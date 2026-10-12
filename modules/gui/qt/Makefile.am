@@ -275,6 +275,7 @@ libqt_plugin_la_SOURCES = \
 	network/networksourcesmodel.hpp \
 	network/networkmediamodel.cpp \
 	network/networkmediamodel.hpp \
+	network/networktreeitem.hpp \
 	network/standardpathmodel.cpp \
 	network/standardpathmodel.hpp \
 	network/vlcmediasourcewrapper.hpp \
@@ -485,6 +486,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	network/networkbasemodel.moc.cpp \
 	network/networksourcesmodel.moc.cpp \
 	network/networkmediamodel.moc.cpp \
+	network/networktreeitem.moc.cpp \
 	network/standardpathmodel.moc.cpp \
 	style/colorcontext.moc.cpp \
 	style/systempalette.moc.cpp \

@@ -1,6 +1,6 @@
 #include "navigation_history.hpp"
 #include <cassert>
-#include "network/networkmediamodel.hpp"
+#include "network/networktreeitem.hpp"
 #include "medialibrary/mlqmltypes.hpp"
 
 NavigationHistory::NavigationHistory(QObject *parent)
@@ -15,6 +15,12 @@ bool NavigationHistory::isPreviousEmpty()
 
 void NavigationHistory::push(QStringList path, const QVariantMap& properties, Qt::FocusReason focusReason)
 {
+    if (!m_forward.empty())
+    {
+        m_forward.clear();
+        emit nextEmptyChanged(true);
+    }
+
     auto prop = std::make_unique<QQmlPropertyMap>();
     for (auto it =  properties.keyValueBegin(); it != properties.keyValueEnd(); ++it)
         prop->insert((*it).first, (*it).second);
@@ -31,6 +37,12 @@ void NavigationHistory::push(QStringList path, const QVariantMap& properties, Qt
 
 void NavigationHistory::push(QStringList path, Qt::FocusReason focusReason)
 {
+    if (!m_forward.empty())
+    {
+        m_forward.clear();
+        emit nextEmptyChanged(true);
+    }
+
     m_history.emplace_back(path, std::make_unique<QQmlPropertyMap>());
 
     updateCurrent();
@@ -139,7 +151,11 @@ void NavigationHistory::previous(Qt::FocusReason reason)
     if (m_history.size() == 1)
         return;
 
+    const bool wasNextEmpty = m_forward.empty();
+    m_forward.push_back(std::move(m_history.back()));
     m_history.pop_back();
+    if (wasNextEmpty)
+        emit nextEmptyChanged(false);
 
     while (!isNodeValid(*m_history.back().second)) {
         m_history.pop_back();
@@ -149,6 +165,28 @@ void NavigationHistory::previous(Qt::FocusReason reason)
 
     if (m_history.size() == 1)
         emit previousEmptyChanged(true);
+
+    updateCurrent();
+    emit navigate(reason);
+}
+
+bool NavigationHistory::isNextEmpty() const
+{
+    return m_forward.empty();
+}
+
+void NavigationHistory::next(Qt::FocusReason reason)
+{
+    if (m_forward.empty())
+        return;
+
+    m_history.push_back(std::move(m_forward.back()));
+    m_forward.pop_back();
+
+    if (m_history.size() == 2)
+        emit previousEmptyChanged(false);
+    if (m_forward.empty())
+        emit nextEmptyChanged(true);
 
     updateCurrent();
     emit navigate(reason);

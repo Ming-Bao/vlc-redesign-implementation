@@ -114,6 +114,7 @@ moc_headers = files(
     'network/networkdevicemodel.hpp',
     'network/networksourcesmodel.hpp',
     'network/networkmediamodel.hpp',
+    'network/networktreeitem.hpp',
     'network/standardpathmodel.hpp',
     'style/systempalette.hpp',
     'style/vlcicons.hpp',
@@ -399,6 +400,7 @@ qt_plugin_sources = files(
     'network/networksourcesmodel.hpp',
     'network/networkmediamodel.cpp',
     'network/networkmediamodel.hpp',
+    'network/networktreeitem.hpp',
     'network/standardpathmodel.cpp',
     'network/standardpathmodel.hpp',
     'network/vlcmediasourcewrapper.hpp',
@@ -1352,6 +1354,27 @@ if qt6_dep.found()
             ),
             'moc_headers': files(
                 'maininterface/navigationmodel.hpp'
+            ),
+            'suite': ['qt'],
+            'include_directories' : qt_include_dir,
+            'link_with': [libvlccore, libvlc],
+            'dependencies': [qt6_dep, qt_extra_deps, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
+            'name': 'test_qt_navigation_history',
+            'sources': files(
+                'tests/test_navigation_history.cpp',
+                'util/navigation_history.hpp',
+                'util/navigation_history.cpp'
+            ),
+            'moc_sources': files(
+                'tests/test_navigation_history.cpp'
+            ),
+            'moc_headers': files(
+                'util/navigation_history.hpp',
+                'medialibrary/mlqmltypes.hpp',
+                'network/networktreeitem.hpp'
             ),
             'suite': ['qt'],
             'include_directories' : qt_include_dir,
