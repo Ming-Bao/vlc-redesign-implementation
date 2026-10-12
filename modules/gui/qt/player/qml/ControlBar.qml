@@ -58,12 +58,18 @@ T.Pane {
     property bool compactStyle: false
     property color backgroundColor: theme.bg.primary
 
-    // Inline needs the spacer slot of the controls row; fall back when a custom
-    // profile fills the centre section
+    // Inline needs the spacer slot of the controls row; a profile that fills the
+    // centre section (e.g. saved before the redesign) falls back to this position
+    property int inlineFallback: ControlBar.TimeTextPosition.LeftRightSlider
+
     readonly property int _textPosition: (textPosition === ControlBar.TimeTextPosition.Inline
                                           && !contentItem.playerControlLayout.fillerItem)
-                                         ? ControlBar.TimeTextPosition.LeftRightSlider
+                                         ? inlineFallback
                                          : textPosition
+
+    // the compact look only applies when the inline layout is actually in use
+    readonly property bool _compact: compactStyle && (_textPosition === ControlBar.TimeTextPosition.Inline)
+    readonly property bool _dark: theme.palette.isDark
     readonly property bool _sideTimes: (_textPosition === ControlBar.TimeTextPosition.LeftRightSlider
                                         || _textPosition === ControlBar.TimeTextPosition.Inline)
 
@@ -152,7 +158,7 @@ T.Pane {
                     const length = Player.length
                     return Player.time.formatHMS(length.isSubSecond() ? VLCTick.SubSecondFormattedAsMS : 0)
                 }
-                color: root.compactStyle ? theme.fg.secondary : theme.fg.primary
+                color: root._compact ? theme.fg.secondary : theme.fg.primary
                 font: timeTextMetrics.font
                 horizontalAlignment: Text.AlignHCenter
 
@@ -234,9 +240,11 @@ T.Pane {
 
                 barHeight: root.sliderHeight
 
-                blockStyle: root.compactStyle
-                backgroundColor: root.compactStyle ? "#090909" : theme.bg.primary
-                progressColor: root.compactStyle ? Qt.tint("#090909", Qt.alpha(theme.accent, 0.26)) : theme.fg.primary
+                blockStyle: root._compact
+                backgroundColor: !root._compact ? theme.bg.primary
+                                                : root._dark ? "#090909" : Qt.darker(root.backgroundColor, 1.15)
+                progressColor: root._compact ? Qt.tint(backgroundColor, Qt.alpha(theme.accent, root._dark ? 0.26 : 0.4))
+                                             : theme.fg.primary
 
                 Accessible.role: Accessible.Slider
                 Accessible.name: qsTr("Progress")
@@ -353,12 +361,12 @@ T.Pane {
 
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.leftMargin: root.compactStyle ? VLCStyle.dp(20, VLCStyle.scale) : VLCStyle.margin_large
-            Layout.rightMargin: root.compactStyle ? VLCStyle.dp(20, VLCStyle.scale) : VLCStyle.margin_large
+            Layout.leftMargin: root._compact ? VLCStyle.dp(20, VLCStyle.scale) : VLCStyle.margin_large
+            Layout.rightMargin: root._compact ? VLCStyle.dp(20, VLCStyle.scale) : VLCStyle.margin_large
 
-            spacing: root.compactStyle ? VLCStyle.margin_xsmall : VLCStyle.margin_normal
+            spacing: root._compact ? VLCStyle.margin_xsmall : VLCStyle.margin_normal
 
-            compactStyle: root.compactStyle
+            compactStyle: root._compact
 
             identifier: root.identifier
 

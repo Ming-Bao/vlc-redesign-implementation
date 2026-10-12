@@ -55,12 +55,21 @@ ControlBar {
 
     textPosition: ControlBar.TimeTextPosition.Inline
 
-    sliderHeight: VLCStyle.dp(28, VLCStyle.scale)
+    // pre-redesign look for profiles that cannot use the inline layout
+    inlineFallback: (MainCtx.pinVideoControls) ? ControlBar.TimeTextPosition.LeftRightSlider
+                                               : ControlBar.TimeTextPosition.Hide
 
-    backgroundColor: colorContext.palette.isDark ? "#1B1B1B" : colorContext.bg.primary
+    sliderHeight: _compact ? VLCStyle.dp(28, VLCStyle.scale)
+                           : (MainCtx.pinVideoControls) ? VLCStyle.heightBar_xxsmall
+                                                        : VLCStyle.dp(3, VLCStyle.scale)
 
-    topPadding: VLCStyle.dp(11, VLCStyle.scale)
-    bottomPadding: VLCStyle.dp(11, VLCStyle.scale)
+    bookmarksHeight: (MainCtx.pinVideoControls) ? VLCStyle.controlBarBookmarksHeight
+                                                : VLCStyle.icon_xsmall * 0.7
+
+    backgroundColor: (_compact && colorContext.palette.isDark) ? "#1B1B1B" : colorContext.bg.primary
+
+    topPadding: _compact ? VLCStyle.dp(11, VLCStyle.scale) : 0
+    bottomPadding: _compact ? VLCStyle.dp(11, VLCStyle.scale) : VLCStyle.margin_xsmall
 
     identifier: PlayerControlbarModel.Miniplayer
 
