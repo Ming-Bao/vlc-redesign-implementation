@@ -693,13 +693,13 @@ void SystemPalette::makeDarkPalette()
 
     {
         C::ColorSet CS = C::View;
-        setColor(CS, C::Bg, C::Primary, C::Normal, darkGrey300 );
+        setColor(CS, C::Bg, C::Primary, C::Normal, QColor("#0E0E0E") );
         setColor(CS, C::Bg, C::Secondary, C::Normal, Qt::black );
 
-        setColor(CS, C::Fg, C::Primary, C::Normal, Qt::white );
-        setColor(CS, C::Fg, C::Primary, C::Disabled, setColorAlpha(Qt::white, 0.3) );
+        setColor(CS, C::Fg, C::Primary, C::Normal, QColor("#C6C6C6") );
+        setColor(CS, C::Fg, C::Primary, C::Disabled, setColorAlpha(QColor("#C6C6C6"), 0.3) );
 
-        setColor(CS, C::Fg, C::Secondary, C::Normal, setColorAlpha(Qt::white, 0.6));
+        setColor(CS, C::Fg, C::Secondary, C::Normal, QColor("#8F8F8F"));
 
         setColor(CS, C::Bg, C::Negative, C::Normal, QColor(Qt::darkRed));
         setColor(CS, C::Fg, C::Negative, C::Normal, Qt::red);
@@ -720,7 +720,7 @@ void SystemPalette::makeDarkPalette()
 
         setColor(CS, C::Decoration, C::Shadow, C::Normal, setColorAlpha(Qt::black, 0.22));
 
-        setColor(CS, C::Decoration, C::Separator, C::Normal, darkGrey800);
+        setColor(CS, C::Decoration, C::Separator, C::Normal, QColor("#222222"));
 
         setColor(CS, C::Decoration, C::Accent, C::Normal, orange500);
         setColor(CS, C::Fg, C::Link, C::Normal, orange500);
@@ -729,8 +729,8 @@ void SystemPalette::makeDarkPalette()
     //window banner & miniplayer
     {
         C::ColorSet CS = C::Window;
-        setColor(CS, C::Bg, C::Primary, C::Normal, Qt::black); //FIXME
-        setColor(CS, C::Bg, C::Secondary, C::Normal, Qt::black);
+        setColor(CS, C::Bg, C::Primary, C::Normal, QColor("#0E0E0E"));
+        setColor(CS, C::Bg, C::Secondary, C::Normal, QColor("#191919"));
         setColor(CS, C::Decoration, C::Border, C::Normal, darkGrey800); //FIXME not a predef
     }
 
@@ -748,11 +748,11 @@ void SystemPalette::makeDarkPalette()
         setColor(CS, C::Bg, C::Primary, C::Focused, darkGrey800);
         setColor(CS, C::Bg, C::Primary, C::Hovered, darkGrey800);
 
-        setColor(CS, C::Fg, C::Primary, C::Normal, setColorAlpha(Qt::white, 0.6));
-        setColor(CS, C::Fg, C::Primary, C::Focused, Qt::white);
-        setColor(CS, C::Fg, C::Primary, C::Hovered, Qt::white);
+        setColor(CS, C::Fg, C::Primary, C::Normal, QColor("#8F8F8F"));
+        setColor(CS, C::Fg, C::Primary, C::Focused, QColor("#C6C6C6"));
+        setColor(CS, C::Fg, C::Primary, C::Hovered, QColor("#C6C6C6"));
         setColor(CS, C::Fg, C::Primary, C::Disabled, setColorAlpha(Qt::white, 0.2));
-        setColor(CS, C::Fg, C::Secondary, C::Normal, Qt::white);
+        setColor(CS, C::Fg, C::Secondary, C::Normal, QColor("#C6C6C6"));
     }
 
     //tool button
@@ -795,8 +795,8 @@ void SystemPalette::makeDarkPalette()
         setColor(CS, C::Bg, C::Highlight, C::Hovered, setColorAlpha(darkGrey800, 0.8));
         setColor(CS, C::Fg, C::Highlight, C::Normal, Qt::white);
 
-        setColor(CS, C::Fg, C::Primary, C::Normal, Qt::white);
-        setColor(CS, C::Fg, C::Secondary, C::Normal, setColorAlpha(Qt::white, 0.6));
+        setColor(CS, C::Fg, C::Primary, C::Normal, QColor("#C6C6C6"));
+        setColor(CS, C::Fg, C::Secondary, C::Normal, QColor("#8F8F8F"));
 
         setColor(CS, C::Decoration, C::Indicator, C::Normal, QColor("#666666"));  //FIXME not a predef
     }
