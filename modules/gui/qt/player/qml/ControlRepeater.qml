@@ -25,6 +25,9 @@ Repeater {
 
     property int alignment: Qt.AlignVCenter
 
+    // compact (mini player) styling, forwarded to controls that support it
+    property bool compactStyle: false
+
     property real availableWidth: Number.MAX_VALUE
     property real availableHeight: Number.MAX_VALUE
 
@@ -104,6 +107,9 @@ Repeater {
                 item.activeFocusOnTab = true
 
             item.visible = Qt.binding(function() { return loader.visible })
+
+            if (typeof item.compactStyle === "boolean")
+                item.compactStyle = Qt.binding(function() { return repeater.compactStyle })
 
             if (item.requestLockUnlockAutoHide)
                 item.requestLockUnlockAutoHide.connect(repeater.requestLockUnlockAutoHide)

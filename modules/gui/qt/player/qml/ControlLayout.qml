@@ -80,6 +80,8 @@ FocusScope {
 
     property alias alignment: repeater.alignment
 
+    property alias compactStyle: repeater.compactStyle
+
 
     ///@type {function}
     required property var altFocusAction

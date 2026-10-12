@@ -34,6 +34,9 @@ T.Control {
 
     property bool paintOnly: false
 
+    // pill-shaped variant used by the compact (mini player) bar
+    property bool compactStyle: false
+
     readonly property ColorContext colorContext: ColorContext {
         id: theme
 
@@ -217,10 +220,11 @@ T.Control {
                 return VLCIcons.play_filled
         }
 
-        color: cursorInside ? theme.accent
-                            : "black"  //foreground is always black
+        color: (cursorInside && !root.compactStyle) ? theme.accent
+                                                    : "black"  //foreground is always black
 
-        font.pixelSize: Math.round(parent.height / 1.7)
+        font.pixelSize: root.compactStyle ? Math.round(VLCStyle.icon_normal * 0.8)
+                                          : Math.round(parent.height / 1.7)
 
         font.family: VLCIcons.fontFamily
 
@@ -240,10 +244,20 @@ T.Control {
     }
 
     background: Item {
-        implicitWidth: height
-        implicitHeight: VLCStyle.icon_medium
+        implicitWidth: root.compactStyle ? VLCStyle.dp(54, VLCStyle.scale) : height
+        implicitHeight: root.compactStyle ? VLCStyle.dp(28, VLCStyle.scale) : VLCStyle.icon_medium
+
+        // Figma: accent pill while paused (shows "play"), grey while playing (shows "pause")
+        Rectangle {
+            visible: root.compactStyle
+            anchors.fill: parent
+            radius: VLCStyle.dp(6, VLCStyle.scale)
+            color: (Player.playingState === Player.PLAYING_STATE_PLAYING) ? "#6B6B6B" : theme.accent
+            border.color: root.visualFocus ? theme.visualFocus : "transparent"
+        }
 
         Widgets.AnimatedBackground {
+            visible: !root.compactStyle
             anchors.fill: parent
             anchors.margins: -border.width * 4
 
@@ -256,6 +270,7 @@ T.Control {
         }
 
         Rectangle {
+            visible: !root.compactStyle
             anchors.fill: parent
 
             radius: width / 2

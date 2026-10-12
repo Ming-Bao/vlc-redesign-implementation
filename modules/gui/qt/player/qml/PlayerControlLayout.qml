@@ -36,6 +36,13 @@ FocusScope {
 
     property int identifier: -1
 
+    // compact (mini player) styling, forwarded to the controls
+    property bool compactStyle: false
+
+    // Spacer between left and right sections when there is no centre section;
+    // ControlBar may place an inline seek bar inside it.
+    property Item fillerItem: null
+
     readonly property PlayerControlbarModel model: {
         if (!!MainCtx.controlbarProfileModel.currentModel)
             return MainCtx.controlbarProfileModel.currentModel.getModel(identifier)
@@ -110,6 +117,8 @@ FocusScope {
                 availableWidth: loaderLeftRight.width
                 availableHeight: loaderLeftRight.height
 
+                compactStyle: playerControlLayout.compactStyle
+
                 Component.onCompleted: {
                     requestLockUnlockAutoHide.connect(playerControlLayout.requestLockUnlockAutoHide)
                     menuOpened.connect(playerControlLayout.menuOpened)
@@ -133,7 +142,14 @@ FocusScope {
                                                                                                                : 0
 
                 Layout.fillWidth: true
+                Layout.fillHeight: true
                 visible: true
+
+                Component.onCompleted: playerControlLayout.fillerItem = this
+                Component.onDestruction: {
+                    if (playerControlLayout.fillerItem === this)
+                        playerControlLayout.fillerItem = null
+                }
             }
 
             ControlRepeater {
@@ -156,6 +172,8 @@ FocusScope {
 
                 availableWidth: loaderLeftRight.width
                 availableHeight: loaderLeftRight.height
+
+                compactStyle: playerControlLayout.compactStyle
 
                 Component.onCompleted: {
                     requestLockUnlockAutoHide.connect(playerControlLayout.requestLockUnlockAutoHide)
@@ -199,6 +217,8 @@ FocusScope {
             alignment: (Qt.AlignVCenter | Qt.AlignLeft)
 
             spacing: playerControlLayout.spacing
+
+            compactStyle: playerControlLayout.compactStyle
 
             focus: true
 
@@ -264,6 +284,8 @@ FocusScope {
 
             spacing: playerControlLayout.spacing
 
+            compactStyle: playerControlLayout.compactStyle
+
             altFocusAction: () => Navigation.defaultNavigationUp()
 
             Navigation.parentItem: playerControlLayout
@@ -307,6 +329,8 @@ FocusScope {
             alignment: (Qt.AlignVCenter | Qt.AlignRight)
 
             spacing: playerControlLayout.spacing
+
+            compactStyle: playerControlLayout.compactStyle
 
             focus: true
 

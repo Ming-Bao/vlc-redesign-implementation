@@ -51,14 +51,16 @@ ControlBar {
         Qt.callLater(() => { stateBinding.when = true })
     }
 
-    textPosition: (MainCtx.pinVideoControls) ? ControlBar.TimeTextPosition.LeftRightSlider
-                                             : ControlBar.TimeTextPosition.Hide
+    compactStyle: true
 
-    sliderHeight: (MainCtx.pinVideoControls) ? VLCStyle.heightBar_xxsmall
-                                             : VLCStyle.dp(3, VLCStyle.scale)
+    textPosition: ControlBar.TimeTextPosition.Inline
 
-    bookmarksHeight: (MainCtx.pinVideoControls) ? VLCStyle.controlBarBookmarksHeight
-                                                : VLCStyle.icon_xsmall * 0.7
+    sliderHeight: VLCStyle.dp(28, VLCStyle.scale)
+
+    backgroundColor: colorContext.palette.isDark ? "#1B1B1B" : colorContext.bg.primary
+
+    topPadding: VLCStyle.dp(11, VLCStyle.scale)
+    bottomPadding: VLCStyle.dp(11, VLCStyle.scale)
 
     identifier: PlayerControlbarModel.Miniplayer
 
