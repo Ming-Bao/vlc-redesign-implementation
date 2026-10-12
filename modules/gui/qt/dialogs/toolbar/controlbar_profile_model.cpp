@@ -162,7 +162,8 @@ decltype (ControlbarProfileModel::m_defaults)
                                     ControlListModel::VOLUME,
                                     ControlListModel::LANG_BUTTON,
                                     ControlListModel::EXTENDED_BUTTON,
-                                    ControlListModel::PLAYLIST_BUTTON
+                                    ControlListModel::PLAYLIST_BUTTON,
+                                    ControlListModel::PLAYER_SWITCH_BUTTON
                                 }
                             }
                         }
