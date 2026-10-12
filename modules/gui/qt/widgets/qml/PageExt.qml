@@ -39,6 +39,9 @@ T.Page {
 
     property bool isSearchable: _firstChild?.isSearchable ?? false
 
+    // number of items in the current subview, -1 when the subview has no model count
+    readonly property int itemCount: (typeof _firstChild?.count === "number") ? _firstChild.count : -1
+
     property var sortModel: _firstChild?.sortModel ?? null
 
     //property is *not* readOnly, a PageLoader may define a localMenuDelegate common for its subviews (music, video)
@@ -111,6 +114,7 @@ T.Page {
 
     header: DefaultPageHeader {
         text: root.title
+        itemCount: root.itemCount
 
         leftPadding: VLCStyle.dynamicAppMargins(width) + VLCStyle.layout_left_margin + root.leftPadding
         rightPadding: VLCStyle.dynamicAppMargins(width) + VLCStyle.layout_right_margin + root.rightPadding
@@ -137,6 +141,8 @@ T.Page {
         // Properties
         property alias text: label.text
 
+        property int itemCount: -1
+
         property alias sortMenu: gridSortFilter.sortMenu
 
         property alias search: gridSortFilter.search
@@ -144,8 +150,8 @@ T.Page {
 
         position: T.ToolBar.Header
 
-        topPadding: VLCStyle.layoutTitle_top_padding
-        bottomPadding: VLCStyle.layoutTitle_bottom_padding
+        topPadding: VLCStyle.dp(20, VLCStyle.scale)
+        bottomPadding: VLCStyle.dp(17, VLCStyle.scale)
 
         // FIXME: `GridItem`'s background extends beyond its
         //        bounding rect, violating the hypothetical
@@ -172,25 +178,81 @@ T.Page {
             color: theme.bg.primary
         }
 
-        RowLayout {
-            id: row
-
+        ColumnLayout {
             anchors.fill: parent
+            spacing: VLCStyle.dp(17, VLCStyle.scale)
 
-            SubtitleLabel {
-                id: label
+            RowLayout {
+                id: row
 
                 Layout.fillWidth: true
+                spacing: VLCStyle.dp(20, VLCStyle.scale)
 
-                color: theme.fg.primary
+                Row {
+                    spacing: VLCStyle.margin_small
+
+                    IconToolButton {
+                        id: backBtn
+
+                        text: VLCIcons.back
+                        description: qsTr("Previous")
+                        font.pixelSize: VLCStyle.icon_normal
+                        enabled: !History.previousEmpty
+
+                        Navigation.parentItem: defaultPageHeader
+                        Navigation.rightItem: forwardBtn
+
+                        onClicked: History.previous()
+                    }
+
+                    IconToolButton {
+                        id: forwardBtn
+
+                        text: VLCIcons.back
+                        rotation: 180
+                        description: qsTr("Next")
+                        font.pixelSize: VLCStyle.icon_normal
+                        enabled: !History.nextEmpty
+
+                        Navigation.parentItem: defaultPageHeader
+                        Navigation.leftItem: backBtn
+                        Navigation.rightItem: gridSortFilter
+
+                        onClicked: History.next()
+                    }
+                }
+
+                T.Label {
+                    id: label
+
+                    Layout.fillWidth: true
+
+                    color: theme.fg.secondary
+                    font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
+                    elide: Text.ElideRight
+                }
+
+                T.Label {
+                    visible: defaultPageHeader.itemCount >= 0
+                    text: qsTr("%1 item", "%1 items", defaultPageHeader.itemCount).arg(defaultPageHeader.itemCount)
+                    color: theme.fg.secondary.alpha(0.75)
+                    font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
+                }
+
+                GridSortFilterControls {
+                    id: gridSortFilter
+                    focus: true
+                    sort: _sortCtx
+                    search: _searchCtx
+                    Navigation.parentItem: defaultPageHeader
+                    Navigation.leftItem: forwardBtn
+                }
             }
 
-            GridSortFilterControls {
-                id: gridSortFilter
-                focus: true
-                sort: _sortCtx
-                search: _searchCtx
-                Navigation.parentItem: defaultPageHeader
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: VLCStyle.dp(1, VLCStyle.scale)
+                color: theme.separator
             }
         }
     }
