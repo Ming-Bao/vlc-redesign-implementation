@@ -469,7 +469,7 @@ FocusScope {
                     id: topLeftCornerBackground
 
                     z: 99
-                    color: sidebar.background.color
+                    color: sidebar.colorContext.bg.primary
                     visible: sidebar.visible && (stackViewTopLeftRadiusRectangle.topLeftRadius !== undefined)
 
                     anchors.left: stackView.left
