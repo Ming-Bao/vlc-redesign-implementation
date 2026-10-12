@@ -236,6 +236,60 @@ void VLCMenuBar::FileMenu(qt_intf_t *p_intf, QMenu *menu)
 }
 
 /**
+ * Flat main ("…") menu of the redesigned interface
+ **/
+void VLCMenuBar::MainMenu( qt_intf_t *p_intf, QMenu *menu )
+{
+    auto mi = p_intf->p_mi;
+
+    addDPStaticEntry( menu, qtr( "Open &File(s)..." ),
+        ":/menu/file.svg", []() { THEDP->simpleOpenDialog(); }, "Ctrl+O" );
+    addDPStaticEntry( menu, qtr( "Open F&older..." ),
+        ":/menu/folder.svg", &DialogsProvider::PLOpenDir, "Ctrl+F" );
+    addDPStaticEntry( menu, qtr( "Open &Network Stream..." ),
+        ":/menu/network.svg", &DialogsProvider::openNetDialog, "Ctrl+N" );
+    addDPStaticEntry( menu, qtr( "Open &Disc..." ),
+        ":/menu/disc.svg", &DialogsProvider::openDiscDialog, "Ctrl+D" );
+    addDPStaticEntry( menu, qtr( "Open &Capture Device..." ),
+        ":/menu/capture-card.svg", &DialogsProvider::openCaptureDialog, "Ctrl+C" );
+    addDPStaticEntry( menu, qtr( "Conve&rt..." ), "",
+        &DialogsProvider::openAndTranscodingDialogs, "Ctrl+R" );
+
+    if( mi && var_InheritBool( p_intf, "save-recentplay" ) && mi->hasMediaLibrary() )
+    {
+        MLRecentMediaModel* recentModel = new MLRecentMediaModel(nullptr);
+        recentModel->setMl(mi->getMediaLibrary());
+        recentModel->setLimit(10);
+        QMenu* recentsMenu = new RecentMenu(recentModel, mi->getMediaLibrary(), menu);
+        recentsMenu->setTitle(qtr( "Open &Recent" ) );
+        recentModel->setParent(recentsMenu);
+        menu->addMenu( recentsMenu );
+    }
+
+    menu->addSeparator();
+
+    if( !p_intf->b_isDialogProvider )
+        addDPStaticEntry( menu, qtr( "Customi&ze Player..." ),
+            ":/menu/preferences.svg", &DialogsProvider::showToolbarEditorDialog );
+    addDPStaticEntry( menu, qtr( "&Settings" ),
+        ":/menu/preferences.svg", &DialogsProvider::prefsDialog, "Ctrl+P", QAction::PreferencesRole );
+    addDPStaticEntry( menu, qfut( I_MENU_ABOUT ), ":/menu/info.svg",
+        &DialogsProvider::aboutDialog, "Shift+F1", QAction::AboutRole );
+
+    /* Everything the redesign does not list stays reachable */
+    menu->addSeparator();
+    QMenu* more = menu->addMenu( qtr( "&More" ) );
+    NavigMenu( p_intf, more->addMenu( qtr( "P&layback" ) ) );
+    AudioMenu( p_intf, more->addMenu( qtr( "&Audio" ) ) );
+    VideoMenu( p_intf, more->addMenu( qtr( "&Video" ) ) );
+    SubtitleMenu( p_intf, more->addMenu( qtr( "Subti&tle" ) ) );
+    ToolsMenu( p_intf, more->addMenu( qtr( "Tool&s" ) ) );
+    ViewMenu( p_intf, more->addMenu( qtr( "V&iew" ) ) );
+    HelpMenu( p_intf, more->addMenu( qtr( "&Help" ) ) );
+    addDPStaticEntry( menu, qtr( "&Quit" ), ":/menu/exit.svg", &DialogsProvider::quit, "Ctrl+Q" );
+}
+
+/**
  * Tools, like Media Information, Preferences or Messages
  **/
 void VLCMenuBar::ToolsMenu( qt_intf_t *p_intf, QMenu *menu )
