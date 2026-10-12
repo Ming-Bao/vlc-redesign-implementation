@@ -153,6 +153,8 @@ class QmlGlobalMenu : public VLCMenuBar
 {
     Q_OBJECT
     SIMPLE_MENU_PROPERTY(MainCtx*, ctx, nullptr)
+    // flat main menu of the redesigned title bar instead of the menubar tree
+    SIMPLE_MENU_PROPERTY(bool, flat, false)
 
     Q_PROPERTY(bool shown READ isShown NOTIFY shownChanged FINAL)
 

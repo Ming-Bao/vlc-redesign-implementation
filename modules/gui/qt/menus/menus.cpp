@@ -279,6 +279,7 @@ void VLCMenuBar::MainMenu( qt_intf_t *p_intf, QMenu *menu )
     /* Everything the redesign does not list stays reachable */
     menu->addSeparator();
     QMenu* more = menu->addMenu( qtr( "&More" ) );
+    FileMenu( p_intf, more->addMenu( qtr( "&Media" ) ) );
     NavigMenu( p_intf, more->addMenu( qtr( "P&layback" ) ) );
     AudioMenu( p_intf, more->addMenu( qtr( "&Audio" ) ) );
     VideoMenu( p_intf, more->addMenu( qtr( "&Video" ) ) );

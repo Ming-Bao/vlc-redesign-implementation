@@ -132,6 +132,7 @@ T.ToolBar {
                     Menus.QmlGlobalMenu {
                         id: contextMenu
                         ctx: MainCtx
+                        flat: true
                     }
                 }
 

@@ -263,7 +263,40 @@ void QmlGlobalMenu::popup(QPoint pos)
         aboutToHide();
     });
 
-    MainMenu( p_intf, m_menu.get() );
+    if (m_flat)
+    {
+        MainMenu( p_intf, m_menu.get() );
+        m_menu->popup(pos);
+        return;
+    }
+
+    QMenu* submenu;
+
+    submenu = m_menu->addMenu(qtr( "&Media" ));
+    FileMenu( p_intf, submenu );
+
+    /* Dynamic menus, rebuilt before being showed */
+    submenu = m_menu->addMenu(qtr( "P&layback" ));
+    NavigMenu( p_intf, submenu );
+
+    submenu = m_menu->addMenu(qtr( "&Audio" ));
+    AudioMenu( p_intf, submenu );
+
+    submenu = m_menu->addMenu(qtr( "&Video" ));
+    VideoMenu( p_intf, submenu );
+
+    submenu = m_menu->addMenu(qtr( "Subti&tle" ));
+    SubtitleMenu( p_intf, submenu );
+
+    submenu = m_menu->addMenu(qtr( "Tool&s" ));
+    ToolsMenu( p_intf, submenu );
+
+    /* View menu, a bit different */
+    submenu = m_menu->addMenu(qtr( "V&iew" ));
+    ViewMenu( p_intf, submenu );
+
+    submenu = m_menu->addMenu(qtr( "&Help" ));
+    HelpMenu( p_intf, submenu );
 
     m_menu->popup(pos);
 }
