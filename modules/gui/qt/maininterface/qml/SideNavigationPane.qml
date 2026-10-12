@@ -88,9 +88,23 @@ T.Pane {
         }
     }
 
-    background: Widgets.AcrylicBackground {
-        enabled: root.useAcrylic
-        tintColor: theme.bg.primary
+    // inset of the rounded card behind the expanded sidebar (Figma)
+    readonly property real _cardMargin: delegateShowText ? VLCStyle.margin_xsmall : 0
+
+    background: Item {
+        Widgets.AcrylicBackground {
+            anchors.fill: parent
+            enabled: root.useAcrylic
+            tintColor: theme.bg.primary
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: root._cardMargin
+            radius: VLCStyle.dp(6, VLCStyle.scale)
+            color: theme.bg.secondary
+            visible: root.delegateShowText
+        }
     }
 
     contentItem:  Item {
@@ -122,8 +136,7 @@ T.Pane {
 
                 colorContext.colorSet: ColorContext.Window
 
-                fadingEdge.backgroundColor:  (root.background && (root.background.color.a >= 1.0)) ? root.background.color
-                                                                                                   : "transparent"
+                fadingEdge.backgroundColor: root.delegateShowText ? theme.bg.secondary : "transparent"
 
                 component DelegateAnimation : NumberAnimation {
                     easing.type: Easing.InOutSine
@@ -165,11 +178,11 @@ T.Pane {
 
                     property real preferredHeight: shouldShow ? VLCStyle.buttonHeightNavigationPane : 0.0
 
-                    leftPadding: root.safeAreaLeftMargin + VLCStyle.margin_xsmall
-                    rightPadding: root.safeAreaRightMargin
+                    leftPadding: root.safeAreaLeftMargin + root._cardMargin + VLCStyle.margin_xsmall
+                    rightPadding: root.safeAreaRightMargin + root._cardMargin
 
-                    leftInset: root.safeAreaLeftMargin + implicitLeftInset
-                    rightInset: root.safeAreaRightMargin + implicitRightInset
+                    leftInset: root.safeAreaLeftMargin + root._cardMargin + implicitLeftInset
+                    rightInset: root.safeAreaRightMargin + root._cardMargin + implicitRightInset
 
                     iconTxt: icon_alias
                     text: title
@@ -267,11 +280,11 @@ T.Pane {
                 Layout.fillWidth: true
                 Layout.preferredHeight: VLCStyle.buttonHeightNavigationPane
 
-                leftPadding: root.safeAreaLeftMargin + VLCStyle.margin_xsmall
-                rightPadding: root.safeAreaRightMargin
+                leftPadding: root.safeAreaLeftMargin + root._cardMargin + VLCStyle.margin_xsmall
+                rightPadding: root.safeAreaRightMargin + root._cardMargin
 
-                leftInset: root.safeAreaLeftMargin + implicitLeftInset
-                rightInset: root.safeAreaRightMargin + implicitRightInset
+                leftInset: root.safeAreaLeftMargin + root._cardMargin + implicitLeftInset
+                rightInset: root.safeAreaRightMargin + root._cardMargin + implicitRightInset
 
                 iconTxt: VLCIcons.settings
                 text: qsTr("Preferences")

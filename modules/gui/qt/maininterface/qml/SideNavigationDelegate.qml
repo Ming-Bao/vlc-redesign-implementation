@@ -55,8 +55,9 @@ T.ItemDelegate {
     property real implicitLeftInset: VLCStyle.margin_xxsmall
     property real implicitRightInset: VLCStyle.margin_xxsmall
 
-    property real implicitTopInset: VLCStyle.margin_xxxsmall
-    property real implicitBottomInset: VLCStyle.margin_xxxsmall
+    // Figma: 32px rows, 14px apart
+    property real implicitTopInset: VLCStyle.dp(7, VLCStyle.scale)
+    property real implicitBottomInset: VLCStyle.dp(7, VLCStyle.scale)
 
     // Accessible
 
@@ -103,25 +104,13 @@ T.ItemDelegate {
         border.color: visualFocus ? theme.visualFocus : "transparent"
 
         radius: control.radius
-
-        Widgets.CurrentIndicator {
-            anchors {
-                left: parent.left
-                leftMargin: VLCStyle.margin_xxxsmall
-                verticalCenter: parent.verticalCenter
-            }
-            implicitHeight: parent.height / 2
-            visible: control.checked
-
-            radius: control.radius / 2
-        }
     }
 
     contentItem: RowLayout {
         spacing: VLCStyle.margin_xsmall
 
         Item {
-            Layout.preferredWidth: VLCStyle.icon_banner
+            Layout.preferredWidth: VLCStyle.icon_normal
             Layout.fillHeight: true
 
             Widgets.IconLabel {
@@ -138,7 +127,7 @@ T.ItemDelegate {
 
                 color: (control.highlighted || control.checked) ? theme.accent : theme.fg.primary
 
-                font.pixelSize: VLCStyle.icon_banner
+                font.pixelSize: VLCStyle.icon_normal
             }
         }
 
@@ -160,7 +149,7 @@ T.ItemDelegate {
 
             font.pixelSize: VLCStyle.fontSize_normal
 
-            font.weight: control.checked ? Font.DemiBold : Font.Normal
+            font.weight: Font.Normal
 
             //button text is already exposed
             Accessible.ignored: true

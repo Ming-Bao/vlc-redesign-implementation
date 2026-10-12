@@ -175,9 +175,9 @@ private slots:
         QCOMPARE(m_model->rowCount(), 5);
         int i = 0;
         COMPARE_ROW(i++, "Home", Leaf);
-        COMPARE_ROW(i++, "Video", Closed);
+        COMPARE_ROW(i++, "Videos", Closed);
         COMPARE_ROW(i++, "Music", Closed);
-        COMPARE_ROW(i++, "Browse", Leaf);
+        COMPARE_ROW(i++, "Network", Leaf);
         COMPARE_ROW(i++, "Discover", Closed);
     }
 
@@ -187,7 +187,7 @@ private slots:
         QCOMPARE(m_model->rowCount(), 3);
         int i = 0;
         COMPARE_ROW(i++, "Home", Leaf);
-        COMPARE_ROW(i++, "Browse", Leaf);
+        COMPARE_ROW(i++, "Network", Leaf);
         COMPARE_ROW(i++, "Discover", Closed);
     }
 
@@ -215,13 +215,13 @@ private slots:
 
         int i = 0;
         COMPARE_ROW(i++, "Home", Leaf);
-        COMPARE_ROW(i++, "Video", Opened);
+        COMPARE_ROW(i++, "Videos", Opened);
         {
             COMPARE_ROW(i++, "All", Leaf);
             COMPARE_ROW(i++, "Playlists", Leaf);
         }
         COMPARE_ROW(i++, "Music", Closed);
-        COMPARE_ROW(i++, "Browse", Leaf);
+        COMPARE_ROW(i++, "Network", Leaf);
         COMPARE_ROW(i++, "Discover", Closed);
     }
 
@@ -263,7 +263,7 @@ private slots:
 
         int i = 0;
         COMPARE_ROW(i++, "Home", Leaf);
-        COMPARE_ROW(i++, "Video", Closed);
+        COMPARE_ROW(i++, "Videos", Closed);
         COMPARE_ROW(i++, "Music", Opened);
         {
             COMPARE_ROW(i++, "Artists", Leaf);
@@ -272,7 +272,7 @@ private slots:
             COMPARE_ROW(i++, "Genres", Leaf);
             COMPARE_ROW(i++, "Playlists", Leaf);
         }
-        COMPARE_ROW(i++, "Browse", Leaf);
+        COMPARE_ROW(i++, "Network", Leaf);
         COMPARE_ROW(i++, "Discover", Closed);
     }
 
@@ -286,7 +286,7 @@ private slots:
 
         int i = 0;
         COMPARE_ROW(i++, "Home", Leaf);
-        COMPARE_ROW(i++, "Video", Closed);
+        COMPARE_ROW(i++, "Videos", Closed);
         COMPARE_ROW(i++, "Music", Opened);
         {
             COMPARE_ROW(i++, "Artists", Leaf);
@@ -295,7 +295,7 @@ private slots:
             COMPARE_ROW(i++, "Genres", Leaf);
             COMPARE_ROW(i++, "Playlists", Leaf);
         }
-        COMPARE_ROW(i++, "Browse", Leaf);
+        COMPARE_ROW(i++, "Network", Leaf);
         COMPARE_ROW(i++, "Discover", Closed);
 
         QVERIFY(m_model->setData(m_model->index(2), true, NavigationModel::EXPANDED));
@@ -306,7 +306,7 @@ private slots:
 
         i = 0;
         COMPARE_ROW(i++, "Home", Leaf);
-        COMPARE_ROW(i++, "Video", Closed);
+        COMPARE_ROW(i++, "Videos", Closed);
         COMPARE_ROW(i++, "Music", Opened);
         {
             COMPARE_ROW(i++, "Artists", Leaf);
@@ -315,7 +315,7 @@ private slots:
             COMPARE_ROW(i++, "Genres", Leaf);
             COMPARE_ROW(i++, "Playlists", Leaf);
         }
-        COMPARE_ROW(i++, "Browse", Leaf);
+        COMPARE_ROW(i++, "Network", Leaf);
         COMPARE_ROW(i++, "Discover", Closed);
     }
 
@@ -329,9 +329,9 @@ private slots:
 
         int i = 0;
         COMPARE_ROW(i++, "Home", Leaf);
-        COMPARE_ROW(i++, "Video", Closed);
+        COMPARE_ROW(i++, "Videos", Closed);
         COMPARE_ROW(i++, "Music", Closed);
-        COMPARE_ROW(i++, "Browse", Leaf);
+        COMPARE_ROW(i++, "Network", Leaf);
         COMPARE_ROW(i++, "Discover", Closed);
     }
 
@@ -345,9 +345,9 @@ private slots:
 
         int i = 0;
         COMPARE_ROW(i++, "Home", Leaf);
-        COMPARE_ROW(i++, "Video", Closed);
+        COMPARE_ROW(i++, "Videos", Closed);
         COMPARE_ROW(i++, "Music", Closed);
-        COMPARE_ROW(i++, "Browse", Leaf);
+        COMPARE_ROW(i++, "Network", Leaf);
         COMPARE_ROW(i++, "Discover", Closed);
     }
 
@@ -361,13 +361,13 @@ private slots:
 
         int i = 0;
         COMPARE_ROW(i++, "Home", Leaf);
-        COMPARE_ROW(i++, "Video", Opened);
+        COMPARE_ROW(i++, "Videos", Opened);
         {
             COMPARE_ROW(i++, "All", Leaf);
             COMPARE_ROW(i++, "Playlists", Leaf);
         }
         COMPARE_ROW(i++, "Music", Closed);
-        COMPARE_ROW(i++, "Browse", Leaf);
+        COMPARE_ROW(i++, "Network", Leaf);
         COMPARE_ROW(i++, "Discover", Closed);
 
         QVERIFY(m_model->setData(m_model->index(1), false, NavigationModel::EXPANDED));
@@ -378,9 +378,9 @@ private slots:
 
         i = 0;
         COMPARE_ROW(i++, "Home", Leaf);
-        COMPARE_ROW(i++, "Video", Closed);
+        COMPARE_ROW(i++, "Videos", Closed);
         COMPARE_ROW(i++, "Music", Closed);
-        COMPARE_ROW(i++, "Browse", Leaf);
+        COMPARE_ROW(i++, "Network", Leaf);
         COMPARE_ROW(i++, "Discover", Closed);
     }
 
@@ -394,13 +394,13 @@ private slots:
 
         int i = 0;
         COMPARE_ROW(i++, "Home", Leaf);
-        COMPARE_ROW(i++, "Video", Opened);
+        COMPARE_ROW(i++, "Videos", Opened);
         {
             COMPARE_ROW(i++, "All", Leaf);
             COMPARE_ROW(i++, "Playlists", Leaf);
         }
         COMPARE_ROW(i++, "Music", Closed);
-        COMPARE_ROW(i++, "Browse", Leaf);
+        COMPARE_ROW(i++, "Network", Leaf);
         COMPARE_ROW(i++, "Discover", Closed);
 
         QVERIFY(!m_model->setData(m_model->index(8), false, NavigationModel::EXPANDED));
@@ -411,13 +411,13 @@ private slots:
 
         i = 0;
         COMPARE_ROW(i++, "Home", Leaf);
-        COMPARE_ROW(i++, "Video", Opened);
+        COMPARE_ROW(i++, "Videos", Opened);
         {
             COMPARE_ROW(i++, "All", Leaf);
             COMPARE_ROW(i++, "Playlists", Leaf);
         }
         COMPARE_ROW(i++, "Music", Closed);
-        COMPARE_ROW(i++, "Browse", Leaf);
+        COMPARE_ROW(i++, "Network", Leaf);
         COMPARE_ROW(i++, "Discover", Closed);
     }
 
@@ -432,13 +432,13 @@ private slots:
 
         int i = 0;
         COMPARE_ROW(i++, "Home", Leaf);
-        COMPARE_ROW(i++, "Video", Opened);
+        COMPARE_ROW(i++, "Videos", Opened);
         {
             COMPARE_ROW(i++, "All", Leaf);
             COMPARE_ROW(i++, "Playlists", Leaf);
         }
         COMPARE_ROW(i++, "Music", Closed);
-        COMPARE_ROW(i++, "Browse", Leaf);
+        COMPARE_ROW(i++, "Network", Leaf);
         COMPARE_ROW(i++, "Discover", Closed);
 
         QVERIFY(m_model->setData(m_model->index(4), true, NavigationModel::EXPANDED));
@@ -449,7 +449,7 @@ private slots:
 
         i = 0;
         COMPARE_ROW(i++, "Home", Leaf);
-        COMPARE_ROW(i++, "Video", Closed);
+        COMPARE_ROW(i++, "Videos", Closed);
         COMPARE_ROW(i++, "Music", Opened);
         {
             COMPARE_ROW(i++, "Artists", Leaf);
@@ -458,7 +458,7 @@ private slots:
             COMPARE_ROW(i++, "Genres", Leaf);
             COMPARE_ROW(i++, "Playlists", Leaf);
         }
-        COMPARE_ROW(i++, "Browse", Leaf);
+        COMPARE_ROW(i++, "Network", Leaf);
         COMPARE_ROW(i++, "Discover", Closed);
     }
 
@@ -472,13 +472,13 @@ private slots:
 
         int i = 0;
         COMPARE_ROW(i++, "Home", Leaf);
-        COMPARE_ROW(i++, "Video", Opened);
+        COMPARE_ROW(i++, "Videos", Opened);
         {
             COMPARE_ROW(i++, "All", Leaf);
             COMPARE_ROW(i++, "Playlists", Leaf);
         }
         COMPARE_ROW(i++, "Music", Closed);
-        COMPARE_ROW(i++, "Browse", Leaf);
+        COMPARE_ROW(i++, "Network", Leaf);
         COMPARE_ROW(i++, "Discover", Closed);
 
         QVERIFY(m_model->setData(m_model->index(4), false, NavigationModel::EXPANDED));
@@ -489,13 +489,13 @@ private slots:
 
         i = 0;
         COMPARE_ROW(i++, "Home", Leaf);
-        COMPARE_ROW(i++, "Video", Opened);
+        COMPARE_ROW(i++, "Videos", Opened);
         {
             COMPARE_ROW(i++, "All", Leaf);
             COMPARE_ROW(i++, "Playlists", Leaf);
         }
         COMPARE_ROW(i++, "Music", Closed);
-        COMPARE_ROW(i++, "Browse", Leaf);
+        COMPARE_ROW(i++, "Network", Leaf);
         COMPARE_ROW(i++, "Discover", Closed);
     }
 
@@ -509,13 +509,13 @@ private slots:
 
         int i = 0;
         COMPARE_ROW(i++, "Home", Leaf);
-        COMPARE_ROW(i++, "Video", Opened);
+        COMPARE_ROW(i++, "Videos", Opened);
         {
             COMPARE_ROW(i++, "All", Leaf);
             COMPARE_ROW(i++, "Playlists", Leaf);
         }
         COMPARE_ROW(i++, "Music", Closed);
-        COMPARE_ROW(i++, "Browse", Leaf);
+        COMPARE_ROW(i++, "Network", Leaf);
         COMPARE_ROW(i++, "Discover", Closed);
 
         QVERIFY(m_model->setData(m_model->index(0), true, NavigationModel::EXPANDED));
@@ -526,9 +526,9 @@ private slots:
 
         i = 0;
         COMPARE_ROW(i++, "Home", Leaf);
-        COMPARE_ROW(i++, "Video", Closed);
+        COMPARE_ROW(i++, "Videos", Closed);
         COMPARE_ROW(i++, "Music", Closed);
-        COMPARE_ROW(i++, "Browse", Leaf);
+        COMPARE_ROW(i++, "Network", Leaf);
         COMPARE_ROW(i++, "Discover", Closed);
     }
 

@@ -149,7 +149,7 @@ QtObject {
     readonly property int closedWidthPlaylist: MainCtx.dp(20, scale);
 
     readonly property int expandNavigationPaneWidth: MainCtx.dp(160, scale);
-    readonly property int buttonHeightNavigationPane: MainCtx.dp(35, scale);
+    readonly property int buttonHeightNavigationPane: MainCtx.dp(46, scale);
 
     readonly property int widthSearchInput: MainCtx.dp(200, scale);
     readonly property int widthSortBox: MainCtx.dp(150, scale);
