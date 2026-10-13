@@ -27,6 +27,8 @@ import VLC.Widgets as Widgets
 import VLC.Util
 import VLC.Playlist
 import VLC.Style
+import VLC.Menus
+import VLC.Dialogs
 
 T.Pane {
     id: root
@@ -214,6 +216,7 @@ T.Pane {
 
                     Navigation.parentItem: root
                     Navigation.leftItem: sort
+                    Navigation.rightItem: addButton
                     Navigation.downItem: listView
 
                     Connections {
@@ -221,6 +224,35 @@ T.Pane {
 
                         function onDiscardedFilteredOutItems() {
                             searchBox.retract()
+                        }
+                    }
+                }
+
+                Widgets.IconToolButton {
+                    id: addButton
+
+                    text: VLCIcons.add
+                    font.pixelSize: VLCStyle.icon_banner
+                    description: qsTr("Add to the queue")
+
+                    AccessibleCompat.id: "playqueueAdd"
+
+                    Navigation.parentItem: root
+                    Navigation.leftItem: searchBox
+                    Navigation.downItem: listView
+
+                    onClicked: addMenu.popup(mapToGlobal(0, height), [qsTr("Add File..."), qsTr("Add Folder...")])
+
+                    StringListMenu {
+                        id: addMenu
+
+                        ctx: MainCtx
+
+                        onSelected: (index) => {
+                            if (index === 0)
+                                DialogsProvider.simpleOpenDialog(false)
+                            else
+                                DialogsProvider.PLAppendDir()
                         }
                     }
                 }
