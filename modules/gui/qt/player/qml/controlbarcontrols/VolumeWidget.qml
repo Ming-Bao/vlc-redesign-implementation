@@ -116,6 +116,8 @@ T.Pane {
 
                 radius: root._meter ? VLCStyle.dp(2, VLCStyle.scale) : volControl.radius
                 color: root._meter ? "#090909" : volControl.bgColor
+                // as in SliderExt: mirror the fill for right-to-left layouts
+                scale: volControl.horizontal && volControl.mirrored ? -1 : 1
 
                 Rectangle {
                     width: volControl.position * parent.width
