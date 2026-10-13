@@ -30,6 +30,10 @@ T.Pane {
 
     property bool paintOnly: false
 
+    // Figma compact bars: 88px meter with a green-to-red level gradient (dark theme)
+    property bool compactStyle: false
+    readonly property bool _meter: compactStyle && volControl.colorContext.palette.isDark
+
     readonly property color sliderColor: {
         const theme = volControl.colorContext
         return (volControl.position > _fullvolpos) ? theme.fg.negative : theme.fg.primary
@@ -98,7 +102,53 @@ T.Pane {
             id: volControl
 
             // FIXME: use VLCStyle
-            implicitWidth: VLCStyle.dp(100, VLCStyle.scale)
+            implicitWidth: root._meter ? VLCStyle.dp(88, VLCStyle.scale) : VLCStyle.dp(100, VLCStyle.scale)
+
+            background: Rectangle {
+                x: volControl.leftPadding
+                y: volControl.topPadding + (volControl.availableHeight - height) / 2
+
+                implicitWidth: VLCStyle.heightBar_xlarge
+                implicitHeight: root._meter ? VLCStyle.dp(22, VLCStyle.scale) : VLCStyle.heightBar_xxsmall
+
+                width: volControl.availableWidth
+                height: implicitHeight
+
+                radius: root._meter ? VLCStyle.dp(2, VLCStyle.scale) : volControl.radius
+                color: root._meter ? "#090909" : volControl.bgColor
+
+                Rectangle {
+                    width: volControl.position * parent.width
+                    height: parent.height
+                    radius: parent.radius
+
+                    visible: !root._meter
+                    color: volControl.color
+                }
+
+                // the level reveals a gradient spanning the whole track
+                Item {
+                    width: volControl.position * parent.width
+                    height: parent.height
+                    clip: true
+
+                    visible: root._meter
+
+                Rectangle {
+                    width: volControl.background.width
+                    height: parent.height
+                    radius: volControl.background.radius
+
+                    gradient: Gradient {
+                        orientation: Gradient.Horizontal
+                        GradientStop { position: 0.0; color: "#95D318" }
+                        GradientStop { position: 0.58; color: "#B2A918" }
+                        GradientStop { position: 0.79; color: "#D37918" }
+                        GradientStop { position: 1.0; color: "#FF3737" }
+                    }
+                }
+                }
+            }
 
             // WARNING: Directly setting the insets break handle and background positioning.
             Binding on topInset {
