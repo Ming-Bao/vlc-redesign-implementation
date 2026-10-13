@@ -127,6 +127,10 @@ struct vlc_player_input
          */
         bool has_video_tracks;
         bool has_audio_tracks;
+        /* The user's track choices (string ids) per category, recorded when
+         * made: tracks are unselected and deleted before the states are saved
+         */
+        char *user_track_ids[DATA_ES];
     } ml;
 
     unsigned repeat;

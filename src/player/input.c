@@ -674,6 +674,13 @@ vlc_player_input_HandleEsEvent(struct vlc_player_input *input,
             {
                 trackpriv->t.selected = true;
                 trackpriv->selected_by_user = ev->forced;
+                if (ev->forced)
+                {
+                    const enum es_format_category_e cat = ev->fmt->i_cat;
+                    free(input->ml.user_track_ids[cat]);
+                    input->ml.user_track_ids[cat] =
+                        vlc_player_input_GetSelectedTrackStringIds(input, cat);
+                }
                 trackpriv->vout_order = ev->vout_order;
                 vlc_player_SendEvent(player, on_track_selection_changed,
                                      NULL, trackpriv->t.es_id);
@@ -1296,6 +1303,8 @@ vlc_player_input_New(vlc_player_t *player, input_item_t *item)
     input->ml.delay_restore = false;
     input->ml.pos = -1.f;
     input->ml.has_audio_tracks = input->ml.has_video_tracks = false;
+    for (size_t i = 0; i < ARRAY_SIZE(input->ml.user_track_ids); ++i)
+        input->ml.user_track_ids[i] = NULL;
 
     static const struct vlc_input_thread_callbacks cbs = {
         .on_event = input_thread_Events,
@@ -1368,6 +1377,9 @@ vlc_player_input_Delete(struct vlc_player_input *input)
     vlc_vector_destroy(&input->video_track_vector);
     vlc_vector_destroy(&input->audio_track_vector);
     vlc_vector_destroy(&input->spu_track_vector);
+
+    for (size_t i = 0; i < ARRAY_SIZE(input->ml.user_track_ids); ++i)
+        free(input->ml.user_track_ids[i]);
 
     input_Close(input->thread);
     free(input);

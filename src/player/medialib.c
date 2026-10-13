@@ -271,12 +271,12 @@ vlc_player_UpdateMLStates(vlc_player_t *player, struct vlc_player_input* input)
             input->ml.states.zoom = -1.f;
     }
 
-    char *video_track_ids =
-        vlc_player_input_GetSelectedTrackStringIds(input, VIDEO_ES);
-    char *audio_track_ids =
-        vlc_player_input_GetSelectedTrackStringIds(input, AUDIO_ES);
-    char *subtitle_track_ids =
-        vlc_player_input_GetSelectedTrackStringIds(input, SPU_ES);
+    /* The tracks are gone by now: use the choices recorded when made */
+    char *video_track_ids = input->ml.user_track_ids[VIDEO_ES];
+    char *audio_track_ids = input->ml.user_track_ids[AUDIO_ES];
+    char *subtitle_track_ids = input->ml.user_track_ids[SPU_ES];
+    input->ml.user_track_ids[VIDEO_ES] = input->ml.user_track_ids[AUDIO_ES] =
+        input->ml.user_track_ids[SPU_ES] = NULL;
 
     vlc_player_CompareAssignState(&input->ml.states.current_video_track, &video_track_ids);
     vlc_player_CompareAssignState(&input->ml.states.current_audio_track, &audio_track_ids);
