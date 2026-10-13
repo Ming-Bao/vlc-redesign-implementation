@@ -140,17 +140,6 @@ FocusScope {
         colorSet: ColorContext.Window
     }
 
-    // when the last player panel closed (see the video's click to pause)
-    property double _menuClosedAt: 0
-
-    Connections {
-        target: controlBar
-        function onMenuChanged() {
-            if (!controlBar.menu)
-                rootPlayer._menuClosedAt = Date.now()
-        }
-    }
-
     PlayerToolbarVisibilityFSM {
         id: playerToolbarVisibilityFSM
 
@@ -306,31 +295,6 @@ FocusScope {
                             interactiveAutoHideTimer.restart()
                         else
                             playerToolbarVisibilityFSM.mouseMove();
-                    }
-
-                    // click to pause; a double click (fullscreen, handled by the core) toggles back
-                    property bool _clickArmed: false
-                    property double _toggledAt: 0
-
-                    onMousePressed: (button) => {
-                        // a press that just closed a player panel only dismisses it
-                        _clickArmed = (button === 0) && !Player.isInteractive
-                                      && (Date.now() - rootPlayer._menuClosedAt) > 100
-                    }
-                    onMouseReleased: (button) => {
-                        if (button !== 0 || !_clickArmed)
-                            return
-                        _clickArmed = false
-                        _toggledAt = Date.now()
-                        MainPlaylistController.togglePlayPause()
-                    }
-                    onMouseDblClicked: (button) => {
-                        if (button !== 0)
-                            return
-                        // Qt Quick sends the second press too: don't let its release toggle again
-                        _clickArmed = false
-                        if ((Date.now() - _toggledAt) < Qt.styleHints.mouseDoubleClickInterval)
-                            MainPlaylistController.togglePlayPause()
                     }
 
                     Component.onCompleted: {
