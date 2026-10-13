@@ -174,6 +174,11 @@ FSM {
         }
 
         transitions: ({
+            // a lock (open menu or panel, controls under the video) shows and keeps the bars
+            lock: {
+                action: () => { fsm.lockCount++; },
+                target: fsmLocked
+            },
             mouseMove: {
                 guard: () => !Player.isInteractive,
                 action: () => {

@@ -78,8 +78,6 @@ FocusScope {
 
     Component.onCompleted: {
         MainCtx.preferHotkeys = true
-        // on_ControlsUnderVideoChanged does not run for the initial value
-        lockUnlockAutoHide(_controlsUnderVideo)
     }
     Component.onDestruction: MainCtx.preferHotkeys = false
 
@@ -144,6 +142,12 @@ FocusScope {
 
     PlayerToolbarVisibilityFSM {
         id: playerToolbarVisibilityFSM
+
+        // locks sent before the FSM starts are dropped, so apply the initial value here
+        onStartedChanged: {
+            if (started)
+                rootPlayer.lockUnlockAutoHide(rootPlayer._controlsUnderVideo)
+        }
 
         onForceUnlock:{
             controlBar.forceUnlock()
