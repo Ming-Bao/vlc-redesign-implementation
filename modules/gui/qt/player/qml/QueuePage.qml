@@ -1,0 +1,170 @@
+/*****************************************************************************
+ * Copyright (C) 2026 VLC authors and VideoLAN
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * ( at your option ) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
+ *****************************************************************************/
+import QtQuick
+import QtQuick.Templates as T
+import QtQuick.Layouts
+
+import VLC.MainInterface
+import VLC.Style
+import VLC.Widgets as Widgets
+import VLC.Playlist
+import VLC.PlayerControls
+import VLC.Menus
+import VLC.Dialogs
+
+// Figma queue tab: count and length with sort/repeat/shuffle/remove/add, then the queue
+ColumnLayout {
+    id: root
+
+    readonly property ColorContext colorContext: ColorContext {
+        id: theme
+        colorSet: ColorContext.Window
+    }
+    readonly property bool _dark: theme.palette.isDark
+
+    spacing: 0
+
+    PlaylistListModel {
+        id: queueModel
+        playlist: MainPlaylistController.playlist
+    }
+
+    RowLayout {
+        Layout.fillWidth: true
+        Layout.preferredHeight: VLCStyle.dp(68, VLCStyle.scale)
+        Layout.leftMargin: VLCStyle.dp(28, VLCStyle.scale)
+        Layout.rightMargin: VLCStyle.dp(20, VLCStyle.scale)
+        spacing: VLCStyle.dp(12, VLCStyle.scale)
+
+        Widgets.LabelExt {
+            Layout.fillWidth: true
+            text: qsTr("%1 items - %2").arg(queueModel.count).arg(queueModel.duration.formatLong())
+            elide: Text.ElideRight
+            font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
+            color: root._dark ? "#6B6B6B" : theme.fg.secondary
+        }
+
+        Widgets.SortControl {
+            font.pixelSize: VLCStyle.icon_normal
+            description: qsTr("Sort")
+            enabled: MainPlaylistController.count > 1
+            checked: MainPlaylistController.sortKey !== PlaylistController.SORT_KEY_NONE
+            popupAbove: false
+            model: MainPlaylistController.sortKeyTitleList
+            sortKey: MainPlaylistController.sortKey
+            sortOrder: (MainPlaylistController.sortOrder === PlaylistController.SORT_ORDER_DESC)
+                       ? Qt.DescendingOrder : Qt.AscendingOrder
+            onSortSelected: key => { MainPlaylistController.sortKey = key }
+            onSortOrderSelected: type => {
+                MainPlaylistController.sortOrder = (type === Qt.DescendingOrder)
+                        ? PlaylistController.SORT_ORDER_DESC : PlaylistController.SORT_ORDER_ASC
+                MainPlaylistController.sort()
+            }
+        }
+
+        LoopButton { font.pixelSize: VLCStyle.icon_normal }
+
+        RandomButton { font.pixelSize: VLCStyle.icon_normal }
+
+        Widgets.IconToolButton {
+            text: VLCIcons.remove
+            font.pixelSize: VLCStyle.icon_normal
+            description: qsTr("Remove from the queue")
+            enabled: list.currentIndex >= 0
+            onClicked: list.removeCurrent()
+        }
+
+        Widgets.IconToolButton {
+            text: VLCIcons.add
+            font.pixelSize: VLCStyle.icon_normal
+            description: qsTr("Add to the queue")
+            onClicked: addMenu.popup(mapToGlobal(0, height), [qsTr("Add File..."), qsTr("Add Folder...")])
+
+            StringListMenu {
+                id: addMenu
+                ctx: MainCtx
+                onSelected: (index) => {
+                    if (index === 0)
+                        DialogsProvider.simpleOpenDialog(false)
+                    else
+                        DialogsProvider.PLAppendDir()
+                }
+            }
+        }
+    }
+
+    ListView {
+        id: list
+
+        // PlayerPanel.onOpened focuses this: the cursor starts on the playing item
+        function focusRow() {
+            if (currentIndex < 0)
+                currentIndex = Math.max(0, MainPlaylistController.currentIndex)
+            positionViewAtIndex(currentIndex, ListView.Contain)
+            return list
+        }
+
+        function removeCurrent() {
+            if (currentIndex >= 0)
+                queueModel.removeItems([currentIndex])
+        }
+
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        Layout.leftMargin: VLCStyle.dp(20, VLCStyle.scale)
+        Layout.rightMargin: VLCStyle.dp(20, VLCStyle.scale)
+
+        model: queueModel
+        currentIndex: -1
+        spacing: VLCStyle.dp(12, VLCStyle.scale)
+        clip: true
+        boundsBehavior: Flickable.StopAtBounds
+        highlightMoveDuration: 0
+        T.ScrollBar.vertical: Widgets.ScrollBarExt { }
+
+        Keys.onReturnPressed: MainPlaylistController.goTo(currentIndex, true)
+        Keys.onEnterPressed: MainPlaylistController.goTo(currentIndex, true)
+        Keys.onDeletePressed: removeCurrent()
+
+        delegate: PanelRow {
+            id: queueRow
+
+            required property int index
+            required property var model
+
+            width: ListView.view.width
+            text: model.title
+            trailingText: model.duration.formatShort()
+            current: model.isCurrent
+            selected: ListView.isCurrentItem
+
+            leading: Widgets.IconLabel {
+                width: VLCStyle.dp(32, VLCStyle.scale)
+                height: VLCStyle.dp(32, VLCStyle.scale)
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                text: VLCIcons.drag_handle
+                font.pixelSize: VLCStyle.icon_normal
+                color: queueRow._dark ? "#8F8F8F" : queueRow.colorContext.fg.secondary
+            }
+
+            onClicked: list.currentIndex = index
+            onDoubleClicked: MainPlaylistController.goTo(index, true)
+        }
+    }
+}

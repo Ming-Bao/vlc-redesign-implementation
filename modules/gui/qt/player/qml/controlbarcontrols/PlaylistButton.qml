@@ -30,7 +30,8 @@ Widgets.IconToolButton {
     text: VLCIcons.playlist
     onClicked: {
         MainCtx.playqueuePanel.visible = !MainCtx.playqueuePanel.visible
-        if (MainCtx.playqueuePanel.visible && MainCtx.playqueuePanel.docked) {
+        if (MainCtx.playqueuePanel.visible && MainCtx.playqueuePanel.docked
+                && typeof playlistWidget !== "undefined") {
             playlistWidget.gainFocus(playlistBtn)
         }
     }

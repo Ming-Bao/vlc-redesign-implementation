@@ -32,6 +32,8 @@ T.Popup {
     property string footerText: ""
     // the pages scroll when the card would be taller than this
     property real maximumHeight: Number.POSITIVE_INFINITY
+    // the card takes maximumHeight and each page fills it (for pages that scroll themselves, like the queue)
+    property bool fillHeight: false
     default property alias pages: pageHolder.data
 
     signal footerClicked()
@@ -44,7 +46,8 @@ T.Popup {
     readonly property bool _dark: theme.palette.isDark
 
     width: VLCStyle.dp(400, VLCStyle.scale)
-    implicitHeight: Math.min(contentHeight + topPadding + bottomPadding, maximumHeight)
+    implicitHeight: fillHeight ? maximumHeight
+                               : Math.min(contentHeight + topPadding + bottomPadding, maximumHeight)
     padding: 0
     focus: true
     // a press outside the card closes it and goes no further: it must not reach the video
@@ -56,7 +59,7 @@ T.Popup {
     T.Overlay.modal: Item { }
 
     Connections {
-        target: root.visible ? root.T.Overlay.overlay : null
+        target: root.visible && root.modal ? root.T.Overlay.overlay : null
         // the modal popup blocks clicks on the background; close once the whole click is
         // absorbed so that neither press nor release reaches the video. The overlay also
         // reports clicks on the card itself: those are not dismissals
@@ -66,11 +69,15 @@ T.Popup {
         }
     }
 
-    // another popup (e.g. a combo box list) is open over the overlay: a click there is not a dismissal
+    // another popup (e.g. a combo box list) is open over this card: a click there is not a dismissal.
+    // Popups stacked below it (the docked queue card) do not count
     function _otherPopupOpen() {
         const own = contentItem.parent
+        let above = false
         for (const c of T.Overlay.overlay.children) {
-            if (c !== own && c.visible && String(c).startsWith("QQuickPopupItem"))
+            if (c === own)
+                above = true
+            else if (above && c.visible && String(c).startsWith("QQuickPopupItem"))
                 return true
         }
         return false
@@ -109,7 +116,7 @@ T.Popup {
         Rectangle {
             Layout.fillWidth: true
             implicitHeight: VLCStyle.dp(50, VLCStyle.scale)
-            visible: root.tabs.length > 1
+            visible: root.tabs.length > 0
             topLeftRadius: VLCStyle.dp(10, VLCStyle.scale)
             topRightRadius: VLCStyle.dp(10, VLCStyle.scale)
             color: root._dark ? "#090909" : theme.bg.secondary
@@ -203,7 +210,7 @@ T.Popup {
 
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.preferredHeight: pageHolder.implicitHeight
+            Layout.preferredHeight: root.fillHeight ? -1 : pageHolder.implicitHeight
             Layout.minimumHeight: 0
 
             contentWidth: width
@@ -235,13 +242,17 @@ T.Popup {
                 id: pageHolder
 
                 width: pageFlick.width
-                implicitHeight: children[root.currentTab]?.implicitHeight ?? 0
+                implicitHeight: root.fillHeight ? pageFlick.height : (children[root.currentTab]?.implicitHeight ?? 0)
                 height: implicitHeight
 
                 function _sync() {
                     for (let i = 0; i < children.length; ++i) {
                         children[i].visible = (i === root.currentTab)
                         children[i].width = Qt.binding(() => pageHolder.width)
+                        if (root.fillHeight) {
+                            const page = children[i]
+                            page.height = Qt.binding(() => pageHolder.height)
+                        }
                     }
                 }
 
