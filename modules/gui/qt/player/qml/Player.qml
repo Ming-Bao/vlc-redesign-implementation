@@ -51,14 +51,19 @@ FocusScope {
     }
 
     // Only applicable in video mode:
-    property bool displayFadeRectangles: !_controlsUnderVideo && (height > (implicitFadeRectangleHeight * 3))
+    // Figma: solid bars, no gradient over the video
+    property bool displayFadeRectangles: false
     property real implicitFadeRectangleHeight: VLCStyle.dp(206, VLCStyle.scale)
 
     // Private
 
-    property bool _controlsUnderVideo: (MainCtx.pinVideoControls
-                                        &&
-                                        (MainCtx.intfMainWindow.visibility !== Window.FullScreen))
+    // Figma 247:445 / 3328:11554: in a window the video sits between the bars,
+    // in fullscreen the bars overlay it and hide when idle
+    property bool _controlsUnderVideo: (MainCtx.intfMainWindow.visibility !== Window.FullScreen)
+
+    readonly property color _barColor: !windowTheme.palette.isDark ? windowTheme.bg.primary
+                                     : _controlsUnderVideo ? "#1B1B1B"
+                                                           : Qt.rgba(0x19 / 255, 0x19 / 255, 0x19 / 255, 0.95)
 
     property bool _keyPressed: false
 
@@ -951,7 +956,7 @@ FocusScope {
             return (parts.length > 2) ? parts[parts.length - 2] : ""
         }
 
-        tintColor: windowTheme.palette.isDark ? "#1B1B1B" : windowTheme.bg.primary
+        tintColor: rootPlayer._barColor
 
         playqueueVisible: playlistVisibility.isPlaylistVisible
 
@@ -997,6 +1002,50 @@ FocusScope {
         // like the previous player top bar, start with the focus here (not on a control
         // that may be rebuilt when the video output appears), without a keyboard reason
         Component.onCompleted: Qt.callLater(() => topBar.forceActiveFocus(Qt.OtherFocusReason))
+    }
+
+    // Figma "continue" toast: resume prompt above the control bar
+    Rectangle {
+        id: resumeToast
+
+        // not bound to visible: a child reads invisible while its parent is hidden,
+        // so the dialog could never show itself
+        opacity: resumeDialog.visible ? 1 : 0
+        z: 2
+
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: controlBar.top
+        anchors.bottomMargin: VLCStyle.dp(24, VLCStyle.scale)
+
+        width: resumeDialog.implicitWidth + VLCStyle.dp(30, VLCStyle.scale)
+        height: resumeDialog.implicitHeight + VLCStyle.dp(20, VLCStyle.scale)
+
+        radius: VLCStyle.dp(8, VLCStyle.scale)
+        color: windowTheme.palette.isDark ? Qt.rgba(0x19 / 255, 0x19 / 255, 0x19 / 255, 0.95)
+                                          : windowTheme.bg.primary
+
+        ResumeDialog {
+            id: resumeDialog
+
+            anchors.fill: parent
+            anchors.topMargin: VLCStyle.dp(10, VLCStyle.scale)
+            anchors.bottomMargin: VLCStyle.dp(10, VLCStyle.scale)
+            anchors.leftMargin: VLCStyle.dp(20, VLCStyle.scale)
+            anchors.rightMargin: VLCStyle.dp(10, VLCStyle.scale)
+
+            maxWidth: Math.min(VLCStyle.dp(552, VLCStyle.scale), rootPlayer.width - VLCStyle.margin_large * 2)
+
+            colorContext.palette: windowTheme.palette
+
+            Navigation.parentItem: rootPlayer
+
+            onHidden: {
+                if (activeFocus)
+                    controlBar.forceActiveFocus()
+            }
+
+            onVisibleChanged: rootPlayer.lockUnlockAutoHide(visible)
+        }
     }
 
     Loader {
@@ -1306,21 +1355,7 @@ FocusScope {
         background: Rectangle {
             id: controlBarBackground
 
-            visible: !MainCtx.hasEmbededVideo || MainCtx.pinVideoControls || !rootPlayer.displayFadeRectangles
-
-            opacity: {
-                if (MainCtx.hasEmbededVideo && !MainCtx.pinVideoControls && !rootPlayer.displayFadeRectangles) {
-                    return 0.6
-                } else if ((Window.visibility === Window.FullScreen) && MainCtx.hasEmbededVideo) {
-                    return MainCtx.pinOpacity
-                } else if (AcrylicController.enabled || !MainCtx.hasEmbededVideo) {
-                    return 0.7
-                } else {
-                    return 1.0
-                }
-            }
-
-            color: windowTheme.bg.primary
+            color: rootPlayer._barColor
         }
 
         FadeControllerStateGroup {
