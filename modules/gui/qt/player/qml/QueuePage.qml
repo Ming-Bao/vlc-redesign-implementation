@@ -207,9 +207,10 @@ ColumnLayout {
                         if (active)
                             return
                         const to = targetIndex()
+                        // the move is applied later by the core: the cursor follows the dragged item through it
+                        list.currentIndex = queueRow.index
                         if (to !== queueRow.index)
                             queueModel.moveItemsPre([queueRow.index], to > queueRow.index ? to + 1 : to)
-                        list.currentIndex = to
                     }
                 }
             }
