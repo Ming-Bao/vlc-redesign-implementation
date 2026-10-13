@@ -112,6 +112,8 @@ public:
     bool PreparePlayback( virtual_segment_c & new_vsegment );
     bool AnalyseAllSegmentsFound( demux_t *p_demux, matroska_stream_c * );
 
+    bool has_dvd_menus = false; // a DVD chapter codec was found; set and read on the demux thread
+
     dvd_command_interpretor_c * GetDVDInterpretor()
     {
         if (!dvd_interpretor)

@@ -248,7 +248,10 @@ bool event_thread_t::AddTrack( mkv_track_t & track )
     es_list.push_front( ESInfo( track, *this ) );
     es_list_t::iterator info = es_list.begin();
 
-    if( category == VIDEO_ES )
+    /* Only take over the mouse for menus: otherwise the core's default
+     * handling (click to pause) must stay in place */
+    const demux_sys_t* p_sys = static_cast<const demux_sys_t*>( p_demux->p_sys );
+    if( category == VIDEO_ES && p_sys->has_dvd_menus )
     {
         if( es_out_Control( p_demux->out, ES_OUT_VOUT_SET_MOUSE_EVENT,
                             es, static_cast<vlc_mouse_event>(EventMouse),

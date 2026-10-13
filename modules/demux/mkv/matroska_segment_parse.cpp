@@ -1488,7 +1488,10 @@ void matroska_segment_c::ParseChapterAtom( int i_level, KaxChapterAtom *ca, chap
                         if (unlikely(interepreter == nullptr))
                             debug( vars, "failed to get the DVD interpreter ");
                         else
+                        {
                             p_ccodec = new dvd_chapter_codec_c( vlc_object_logger( &vars.obj->sys.demuxer ), vars.obj->sys, *interepreter );
+                            vars.obj->sys.has_dvd_menus = true;
+                        }
                     }
                     break;
                 }
