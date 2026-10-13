@@ -91,8 +91,12 @@ StackViewExt {
                     let pageProp = {
                         pagePrefix:[...pagePrefix, head]
                     }
-                    for (const key of properties.keys()) {
-                        pageProp[key] = properties[key]
+                    // history properties belong to the last page of the path;
+                    // intermediate loaders forward them down with loadView()
+                    if (path.length === 1) {
+                        for (const key of properties.keys()) {
+                            pageProp[key] = properties[key]
+                        }
                     }
 
                     History.update([...pagePrefix, head])

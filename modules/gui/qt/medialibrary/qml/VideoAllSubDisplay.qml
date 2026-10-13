@@ -35,6 +35,9 @@ Widgets.PageExt {
 
     property alias currentIndex: videoAll.currentIndex
 
+    // restored from the navigation history (see VideoAllDisplay)
+    property alias initialIndex: videoAll.initialIndex
+
     // NOTE: We are exposing a custom SortMenu with grouping options.
     sortMenu: SortMenuVideo {
         ctx: MainCtx
