@@ -47,7 +47,8 @@ T.Popup {
     focus: true
     closePolicy: T.Popup.CloseOnEscape | T.Popup.CloseOnPressOutsideParent
 
-    // start keyboard focus on the current page's first track section, else the first tab
+    // start keyboard focus on the current page's selected track, else its first control. It must be
+    // visual focus: in the player, hotkeys take keys (Escape, arrows) from items without it
     onOpened: {
         const page = pageHolder.children[currentTab]
         for (const c of (page?.children ?? [])) {
