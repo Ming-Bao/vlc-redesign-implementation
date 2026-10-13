@@ -48,18 +48,18 @@ T.Popup {
     // the parent is the whole player, so close on presses outside the card itself
     closePolicy: T.Popup.CloseOnEscape | T.Popup.CloseOnPressOutside
 
-    // start keyboard focus on the current page's selected track, else its first control. It must be
-    // visual focus: in the player, hotkeys take keys (Escape, arrows) from items without it
+    // start keyboard focus on the current page's selected track, else its first control; the
+    // focus ring shows once the keyboard is used
     onOpened: {
         const page = pageHolder.children[currentTab]
         for (const c of (page?.children ?? [])) {
             const row = c.focusRow?.()
             if (row) {
-                row.forceActiveFocus(Qt.TabFocusReason)
+                row.forceActiveFocus(Qt.OtherFocusReason)
                 return
             }
         }
-        page?.nextItemInFocusChain(true)?.forceActiveFocus(Qt.TabFocusReason)
+        page?.nextItemInFocusChain(true)?.forceActiveFocus(Qt.OtherFocusReason)
     }
 
     background: Rectangle {

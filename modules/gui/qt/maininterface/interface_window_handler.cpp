@@ -537,6 +537,14 @@ bool InterfaceWindowHandler::applyKeyEvent(QKeyEvent * event) const
                     return false;
             }
         }
+
+        // an open popup (menu, panel, combo box list) holding the focus keeps its keys, so
+        // Escape closes it even after a mouse click took the focus without visual focus
+        for (const QQuickItem * parent = item; parent; parent = parent->parentItem())
+        {
+            if (parent->inherits("QQuickPopupItem"))
+                return false;
+        }
     }
 
     event->accept();
