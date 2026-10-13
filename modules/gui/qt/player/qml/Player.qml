@@ -1313,14 +1313,19 @@ FocusScope {
 
         rightPadding: VLCStyle.applicationHorizontalMargin
         leftPadding: VLCStyle.applicationHorizontalMargin
-        bottomPadding: VLCStyle.applicationVerticalMargin + VLCStyle.margin_xsmall
+        bottomPadding: _compact ? VLCStyle.dp(11, VLCStyle.scale)
+                                : VLCStyle.applicationVerticalMargin + VLCStyle.margin_xsmall
 
-        textPosition: (MainCtx.pinVideoControls)
-                      ? ControlBar.TimeTextPosition.LeftRightSlider
-                      : ControlBar.TimeTextPosition.AboveSlider
+        // Figma Controls (default): ⏮ ▶ ⏭ · time · seek · duration · volume tracks settings queue
+        compactStyle: true
+        textPosition: ControlBar.TimeTextPosition.Inline
+        // pre-redesign profiles fill the centre section and cannot host the inline seek bar
+        inlineFallback: ControlBar.TimeTextPosition.LeftRightSlider
+        sliderHeight: _compact ? VLCStyle.dp(28, VLCStyle.scale) : VLCStyle.heightBar_xxsmall
+        topPadding: _compact ? VLCStyle.dp(11, VLCStyle.scale) : 0
 
         // hide right text so that it won't overlap with play queue
-        showRemainingTime: (textPosition !== ControlBar.TimeTextPosition.AboveSlider)
+        showRemainingTime: (_textPosition !== ControlBar.TimeTextPosition.AboveSlider)
                            || !playlistVisibility.isPlaylistVisible
 
         onStateChanged: {

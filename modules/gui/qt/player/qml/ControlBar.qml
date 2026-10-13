@@ -370,8 +370,9 @@ T.Pane {
 
             identifier: root.identifier
 
-            implicitHeight: MainCtx.pinVideoControls ? VLCStyle.controlLayoutHeightPinned
-                                                     : VLCStyle.controlLayoutHeight
+            // Figma compact bar: 32px row (28px pill) inside 11px padding = 54px
+            implicitHeight: (root._compact || MainCtx.pinVideoControls) ? VLCStyle.controlLayoutHeightPinned
+                                                                        : VLCStyle.controlLayoutHeight
 
             visible: !model?.empty ?? false
 
