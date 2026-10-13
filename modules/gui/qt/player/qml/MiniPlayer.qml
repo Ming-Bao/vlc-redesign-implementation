@@ -80,7 +80,8 @@ ControlBar {
             // Animation should not be based on the implicit height change
             // but rather the visibility state:
             behavior.enabled = false
-            Qt.callLater(() => { behavior.enabled = true })
+            // the bar may be gone by then (its inline slot is destroyed first on teardown)
+            Qt.callLater(() => { if (behavior) behavior.enabled = true })
         }
     }
 
