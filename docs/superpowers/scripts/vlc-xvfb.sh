@@ -7,12 +7,17 @@ start)
     shift
     Xvfb :77 -screen 0 1600x900x24 -nolisten tcp > "$RUN/xvfb.log" 2>&1 & echo $! > "$RUN/xvfb.pid"
     sleep 1
+    # park the pointer off the (initially small, centred) window so nothing starts hovered
+    xdotool mousemove 1599 899
     "$BUILD/bin/vlc-static" -I qt --no-qt-privacy-ask --restore-playback-pos=0 "$@" > "$RUN/vlc.log" 2>&1 & echo $! > "$RUN/vlc.pid"
     for i in $(seq 60); do
         if xdotool search --name "VLC media player" >/dev/null 2>&1; then
             sleep 3
-            # no window manager: resize every top-level VLC window (the real one is among them)
-            for w in $(xdotool search --maxdepth 1 --class vlc); do xdotool windowmove "$w" 0 0 windowsize "$w" 1600 900; done
+            # no window manager: resize the top-level main window(s); popups/tooltips (< 400px) keep their size
+            for w in $(xdotool search --maxdepth 1 --class vlc); do
+                eval "$(xdotool getwindowgeometry --shell "$w")"
+                [ "$WIDTH" -ge 400 ] && xdotool windowmove "$w" 0 0 windowsize "$w" 1600 900
+            done
             sleep 4; echo ready; exit 0
         fi
         sleep 0.5
