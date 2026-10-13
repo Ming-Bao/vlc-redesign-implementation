@@ -10,6 +10,7 @@ Steps (executed in order):
     max               maximize the focused window (Super+Up)
     sleep:SECONDS
     shot:NAME         save OUTDIR/NAME.png from a Mutter ScreenCast stream
+    move:X,Y          move the pointer to monitor coordinates
     click:X,Y         left click at monitor coordinates
     key:KEYSYM        press+release a keysym (e.g. space, Escape)
 Writes OUTDIR/vlc.log and OUTDIR/shell.log.
@@ -123,6 +124,10 @@ def main():
                             "!", "videoconvert", "!", "pngenc", "!", "filesink",
                             f"location={out}/{arg}.png"], check=True, timeout=20)
             print(f"saved {out}/{arg}.png")
+        elif verb == "move":
+            x, y = (float(v) for v in arg.split(","))
+            rd.call_sync("NotifyPointerMotionAbsolute", GLib.Variant("(sdd)", (stream_path, x, y)), 0, 5000, None)
+            pump(0.3)
         elif verb == "click":
             x, y = (float(v) for v in arg.split(","))
             rd.call_sync("NotifyPointerMotionAbsolute", GLib.Variant("(sdd)", (stream_path, x, y)), 0, 5000, None)
