@@ -939,11 +939,27 @@ FocusScope {
         }
     }
 
+    // menubar mode: the menu (and the window buttons with CSD) above the title bar, as in the library
+    MenuTopbar {
+        id: menuTopbar
+
+        z: 2
+
+        visible: MainCtx.hasToolbarMenu && (MainCtx.intfMainWindow.visibility !== Window.FullScreen)
+        enabled: visible
+
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+
+        plListView: topBar.plListView
+    }
+
     // Figma 247:445: the player keeps the window title bar, with the media folder as a chip
     LocalTopbar {
         id: topBar
 
-        anchors.top: parent.top
+        anchors.top: menuTopbar.visible ? menuTopbar.bottom : parent.top
         anchors.left: parent.left
         anchors.right: parent.right
 
