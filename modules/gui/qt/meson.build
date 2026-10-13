@@ -753,6 +753,7 @@ qml_modules += {
        'player/qml/PlayerPanel.qml',
        'player/qml/TrackSection.qml',
        'player/qml/TracksPanel.qml',
+       'player/qml/PlaybackPanel.qml',
        'player/qml/TracksPage.qml',
        'player/qml/TracksPageAudio.qml',
        'player/qml/TracksPageSpeed.qml',

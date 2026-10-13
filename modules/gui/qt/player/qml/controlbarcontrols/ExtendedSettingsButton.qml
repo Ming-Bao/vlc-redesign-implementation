@@ -21,6 +21,7 @@ import QtQuick
 import VLC.Widgets as Widgets
 import VLC.Style
 import VLC.Dialogs
+import VLC.Player
 import VLC.Util
 
 Widgets.IconToolButton {
@@ -32,5 +33,45 @@ Widgets.IconToolButton {
 
     AccessibleCompat.id: "extendedSettingsButton"
 
-    onClicked: DialogsProvider.extendedDialog()
+    signal requestLockUnlockAutoHide(bool lock)
+    signal menuOpened(var menu)
+
+    readonly property var _parentItem: ((typeof rootPlayer !== 'undefined') && (rootPlayer !== null)) ? rootPlayer
+                                                                                                       : g_mainDisplay
+
+    enabled: panelLoader.status === Loader.Ready
+
+    onClicked: panelLoader.item.open()
+
+    Loader {
+        id: panelLoader
+
+        sourceComponent: PlaybackPanel {
+            id: panel
+
+            parent: extdSettingsBtn._parentItem
+
+            x: parent.width - width - VLCStyle.dp(20, VLCStyle.scale)
+            y: parent.positionSliderY - height - VLCStyle.dp(20, VLCStyle.scale)
+            z: 1
+
+            colorContext.palette: extdSettingsBtn.colorContext.palette
+
+            onOpened: {
+                extdSettingsBtn.requestLockUnlockAutoHide(true)
+                extdSettingsBtn.menuOpened(panel)
+            }
+
+            onClosed: {
+                extdSettingsBtn.requestLockUnlockAutoHide(false)
+                extdSettingsBtn.forceActiveFocus()
+                extdSettingsBtn.menuOpened(null)
+            }
+        }
+    }
+
+    function forceUnlock() {
+        if (panelLoader && panelLoader.item)
+            panelLoader.item.close()
+    }
 }
