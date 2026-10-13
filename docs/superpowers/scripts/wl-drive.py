@@ -109,7 +109,7 @@ def main():
             for kv in filter(None, os.environ.get("WL_VLC_ENV", "").split(";")):
                 k, _, v = kv.partition("=")
                 venv[k] = v
-            vlc = subprocess.Popen([f"{BUILD}/bin/vlc-static", "-vv", "-I", "qt", "--no-qt-privacy-ask",
+            vlc = subprocess.Popen([f"{BUILD}/bin/vlc-static", "-vv", "-I", "qt", "--aout=dummy", "--no-qt-privacy-ask",
                                     "--restore-playback-pos=0", *args], env=venv,
                                    stdout=open(f"{out}/vlc.log", "w"), stderr=subprocess.STDOUT)
             pump(12)

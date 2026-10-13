@@ -9,7 +9,7 @@ start)
     sleep 1
     # park the pointer off the (initially small, centred) window so nothing starts hovered
     xdotool mousemove 1599 899
-    "$BUILD/bin/vlc-static" -I qt --no-qt-privacy-ask --restore-playback-pos=0 "$@" > "$RUN/vlc.log" 2>&1 & echo $! > "$RUN/vlc.pid"
+    "$BUILD/bin/vlc-static" -I qt --aout=dummy --no-qt-privacy-ask --restore-playback-pos=0 "$@" > "$RUN/vlc.log" 2>&1 & echo $! > "$RUN/vlc.pid"
     for i in $(seq 60); do
         if xdotool search --name "VLC media player" >/dev/null 2>&1; then
             sleep 3
