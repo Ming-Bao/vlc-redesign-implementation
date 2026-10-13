@@ -192,7 +192,11 @@ ColumnLayout {
 
                     function targetIndex() {
                         const p = list.mapFromItem(null, dragHandler.centroid.scenePosition)
-                        const i = list.indexAt(VLCStyle.dp(10, VLCStyle.scale), p.y + list.contentY)
+                        const x = VLCStyle.dp(10, VLCStyle.scale)
+                        // a gap between rows belongs to the row below it
+                        let i = list.indexAt(x, p.y + list.contentY)
+                        if (i < 0)
+                            i = list.indexAt(x, p.y + list.contentY + list.spacing)
                         if (i >= 0)
                             return i
                         return p.y < 0 ? 0 : list.count - 1
