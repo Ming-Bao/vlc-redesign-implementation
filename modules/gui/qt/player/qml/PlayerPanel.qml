@@ -30,6 +30,8 @@ T.Popup {
     property var tabs: []
     property int currentTab: 0
     property string footerText: ""
+    // the pages scroll when the card would be taller than this
+    property real maximumHeight: Number.POSITIVE_INFINITY
     default property alias pages: pageHolder.data
 
     signal footerClicked()
@@ -42,7 +44,7 @@ T.Popup {
     readonly property bool _dark: theme.palette.isDark
 
     width: VLCStyle.dp(400, VLCStyle.scale)
-    implicitHeight: contentHeight + topPadding + bottomPadding
+    implicitHeight: Math.min(contentHeight + topPadding + bottomPadding, maximumHeight)
     padding: 0
     focus: true
     // the parent is the whole player, so close on presses outside the card itself
@@ -168,24 +170,59 @@ T.Popup {
             }
         }
 
-        Item {
-            id: pageHolder
+        Flickable {
+            id: pageFlick
 
             Layout.fillWidth: true
-            implicitHeight: children[root.currentTab]?.implicitHeight ?? 0
+            Layout.fillHeight: true
+            Layout.preferredHeight: pageHolder.implicitHeight
+            Layout.minimumHeight: 0
 
-            function _sync() {
-                for (let i = 0; i < children.length; ++i) {
-                    children[i].visible = (i === root.currentTab)
-                    children[i].width = Qt.binding(() => pageHolder.width)
+            contentWidth: width
+            contentHeight: pageHolder.implicitHeight
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
+
+            T.ScrollBar.vertical: Widgets.ScrollBarExt { }
+
+            // keep the keyboard-focused row in view
+            Connections {
+                target: pageFlick.Window.window
+                function onActiveFocusItemChanged() {
+                    const item = pageFlick.Window.activeFocusItem
+                    let p = item
+                    while (p && p !== pageHolder)
+                        p = p.parent
+                    if (!p)
+                        return
+                    const y = item.mapToItem(pageHolder, 0, 0).y
+                    if (y < pageFlick.contentY)
+                        pageFlick.contentY = y
+                    else if (y + item.height > pageFlick.contentY + pageFlick.height)
+                        pageFlick.contentY = y + item.height - pageFlick.height
                 }
             }
 
-            onChildrenChanged: _sync()
+            Item {
+                id: pageHolder
 
-            Connections {
-                target: root
-                function onCurrentTabChanged() { pageHolder._sync() }
+                width: pageFlick.width
+                implicitHeight: children[root.currentTab]?.implicitHeight ?? 0
+                height: implicitHeight
+
+                function _sync() {
+                    for (let i = 0; i < children.length; ++i) {
+                        children[i].visible = (i === root.currentTab)
+                        children[i].width = Qt.binding(() => pageHolder.width)
+                    }
+                }
+
+                onChildrenChanged: _sync()
+
+                Connections {
+                    target: root
+                    function onCurrentTabChanged() { pageHolder._sync() }
+                }
             }
         }
 

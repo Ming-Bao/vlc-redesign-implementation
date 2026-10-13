@@ -62,6 +62,8 @@ Widgets.IconToolButton {
 
             x: parent.width - width - VLCStyle.dp(20, VLCStyle.scale)
             y: parent.positionSliderY - height - VLCStyle.dp(20, VLCStyle.scale)
+            // 20 dp above the bar, clear of the top bar
+            maximumHeight: parent.positionSliderY - VLCStyle.dp(80, VLCStyle.scale)
             z: 1
 
             colorContext.palette: extdSettingsBtn.colorContext.palette
