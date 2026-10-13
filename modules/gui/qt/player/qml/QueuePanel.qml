@@ -32,6 +32,8 @@ PlayerPanel {
     fillHeight: true
     modal: false
     dim: false
+    // opening does not take the focus: the player keeps its hotkeys while the card is up
+    focus: false
 
     // where keyboard navigation leaves the card, forwarded to every page (wired by the player)
     property Item navigationParent: null

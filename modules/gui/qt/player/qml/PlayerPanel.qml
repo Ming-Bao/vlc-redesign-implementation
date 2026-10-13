@@ -97,7 +97,8 @@ T.Popup {
         page?.nextItemInFocusChain(true)?.forceActiveFocus(Qt.OtherFocusReason)
     }
 
-    onOpened: focusPage()
+    // a popup without focus (the non-modal queue card) leaves the keys to the player's hotkeys
+    onOpened: if (focus) focusPage()
 
     background: Rectangle {
         radius: VLCStyle.dp(10, VLCStyle.scale)
