@@ -60,16 +60,14 @@ Widgets.IconToolButton {
     Loader {
         id: menuLoader
 
-        sourceComponent: TracksMenu {
+        sourceComponent: TracksPanel {
             id: menu
 
             parent: root._parentItem
 
-            x: 0
-            y: (parent.positionSliderY - height)
+            x: parent.width - width - VLCStyle.dp(20, VLCStyle.scale)
+            y: parent.positionSliderY - height - VLCStyle.dp(20, VLCStyle.scale)
             z: 1
-
-            focus: true
 
             colorContext.palette: root.colorContext.palette
 
