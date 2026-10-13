@@ -1012,11 +1012,17 @@ FocusScope {
 
         onRequestLockUnlockAutoHide: (lock) => rootPlayer.lockUnlockAutoHide(lock)
 
+        // open the folder of the playing media in the browser, or the library for other media
         onFolderClicked: {
             if (MainCtx.hasEmbededVideo && !MainCtx.canShowVideoPIP) {
                MainPlaylistController.stop()
             }
             MainCtx.playerView = false
+
+            const folder = MainCtx.folderMRL(Player.url)
+            const tree = MainCtx.folderTree(folder)
+            if (tree)
+                History.push(["network", "browse"], { tree: tree })
         }
 
         FadeControllerStateGroup {

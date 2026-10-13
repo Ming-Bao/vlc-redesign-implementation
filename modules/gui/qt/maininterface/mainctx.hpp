@@ -409,6 +409,8 @@ public:
 
     Q_INVOKABLE QUrl folderMRL(const QString &fileMRL) const;
     Q_INVOKABLE QUrl folderMRL(const QUrl &fileMRL) const;
+    /// browse tree (NetworkTreeItem) rooted at a local folder, invalid for other URLs
+    Q_INVOKABLE QVariant folderTree(const QUrl &folder) const;
 
     Q_INVOKABLE QString displayMRL(const QUrl &mrl) const;
 

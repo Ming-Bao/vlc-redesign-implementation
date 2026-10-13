@@ -58,6 +58,7 @@
 
 #include "dialogs/toolbar/controlbar_profile_model.hpp"
 #include "dialogs/help/help.hpp"
+#include "network/networktreeitem.hpp"
 
 #include <QKeyEvent>
 
@@ -674,6 +675,26 @@ QUrl MainCtx::folderMRL(const QUrl &fileMRL) const
     }
 
     return {};
+}
+
+QVariant MainCtx::folderTree(const QUrl &folder) const
+{
+    if (!folder.isLocalFile())
+        return {};
+
+    const QString name = QFileInfo(folder.toLocalFile()).fileName();
+    input_item_t* item = input_item_NewDirectory(qtu(folder.toString()), qtu(name), ITEM_LOCAL);
+    if (!item)
+        return {};
+
+    // same shape as the browse home's standard folders (see StandardPathModel)
+    SharedInputItem inputItem(item, false);
+    MediaTreePtr tree(vlc_media_tree_New(), false);
+    {
+        MediaTreeLocker lock{tree};
+        vlc_media_tree_Add(tree.get(), &(tree->root), item);
+    }
+    return QVariant::fromValue(NetworkTreeItem(tree, inputItem));
 }
 
 QString MainCtx::displayMRL(const QUrl &mrl) const
