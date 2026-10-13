@@ -45,7 +45,8 @@ T.Popup {
     implicitHeight: contentHeight + topPadding + bottomPadding
     padding: 0
     focus: true
-    closePolicy: T.Popup.CloseOnEscape | T.Popup.CloseOnPressOutsideParent
+    // the parent is the whole player, so close on presses outside the card itself
+    closePolicy: T.Popup.CloseOnEscape | T.Popup.CloseOnPressOutside
 
     // start keyboard focus on the current page's selected track, else its first control. It must be
     // visual focus: in the player, hotkeys take keys (Escape, arrows) from items without it
