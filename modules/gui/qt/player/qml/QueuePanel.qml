@@ -25,7 +25,8 @@ PlayerPanel {
 
     tabs: [
         { text: qsTr("Queue"), icon: VLCIcons.playqueue },
-        { text: qsTr("Bookmarks"), icon: VLCIcons.bookmark }
+        { text: qsTr("Bookmarks"), icon: VLCIcons.bookmark },
+        { text: qsTr("Chapters"), icon: VLCIcons.chapters }
     ]
 
     fillHeight: true
@@ -39,7 +40,7 @@ PlayerPanel {
     signal navigationCancel()
 
     // the shown tab's list, for the player to navigate into
-    readonly property Item currentList: [queuePage, bookmarksPage][currentTab]?.list ?? null
+    readonly property Item currentList: [queuePage, bookmarksPage, chaptersPage][currentTab]?.list ?? null
 
     QueuePage {
         id: queuePage
@@ -51,6 +52,14 @@ PlayerPanel {
 
     BookmarksPage {
         id: bookmarksPage
+        navigationParent: root.navigationParent
+        navigationUp: root.navigationUp
+        navigationDown: root.navigationDown
+        onNavigationCancel: root.navigationCancel()
+    }
+
+    ChaptersPage {
+        id: chaptersPage
         navigationParent: root.navigationParent
         navigationUp: root.navigationUp
         navigationDown: root.navigationDown
