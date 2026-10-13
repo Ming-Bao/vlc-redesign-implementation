@@ -95,31 +95,26 @@ vlc_player_input_RestoreMlStates(struct vlc_player_input* input, bool force_pos)
         vlc_player_input_SelectTracksByStringIds(input, SPU_ES,
                                                  subtitle_track_ids);
 
-    vout_thread_t* vout = vlc_player_vout_Hold(player);
+    /* Only apply what was saved: resetting the others would wipe the user's
+     * own settings (e.g. video filters from the preferences) and reconfigure
+     * the video output while the new input may be reusing it */
+    const bool has_vout_states = input->ml.states.zoom >= .0f
+        || input->ml.states.aspect_ratio || input->ml.states.deinterlace
+        || input->ml.states.video_filter;
+    vout_thread_t* vout = has_vout_states ? vlc_player_vout_Hold(player) : NULL;
     if (vout != NULL)
     {
         if (input->ml.states.zoom >= .0f)
             var_SetFloat(vout, "zoom", input->ml.states.zoom);
-        else
-            var_SetFloat(vout, "zoom", 1.f);
         if (input->ml.states.aspect_ratio)
             var_SetString(vout, "aspect-ratio", input->ml.states.aspect_ratio);
-        else
-            var_SetString(vout, "aspect-ratio", NULL);
         if (input->ml.states.deinterlace)
         {
             var_SetString(vout, "deinterlace-mode", input->ml.states.deinterlace);
             var_SetInteger(vout, "deinterlace", 1);
         }
-        else
-        {
-            var_SetString(vout, "deinterlace-mode", NULL);
-            var_SetInteger(vout, "deinterlace", 0);
-        }
         if (input->ml.states.video_filter)
             var_SetString(vout, "video-filter", input->ml.states.video_filter);
-        else
-            var_SetString(vout, "video-filter", NULL);
         vout_Release(vout);
     }
 }
