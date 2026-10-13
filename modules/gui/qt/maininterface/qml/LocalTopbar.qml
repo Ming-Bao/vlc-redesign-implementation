@@ -60,6 +60,11 @@ T.ToolBar {
     signal toggleNavigationVisibility()
     signal togglePlayqueueVisibility()
     signal folderClicked()
+    // the player keeps its bars shown while the title bar is hovered or its menu is open
+    signal requestLockUnlockAutoHide(bool lock)
+
+    hoverEnabled: true
+    onHoveredChanged: requestLockUnlockAutoHide(hovered)
 
     ///incomming signal to request all menu and popup to close
     function forceUnlock() {
@@ -145,6 +150,9 @@ T.ToolBar {
                         id: contextMenu
                         ctx: MainCtx
                         flat: true
+
+                        onAboutToShow: root.requestLockUnlockAutoHide(true)
+                        onAboutToHide: root.requestLockUnlockAutoHide(false)
                     }
                 }
 

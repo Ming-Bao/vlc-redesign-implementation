@@ -60,6 +60,7 @@ FocusScope {
     // Figma 247:445 / 3328:11554: in a window the video sits between the bars,
     // in fullscreen the bars overlay it and hide when idle
     property bool _controlsUnderVideo: (MainCtx.intfMainWindow.visibility !== Window.FullScreen)
+                                       || MainCtx.pinVideoControls // the user pins them in fullscreen too
 
     readonly property color _barColor: !windowTheme.palette.isDark ? windowTheme.bg.primary
                                      : _controlsUnderVideo ? "#1B1B1B"
@@ -75,7 +76,11 @@ FocusScope {
 
     // Events
 
-    Component.onCompleted: MainCtx.preferHotkeys = true
+    Component.onCompleted: {
+        MainCtx.preferHotkeys = true
+        // on_ControlsUnderVideoChanged does not run for the initial value
+        lockUnlockAutoHide(_controlsUnderVideo)
+    }
     Component.onDestruction: MainCtx.preferHotkeys = false
 
     Keys.priority: Keys.AfterItem
@@ -987,6 +992,8 @@ FocusScope {
         }
 
         onTogglePlayqueueVisibility: playlistVisibility.togglePlaylistVisibility()
+
+        onRequestLockUnlockAutoHide: (lock) => rootPlayer.lockUnlockAutoHide(lock)
 
         onFolderClicked: {
             if (MainCtx.hasEmbededVideo && !MainCtx.canShowVideoPIP) {
