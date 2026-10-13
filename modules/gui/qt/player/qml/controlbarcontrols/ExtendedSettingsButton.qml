@@ -41,16 +41,8 @@ Widgets.IconToolButton {
 
     enabled: panelLoader.status === Loader.Ready
 
-    // a press on this button while the panel is open closes it (outside press) just before the
-    // button sees that press; the click that follows must not reopen it
-    property double _closedAt: 0
-    property bool _reopenBlocked: false
-
-    onPressed: _reopenBlocked = (Date.now() - _closedAt) < 100
-    onClicked: {
-        if (!_reopenBlocked)
-            panelLoader.item.open()
-    }
+    // while the panel is open it is modal: a click on this button only closes it
+    onClicked: panelLoader.item.open()
 
     Loader {
         id: panelLoader
@@ -74,7 +66,6 @@ Widgets.IconToolButton {
             }
 
             onClosed: {
-                extdSettingsBtn._closedAt = Date.now()
                 extdSettingsBtn.requestLockUnlockAutoHide(false)
                 extdSettingsBtn.forceActiveFocus()
                 extdSettingsBtn.menuOpened(null)

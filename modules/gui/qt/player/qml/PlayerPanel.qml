@@ -47,8 +47,34 @@ T.Popup {
     implicitHeight: Math.min(contentHeight + topPadding + bottomPadding, maximumHeight)
     padding: 0
     focus: true
-    // the parent is the whole player, so close on presses outside the card itself
-    closePolicy: T.Popup.CloseOnEscape | T.Popup.CloseOnPressOutside
+    // a press outside the card closes it and goes no further: it must not reach the video
+    // (which would pause) or the control behind it
+    closePolicy: T.Popup.CloseOnEscape
+    modal: true
+    // blocking clicks behind a modal popup needs its background; keep it invisible
+    dim: true
+    T.Overlay.modal: Item { }
+
+    Connections {
+        target: root.visible ? root.T.Overlay.overlay : null
+        // the modal popup blocks clicks on the background; close once the whole click is
+        // absorbed so that neither press nor release reaches the video. The overlay also
+        // reports clicks on the card itself: those are not dismissals
+        function onReleased() {
+            if (!cardHover.hovered && !root._otherPopupOpen())
+                root.close()
+        }
+    }
+
+    // another popup (e.g. a combo box list) is open over the overlay: a click there is not a dismissal
+    function _otherPopupOpen() {
+        const own = contentItem.parent
+        for (const c of T.Overlay.overlay.children) {
+            if (c !== own && c.visible && String(c).startsWith("QQuickPopupItem"))
+                return true
+        }
+        return false
+    }
 
     // start keyboard focus on the current page's selected track, else its first control; the
     // focus ring shows once the keyboard is used
@@ -70,6 +96,8 @@ T.Popup {
     }
 
     contentItem: ColumnLayout {
+        HoverHandler { id: cardHover }
+
         // the popup is not an Item, so the pages' ColorContexts find their palette here
         readonly property ColorContext colorContext: ColorContext {
             colorSet: ColorContext.Window

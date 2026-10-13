@@ -53,16 +53,8 @@ Widgets.IconToolButton {
 
     // Events
 
-    // a press on this button while the panel is open closes it (outside press) just before the
-    // button sees that press; the click that follows must not reopen it
-    property double _closedAt: 0
-    property bool _reopenBlocked: false
-
-    onPressed: _reopenBlocked = (Date.now() - _closedAt) < 100
-    onClicked: {
-        if (!_reopenBlocked)
-            menuLoader.item.open()
-    }
+    // while the panel is open it is modal: a click on this button only closes it
+    onClicked: menuLoader.item.open()
 
     // Children
 
@@ -88,7 +80,6 @@ Widgets.IconToolButton {
             }
 
             onClosed: {
-                root._closedAt = Date.now()
                 root.requestLockUnlockAutoHide(false)
                 root.forceActiveFocus()
                 root.menuOpened(null)
