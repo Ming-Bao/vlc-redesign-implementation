@@ -41,6 +41,9 @@ T.ItemDelegate {
     implicitHeight: VLCStyle.dp(32, VLCStyle.scale)
     // the list keeps keyboard focus and moves its cursor; rows only take clicks
     focusPolicy: Qt.NoFocus
+    // the view still focuses its current row: hand keys to the list first, or platforms where
+    // Return presses a button (GNOME) turn Enter into a click instead of the list's action
+    Keys.forwardTo: [ListView.view]
 
     background: Rectangle {
         radius: VLCStyle.dp(4, VLCStyle.scale)

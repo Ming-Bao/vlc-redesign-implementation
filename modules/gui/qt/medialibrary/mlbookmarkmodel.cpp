@@ -422,6 +422,7 @@ void MLBookmarkModel::updateMediaId(uint64_t revision, const QString &mediaUri)
             beginResetModel();
             m_bookmarks = std::move(ctx.newBookmarks);
             m_currentMediaId = ctx.newMLid;
+            emit canAddChanged();
             refresh(MLBOOKMARKMODEL_REFRESH);
             endResetModel();
         }

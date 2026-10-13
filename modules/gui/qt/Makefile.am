@@ -1189,6 +1189,7 @@ libqml_module_player_a_QML = \
 	player/qml/TrackSection.qml \
 	player/qml/TracksPanel.qml \
 	player/qml/PlaybackPanel.qml \
+	player/qml/BookmarksPage.qml \
 	player/qml/PanelRow.qml \
 	player/qml/QueuePage.qml \
 	player/qml/QueuePanel.qml \

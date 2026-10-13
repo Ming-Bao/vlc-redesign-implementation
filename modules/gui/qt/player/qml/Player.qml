@@ -991,7 +991,7 @@ FocusScope {
         Navigation.parentItem: rootPlayer
         Navigation.downItem: {
             if (playlistVisibility.isPlaylistVisible)
-                return playlistpopup.page.list
+                return playlistpopup.currentList
             if (MainCtx.hasEmbededVideo)
                 return playerSpecializationLoader
             if (Player.isInteractive)
@@ -1096,10 +1096,10 @@ FocusScope {
         onClosed: if (playlistVisibility.isPlaylistVisible && MainCtx.playqueuePanel.docked)
                       playlistVisibility.togglePlaylistVisibility()
 
-        page.navigationParent: rootPlayer
-        page.navigationUp: topBar
-        page.navigationDown: Player.isInteractive ? toggleControlBarButton : controlBar
-        page.onNavigationCancel: {
+        navigationParent: rootPlayer
+        navigationUp: topBar
+        navigationDown: Player.isInteractive ? toggleControlBarButton : controlBar
+        onNavigationCancel: {
             playlistVisibility.togglePlaylistVisibility()
             controlBar.forceActiveFocus()
         }
@@ -1180,7 +1180,7 @@ FocusScope {
         iconTxt: controlBar.state === "hidden" ? VLCIcons.expand_inverted : VLCIcons.expand
 
         Navigation.parentItem: rootPlayer
-        Navigation.upItem: playlistVisibility.isPlaylistVisible ? playlistpopup.page.list : (MainCtx.hasEmbededVideo ? playerSpecializationLoader : topBar)
+        Navigation.upItem: playlistVisibility.isPlaylistVisible ? playlistpopup.currentList : (MainCtx.hasEmbededVideo ? playerSpecializationLoader : topBar)
         Navigation.downItem: controlBar
 
         onClicked:{
@@ -1237,7 +1237,7 @@ FocusScope {
         Navigation.parentItem: rootPlayer
         Navigation.upItem: {
             if (playlistVisibility.isPlaylistVisible)
-                return playlistpopup.page.list
+                return playlistpopup.currentList
             if (Player.isInteractive)
                 return toggleControlBarButton
             if (!MainCtx.hasEmbededVideo)

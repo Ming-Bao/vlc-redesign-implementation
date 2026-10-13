@@ -24,15 +24,36 @@ PlayerPanel {
     id: root
 
     tabs: [
-        { text: qsTr("Queue"), icon: VLCIcons.playqueue }
+        { text: qsTr("Queue"), icon: VLCIcons.playqueue },
+        { text: qsTr("Bookmarks"), icon: VLCIcons.bookmark }
     ]
 
     fillHeight: true
     modal: false
     dim: false
 
-    // the page, for the player to wire keyboard navigation into the list and out of it
-    readonly property alias page: queuePage
+    // where keyboard navigation leaves the card, forwarded to every page (wired by the player)
+    property Item navigationParent: null
+    property Item navigationUp: null
+    property Item navigationDown: null
+    signal navigationCancel()
 
-    QueuePage { id: queuePage }
+    // the shown tab's list, for the player to navigate into
+    readonly property Item currentList: [queuePage, bookmarksPage][currentTab]?.list ?? null
+
+    QueuePage {
+        id: queuePage
+        navigationParent: root.navigationParent
+        navigationUp: root.navigationUp
+        navigationDown: root.navigationDown
+        onNavigationCancel: root.navigationCancel()
+    }
+
+    BookmarksPage {
+        id: bookmarksPage
+        navigationParent: root.navigationParent
+        navigationUp: root.navigationUp
+        navigationDown: root.navigationDown
+        onNavigationCancel: root.navigationCancel()
+    }
 }

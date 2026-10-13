@@ -48,6 +48,8 @@ class MLBookmarkModel : public QAbstractListModel
 
     Q_PROPERTY(MediaLib * ml READ ml WRITE setMl FINAL)
 
+    Q_PROPERTY(bool canAdd READ canAdd NOTIFY canAddChanged FINAL)
+
 public:
     explicit MLBookmarkModel( QObject* parent = nullptr );
     virtual ~MLBookmarkModel();
@@ -78,10 +80,15 @@ public:
     MediaLib* ml() const;
     void setMl(MediaLib* ml);
 
-    void add();
-    void remove( const QModelIndexList& indexes );
+    Q_INVOKABLE void add();
+    Q_INVOKABLE void remove( const QModelIndexList& indexes );
     void clear();
     Q_INVOKABLE void select( const QModelIndex& index );
+
+    bool canAdd() const { return m_currentMediaId != 0; }
+
+signals:
+    void canAddChanged();
 
 private:
     static void onCurrentMediaChanged( vlc_player_t* player, input_item_t* media,

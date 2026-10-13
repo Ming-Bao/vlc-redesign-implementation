@@ -37,7 +37,7 @@ ColumnLayout {
     }
     readonly property bool _dark: theme.palette.isDark
 
-    // the queue list, and where keyboard navigation leaves it (wired by the player)
+    // the queue list, and where keyboard navigation leaves it (forwarded by QueuePanel)
     readonly property alias list: list
     property Item navigationParent: null
     property Item navigationUp: null
