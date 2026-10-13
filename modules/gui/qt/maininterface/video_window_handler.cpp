@@ -165,16 +165,22 @@ void VideoWindowHandler::setVideoSize(unsigned int w, unsigned int h, Qt::Window
                         // can do this because the compensation is not expected to change
                         // with the change in the window size:
                         const auto pslSize = playerSpecializationLoader->size().toSize(); // QML items have logical size too
-                        const auto windowSize = m_window->size();
+                        // Measure the scene, not the window: a previous autoresize may have
+                        // resized the window already while the scene still has the old size.
+                        const auto windowSize = contentItem->size().toSize();
 
-                        const auto dW = (windowSize.width() - pslSize.width());
-                        const auto dH = (windowSize.height() - pslSize.height());
-                        assert(dW >= 0 && dH >= 0); // psl can not be bigger than the window
+                        const QSize compensation(windowSize.width() - pslSize.width(),
+                                                 windowSize.height() - pslSize.height());
+                        // psl can not be bigger than the scene once laid out; when it is, the
+                        // layout is still catching up with a resize: keep the last known value
+                        if (compensation.width() >= 0 && compensation.height() >= 0)
+                            m_sizeCompensation = compensation;
 
-                        msg_Dbg( m_intf, "Autoresize interface window size compensation: %ix%i", dW, dH );
+                        msg_Dbg( m_intf, "Autoresize interface window size compensation: %ix%i",
+                                 m_sizeCompensation.width(), m_sizeCompensation.height() );
 
-                        w += dW;
-                        h += dH;
+                        w += m_sizeCompensation.width();
+                        h += m_sizeCompensation.height();
                     }
                 }
             }

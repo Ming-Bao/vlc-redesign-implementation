@@ -61,6 +61,7 @@ protected slots:
 private:
     qt_intf_t *m_intf = nullptr;
     QPointer<QWindow> m_window;
+    QSize m_sizeCompensation; // non-video area of the window, for autoresize
 
     bool m_videoFullScreen = false;
     bool m_autoresize = false;
