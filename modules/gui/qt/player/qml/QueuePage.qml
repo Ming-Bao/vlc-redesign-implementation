@@ -173,6 +173,8 @@ ColumnLayout {
             selected: ListView.isCurrentItem
 
             leading: Widgets.IconLabel {
+                id: handle
+
                 width: VLCStyle.dp(32, VLCStyle.scale)
                 height: VLCStyle.dp(32, VLCStyle.scale)
                 horizontalAlignment: Text.AlignHCenter
@@ -180,6 +182,32 @@ ColumnLayout {
                 text: VLCIcons.drag_handle
                 font.pixelSize: VLCStyle.icon_normal
                 color: queueRow._dark ? "#8F8F8F" : queueRow.colorContext.fg.secondary
+
+                // the row lands where the pointer is on release; the cursor tint shows the spot meanwhile
+                DragHandler {
+                    id: dragHandler
+
+                    target: null
+                    xAxis.enabled: false
+
+                    function targetIndex() {
+                        const p = list.mapFromItem(null, dragHandler.centroid.scenePosition)
+                        const i = list.indexAt(VLCStyle.dp(10, VLCStyle.scale), p.y + list.contentY)
+                        if (i >= 0)
+                            return i
+                        return p.y < 0 ? 0 : list.count - 1
+                    }
+
+                    onCentroidChanged: if (active) list.currentIndex = targetIndex()
+                    onActiveChanged: {
+                        if (active)
+                            return
+                        const to = targetIndex()
+                        if (to !== queueRow.index)
+                            queueModel.moveItemsPre([queueRow.index], to > queueRow.index ? to + 1 : to)
+                        list.currentIndex = to
+                    }
+                }
             }
 
             onClicked: list.currentIndex = index
