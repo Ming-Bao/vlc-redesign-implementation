@@ -74,6 +74,12 @@ PlayerPanel {
             T.Switch {
                 id: reverseSwitch
 
+                readonly property ColorContext colorContext: ColorContext {
+                    id: reverseSwitchTheme
+                    colorSet: ColorContext.Switch
+                    focused: reverseSwitch.visualFocus
+                }
+
                 implicitWidth: VLCStyle.dp(68, VLCStyle.scale)
                 implicitHeight: VLCStyle.dp(32, VLCStyle.scale)
                 checked: Player.rate < 0
@@ -89,7 +95,7 @@ PlayerPanel {
                     radius: VLCStyle.dp(6, VLCStyle.scale)
                     color: root._fieldColor
                     border.width: reverseSwitch.visualFocus ? VLCStyle.focus_border : 0
-                    border.color: root.colorContext.visualFocus
+                    border.color: reverseSwitchTheme.visualFocus
 
                     Rectangle {
                         x: reverseSwitch.checked ? parent.width - width - VLCStyle.dp(2, VLCStyle.scale)
@@ -131,7 +137,7 @@ PlayerPanel {
                     radius: VLCStyle.dp(6, VLCStyle.scale)
                     color: root._dark ? "#191919" : root.colorContext.bg.primary
                     border.width: visCombo.visualFocus ? VLCStyle.focus_border : VLCStyle.dp(4, VLCStyle.scale)
-                    border.color: visCombo.visualFocus ? root.colorContext.visualFocus : root._fieldColor
+                    border.color: visCombo.visualFocus ? visCombo.colorContext.visualFocus : root._fieldColor
                 }
 
                 contentItem: Widgets.LabelExt {
@@ -175,6 +181,12 @@ PlayerPanel {
         T.Slider {
             id: speedSlider
 
+            readonly property ColorContext colorContext: ColorContext {
+                id: speedSliderTheme
+                colorSet: ColorContext.Slider
+                focused: speedSlider.visualFocus
+            }
+
             Layout.fillWidth: true
             Layout.leftMargin: VLCStyle.dp(20, VLCStyle.scale)
             Layout.rightMargin: VLCStyle.dp(20, VLCStyle.scale)
@@ -191,7 +203,7 @@ PlayerPanel {
                 radius: VLCStyle.dp(6, VLCStyle.scale)
                 color: root._fieldColor
                 border.width: speedSlider.visualFocus ? VLCStyle.focus_border : 0
-                border.color: root.colorContext.visualFocus
+                border.color: speedSliderTheme.visualFocus
 
                 Rectangle {
                     width: speedSlider.handle.x + speedSlider.handle.width / 2

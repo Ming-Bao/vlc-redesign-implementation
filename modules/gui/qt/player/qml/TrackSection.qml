@@ -31,7 +31,6 @@ ColumnLayout {
     property var model: null
     property bool showNone: true
     property alias actions: actionRow.data
-    readonly property Item firstRow: noneRow.visible ? noneRow : (rows.count > 0 ? rows.itemAt(0) : null)
 
     readonly property ColorContext colorContext: ColorContext {
         id: theme
@@ -50,6 +49,16 @@ ColumnLayout {
             if (model.data(model.index(i, 0), Qt.CheckStateRole))
                 return true
         return false
+    }
+
+    // the row keyboard focus starts on: the ticked one, else the first
+    function focusRow() {
+        if (noneRow.visible && noneRow.ticked)
+            return noneRow
+        for (let i = 0; i < rows.count; ++i)
+            if (rows.itemAt(i).ticked)
+                return rows.itemAt(i)
+        return noneRow.visible ? noneRow : rows.itemAt(0)
     }
 
     // uncheck every checked row except `except`
@@ -84,6 +93,11 @@ ColumnLayout {
         Layout.rightMargin: VLCStyle.dp(20, VLCStyle.scale)
         implicitHeight: VLCStyle.dp(32, VLCStyle.scale)
         focusPolicy: Qt.StrongFocus
+
+        Keys.onUpPressed: nextItemInFocusChain(false)?.forceActiveFocus(Qt.BacktabFocusReason)
+        Keys.onDownPressed: nextItemInFocusChain(true)?.forceActiveFocus(Qt.TabFocusReason)
+        Keys.onReturnPressed: clicked()
+        Keys.onEnterPressed: clicked()
 
         Accessible.role: Accessible.RadioButton
         Accessible.checked: ticked

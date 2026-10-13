@@ -47,6 +47,19 @@ T.Popup {
     focus: true
     closePolicy: T.Popup.CloseOnEscape | T.Popup.CloseOnPressOutsideParent
 
+    // start keyboard focus on the current page's first track section, else the first tab
+    onOpened: {
+        const page = pageHolder.children[currentTab]
+        for (const c of (page?.children ?? [])) {
+            const row = c.focusRow?.()
+            if (row) {
+                row.forceActiveFocus(Qt.TabFocusReason)
+                return
+            }
+        }
+        page?.nextItemInFocusChain(true)?.forceActiveFocus(Qt.TabFocusReason)
+    }
+
     background: Rectangle {
         radius: VLCStyle.dp(10, VLCStyle.scale)
         color: root._dark ? Qt.rgba(0x0E / 255, 0x0E / 255, 0x0E / 255, 0.95) : theme.bg.primary
@@ -74,6 +87,8 @@ T.Popup {
                 spacing: 0
 
                 Repeater {
+                    id: tabRepeater
+
                     model: root.tabs
 
                     delegate: T.TabButton {
@@ -81,6 +96,12 @@ T.Popup {
 
                         required property int index
                         required property var modelData
+
+                        readonly property ColorContext colorContext: ColorContext {
+                            id: tabTheme
+                            colorSet: ColorContext.TabButton
+                            focused: tab.visualFocus
+                        }
 
                         readonly property color _fg: checked ? (root._dark ? "#8F8F8F" : theme.fg.primary)
                                                              : (root._dark ? "#6B6B6B" : theme.fg.secondary)
@@ -91,6 +112,13 @@ T.Popup {
                         checked: root.currentTab === index
                         text: modelData.text
                         onClicked: root.currentTab = index
+                        function _select(i) {
+                            root.currentTab = Math.max(0, Math.min(root.tabs.length - 1, i))
+                            tabRepeater.itemAt(root.currentTab).forceActiveFocus(Qt.TabFocusReason)
+                        }
+
+                        Keys.onLeftPressed: _select(root.currentTab - 1)
+                        Keys.onRightPressed: _select(root.currentTab + 1)
 
                         contentItem: Item {
                             Row {
@@ -114,6 +142,16 @@ T.Popup {
                         }
 
                         background: Item {
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: VLCStyle.dp(4, VLCStyle.scale)
+                                radius: VLCStyle.dp(4, VLCStyle.scale)
+                                color: "transparent"
+                                border.width: VLCStyle.focus_border
+                                border.color: tabTheme.visualFocus
+                                visible: tab.visualFocus
+                            }
+
                             Rectangle {
                                 anchors.bottom: parent.bottom
                                 anchors.horizontalCenter: parent.horizontalCenter
@@ -152,6 +190,12 @@ T.Popup {
         T.Button {
             id: footer
 
+            readonly property ColorContext colorContext: ColorContext {
+                id: footerTheme
+                colorSet: ColorContext.ButtonStandard
+                focused: footer.visualFocus
+            }
+
             Layout.fillWidth: true
             Layout.margins: VLCStyle.dp(20, VLCStyle.scale)
             implicitHeight: VLCStyle.dp(32, VLCStyle.scale)
@@ -163,7 +207,7 @@ T.Popup {
                 radius: VLCStyle.dp(4, VLCStyle.scale)
                 color: root._dark ? "#090909" : theme.bg.secondary
                 border.width: footer.visualFocus ? VLCStyle.focus_border : 0
-                border.color: theme.visualFocus
+                border.color: footerTheme.visualFocus
             }
 
             contentItem: Widgets.LabelExt {
