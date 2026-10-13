@@ -435,6 +435,8 @@ qt_plugin_sources = files(
     'playlist/playlist_model.cpp',
     'playlist/playlist_model.hpp',
     'playlist/playlist_model_p.hpp',
+    'playlist/play_session.cpp',
+    'playlist/play_session.hpp',
     'util/asynctask.hpp',
     'util/accessible_compat_attached.cpp',
     'util/accessible_compat_attached.hpp',

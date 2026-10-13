@@ -105,6 +105,7 @@ extern "C" char **environ;
 #include "util/vlctick.hpp"
 #include "util/shared_input_item.hpp"
 #include "util/model_recovery_agent.hpp"
+#include "playlist/play_session.hpp"
 #include "util/vlcqtmessagehandler.hpp"
 #include "network/networkmediamodel.hpp"
 #include "network/devicesourceprovider.hpp"
@@ -752,6 +753,10 @@ static void Close( vlc_object_t *p_this )
     auto p_intf = reinterpret_cast<qt_intf_t*>(intfThread->p_sys);
     if (p_intf)
     {
+        /* the cleanup below stops playback: remember where it was first */
+        if (!p_intf->b_isDialogProvider)
+            snapshotPlaySession(p_intf);
+
         //cleanup the interface
         QMetaObject::invokeMethod( p_intf->p_mi, [p_intf] () {
             ThreadCleanup(p_intf, CLEANUP_INTF_CLOSED);
@@ -1304,6 +1309,9 @@ static void *Thread( void *obj )
     p_intf->p_mainPlayerController = new PlayerController(p_intf);
     p_intf->p_mainPlaylistController = new vlc::playlist::PlaylistController(p_intf->p_playlist);
 
+    if( !p_intf->b_isDialogProvider )
+        QMetaObject::invokeMethod(&app, [p_intf]() { restorePlaySession(p_intf); }, Qt::QueuedConnection);
+
     std::optional playlistModelRecoveryAgent = std::unique_ptr<ModelRecoveryAgent>();
     QMetaObject::invokeMethod(&app, [&playlistModelRecoveryAgent, settings = QPointer(p_intf->mainSettings), mpc = QPointer(p_intf->p_mainPlaylistController)]() {
         if (Q_UNLIKELY(!playlistModelRecoveryAgent)) // std::optional is nullopt, reset() was already called
@@ -1480,6 +1488,8 @@ static void *Thread( void *obj )
 
     msg_Dbg( p_intf, "QApp exec() finished" );
 
+    if( !p_intf->b_isDialogProvider )
+        savePlaySession( p_intf );
     playlistModelRecoveryAgent.reset();
     return ThreadCleanup( p_intf, CLEANUP_APP_TERMINATED );
 }
