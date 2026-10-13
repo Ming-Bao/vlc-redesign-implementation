@@ -969,12 +969,13 @@ FocusScope {
 
         showNavigationToggle: false // the library side panel comes with the library redesign
 
+        // the chip is also the way back to the library, so media without a folder
+        // (streams, discs) get a generic label instead of no chip
         folderName: {
             const url = Player.url.toString()
-            if (!url.startsWith("file:"))
-                return ""
-            const parts = decodeURIComponent(url).split("/")
-            return (parts.length > 2) ? parts[parts.length - 2] : ""
+            const parts = url.startsWith("file:") ? decodeURIComponent(url).split("/") : []
+            const folder = (parts.length > 2) ? parts[parts.length - 2] : ""
+            return folder.length > 0 ? folder : qsTr("Library")
         }
 
         tintColor: rootPlayer._barColor

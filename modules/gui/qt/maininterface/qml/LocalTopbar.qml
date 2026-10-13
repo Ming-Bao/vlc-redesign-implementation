@@ -175,7 +175,7 @@ T.ToolBar {
 
                     Navigation.parentItem: navigationButtons
                     Navigation.leftItem: menuBtn
-                    Navigation.rightItem: playlistBtn
+                    Navigation.rightItem: folderChip
                 }
 
                 // Figma player title bar: divider + folder of the playing media
@@ -198,7 +198,10 @@ T.ToolBar {
                     color: theme.fg.secondary
                     font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
 
+                    Accessible.description: qsTr("Back to the library")
+
                     Navigation.parentItem: navigationButtons
+                    Navigation.leftItem: navigationVisibilty
                     Navigation.rightItem: playlistBtn
 
                     onClicked: root.folderClicked()
@@ -240,7 +243,7 @@ T.ToolBar {
 
                     Navigation.parentItem: playqueueButtonsTop
                     Navigation.rightItem: fullscreenBtn
-                    Navigation.leftItem: navigationVisibilty
+                    Navigation.leftItem: folderChip
 
                     onClicked:  root.togglePlayqueueVisibility()
                 }
