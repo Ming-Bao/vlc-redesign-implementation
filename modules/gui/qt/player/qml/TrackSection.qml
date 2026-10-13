@@ -30,6 +30,8 @@ ColumnLayout {
     property string title
     property var model: null
     property bool showNone: true
+    // draw the 1 px section divider above the title
+    property bool divider: false
     // for models that select simultaneously (video): uncheck the other rows on selection
     property bool singleChoice: false
     property alias actions: actionRow.data
@@ -101,12 +103,20 @@ ColumnLayout {
         Keys.onReturnPressed: clicked()
         Keys.onEnterPressed: clicked()
 
+        readonly property ColorContext colorContext: ColorContext {
+            id: rowTheme
+            colorSet: ColorContext.Item
+            focused: row.visualFocus
+        }
+
         Accessible.role: Accessible.RadioButton
         Accessible.checked: ticked
 
         background: Rectangle {
             radius: VLCStyle.dp(4, VLCStyle.scale)
-            color: (row.visualFocus || row.hovered) ? Qt.rgba(1, 1, 1, 0.05) : "transparent"
+            color: row.hovered ? Qt.rgba(1, 1, 1, 0.05) : "transparent"
+            border.width: row.visualFocus ? VLCStyle.focus_border : 0
+            border.color: rowTheme.visualFocus
         }
 
         contentItem: RowLayout {
@@ -128,6 +138,13 @@ ColumnLayout {
                 color: row.labelColor
             }
         }
+    }
+
+    Rectangle {
+        Layout.fillWidth: true
+        implicitHeight: 1
+        visible: root.divider
+        color: root._dark ? "#222222" : theme.border
     }
 
     RowLayout {
@@ -183,4 +200,6 @@ ColumnLayout {
             }
         }
     }
+
+    Item { implicitHeight: VLCStyle.dp(18, VLCStyle.scale) - root.spacing }
 }

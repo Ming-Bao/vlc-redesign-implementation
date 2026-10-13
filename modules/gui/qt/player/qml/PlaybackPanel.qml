@@ -82,12 +82,10 @@ PlayerPanel {
 
                 implicitWidth: VLCStyle.dp(68, VLCStyle.scale)
                 implicitHeight: VLCStyle.dp(32, VLCStyle.scale)
+                // a click never flips it by itself: it shows the real rate (most inputs refuse a negative one)
+                checkable: false
                 checked: Player.rate < 0
-                onToggled: {
-                    Player.reverse()
-                    // most inputs refuse a negative rate: keep showing the real state
-                    checked = Qt.binding(() => Player.rate < 0)
-                }
+                onClicked: Player.reverse()
                 Accessible.name: qsTr("Reverse")
 
                 indicator: Rectangle {
@@ -195,8 +193,9 @@ PlayerPanel {
             from: root._minRate
             to: root._maxRate
             stepSize: 0.05
+            snapMode: T.Slider.SnapAlways
             value: Math.abs(Player.rate)
-            onMoved: Player.rate = (Player.rate < 0 ? -value : value)
+            onMoved: Player.rate = (Player.rate < 0 ? -1 : 1) * Math.round(value * 100) / 100
             Accessible.name: qsTr("Playback speed")
 
             background: Rectangle {

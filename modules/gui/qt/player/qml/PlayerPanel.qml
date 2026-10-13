@@ -85,7 +85,7 @@ T.Popup {
 
     // start keyboard focus on the current page's selected track, else its first control; the
     // focus ring shows once the keyboard is used
-    onOpened: {
+    function focusPage() {
         const page = pageHolder.children[currentTab]
         for (const c of (page?.children ?? [])) {
             const row = c.focusRow?.()
@@ -96,6 +96,8 @@ T.Popup {
         }
         page?.nextItemInFocusChain(true)?.forceActiveFocus(Qt.OtherFocusReason)
     }
+
+    onOpened: focusPage()
 
     background: Rectangle {
         radius: VLCStyle.dp(10, VLCStyle.scale)
@@ -156,6 +158,9 @@ T.Popup {
                             tabRepeater.itemAt(root.currentTab).forceActiveFocus(Qt.TabFocusReason)
                         }
 
+                        // only the current tab is in the focus chain: Up from the first row lands on it
+                        focusPolicy: checked ? Qt.StrongFocus : Qt.ClickFocus
+                        Keys.onDownPressed: root.focusPage()
                         Keys.onLeftPressed: _select(root.currentTab - 1)
                         Keys.onRightPressed: _select(root.currentTab + 1)
 

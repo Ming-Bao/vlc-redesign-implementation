@@ -50,7 +50,7 @@ PlayerPanel {
         spacing: 0
 
         TrackSection { Layout.fillWidth: true; title: qsTr("Embedded Tracks"); model: Player.audioTracks }
-        TrackSection { Layout.fillWidth: true; title: qsTr("Output Device"); model: Player.audioDevices; showNone: false }
+        TrackSection { Layout.fillWidth: true; title: qsTr("Output Device"); divider: true; model: Player.audioDevices; showNone: false }
     }
 
     ColumnLayout {
@@ -61,6 +61,7 @@ PlayerPanel {
         TrackSection {
             Layout.fillWidth: true
             title: qsTr("External Tracks")
+            divider: true
 
             actions: Widgets.IconToolButton {
                 text: VLCIcons.add
