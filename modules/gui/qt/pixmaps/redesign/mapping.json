@@ -48,5 +48,8 @@
   "queue.svg": ["enqueue"],
   "speed.svg": ["faster"],
   "refresh.svg": ["ic_fluent_arrow_sync_24_regular"],
-  "folder.svg": ["folder"]
+  "folder.svg": ["folder"],
+  "queue-tab.svg": ["playqueue"],
+  "chapters.svg": ["chapters"],
+  "drag-handle.svg": ["drag_handle"]
 }

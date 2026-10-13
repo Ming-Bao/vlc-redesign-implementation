@@ -101,6 +101,9 @@
         {"key":"medialibrary_remove", "path": "./icons/ic_medialibrary_remove.svg"},
         {"key":"regex", "path": "./icons/regex.svg"},
         {"key":"ic_fluent_text_change_case_24_regular", "path": "./icons/ic_fluent_text_change_case_24_regular.svg"},
-        {"key":"folder", "path": "./redesign/folder.svg"}
+        {"key":"folder", "path": "./redesign/folder.svg"},
+        {"key":"playqueue", "path": "./redesign/queue-tab.svg"},
+        {"key":"chapters", "path": "./redesign/chapters.svg"},
+        {"key":"drag_handle", "path": "./redesign/drag-handle.svg"}
     ]
 }

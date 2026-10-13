@@ -111,6 +111,9 @@ class VLCIcons : public QObject {
     Q_PROPERTY(QChar regex MEMBER regex CONSTANT FINAL)
     Q_PROPERTY(QChar ic_fluent_text_change_case_24_regular MEMBER ic_fluent_text_change_case_24_regular CONSTANT FINAL)
     Q_PROPERTY(QChar folder MEMBER folder CONSTANT FINAL)
+    Q_PROPERTY(QChar playqueue MEMBER playqueue CONSTANT FINAL)
+    Q_PROPERTY(QChar chapters MEMBER chapters CONSTANT FINAL)
+    Q_PROPERTY(QChar drag_handle MEMBER drag_handle CONSTANT FINAL)
 
 
 public:
@@ -218,6 +221,9 @@ public:
     static constexpr inline QChar regex{ u'\ue05e' };
     static constexpr inline QChar ic_fluent_text_change_case_24_regular{ u'\ue05f' };
     static constexpr inline QChar folder{ u'\ue060' };
+    static constexpr inline QChar playqueue{ u'\ue061' };
+    static constexpr inline QChar chapters{ u'\ue062' };
+    static constexpr inline QChar drag_handle{ u'\ue063' };
 
 };
 
