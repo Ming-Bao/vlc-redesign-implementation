@@ -320,7 +320,7 @@ FocusScope {
                     anchors.right: parent.right
 
                     opacity: topBar.opacity
-                    visible: rootPlayer.displayFadeRectangles && !topBarAcrylicBg.visible
+                    visible: rootPlayer.displayFadeRectangles
 
                     gradient: Gradient {
                         GradientStop { position: 0; color: Qt.rgba(0, 0, 0, .8) }
@@ -929,7 +929,8 @@ FocusScope {
         }
     }
 
-    TopBar {
+    // Figma 247:445: the player keeps the window title bar, with the media folder as a chip
+    LocalTopbar {
         id: topBar
 
         anchors.top: parent.top
@@ -938,29 +939,21 @@ FocusScope {
 
         z: 1
 
-        topMargin: VLCStyle.applicationVerticalMargin
-        sideMargin: VLCStyle.applicationHorizontalMargin
-
-        textWidth: playlistVisibility.isPlaylistVisible
-                 ? rootPlayer.width - playlistpopup.width
-                 : rootPlayer.width
-
-        // NOTE: With pinned controls, the top controls are hidden when switching to
-        //       fullScreen. Except when resume is visible
-        visible: (MainCtx.pinVideoControls === false
-                  ||
-                  MainCtx.intfMainWindow.visibility !== Window.FullScreen
-                  ||
-                  resumeVisible)
-
         focus: true
-        title: Player.title
 
-        pinControls: MainCtx.pinVideoControls
+        showNavigationToggle: false // the library side panel comes with the library redesign
 
-        showCSD: MainCtx.clientSideDecoration && (MainCtx.intfMainWindow.visibility !== Window.FullScreen)
-        showToolbar: MainCtx.hasToolbarMenu && (MainCtx.intfMainWindow.visibility !== Window.FullScreen)
-        playlistVisible: playlistVisibility.isPlaylistVisible
+        folderName: {
+            const url = Player.url.toString()
+            if (!url.startsWith("file:"))
+                return ""
+            const parts = decodeURIComponent(url).split("/")
+            return (parts.length > 2) ? parts[parts.length - 2] : ""
+        }
+
+        tintColor: windowTheme.palette.isDark ? "#1B1B1B" : windowTheme.bg.primary
+
+        playqueueVisible: playlistVisibility.isPlaylistVisible
 
         plListView: {
             if (playlistpopup.active)
@@ -988,13 +981,9 @@ FocusScope {
             value: (playerToolbarVisibilityFSM.isVisible || rootPlayer._controlsUnderVideo) ? "visible" : "hidden"
         }
 
-        onTogglePlaylistVisibility: playlistVisibility.togglePlaylistVisibility()
+        onTogglePlayqueueVisibility: playlistVisibility.togglePlaylistVisibility()
 
-        onRequestLockUnlockAutoHide: (lock) => {
-            rootPlayer.lockUnlockAutoHide(lock)
-        }
-
-        onBackRequested: {
+        onFolderClicked: {
             if (MainCtx.hasEmbededVideo && !MainCtx.canShowVideoPIP) {
                MainPlaylistController.stop()
             }
@@ -1005,28 +994,9 @@ FocusScope {
             target: topBar
         }
 
-        // TODO: Make TopBar a Control and use background
-        Widgets.AcrylicBackground {
-            id: topBarAcrylicBg
-
-            z: -1
-
-            anchors.fill: parent
-
-            opacity: {
-                if (MainCtx.hasEmbededVideo && !MainCtx.pinVideoControls && !rootPlayer.displayFadeRectangles) {
-                    return 0.6
-                } else if (MainCtx.intfMainWindow.visibility === Window.FullScreen && MainCtx.hasEmbededVideo) {
-                    return MainCtx.pinOpacity
-                } else {
-                    return 1.0
-                }
-            }
-
-            tintColor: windowTheme.bg.primary
-
-            visible: MainCtx.pinVideoControls || (MainCtx.hasEmbededVideo && !rootPlayer.displayFadeRectangles)
-        }
+        // like the previous player top bar, start with the focus here (not on a control
+        // that may be rebuilt when the video output appears), without a keyboard reason
+        Component.onCompleted: Qt.callLater(() => topBar.forceActiveFocus(Qt.OtherFocusReason))
     }
 
     Loader {
@@ -1114,7 +1084,7 @@ FocusScope {
                     return VLCStyle.margin_normal
                 else
                     // NOTE: We increase the padding accordingly to avoid overlapping the TopBar.
-                    return topBar.reservedHeight
+                    return topBar.height
             }
             bottomPadding: 0
 

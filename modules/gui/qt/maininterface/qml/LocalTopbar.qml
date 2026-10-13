@@ -52,8 +52,19 @@ T.ToolBar {
 
     property alias navigationButton: navigationVisibilty
 
+    // name of the folder holding the playing media, shown as a chip (player only)
+    property string folderName: ""
+    property bool showNavigationToggle: true
+    property color tintColor: theme.bg.secondary
+
     signal toggleNavigationVisibility()
     signal togglePlayqueueVisibility()
+    signal folderClicked()
+
+    ///incomming signal to request all menu and popup to close
+    function forceUnlock() {
+        contextMenu.close()
+    }
 
     implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
                              implicitContentHeight + topPadding + bottomPadding)
@@ -68,7 +79,7 @@ T.ToolBar {
 
     background:  Widgets.AcrylicBackground {
         enabled: root.useAcrylic
-        tintColor: theme.bg.secondary
+        tintColor: root.tintColor
     }
 
     contentItem: Item {
@@ -114,7 +125,8 @@ T.ToolBar {
                 Widgets.IconToolButton {
                     id: menuBtn
 
-                    focus: true
+                    // initial focus when the navigation toggle is hidden (player)
+                    focus: !root.showNavigationToggle
 
                     visible: !MainCtx.hasToolbarMenu
                     font.pixelSize: VLCStyle.icon_banner
@@ -139,6 +151,9 @@ T.ToolBar {
                 Widgets.IconToolButton {
                     id: navigationVisibilty
 
+                    visible: root.showNavigationToggle
+                    focus: root.showNavigationToggle
+
                     text: VLCIcons.panel_left
                     description: qsTr("Show navigation menu")
 
@@ -153,6 +168,32 @@ T.ToolBar {
                     Navigation.parentItem: navigationButtons
                     Navigation.leftItem: menuBtn
                     Navigation.rightItem: playlistBtn
+                }
+
+                // Figma player title bar: divider + folder of the playing media
+                Rectangle {
+                    visible: folderChip.visible
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: VLCStyle.dp(1, VLCStyle.scale)
+                    height: VLCStyle.dp(20, VLCStyle.scale)
+                    color: theme.separator
+                }
+
+                Widgets.ButtonExt {
+                    id: folderChip
+
+                    visible: root.folderName.length > 0
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    iconTxt: VLCIcons.folder
+                    text: root.folderName
+                    color: theme.fg.secondary
+                    font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
+
+                    Navigation.parentItem: navigationButtons
+                    Navigation.rightItem: playlistBtn
+
+                    onClicked: root.folderClicked()
                 }
             }
         }
