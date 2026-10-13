@@ -31,5 +31,8 @@ PlayerPanel {
     modal: false
     dim: false
 
-    QueuePage { }
+    // the page, for the player to wire keyboard navigation into the list and out of it
+    readonly property alias page: queuePage
+
+    QueuePage { id: queuePage }
 }

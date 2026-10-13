@@ -991,7 +991,7 @@ FocusScope {
         Navigation.parentItem: rootPlayer
         Navigation.downItem: {
             if (playlistVisibility.isPlaylistVisible)
-                return playlistpopup.contentItem
+                return playlistpopup.page.list
             if (MainCtx.hasEmbededVideo)
                 return playerSpecializationLoader
             if (Player.isInteractive)
@@ -1079,7 +1079,7 @@ FocusScope {
         id: playlistpopup
 
         // the play queue state (button, hotkey, FSM) decides; the card follows it
-        readonly property bool shown: playlistVisibility.isPlaylistVisible && MainCtx.playqueuePanel.docked
+        readonly property bool shown: playlistVisibility.isPlaylistVisible
 
         parent: rootPlayer
         x: rootPlayer.width - width - VLCStyle.dp(20, VLCStyle.scale)
@@ -1092,7 +1092,17 @@ FocusScope {
         onShownChanged: shown ? open() : close()
         Component.onCompleted: if (shown) open()
         // Escape closes the card itself: keep the play queue state in step
-        onClosed: if (playlistVisibility.isPlaylistVisible) playlistVisibility.togglePlaylistVisibility()
+        // (only while the docked queue is still shown: undocking closes the card too)
+        onClosed: if (playlistVisibility.isPlaylistVisible && MainCtx.playqueuePanel.docked)
+                      playlistVisibility.togglePlaylistVisibility()
+
+        page.navigationParent: rootPlayer
+        page.navigationUp: topBar
+        page.navigationDown: Player.isInteractive ? toggleControlBarButton : controlBar
+        page.onNavigationCancel: {
+            playlistVisibility.togglePlaylistVisibility()
+            controlBar.forceActiveFocus()
+        }
     }
 
     Dialogs {
@@ -1170,7 +1180,7 @@ FocusScope {
         iconTxt: controlBar.state === "hidden" ? VLCIcons.expand_inverted : VLCIcons.expand
 
         Navigation.parentItem: rootPlayer
-        Navigation.upItem: playlistVisibility.isPlaylistVisible ? playlistpopup.contentItem : (MainCtx.hasEmbededVideo ? playerSpecializationLoader : topBar)
+        Navigation.upItem: playlistVisibility.isPlaylistVisible ? playlistpopup.page.list : (MainCtx.hasEmbededVideo ? playerSpecializationLoader : topBar)
         Navigation.downItem: controlBar
 
         onClicked:{
@@ -1227,7 +1237,7 @@ FocusScope {
         Navigation.parentItem: rootPlayer
         Navigation.upItem: {
             if (playlistVisibility.isPlaylistVisible)
-                return playlistpopup.contentItem
+                return playlistpopup.page.list
             if (Player.isInteractive)
                 return toggleControlBarButton
             if (!MainCtx.hasEmbededVideo)

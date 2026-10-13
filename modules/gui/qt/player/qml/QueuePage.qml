@@ -37,6 +37,13 @@ ColumnLayout {
     }
     readonly property bool _dark: theme.palette.isDark
 
+    // the queue list, and where keyboard navigation leaves it (wired by the player)
+    readonly property alias list: list
+    property Item navigationParent: null
+    property Item navigationUp: null
+    property Item navigationDown: null
+    signal navigationCancel()
+
     spacing: 0
 
     PlaylistListModel {
@@ -137,6 +144,18 @@ ColumnLayout {
         highlightMoveDuration: 0
         T.ScrollBar.vertical: Widgets.ScrollBarExt { }
 
+        Navigation.parentItem: root.navigationParent
+        Navigation.upItem: root.navigationUp
+        Navigation.downItem: root.navigationDown
+        Navigation.leftAction: () => root.navigationCancel()
+        Navigation.cancelAction: () => root.navigationCancel()
+
+        // navigating into the list puts the cursor on a row
+        onActiveFocusChanged: if (activeFocus) focusRow()
+
+        // the list moves its cursor first; keys it leaves (Up on the first row, Escape...) navigate out
+        Keys.priority: Keys.AfterItem
+        Keys.onPressed: (event) => Navigation.defaultKeyAction(event)
         Keys.onReturnPressed: MainPlaylistController.goTo(currentIndex, true)
         Keys.onEnterPressed: MainPlaylistController.goTo(currentIndex, true)
         Keys.onDeletePressed: removeCurrent()
