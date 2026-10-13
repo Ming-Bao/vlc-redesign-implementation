@@ -30,6 +30,8 @@ ColumnLayout {
     property string title
     property var model: null
     property bool showNone: true
+    // for models that select simultaneously (video): uncheck the other rows on selection
+    property bool singleChoice: false
     property alias actions: actionRow.data
 
     readonly property ColorContext colorContext: ColorContext {
@@ -175,8 +177,9 @@ ColumnLayout {
                 if (model.checked)
                     return
                 model.checked = true
-                // the video track model selects simultaneously; the Figma list is single-choice
-                root._uncheckAll(index)
+                // the Figma list is single-choice; exclusive models already drop the old track
+                if (root.singleChoice)
+                    root._uncheckAll(index)
             }
         }
     }

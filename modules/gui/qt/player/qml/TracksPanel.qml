@@ -43,7 +43,7 @@ PlayerPanel {
     ColumnLayout {
         spacing: 0
 
-        TrackSection { Layout.fillWidth: true; title: qsTr("Embedded Tracks"); model: Player.videoTracks }
+        TrackSection { Layout.fillWidth: true; title: qsTr("Embedded Tracks"); model: Player.videoTracks; singleChoice: true }
     }
 
     ColumnLayout {
