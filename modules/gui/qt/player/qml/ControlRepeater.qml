@@ -45,7 +45,10 @@ Repeater {
         // NOTE: We update the 'navigation chain' after removing the item.
         item.removeNavigation()
 
-        item.recoverFocus(index)
+        // only move the focus if the removed control had it; otherwise rebuilding
+        // the bar would pull the focus from wherever it is
+        if (item.activeFocus)
+            item.recoverFocus(index)
     }
 
     delegate: Loader {
