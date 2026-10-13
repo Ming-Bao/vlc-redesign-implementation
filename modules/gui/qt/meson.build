@@ -471,6 +471,8 @@ qt_plugin_sources = files(
     'util/locallistcacheloader.hpp',
     'util/navigation_history.cpp',
     'util/navigation_history.hpp',
+    'util/ui_font.cpp',
+    'util/ui_font.hpp',
     'util/item_key_event_filter.cpp',
     'util/item_key_event_filter.hpp',
     'util/flickable_scroll_handler.cpp',
@@ -1354,6 +1356,22 @@ if qt6_dep.found()
             ),
             'moc_headers': files(
                 'maininterface/navigationmodel.hpp'
+            ),
+            'suite': ['qt'],
+            'include_directories' : qt_include_dir,
+            'link_with': [libvlccore, libvlc],
+            'dependencies': [qt6_dep, qt_extra_deps, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
+            'name': 'test_qt_ui_font',
+            'sources': files(
+                'tests/test_ui_font.cpp',
+                'util/ui_font.hpp',
+                'util/ui_font.cpp'
+            ),
+            'moc_sources': files(
+                'tests/test_ui_font.cpp'
             ),
             'suite': ['qt'],
             'include_directories' : qt_include_dir,

@@ -327,6 +327,7 @@ libqt_plugin_la_SOURCES = \
 	util/locallistcacheloader.hpp \
 	util/locallistbasemodel.hpp \
 	util/navigation_history.cpp util/navigation_history.hpp \
+	util/ui_font.cpp util/ui_font.hpp \
 	util/item_key_event_filter.cpp \
 	util/item_key_event_filter.hpp \
 	util/flickable_scroll_handler.cpp \

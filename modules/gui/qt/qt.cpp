@@ -52,6 +52,7 @@ extern "C" char **environ;
 #endif
 
 #include <QApplication>
+#include <QFontDatabase>
 #include <QDate>
 #include <QMutex>
 #include <QtQuickControls2/QQuickStyle>
@@ -83,6 +84,7 @@ extern "C" char **environ;
 #endif
 
 #include "qt.hpp"
+#include "util/ui_font.hpp"
 
 #include "player/player_controller.hpp"    /* THEMIM destruction */
 #include "playlist/playlist_controller.hpp" /* THEMPL creation */
@@ -917,6 +919,17 @@ static void *Thread( void *obj )
         const auto translator = new Translator(&app);
         const auto ret = QCoreApplication::installTranslator(translator);
         assert(ret);
+    }
+
+    {
+        // Figma redesign: the interface uses Inter when it is installed
+        const QString family = vlc::preferredUiFontFamily(QFontDatabase::families());
+        if (!family.isEmpty())
+        {
+            QFont font = app.font();
+            font.setFamily(family);
+            app.setFont(font);
+        }
     }
 
     /* Ctrl+Q, or more specifically Command+Q on MacOS is going
