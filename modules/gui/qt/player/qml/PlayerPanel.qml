@@ -20,6 +20,7 @@ import QtQuick
 import QtQuick.Templates as T
 import QtQuick.Layouts
 
+import VLC.MainInterface
 import VLC.Style
 import VLC.Widgets as Widgets
 
@@ -35,6 +36,9 @@ T.Popup {
     // the card takes maximumHeight and each page fills it (for pages that scroll themselves, like the queue)
     property bool fillHeight: false
     default property alias pages: pageHolder.data
+    // the shown tab's button (pages go Up to it), and where Up from the tabs leaves the card
+    readonly property Item currentTabButton: tabRepeater.count, tabRepeater.itemAt(currentTab)
+    property Item tabsNavigationUp: null
 
     signal footerClicked()
 
@@ -161,6 +165,12 @@ T.Popup {
 
                         // only the current tab is in the focus chain: Up from the first row lands on it
                         focusPolicy: checked ? Qt.StrongFocus : Qt.ClickFocus
+                        Navigation.upItem: root.tabsNavigationUp
+                        Keys.onUpPressed: (event) => {
+                            event.accepted = !!root.tabsNavigationUp
+                            if (event.accepted)
+                                Navigation.defaultNavigationUp()
+                        }
                         Keys.onDownPressed: root.focusPage()
                         Keys.onLeftPressed: _select(root.currentTab - 1)
                         Keys.onRightPressed: _select(root.currentTab + 1)

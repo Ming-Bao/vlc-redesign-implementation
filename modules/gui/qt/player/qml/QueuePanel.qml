@@ -34,6 +34,7 @@ PlayerPanel {
     dim: false
     // opening does not take the focus: the player keeps its hotkeys while the card is up
     focus: false
+    tabsNavigationUp: navigationUp
 
     // where keyboard navigation leaves the card, forwarded to every page (wired by the player)
     property Item navigationParent: null
@@ -47,7 +48,7 @@ PlayerPanel {
     QueuePage {
         id: queuePage
         navigationParent: root.navigationParent
-        navigationUp: root.navigationUp
+        navigationUp: root.currentTabButton
         navigationDown: root.navigationDown
         onNavigationCancel: root.navigationCancel()
     }
@@ -55,7 +56,7 @@ PlayerPanel {
     BookmarksPage {
         id: bookmarksPage
         navigationParent: root.navigationParent
-        navigationUp: root.navigationUp
+        navigationUp: root.currentTabButton
         navigationDown: root.navigationDown
         onNavigationCancel: root.navigationCancel()
     }
@@ -63,7 +64,7 @@ PlayerPanel {
     ChaptersPage {
         id: chaptersPage
         navigationParent: root.navigationParent
-        navigationUp: root.navigationUp
+        navigationUp: root.currentTabButton
         navigationDown: root.navigationDown
         onNavigationCancel: root.navigationCancel()
     }
