@@ -834,7 +834,7 @@ void PlayerEffects::resetToDefaults(const QStringList& names, const QStringList&
 - `SettingToggle { checked: bool; signal requested(bool on) }`: never flips itself; the owner binds `checked`.
 - `SettingSlider { label; valueText; from; to; stepSize; value; ticks: int = 0; defaultValue; signal moved(real v) }`: the header row (label + valueText) plus the track. Double-click resets: `moved(defaultValue)`. `showHeader: bool = true`.
 - `SettingCombo { model; textRole; currentIndex; fullWidth: bool = false; signal activated(int index) }`.
-- `SettingField { text; suffix; validator; signal committed(string text) }`: emits on Enter or focus-out and reverts to `text` on Escape.
+- `SettingField { committedText; suffix; validator; signal committed(string text) }`: the owner binds the live value to `committedText` (never `text`); it emits `committed` on Enter or focus-out and reverts to `committedText` on Escape.
 - `SettingSegments { model: [string]; currentIndex; signal activated(int index) }`.
 - `EffectAccordion { expanded: bool = false; default property alias content }`.
 - `SettingsPage`: a Flickable page. `default property alias content` is a ColumnLayout; it scrolls the active focus item into view and has a 16 dp bottom spacer.
