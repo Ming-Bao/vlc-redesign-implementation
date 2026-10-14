@@ -16,7 +16,163 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 import QtQuick
+import QtQuick.Layouts
+import VLC.Style
+import VLC.Player
+import VLC.Widgets as Widgets
 
+// Figma subtitle settings, 763:1986
 SettingsPage {
-    SettingSection { title: qsTr("Defaults"); divider: false }
+    id: root
+
+    // a small hint under a row (settings that the text renderer only reads when it opens)
+    component Note: Widgets.LabelExt {
+        readonly property ColorContext colorContext: ColorContext { id: noteTheme; colorSet: ColorContext.Window }
+        readonly property SettingsStyle _s: SettingsStyle { theme: noteTheme }
+        Layout.fillWidth: true
+        Layout.leftMargin: VLCStyle.dp(4, VLCStyle.scale)
+        font.pixelSize: VLCStyle.dp(12, VLCStyle.scale)
+        color: _s.label
+    }
+
+    component ColorField: SettingRow {
+        id: cf
+        required property string colorVar
+        SettingField {
+            validator: RegularExpressionValidator { regularExpression: /#?[0-9A-Fa-f]{6}/ }
+            committedText: { void(Effects.revision); return "#" + Number(Effects.configValue(cf.colorVar)).toString(16).toUpperCase().padStart(6, "0") }
+            onCommitted: (t) => Effects.setConfigValue(cf.colorVar, t.startsWith("#") ? t : "#" + t)
+            Rectangle {
+                anchors.right: parent.right; anchors.rightMargin: VLCStyle.dp(7, VLCStyle.scale)
+                anchors.verticalCenter: parent.verticalCenter
+                width: VLCStyle.dp(22, VLCStyle.scale); height: width; radius: VLCStyle.dp(4, VLCStyle.scale)
+                color: parent.committedText
+                border.width: 1; border.color: "#404040"
+            }
+        }
+    }
+
+    // the duration factor lives in the subsdelay filter: on while the factor is above zero
+    function setDuration(v) {
+        Effects.setValue("subsdelay-factor", v)
+        if ((v > 0) !== Effects.filterEnabled("subsdelay")) Effects.setFilterEnabled("subsdelay", v > 0)
+    }
+
+    SettingSection {
+        title: qsTr("Defaults")
+        divider: false
+        SettingRow {
+            label: qsTr("Subtitle Track")
+            SettingField {
+                validator: IntValidator { bottom: -1; top: 99 }
+                committedText: { void(Effects.revision); const n = Number(Effects.configValue("sub-track")); return n < 0 ? qsTr("Auto") : String(n + 1) }
+                onCommitted: (t) => Effects.setConfigValue("sub-track", t === "" || t === qsTr("Auto") ? -1 : Math.max(0, parseInt(t) - 1))
+            }
+        }
+        SettingRow {
+            label: qsTr("Subtitle Language")
+            SettingField {
+                committedText: { void(Effects.revision); return String(Effects.configValue("sub-language")) }
+                onCommitted: (t) => Effects.setConfigValue("sub-language", t)
+            }
+        }
+    }
+
+    SettingSection {
+        title: qsTr("Synchronization")
+        SettingRow {
+            label: qsTr("Subtitle Track Delay")
+            SettingField {
+                suffix: " s"
+                validator: DoubleValidator { notation: DoubleValidator.StandardNotation; decimals: 3 }
+                committedText: (Player.subtitleDelayMS / 1000).toFixed(3)
+                onCommitted: (t) => { const s = parseFloat(t); if (!isNaN(s)) Player.subtitleDelayMS = Math.round(Math.max(-10, Math.min(10, s)) * 1000) }
+            }
+        }
+        DelaySlider { valueMs: Player.subtitleDelayMS; onMovedMs: (ms) => Player.subtitleDelayMS = ms }
+
+        SettingRow {
+            label: qsTr("Subtitle Speed")
+            SettingField {
+                suffix: qsTr(" fps")
+                validator: DoubleValidator { bottom: 1; top: 100; decimals: 3 }
+                committedText: Player.subtitleFPS.toFixed(3)
+                onCommitted: (t) => { const v = parseFloat(t); if (!isNaN(v)) Player.subtitleFPS = Math.max(1, Math.min(100, v)) }
+            }
+        }
+        SettingSlider {
+            showHeader: false
+            from: 1; to: 100; stepSize: 0.2; defaultValue: 1
+            value: Player.subtitleFPS
+            onMoved: (v) => Player.subtitleFPS = v
+        }
+
+        SettingRow {
+            label: qsTr("Subtitle Duration Factor")
+            SettingField {
+                validator: DoubleValidator { bottom: 0; top: 20; decimals: 3 }
+                committedText: { void(Effects.revision); return Effects.filterEnabled("subsdelay") ? Number(Effects.value("subsdelay-factor")).toFixed(3) : "0.000" }
+                onCommitted: (t) => { const v = parseFloat(t); if (!isNaN(v)) root.setDuration(Math.max(0, Math.min(20, v))) }
+            }
+        }
+        SettingSlider {
+            showHeader: false
+            from: 0; to: 20; stepSize: 0.2; defaultValue: 0
+            value: { void(Effects.revision); return Effects.filterEnabled("subsdelay") ? Number(Effects.value("subsdelay-factor")) : 0 }
+            onMoved: (v) => root.setDuration(v)
+        }
+    }
+
+    SettingSection {
+        title: qsTr("Appearance")
+
+        SettingRow {
+            label: qsTr("Subtitle Font")
+            SettingField {
+                committedText: { void(Effects.revision); return String(Effects.configValue("freetype-font")) }
+                onCommitted: (t) => Effects.setConfigValue("freetype-font", t)
+            }
+        }
+        Note { text: qsTr("Applies to the next video") }
+        ColorField { label: qsTr("Text Color"); colorVar: "freetype-color" }
+        ColorField { label: qsTr("Outline Color"); colorVar: "freetype-outline-color" }
+        Note { text: qsTr("Applies to the next video") }
+        SettingRow {
+            label: qsTr("Subtitle Offset")
+            SettingField {
+                suffix: qsTr("px")
+                validator: IntValidator { bottom: 0; top: 2000 }
+                committedText: { void(Effects.revision); return String(Effects.value("sub-margin")) }
+                onCommitted: (t) => Effects.setValue("sub-margin", parseInt(t) || 0)
+            }
+        }
+
+        SettingSlider {
+            readonly property var stops: [50, 75, 100, 125, 150, 200]
+            readonly property var names: [qsTr("Smaller"), qsTr("Small"), qsTr("Auto"), qsTr("Large"), qsTr("Larger"), qsTr("Largest")]
+            label: qsTr("Font Size")
+            from: 0; to: 5; stepSize: 1; defaultValue: 2; ticks: 6
+            value: { void(Effects.revision); const s = Effects.subtitleTextScale(); let best = 0
+                     for (let i = 1; i < stops.length; ++i) if (Math.abs(stops[i] - s) < Math.abs(stops[best] - s)) best = i
+                     return best }
+            valueText: names[Math.round(value)]
+            onMoved: (v) => Effects.setSubtitleTextScale(stops[Math.round(v)])
+        }
+        SettingSlider {
+            readonly property var stops: [0, 2, 4, 6]
+            readonly property var names: [qsTr("None"), qsTr("Thin"), qsTr("Normal"), qsTr("Thick")]
+            label: qsTr("Outline Thickness")
+            from: 0; to: 3; stepSize: 1; defaultValue: 2; ticks: 4
+            value: { void(Effects.revision); return Math.max(0, stops.indexOf(Number(Effects.configValue("freetype-outline-thickness")))) }
+            valueText: names[Math.round(value)]
+            onMoved: (v) => Effects.setConfigValue("freetype-outline-thickness", stops[Math.round(v)])
+        }
+        SettingSlider {
+            label: qsTr("Background Opacity")
+            from: 0; to: 100; stepSize: 10; defaultValue: 0; ticks: 11
+            value: { void(Effects.revision); return Math.round(Number(Effects.configValue("freetype-background-opacity")) / 2.55) }
+            valueText: qsTr("%1 %").arg(Math.round(value))
+            onMoved: (v) => Effects.setConfigValue("freetype-background-opacity", Math.round(v * 2.55))
+        }
+    }
 }
