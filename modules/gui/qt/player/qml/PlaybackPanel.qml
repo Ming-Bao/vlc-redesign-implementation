@@ -43,6 +43,8 @@ PlayerPanel {
         { text: qsTr("Subtitles"), icon: VLCIcons.audiosub }
     ]
 
+    onClosed: Player.rendererManager.StopScan()
+
     footerFlat: true
     footerIcon: VLCIcons.settings
     footerText: qsTr("Open Advanced Settings")
