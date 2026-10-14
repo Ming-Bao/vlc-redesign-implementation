@@ -30,6 +30,7 @@ Widgets.ComboBoxExt {
     Layout.alignment: Qt.AlignTop
     Layout.preferredHeight: VLCStyle.dp(48, VLCStyle.scale)
     color: _s.value
+    opacity: enabled ? 1.0 : _s.disabledOpacity
 
     background: Rectangle {
         radius: VLCStyle.dp(6, VLCStyle.scale)

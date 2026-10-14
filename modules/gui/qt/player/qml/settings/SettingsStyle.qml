@@ -35,5 +35,7 @@ QtObject {
     readonly property color knobOff:   dark ? "#404040" : theme.fg.secondary
     readonly property color divider:   dark ? "#222222" : theme.separator
     readonly property color box:       dark ? "#1B1B1B" : theme.bg.secondary
+    // controls dim to this when !enabled (e.g. vout-backed controls without a video output)
+    readonly property real disabledOpacity: 0.4
     readonly property color tick:      dark ? "#2A2A2A" : theme.separator
 }

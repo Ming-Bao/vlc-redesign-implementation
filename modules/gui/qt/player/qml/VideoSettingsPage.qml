@@ -282,7 +282,6 @@ SettingsPage {
         SettingRow { label: qsTr("Crop") }
         EffectAccordion {
             enabled: Effects.hasVideo
-            opacity: enabled ? 1.0 : 0.4   // greyed without a video output
             GridLayout {
                 id: cropGrid
                 Layout.fillWidth: true
@@ -297,16 +296,22 @@ SettingsPage {
                 CropField { side: "bottom"; title: qsTr("Bottom"); linked: cropGrid.linkV }
                 Widgets.IconToolButton {
                     text: VLCIcons.link
-                    checked: cropGrid.linkV; checkable: true
-                    onClicked: cropGrid.linkV = !cropGrid.linkV
+                    checked: cropGrid.linkV
+                    onClicked: {
+                        cropGrid.linkV = !cropGrid.linkV
+                        if (cropGrid.linkV) Effects.setVoutCrop("bottom", Effects.voutCrop("top"))
+                    }
                     description: qsTr("Link top and bottom")
                 }
                 CropField { side: "left"; title: qsTr("Left"); linked: cropGrid.linkH }
                 CropField { side: "right"; title: qsTr("Right"); linked: cropGrid.linkH }
                 Widgets.IconToolButton {
                     text: VLCIcons.link
-                    checked: cropGrid.linkH; checkable: true
-                    onClicked: cropGrid.linkH = !cropGrid.linkH
+                    checked: cropGrid.linkH
+                    onClicked: {
+                        cropGrid.linkH = !cropGrid.linkH
+                        if (cropGrid.linkH) Effects.setVoutCrop("right", Effects.voutCrop("left"))
+                    }
                     description: qsTr("Link left and right")
                 }
             }

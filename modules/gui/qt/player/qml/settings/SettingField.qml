@@ -33,6 +33,7 @@ T.TextField {
     leftPadding: VLCStyle.dp(12, VLCStyle.scale)
     rightPadding: VLCStyle.dp(18, VLCStyle.scale)
     verticalAlignment: TextInput.AlignVCenter
+    opacity: enabled ? 1.0 : _s.disabledOpacity
     font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
     color: _s.value
     selectByMouse: true

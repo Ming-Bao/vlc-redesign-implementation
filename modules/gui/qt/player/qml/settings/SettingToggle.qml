@@ -30,6 +30,7 @@ T.Switch {
     implicitHeight: VLCStyle.dp(32, VLCStyle.scale)
     // the owner binds `checked` to the real state; a click only asks for the change
     checkable: false
+    opacity: enabled ? 1.0 : _s.disabledOpacity
     onClicked: requested(!checked)
 
     indicator: Rectangle {

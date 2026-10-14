@@ -33,6 +33,7 @@ Rectangle {
     implicitHeight: col.implicitHeight
     radius: VLCStyle.dp(6, VLCStyle.scale)
     color: expanded ? _s.box : _s.field
+    opacity: enabled ? 1.0 : _s.disabledOpacity
 
     ColumnLayout {
         id: col

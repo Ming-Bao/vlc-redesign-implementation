@@ -35,13 +35,16 @@ PlayerEffects::PlayerEffects(qt_intf_t* intf, PlayerController* player, QObject*
     : QObject(parent), m_intf(intf), m_player(player)
 {
     connect(player, &PlayerController::voutListChanged, this, &PlayerEffects::outputsChanged);
+    connect(player, &PlayerController::hasVideoOutputChanged, this, &PlayerEffects::outputsChanged);
     connect(player, &PlayerController::inputChanged, this, &PlayerEffects::outputsChanged);
     connect(this, &PlayerEffects::outputsChanged, this, &PlayerEffects::touch);
 }
 
 void PlayerEffects::touch() { ++m_revision; emit changed(); }
 
-bool PlayerEffects::hasVideo() const { return !m_player->getVouts().isEmpty(); }
+// the player keeps a vout object alive without any video (audio-only, or video disabled), so the vout list is
+// not a test for video: use the controller's own flag, which counts only vouts that are really showing video
+bool PlayerEffects::hasVideo() const { return m_player->hasVideoOutput(); }
 bool PlayerEffects::hasAudio() const { return m_player->getAout() != nullptr; }
 
 QStringList PlayerEffects::equalizerPresets() const
