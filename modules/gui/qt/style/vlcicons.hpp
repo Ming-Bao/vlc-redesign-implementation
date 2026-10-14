@@ -114,6 +114,7 @@ class VLCIcons : public QObject {
     Q_PROPERTY(QChar playqueue MEMBER playqueue CONSTANT FINAL)
     Q_PROPERTY(QChar chapters MEMBER chapters CONSTANT FINAL)
     Q_PROPERTY(QChar drag_handle MEMBER drag_handle CONSTANT FINAL)
+    Q_PROPERTY(QChar link MEMBER link CONSTANT FINAL)
 
 
 public:
@@ -224,6 +225,7 @@ public:
     static constexpr inline QChar playqueue{ u'\ue061' };
     static constexpr inline QChar chapters{ u'\ue062' };
     static constexpr inline QChar drag_handle{ u'\ue063' };
+    static constexpr inline QChar link{ u'\ue064' };
 
 };
 

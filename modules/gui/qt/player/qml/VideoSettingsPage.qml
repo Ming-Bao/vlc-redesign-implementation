@@ -18,6 +18,7 @@
 import QtQuick
 import QtQuick.Layouts
 import VLC.Style
+import VLC.Widgets as Widgets
 import VLC.Player
 
 // Figma video settings, 498:2965
@@ -30,6 +31,93 @@ SettingsPage {
     Connections { target: Player.zoom; function onDataChanged() { root._modelTick++ } function onModelReset() { root._modelTick++ } }
     Connections { target: Player.aspectRatio; function onDataChanged() { root._modelTick++ } function onModelReset() { root._modelTick++ } }
     Connections { target: Player.crop; function onDataChanged() { root._modelTick++ } function onModelReset() { root._modelTick++ } }
+
+    // [label, var, module, from, to, step, default, ticks, display(v) -> string]
+    readonly property var essential: [
+        [qsTr("Hue"),         "hue",             "adjust",  -180, 180, 1,    0,    0, (v) => v.toFixed(0) + "\u00B0"],
+        [qsTr("Brightness"),  "brightness",      "adjust",  0,    2,   0.01, 1,    0, (v) => v.toFixed(2)],
+        [qsTr("Contrast"),    "contrast",        "adjust",  0,    2,   0.01, 1,    0, (v) => v.toFixed(2)],
+        [qsTr("Saturation"),  "saturation",      "adjust",  0,    3,   0.01, 1,    3, (v) => v.toFixed(2)],
+        [qsTr("Gamma"),       "gamma",           "adjust",  0.01, 10,  0.01, 1,    10, (v) => v.toFixed(2)],
+        [qsTr("Sharpen Sigma"), "sharpen-sigma", "sharpen", 0,    2,   0.01, 0.05, 5, (v) => v.toFixed(2)],
+        [qsTr("Banding Removal Radius"), "gradfun-radius", "gradfun", 4, 32, 1, 16, 8, (v) => v.toFixed(0)],
+        [qsTr("Film Grain Variance"), "grain-variance", "grain", 0, 10, 0.1, 2, 10, (v) => v.toFixed(1)],
+    ]
+
+    // the current value of a spec row; a var that does not exist yet (filter off) counts as its default
+    function specValue(spec) {
+        const v = Effects.value(spec[1])
+        return (v === undefined || v === null || v === "" || isNaN(Number(v))) ? spec[6] : Number(v)
+    }
+
+    // a value-driven filter is on while any of its values differs from its default
+    function setDriven(specs, idx, v) {
+        const s = specs[idx]
+        Effects.setValue(s[1], v)
+        const on = specs.some((o) => o[2] === s[2] && Math.abs(specValue(o) - o[6]) > o[5] / 2)
+        if (on !== Effects.filterEnabled(s[2]))
+            Effects.setFilterEnabled(s[2], on)
+    }
+
+    component CropField: SettingField {
+        required property string side
+        required property string title
+        required property bool linked
+        Layout.fillWidth: true
+        implicitWidth: VLCStyle.dp(141, VLCStyle.scale)
+        implicitHeight: VLCStyle.dp(33, VLCStyle.scale)
+        leftPadding: VLCStyle.dp(72, VLCStyle.scale)
+        suffix: qsTr(" px")
+        validator: IntValidator { bottom: 0; top: 4096 }
+        committedText: { void(Effects.revision); return String(Effects.voutCrop(side)) }
+        onCommitted: (t) => {
+            const px = parseInt(t) || 0
+            Effects.setVoutCrop(side, px)
+            if (linked)
+                Effects.setVoutCrop({ top: "bottom", bottom: "top", left: "right", right: "left" }[side], px)
+        }
+        Widgets.LabelExt {
+            x: VLCStyle.dp(12, VLCStyle.scale); anchors.verticalCenter: parent.verticalCenter
+            text: parent.title; font.pixelSize: VLCStyle.dp(14, VLCStyle.scale); color: parent._s.label
+        }
+    }
+
+    component Divider: Rectangle {
+        readonly property ColorContext colorContext: ColorContext { id: dTheme; colorSet: ColorContext.Window }
+        readonly property SettingsStyle _s: SettingsStyle { theme: dTheme }
+        Layout.fillWidth: true
+        implicitHeight: 1
+        color: _s.divider
+    }
+
+    component ColorRow: SettingRow {
+        required property string module
+        required property string colorVar
+        SettingField {
+            implicitWidth: VLCStyle.dp(116, VLCStyle.scale)
+            validator: RegularExpressionValidator { regularExpression: /#?[0-9A-Fa-f]{6}/ }
+            committedText: { void(Effects.revision); return "#" + Number(Effects.value(parent.colorVar)).toString(16).toUpperCase().padStart(6, "0") }
+            onCommitted: (t) => Effects.setValue(parent.colorVar, t.startsWith("#") ? t : "#" + t)
+            Rectangle {   // swatch
+                anchors.right: parent.right; anchors.rightMargin: VLCStyle.dp(6, VLCStyle.scale)
+                anchors.verticalCenter: parent.verticalCenter
+                width: VLCStyle.dp(22, VLCStyle.scale); height: width; radius: VLCStyle.dp(4, VLCStyle.scale)
+                color: parent.committedText
+            }
+        }
+        SettingToggle {
+            checked: { void(Effects.revision); return Effects.filterEnabled(parent.module) }
+            onRequested: (on) => Effects.setFilterEnabled(parent.module, on)
+        }
+    }
+
+    component ModuleToggle: SettingRow {
+        required property string module
+        SettingToggle {
+            checked: { void(Effects.revision); return Effects.filterEnabled(parent.module) }
+            onRequested: (on) => Effects.setFilterEnabled(parent.module, on)
+        }
+    }
 
     function checkedRow(model) {
         void(Effects.revision)
@@ -163,6 +251,124 @@ SettingsPage {
                     function onDataChanged() { renderCombo.rebuild() }
                 }
                 Component.onCompleted: rebuild()
+            }
+        }
+    }
+
+    SettingSection {
+        title: qsTr("Filters")
+
+        SettingRow { label: qsTr("Essential") }
+        EffectAccordion {
+            Repeater {
+                model: root.essential
+                SettingSlider {
+                    required property var modelData
+                    required property int index
+                    label: modelData[0]
+                    valueText: ""
+                    Accessible.description: modelData[8](value)
+                    from: modelData[3]; to: modelData[4]; stepSize: modelData[5]
+                    defaultValue: modelData[6]; ticks: modelData[7]
+                    value: { void(Effects.revision); return root.specValue(modelData) }
+                    onMoved: (v) => root.setDriven(root.essential, index, v)
+                }
+            }
+        }
+    }
+
+    SettingSection {
+        title: ""   // Figma: sub-blocks are separated by a divider and a 14 px label, not a new title
+        SettingRow { label: qsTr("Crop") }
+        EffectAccordion {
+            enabled: Effects.hasVideo
+            opacity: enabled ? 1.0 : 0.4   // greyed without a video output
+            GridLayout {
+                id: cropGrid
+                Layout.fillWidth: true
+                Layout.topMargin: VLCStyle.dp(6, VLCStyle.scale)
+                columns: 3
+                columnSpacing: VLCStyle.dp(8, VLCStyle.scale)
+                rowSpacing: VLCStyle.dp(16, VLCStyle.scale)
+                property bool linkV: false
+                property bool linkH: false
+
+                CropField { side: "top"; title: qsTr("Top"); linked: cropGrid.linkV }
+                CropField { side: "bottom"; title: qsTr("Bottom"); linked: cropGrid.linkV }
+                Widgets.IconToolButton {
+                    text: VLCIcons.link
+                    checked: cropGrid.linkV; checkable: true
+                    onClicked: cropGrid.linkV = !cropGrid.linkV
+                    description: qsTr("Link top and bottom")
+                }
+                CropField { side: "left"; title: qsTr("Left"); linked: cropGrid.linkH }
+                CropField { side: "right"; title: qsTr("Right"); linked: cropGrid.linkH }
+                Widgets.IconToolButton {
+                    text: VLCIcons.link
+                    checked: cropGrid.linkH; checkable: true
+                    onClicked: cropGrid.linkH = !cropGrid.linkH
+                    description: qsTr("Link left and right")
+                }
+            }
+        }
+    }
+
+    SettingSection {
+        title: ""
+        SettingRow { label: qsTr("Colors") }
+        EffectAccordion {
+            ColorRow { label: qsTr("Color Extraction"); module: "extract"; colorVar: "extract-component" }
+            Divider { }
+            ColorRow { label: qsTr("Color Threshold"); module: "colorthres"; colorVar: "colorthres-color" }
+            SettingSlider {
+                label: qsTr("Saturation"); valueText: ""
+                from: 0; to: 255; stepSize: 1; defaultValue: 20
+                value: { void(Effects.revision); return Number(Effects.value("colorthres-saturationthres")) }
+                onMoved: (v) => Effects.setValue("colorthres-saturationthres", Math.round(v))
+            }
+            SettingSlider {
+                label: qsTr("Similarity"); valueText: ""
+                from: 0; to: 255; stepSize: 1; defaultValue: 15
+                value: { void(Effects.revision); return Number(Effects.value("colorthres-similaritythres")) }
+                onMoved: (v) => Effects.setValue("colorthres-similaritythres", Math.round(v))
+            }
+            Divider { }
+            ModuleToggle { label: qsTr("Negate Colors"); module: "invert" }
+            Divider { }
+            ModuleToggle { label: qsTr("Posterize"); module: "posterize" }
+            Divider { }
+            ModuleToggle { label: qsTr("Gradient"); module: "gradient" }
+            SettingCombo {
+                fullWidth: true
+                readonly property var modes: ["gradient", "edge", "hough"]
+                model: [qsTr("Gradient"), qsTr("Edge"), qsTr("Hough")]
+                currentIndex: { void(Effects.revision); return Math.max(0, modes.indexOf(String(Effects.value("gradient-mode")))) }
+                onActivated: (i) => Effects.setValue("gradient-mode", modes[i])
+            }
+            SettingRow {
+                label: qsTr("Color")
+                SettingToggle {
+                    // gradient-type is obsolete since 4.0.0: the option is the boolean gradient-color
+                    checked: { void(Effects.revision); return Boolean(Effects.value("gradient-color")) }
+                    onRequested: (on) => Effects.setValue("gradient-color", on)
+                }
+            }
+            SettingRow {
+                label: qsTr("Cartoon")
+                SettingToggle {
+                    checked: { void(Effects.revision); return Boolean(Effects.value("gradient-cartoon")) }
+                    onRequested: (on) => Effects.setValue("gradient-cartoon", on)
+                }
+            }
+            Divider { }
+            SettingSlider {
+                label: qsTr("Sepia Intensity"); valueText: ""
+                from: 0; to: 255; stepSize: 1; defaultValue: 0; ticks: 3
+                value: { void(Effects.revision); return Effects.filterEnabled("sepia") ? Number(Effects.value("sepia-intensity")) : 0 }
+                onMoved: (v) => {
+                    Effects.setValue("sepia-intensity", Math.round(v))
+                    if ((v > 0) !== Effects.filterEnabled("sepia")) Effects.setFilterEnabled("sepia", v > 0)
+                }
             }
         }
     }

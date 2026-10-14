@@ -35,6 +35,7 @@ ColumnLayout {
     Rectangle { visible: root.divider; Layout.fillWidth: true; implicitHeight: 1; color: root._s.divider }
     Widgets.LabelExt {
         id: titleLabel
+        visible: text.length > 0
         Layout.leftMargin: VLCStyle.dp(24, VLCStyle.scale)
         Layout.topMargin: VLCStyle.dp(20, VLCStyle.scale)
         font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
