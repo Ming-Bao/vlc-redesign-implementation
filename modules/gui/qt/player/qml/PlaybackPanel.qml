@@ -43,7 +43,85 @@ PlayerPanel {
         { text: qsTr("Subtitles"), icon: VLCIcons.audiosub }
     ]
 
+    readonly property var pageHolderPages: [null, videoPage, audioPage, subtitlePage]
+
     onClosed: Player.rendererManager.StopScan()
+
+    footerHeader: T.Button {
+        id: presetBtn
+
+        readonly property SettingsStyle _s: SettingsStyle { theme: root.colorContext }
+
+        visible: root.currentTab > 0
+        Layout.fillWidth: true
+        implicitHeight: VLCStyle.dp(42, VLCStyle.scale)
+        padding: VLCStyle.dp(2, VLCStyle.scale)
+        text: qsTr("Default Preset")
+        onClicked: presetMenu.open()
+
+        background: Rectangle {
+            radius: VLCStyle.dp(6, VLCStyle.scale)
+            color: presetBtn._s.field
+            border.width: presetBtn.visualFocus ? VLCStyle.focus_border : 0
+            border.color: root.colorContext.visualFocus
+        }
+
+        contentItem: RowLayout {
+            Widgets.LabelExt {
+                Layout.fillWidth: true
+                leftPadding: VLCStyle.dp(16, VLCStyle.scale)
+                text: presetBtn.text
+                font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
+                color: presetBtn._s.value
+            }
+            Widgets.IconLabel {
+                Layout.rightMargin: VLCStyle.dp(16, VLCStyle.scale)
+                text: VLCIcons.expand
+                rotation: 180   // the glyph points down; the menu opens upwards
+                font.pixelSize: VLCStyle.dp(24, VLCStyle.scale)
+                color: presetBtn._s.value
+            }
+        }
+
+        // a one-entry popup rather than a T.Menu: it stacks over the modal card like any other popup
+        T.Popup {
+            id: presetMenu
+            y: -height - VLCStyle.dp(4, VLCStyle.scale)
+            width: presetBtn.width
+            height: VLCStyle.dp(38, VLCStyle.scale)
+            padding: 0
+            closePolicy: T.Popup.CloseOnEscape | T.Popup.CloseOnPressOutside
+
+            background: Rectangle { color: presetBtn._s.field; radius: VLCStyle.dp(6, VLCStyle.scale) }
+
+            contentItem: T.ItemDelegate {
+                id: resetItem
+                implicitHeight: VLCStyle.dp(38, VLCStyle.scale)
+                text: qsTr("Reset to Default Preset")
+                onClicked: {
+                    presetMenu.close()
+                    const page = root.pageHolderPages[root.currentTab]
+                    if (!page)
+                        return
+                    Effects.resetToDefaults(page.resetNames, page.resetModules)
+                    if (root.currentTab === 3)
+                        Effects.setSubtitleTextScale(100)
+                }
+
+                contentItem: Widgets.LabelExt {
+                    leftPadding: VLCStyle.dp(16, VLCStyle.scale)
+                    verticalAlignment: Text.AlignVCenter
+                    text: resetItem.text
+                    font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
+                    color: resetItem.hovered || resetItem.visualFocus ? presetBtn._s.accent : presetBtn._s.value
+                }
+                background: Rectangle {
+                    color: resetItem.hovered || resetItem.visualFocus ? presetBtn._s.face : "transparent"
+                    radius: VLCStyle.dp(4, VLCStyle.scale)
+                }
+            }
+        }
+    }
 
     footerFlat: true
     footerIcon: VLCIcons.settings
@@ -185,7 +263,7 @@ PlayerPanel {
         }
     }
 
-    VideoSettingsPage {}
-    AudioSettingsPage {}
-    SubtitleSettingsPage {}
+    VideoSettingsPage { id: videoPage }
+    AudioSettingsPage { id: audioPage }
+    SubtitleSettingsPage { id: subtitlePage }
 }

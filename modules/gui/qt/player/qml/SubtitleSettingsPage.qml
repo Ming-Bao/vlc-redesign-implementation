@@ -25,6 +25,10 @@ import VLC.Widgets as Widgets
 SettingsPage {
     id: root
 
+    // what the preset button's reset writes back to the defaults, and the filters it switches off
+    readonly property var resetNames: ["sub-track", "sub-language", "subsdelay-factor", "freetype-font", "freetype-color", "freetype-outline-color", "sub-margin", "freetype-outline-thickness", "freetype-background-opacity", "sub-text-scale"]
+    readonly property var resetModules: ["subsdelay"]
+
     // a small hint under a row (settings that the text renderer only reads when it opens)
     component Note: Widgets.LabelExt {
         readonly property ColorContext colorContext: ColorContext { id: noteTheme; colorSet: ColorContext.Window }

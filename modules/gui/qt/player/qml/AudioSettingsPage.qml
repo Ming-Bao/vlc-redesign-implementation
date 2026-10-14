@@ -24,6 +24,10 @@ import VLC.Player
 SettingsPage {
     id: root
 
+    // what the preset button's reset writes back to the defaults, and the filters it switches off
+    readonly property var resetNames: ["audio-track", "audio-language", "equalizer-preamp", "equalizer-bands", "equalizer-preset", "equalizer-2pass", "compressor-rms-peak", "compressor-attack", "compressor-release", "compressor-threshold", "compressor-ratio", "compressor-knee", "compressor-makeup-gain", "spatializer-roomsize", "spatializer-width", "spatializer-wet", "spatializer-dry", "spatializer-damp", "stereowiden-delay", "stereowiden-feedback", "stereowiden-crossfeed", "stereowiden-dry-mix", "pitch-shift"]
+    readonly property var resetModules: ["equalizer", "compressor", "spatializer", "stereo_widen", "scaletempo_pitch"]
+
     // the stereo-mode model changes under us (rows arrive with the audio output, hotkeys flip the checked row)
     property int _modelTick: 0
     Connections {

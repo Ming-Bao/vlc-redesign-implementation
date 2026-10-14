@@ -25,6 +25,10 @@ import VLC.Player
 SettingsPage {
     id: root
 
+    // what the preset button's reset writes back to the defaults, and the filters it switches off
+    readonly property var resetNames: ["hue", "brightness", "contrast", "saturation", "gamma", "sharpen-sigma", "gradfun-radius", "grain-variance", "extract-component", "colorthres-color", "colorthres-saturationthres", "colorthres-similaritythres", "gradient-mode", "gradient-color", "gradient-cartoon", "sepia-intensity", "preferred-resolution"]
+    readonly property var resetModules: ["adjust", "sharpen", "gradfun", "grain", "extract", "colorthres", "invert", "posterize", "gradient", "sepia", "transform"]
+
     // re-read a VLCVarChoiceModel's checked row when the panel opens or the outputs change
     // bumped when a checkable model changes under us (hotkeys, menus), which Effects.revision does not cover
     property int _modelTick: 0
