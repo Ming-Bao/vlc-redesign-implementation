@@ -35,21 +35,11 @@ SettingsPage {
         color: _s.label
     }
 
-    component ColorField: SettingRow {
-        id: cf
-        required property string colorVar
-        SettingField {
-            validator: RegularExpressionValidator { regularExpression: /#?[0-9A-Fa-f]{6}/ }
-            committedText: { void(Effects.revision); return "#" + Number(Effects.configValue(cf.colorVar)).toString(16).toUpperCase().padStart(6, "0") }
-            onCommitted: (t) => Effects.setConfigValue(cf.colorVar, t.startsWith("#") ? t : "#" + t)
-            Rectangle {
-                anchors.right: parent.right; anchors.rightMargin: VLCStyle.dp(7, VLCStyle.scale)
-                anchors.verticalCenter: parent.verticalCenter
-                width: VLCStyle.dp(22, VLCStyle.scale); height: width; radius: VLCStyle.dp(4, VLCStyle.scale)
-                color: parent.committedText
-                border.width: 1; border.color: "#404040"
-            }
-        }
+    // index of the stop nearest to value
+    function nearestStop(stops, value) {
+        let best = 0
+        for (let i = 1; i < stops.length; ++i) if (Math.abs(stops[i] - value) < Math.abs(stops[best] - value)) best = i
+        return best
     }
 
     // the duration factor lives in the subsdelay filter: on while the factor is above zero
@@ -63,11 +53,7 @@ SettingsPage {
         divider: false
         SettingRow {
             label: qsTr("Subtitle Track")
-            SettingField {
-                validator: IntValidator { bottom: -1; top: 99 }
-                committedText: { void(Effects.revision); const n = Number(Effects.configValue("sub-track")); return n < 0 ? qsTr("Auto") : String(n + 1) }
-                onCommitted: (t) => Effects.setConfigValue("sub-track", t === "" || t === qsTr("Auto") ? -1 : Math.max(0, parseInt(t) - 1))
-            }
+            TrackField { configName: "sub-track" }
         }
         SettingRow {
             label: qsTr("Subtitle Language")
@@ -134,8 +120,8 @@ SettingsPage {
             }
         }
         Note { text: qsTr("Applies to the next video") }
-        ColorField { label: qsTr("Text Color"); colorVar: "freetype-color" }
-        ColorField { label: qsTr("Outline Color"); colorVar: "freetype-outline-color" }
+        SettingRow { label: qsTr("Text Color"); ColorField { colorVar: "freetype-color" } }
+        SettingRow { label: qsTr("Outline Color"); ColorField { colorVar: "freetype-outline-color" } }
         Note { text: qsTr("Applies to the next video") }
         SettingRow {
             label: qsTr("Subtitle Offset")
@@ -143,7 +129,7 @@ SettingsPage {
                 suffix: qsTr("px")
                 validator: IntValidator { bottom: 0; top: 2000 }
                 committedText: { void(Effects.revision); return String(Effects.value("sub-margin")) }
-                onCommitted: (t) => Effects.setValue("sub-margin", parseInt(t) || 0)
+                onCommitted: (t) => { const n = parseInt(t); if (!isNaN(n)) Effects.setValue("sub-margin", Math.max(0, Math.min(2000, n))) }   // NaN reverts
             }
         }
 
@@ -152,9 +138,7 @@ SettingsPage {
             readonly property var names: [qsTr("Smaller"), qsTr("Small"), qsTr("Auto"), qsTr("Large"), qsTr("Larger"), qsTr("Largest")]
             label: qsTr("Font Size")
             from: 0; to: 5; stepSize: 1; defaultValue: 2; ticks: 6
-            value: { void(Effects.revision); const s = Effects.subtitleTextScale(); let best = 0
-                     for (let i = 1; i < stops.length; ++i) if (Math.abs(stops[i] - s) < Math.abs(stops[best] - s)) best = i
-                     return best }
+            value: { void(Effects.revision); return root.nearestStop(stops, Effects.subtitleTextScale()) }
             valueText: names[Math.round(value)]
             onMoved: (v) => Effects.setSubtitleTextScale(stops[Math.round(v)])
         }
@@ -163,7 +147,7 @@ SettingsPage {
             readonly property var names: [qsTr("None"), qsTr("Thin"), qsTr("Normal"), qsTr("Thick")]
             label: qsTr("Outline Thickness")
             from: 0; to: 3; stepSize: 1; defaultValue: 2; ticks: 4
-            value: { void(Effects.revision); return Math.max(0, stops.indexOf(Number(Effects.configValue("freetype-outline-thickness")))) }
+            value: { void(Effects.revision); return root.nearestStop(stops, Number(Effects.configValue("freetype-outline-thickness"))) }
             valueText: names[Math.round(value)]
             onMoved: (v) => Effects.setConfigValue("freetype-outline-thickness", stops[Math.round(v)])
         }

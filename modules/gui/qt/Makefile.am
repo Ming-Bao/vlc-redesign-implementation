@@ -1203,6 +1203,8 @@ libqml_module_player_a_QML = \
 	player/qml/settings/EffectAccordion.qml \
 	player/qml/settings/SettingsPage.qml \
 	player/qml/settings/DelaySlider.qml \
+	player/qml/settings/TrackField.qml \
+	player/qml/settings/ColorField.qml \
 	player/qml/VideoSettingsPage.qml \
 	player/qml/AudioSettingsPage.qml \
 	player/qml/SubtitleSettingsPage.qml \

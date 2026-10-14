@@ -97,15 +97,7 @@ SettingsPage {
 
         SettingRow {
             label: qsTr("Audio Track")
-            SettingField {
-                validator: IntValidator { bottom: -1; top: 99 }
-                committedText: { void(Effects.revision); const n = Number(Effects.configValue("audio-track")); return n < 0 ? qsTr("Auto") : String(n + 1) }
-                onCommitted: (t) => {
-                    if (t === "" || t === "-1" || t === qsTr("Auto")) { Effects.setConfigValue("audio-track", -1); return }
-                    const n = parseInt(t)
-                    if (!isNaN(n)) Effects.setConfigValue("audio-track", Math.max(0, n - 1))   // NaN (e.g. a lone "-") reverts
-                }
-            }
+            TrackField { configName: "audio-track" }
         }
         SettingRow {
             label: qsTr("Audio Language")

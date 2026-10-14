@@ -93,18 +93,7 @@ SettingsPage {
     component ColorRow: SettingRow {
         required property string module
         required property string colorVar
-        SettingField {
-            implicitWidth: VLCStyle.dp(116, VLCStyle.scale)
-            validator: RegularExpressionValidator { regularExpression: /#?[0-9A-Fa-f]{6}/ }
-            committedText: { void(Effects.revision); return "#" + Number(Effects.value(parent.colorVar)).toString(16).toUpperCase().padStart(6, "0") }
-            onCommitted: (t) => Effects.setValue(parent.colorVar, t.startsWith("#") ? t : "#" + t)
-            Rectangle {   // swatch
-                anchors.right: parent.right; anchors.rightMargin: VLCStyle.dp(6, VLCStyle.scale)
-                anchors.verticalCenter: parent.verticalCenter
-                width: VLCStyle.dp(22, VLCStyle.scale); height: width; radius: VLCStyle.dp(4, VLCStyle.scale)
-                color: parent.committedText
-            }
-        }
+        ColorField { implicitWidth: VLCStyle.dp(116, VLCStyle.scale); colorVar: parent.colorVar; live: true }
         SettingToggle {
             checked: { void(Effects.revision); return Effects.filterEnabled(parent.module) }
             onRequested: (on) => Effects.setFilterEnabled(parent.module, on)
