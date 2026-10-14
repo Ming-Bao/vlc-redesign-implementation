@@ -18,7 +18,9 @@
 #ifndef VLC_QT_PLAYER_EFFECTS_HPP
 #define VLC_QT_PLAYER_EFFECTS_HPP
 
+#include <QHash>
 #include <QObject>
+#include <QPair>
 #include <QStringList>
 #include <QVariant>
 
@@ -51,6 +53,8 @@ public:
     Q_INVOKABLE void setConfigValue(const QString& name, const QVariant& v);
 
     Q_INVOKABLE double equalizerBand(int band) const;
+    // re-read every binding that follows `revision` (values may change while the panel is closed)
+    Q_INVOKABLE void refresh();
     Q_INVOKABLE void setEqualizerBand(int band, double db);
     Q_INVOKABLE int equalizerPresetIndex() const;
     Q_INVOKABLE void applyEqualizerPreset(int index);
@@ -75,6 +79,7 @@ private:
     enum class Kind { None, Audio, Video };
     Kind kindOf(const QString& module, const char** varName = nullptr) const;
     void touch();
+    mutable QHash<QString, QPair<Kind, const char*>> m_kindCache;   // per module: module_find is costly and logs when missing
 
     qt_intf_t* m_intf;
     PlayerController* m_player;

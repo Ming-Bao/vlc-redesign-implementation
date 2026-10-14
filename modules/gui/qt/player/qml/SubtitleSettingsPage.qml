@@ -79,10 +79,10 @@ SettingsPage {
         SettingRow {
             label: qsTr("Subtitle Track Delay")
             SettingField {
-                suffix: " s"
-                validator: DoubleValidator { notation: DoubleValidator.StandardNotation; decimals: 3 }
+                suffix: qsTr(" s")
+                validator: RegularExpressionValidator { regularExpression: /-?[0-9]*[.,]?[0-9]*/ }
                 committedText: (Player.subtitleDelayMS / 1000).toFixed(3)
-                onCommitted: (t) => { const s = parseFloat(t); if (!isNaN(s)) Player.subtitleDelayMS = Math.round(Math.max(-10, Math.min(10, s)) * 1000) }
+                onCommitted: (t) => { const s = parseFloat(t.replace(",", ".")); if (!isNaN(s)) Player.subtitleDelayMS = Math.round(Math.max(-10, Math.min(10, s)) * 1000) }
             }
         }
         DelaySlider { valueMs: Player.subtitleDelayMS; onMovedMs: (ms) => Player.subtitleDelayMS = ms }
@@ -91,9 +91,9 @@ SettingsPage {
             label: qsTr("Subtitle Speed")
             SettingField {
                 suffix: qsTr(" fps")
-                validator: DoubleValidator { bottom: 1; top: 100; decimals: 3 }
+                validator: RegularExpressionValidator { regularExpression: /[0-9]*[.,]?[0-9]*/ }
                 committedText: Player.subtitleFPS.toFixed(3)
-                onCommitted: (t) => { const v = parseFloat(t); if (!isNaN(v)) Player.subtitleFPS = Math.max(1, Math.min(100, v)) }
+                onCommitted: (t) => { const v = parseFloat(t.replace(",", ".")); if (!isNaN(v)) Player.subtitleFPS = Math.max(1, Math.min(100, v)) }
             }
         }
         SettingSlider {
@@ -106,9 +106,9 @@ SettingsPage {
         SettingRow {
             label: qsTr("Subtitle Duration Factor")
             SettingField {
-                validator: DoubleValidator { bottom: 0; top: 20; decimals: 3 }
+                validator: RegularExpressionValidator { regularExpression: /[0-9]*[.,]?[0-9]*/ }
                 committedText: { void(Effects.revision); return Effects.filterEnabled("subsdelay") ? Number(Effects.value("subsdelay-factor")).toFixed(3) : "0.000" }
-                onCommitted: (t) => { const v = parseFloat(t); if (!isNaN(v)) root.setDuration(Math.max(0, Math.min(20, v))) }
+                onCommitted: (t) => { const v = parseFloat(t.replace(",", ".")); if (!isNaN(v)) root.setDuration(Math.max(0, Math.min(20, v))) }
             }
         }
         SettingSlider {
@@ -136,7 +136,7 @@ SettingsPage {
         SettingRow {
             label: qsTr("Subtitle Offset")
             SettingField {
-                suffix: qsTr("px")
+                suffix: qsTr(" px")
                 validator: IntValidator { bottom: 0; top: 2000 }
                 committedText: { void(Effects.revision); return String(Effects.value("sub-margin")) }
                 onCommitted: (t) => { const n = parseInt(t); if (!isNaN(n)) Effects.setValue("sub-margin", Math.max(0, Math.min(2000, n))) }   // NaN reverts

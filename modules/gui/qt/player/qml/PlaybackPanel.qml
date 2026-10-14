@@ -43,7 +43,10 @@ PlayerPanel {
         { text: qsTr("Subtitles"), icon: VLCIcons.audiosub }
     ]
 
-    onClosed: Player.rendererManager.StopScan()
+    // values can change while the panel is closed (hotkeys, Preferences, the legacy dialog): re-read on open
+    onOpened: Effects.refresh()
+    // only stop a scan the Render popup started
+    onClosed: if (videoPage.scanStarted) { videoPage.scanStarted = false; Player.rendererManager.StopScan() }
 
     footerHeader: T.Button {
         id: presetBtn
@@ -274,7 +277,7 @@ PlayerPanel {
         }
     }
 
-    VideoSettingsPage {}
+    VideoSettingsPage { id: videoPage }
     AudioSettingsPage {}
     SubtitleSettingsPage {}
 }

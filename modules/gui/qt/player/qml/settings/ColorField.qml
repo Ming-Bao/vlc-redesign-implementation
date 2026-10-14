@@ -42,6 +42,6 @@ SettingField {
         anchors.verticalCenter: parent.verticalCenter
         width: VLCStyle.dp(22, VLCStyle.scale); height: width; radius: VLCStyle.dp(4, VLCStyle.scale)
         color: root.committedText
-        border.width: 1; border.color: "#404040"
+        border.width: 1; border.color: root._s.knobOff
     }
 }

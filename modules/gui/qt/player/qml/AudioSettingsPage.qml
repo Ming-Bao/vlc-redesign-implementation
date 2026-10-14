@@ -54,10 +54,10 @@ SettingsPage {
             label: band.label
             SettingField {
                 implicitWidth: VLCStyle.dp(140, VLCStyle.scale)
-                suffix: " dB"
-                validator: DoubleValidator { decimals: 1 }
+                suffix: qsTr(" dB")
+                validator: RegularExpressionValidator { regularExpression: /-?[0-9]*[.,]?[0-9]*/ }
                 committedText: band.value.toFixed(1)
-                onCommitted: (t) => { const v = parseFloat(t); if (!isNaN(v)) band.moved(Math.max(-20, Math.min(20, v))) }
+                onCommitted: (t) => { const v = parseFloat(t.replace(",", ".")); if (!isNaN(v)) band.moved(Math.max(-20, Math.min(20, v))) }
             }
         }
         SettingSlider {
@@ -136,11 +136,11 @@ SettingsPage {
             label: qsTr("Audio Track Delay")
             SettingField {
                 id: delayField
-                suffix: " s"
-                validator: DoubleValidator { notation: DoubleValidator.StandardNotation; decimals: 3 }
+                suffix: qsTr(" s")
+                validator: RegularExpressionValidator { regularExpression: /-?[0-9]*[.,]?[0-9]*/ }
                 committedText: (Player.audioDelayMS / 1000).toFixed(3)
                 onCommitted: (t) => {
-                    const s = parseFloat(t)
+                    const s = parseFloat(t.replace(",", "."))
                     if (!isNaN(s)) Player.audioDelayMS = Math.round(Math.max(-10, Math.min(10, s)) * 1000)
                 }
             }
@@ -176,11 +176,13 @@ SettingsPage {
                 onMoved: (v) => Effects.setValue("equalizer-preamp", v)
             }
             Repeater {
-                model: { void(Effects.revision); return Effects.value("equalizer-vlcfreqs")
-                    ? [qsTr("60 Hz"), qsTr("170 Hz"), qsTr("310 Hz"), qsTr("600 Hz"), qsTr("1 KHz"),
-                       qsTr("3 KHz"), qsTr("6 KHz"), qsTr("12 KHz"), qsTr("14 KHz"), qsTr("16 KHz")]
-                    : [qsTr("31 Hz"), qsTr("63 Hz"), qsTr("125 Hz"), qsTr("250 Hz"), qsTr("500 Hz"),
-                       qsTr("1 KHz"), qsTr("2 KHz"), qsTr("4 KHz"), qsTr("8 KHz"), qsTr("16 KHz")] }
+                // the two label sets are constant arrays; only the choice between them follows the revision
+                readonly property bool vlcFreqs: { void(Effects.revision); return Boolean(Effects.value("equalizer-vlcfreqs")) }
+                readonly property var vlcLabels: [qsTr("60 Hz"), qsTr("170 Hz"), qsTr("310 Hz"), qsTr("600 Hz"), qsTr("1 KHz"),
+                    qsTr("3 KHz"), qsTr("6 KHz"), qsTr("12 KHz"), qsTr("14 KHz"), qsTr("16 KHz")]
+                readonly property var isoLabels: [qsTr("31 Hz"), qsTr("63 Hz"), qsTr("125 Hz"), qsTr("250 Hz"), qsTr("500 Hz"),
+                    qsTr("1 KHz"), qsTr("2 KHz"), qsTr("4 KHz"), qsTr("8 KHz"), qsTr("16 KHz")]
+                model: vlcFreqs ? vlcLabels : isoLabels
                 BandSlider {
                     required property int index
                     required property string modelData
@@ -205,7 +207,7 @@ SettingsPage {
     FilterBlock {
         blockTitle: qsTr("Compressor"); module: "compressor"
         specs: [
-            [qsTr("FM5 / Peak"),  "compressor-rms-peak",    0,   1,   0.01, 0.2, 0, 1, "",        1],
+            [qsTr("RMS / Peak"),  "compressor-rms-peak",    0,   1,   0.01, 0.2, 0, 1, "",        1],
             [qsTr("Attack"),      "compressor-attack",      1.5, 400, 0.5,  25,  0, 1, qsTr(" ms"), 1],
             [qsTr("Release"),     "compressor-release",     2,   800, 1,    100, 0, 1, qsTr(" ms"), 1],
             [qsTr("Threshold"),   "compressor-threshold",   -30, 0,   0.5,  -11, 0, 1, qsTr(" dB"), 1],

@@ -41,6 +41,7 @@ PlayerEffects::PlayerEffects(qt_intf_t* intf, PlayerController* player, QObject*
 }
 
 void PlayerEffects::touch() { ++m_revision; emit changed(); }
+void PlayerEffects::refresh() { touch(); }
 
 // the player keeps a vout object alive without any video (audio-only, or video disabled), so the vout list is
 // not a test for video: use the controller's own flag, which counts only vouts that are really showing video
@@ -57,17 +58,23 @@ QStringList PlayerEffects::equalizerPresets() const
 
 PlayerEffects::Kind PlayerEffects::kindOf(const QString& module, const char** varName) const
 {
-    module_t* m = module_find(qtu(module));
-    if (!m) { msg_Err(m_intf, "Unable to find filter module \"%s\".", qtu(module)); return Kind::None; }
-    const char* var = nullptr;
-    Kind kind = Kind::Video;
-    if (module_provides(m, "audio filter")) { var = "audio-filter"; kind = Kind::Audio; }
-    else if (module_provides(m, "video filter")) var = "video-filter";
-    else if (module_provides(m, "sub source")) var = "sub-source";
-    else if (module_provides(m, "sub filter")) var = "sub-filter";
-    else return Kind::None;
-    if (varName) *varName = var;
-    return kind;
+    auto it = m_kindCache.find(module);
+    if (it == m_kindCache.end())
+    {
+        const char* var = nullptr;
+        Kind kind = Kind::None;
+        module_t* m = module_find(qtu(module));
+        if (!m)
+            msg_Err(m_intf, "Unable to find filter module \"%s\".", qtu(module));   // logged once per module
+        else if (module_provides(m, "audio filter")) { var = "audio-filter"; kind = Kind::Audio; }
+        else if (module_provides(m, "video filter")) { var = "video-filter"; kind = Kind::Video; }
+        else if (module_provides(m, "sub source")) { var = "sub-source"; kind = Kind::Video; }
+        else if (module_provides(m, "sub filter")) { var = "sub-filter"; kind = Kind::Video; }
+        it = m_kindCache.insert(module, { kind, var });
+    }
+    if (it->first == Kind::None) return Kind::None;
+    if (varName) *varName = it->second;
+    return it->first;
 }
 
 static QString configString(const char* name)
@@ -210,12 +217,16 @@ void PlayerEffects::setEqualizerBand(int band, double db)
     auto bands = effects::parseBands(value("equalizer-bands").toString());
     bands[band] = std::clamp(float(db), -20.f, 20.f);
     setValue("equalizer-bands", effects::formatBands(bands));
-    setValue("equalizer-preset", QString());
+    // clear the preset name in the config only: writing "" to the aout var makes the equalizer log
+    // "preset '' not found" (and list every preset) on each band step
+    if (!configString("equalizer-preset").isEmpty())
+        config_PutPsz("equalizer-preset", "");
 }
 
 int PlayerEffects::equalizerPresetIndex() const
 {
-    const QString p = value("equalizer-preset").toString();
+    // the config is authoritative: the aout var keeps the old name once the preset is cleared
+    const QString p = configString("equalizer-preset");
     for (int i = 0; i < NB_PRESETS; ++i)
         if (p == QLatin1String(preset_list[i])) return i;
     return -1;
