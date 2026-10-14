@@ -77,7 +77,7 @@ ColumnLayout {
                 color: root._s.accentBg
             }
             Repeater {
-                model: root.ticks
+                model: root.ticks >= 2 ? root.ticks : 0   // one mark has no spacing to compute
                 Rectangle {
                     required property int index
                     x: VLCStyle.dp(2, VLCStyle.scale) + index / (root.ticks - 1) * (parent.width - VLCStyle.dp(4, VLCStyle.scale))

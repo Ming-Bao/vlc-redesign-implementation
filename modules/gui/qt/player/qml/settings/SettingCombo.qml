@@ -27,6 +27,7 @@ Widgets.ComboBoxExt {
 
     Layout.preferredWidth: fullWidth ? -1 : VLCStyle.dp(220, VLCStyle.scale)
     Layout.fillWidth: fullWidth
+    Layout.alignment: Qt.AlignTop
     Layout.preferredHeight: VLCStyle.dp(48, VLCStyle.scale)
     color: _s.value
 

@@ -53,6 +53,7 @@ T.Popup {
     }
 
     readonly property bool _dark: theme.palette.isDark
+    readonly property bool _fixedTabs: tabs.some(t => t.width !== undefined)
 
     width: VLCStyle.dp(400, VLCStyle.scale)
     implicitHeight: fillHeight ? maximumHeight
@@ -135,7 +136,10 @@ T.Popup {
 
             RowLayout {
                 anchors.fill: parent
-                spacing: 0
+                // Figma tab bar (fixed-width tabs): 6 px side padding and a 1 px gap
+                anchors.leftMargin: root._fixedTabs ? VLCStyle.dp(6, VLCStyle.scale) : 0
+                anchors.rightMargin: anchors.leftMargin
+                spacing: root._fixedTabs ? 1 : 0
 
                 Repeater {
                     id: tabRepeater
@@ -157,7 +161,11 @@ T.Popup {
                         readonly property color _fg: checked ? (root._dark ? "#8F8F8F" : theme.fg.primary)
                                                              : (root._dark ? "#6B6B6B" : theme.fg.secondary)
 
-                        Layout.fillWidth: true
+                        // an entry may carry a fixed `width` (dp); the others share the rest
+                        readonly property bool _fixed: modelData.width !== undefined
+
+                        Layout.fillWidth: !_fixed
+                        Layout.preferredWidth: _fixed ? VLCStyle.dp(modelData.width, VLCStyle.scale) : -1
                         Layout.fillHeight: true
 
                         checked: root.currentTab === index
@@ -183,7 +191,7 @@ T.Popup {
                         contentItem: Item {
                             Row {
                                 anchors.centerIn: parent
-                                spacing: VLCStyle.dp(6, VLCStyle.scale)
+                                spacing: VLCStyle.dp(8, VLCStyle.scale)
 
                                 Widgets.IconLabel {
                                     anchors.verticalCenter: parent.verticalCenter
@@ -217,7 +225,7 @@ T.Popup {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 width: parent.width - VLCStyle.dp(16, VLCStyle.scale)
                                 height: VLCStyle.dp(2, VLCStyle.scale)
-                                color: theme.accent
+                                color: root._dark ? "#D37918" : theme.accent
                                 visible: tab.checked
                             }
                         }
@@ -245,6 +253,9 @@ T.Popup {
             Connections {
                 target: pageFlick.Window.window
                 function onActiveFocusItemChanged() {
+                    // fillHeight pages scroll themselves (a nested Flickable): moving this one too shifts the page
+                    if (root.fillHeight)
+                        return
                     const item = pageFlick.Window.activeFocusItem
                     let p = item
                     while (p && p !== pageHolder)
@@ -326,25 +337,32 @@ T.Popup {
                 border.color: footerTheme.visualFocus
             }
 
-            contentItem: Row {
-                spacing: VLCStyle.dp(6, VLCStyle.scale)
-                Widgets.IconLabel {
-                    visible: root.footerIcon.length > 0
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: root.footerIcon
-                    font.pixelSize: VLCStyle.dp(20, VLCStyle.scale)
-                    color: footerLabel.color
+            // T.Control positions its contentItem itself: the row is centred inside an item that fills it
+            contentItem: Item {
+                implicitWidth: footerRow.implicitWidth
+                implicitHeight: footerRow.implicitHeight
+
+                Row {
+                    id: footerRow
+                    anchors.centerIn: parent
+                    spacing: VLCStyle.dp(6, VLCStyle.scale)
+
+                    Widgets.IconLabel {
+                        visible: root.footerIcon.length > 0
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: root.footerIcon
+                        font.pixelSize: VLCStyle.dp(20, VLCStyle.scale)
+                        color: footerLabel.color
+                    }
+                    Widgets.LabelExt {
+                        id: footerLabel
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: footer.text
+                        font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
+                        color: root.footerFlat ? (root._dark ? "#6B6B6B" : theme.fg.secondary)
+                                               : (root._dark ? "#8F8F8F" : theme.fg.primary)
+                    }
                 }
-                Widgets.LabelExt {
-                    id: footerLabel
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: footer.text
-                    font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-                    color: root.footerFlat ? (root._dark ? "#6B6B6B" : theme.fg.secondary)
-                                           : (root._dark ? "#8F8F8F" : theme.fg.primary)
-                }
-                // centre the row in the button
-                x: (footer.availableWidth - implicitWidth) / 2
             }
         }
     }

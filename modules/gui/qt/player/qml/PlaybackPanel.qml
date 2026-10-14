@@ -29,7 +29,6 @@ import VLC.Dialogs
 PlayerPanel {
     id: root
 
-    readonly property color _labelColor: _dark ? "#6B6B6B" : colorContext.fg.secondary
     readonly property color _fieldColor: _dark ? "#090909" : colorContext.bg.secondary
     readonly property color _valueColor: _dark ? "#8F8F8F" : colorContext.fg.primary
 
@@ -39,8 +38,8 @@ PlayerPanel {
     fillHeight: true
     tabs: [
         { text: qsTr("Playback"),  icon: VLCIcons.effect_filter },
-        { text: qsTr("Video"),     icon: VLCIcons.topbar_video },
-        { text: qsTr("Audio"),     icon: VLCIcons.topbar_music },
+        { text: qsTr("Video"),     icon: VLCIcons.topbar_video, width: 85 },
+        { text: qsTr("Audio"),     icon: VLCIcons.topbar_music, width: 85 },
         { text: qsTr("Subtitles"), icon: VLCIcons.audiosub }
     ]
 
@@ -57,7 +56,7 @@ PlayerPanel {
             Layout.fillWidth: true
             Layout.leftMargin: VLCStyle.dp(20, VLCStyle.scale)
             Layout.rightMargin: VLCStyle.dp(20, VLCStyle.scale)
-            spacing: 0
+            spacing: VLCStyle.dp(5, VLCStyle.scale)
 
             Item { Layout.preferredHeight: VLCStyle.dp(12, VLCStyle.scale) }
 
@@ -74,32 +73,11 @@ PlayerPanel {
             SettingRow {
                 label: qsTr("Audio Visualizer")
 
-                Widgets.ComboBoxExt {
+                SettingCombo {
                     id: visCombo
 
-                    Layout.preferredWidth: VLCStyle.dp(220, VLCStyle.scale)
-                    Layout.preferredHeight: VLCStyle.dp(48, VLCStyle.scale)
                     model: Player.audioVisualization
                     textRole: "display"
-                    color: root._valueColor
-
-                    // Figma field: #191919 inside a 4 px #090909 frame, regular 14 px text
-                    background: Rectangle {
-                        radius: VLCStyle.dp(6, VLCStyle.scale)
-                        color: root._dark ? "#191919" : root.colorContext.bg.primary
-                        border.width: visCombo.visualFocus ? VLCStyle.focus_border : VLCStyle.dp(4, VLCStyle.scale)
-                        border.color: visCombo.visualFocus ? visCombo.colorContext.visualFocus : root._fieldColor
-                    }
-
-                    contentItem: Widgets.LabelExt {
-                        leftPadding: VLCStyle.dp(16, VLCStyle.scale)
-                        rightPadding: visCombo.indicator.width + VLCStyle.dp(16, VLCStyle.scale)
-                        text: visCombo.displayText
-                        verticalAlignment: Text.AlignVCenter
-                        elide: Text.ElideRight
-                        font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-                        color: root._valueColor
-                    }
 
                     // re-read whenever the panel opens; the model has no "current index" property
                     currentIndex: {

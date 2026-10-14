@@ -27,12 +27,30 @@ RowLayout {
     readonly property SettingsStyle _s: SettingsStyle { theme: theme }
 
     Layout.fillWidth: true
-    Layout.preferredHeight: VLCStyle.dp(48, VLCStyle.scale)
+    // Figma: a row with a (non full width) combo is 68 tall, the 48 px control sitting on 20 px of padding
+    // and the label centred on the control; the other rows are 48
+    property bool _combo: false
+    Layout.preferredHeight: VLCStyle.dp(_combo ? 68 : 48, VLCStyle.scale)
     spacing: VLCStyle.dp(12, VLCStyle.scale)
+
+    function _scan() {
+        for (let i = 0; i < children.length; ++i)
+            if (children[i].fullWidth === false) {
+                _combo = true
+                return
+            }
+        _combo = false
+    }
+    onChildrenChanged: _scan()
+    Component.onCompleted: _scan()
 
     Widgets.LabelExt {
         id: lbl
         Layout.fillWidth: true
+        Layout.fillHeight: !root._combo
+        Layout.preferredHeight: root._combo ? VLCStyle.dp(48, VLCStyle.scale) : -1
+        Layout.alignment: Qt.AlignTop
+        verticalAlignment: Text.AlignVCenter
         leftPadding: VLCStyle.dp(4, VLCStyle.scale)
         font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
         color: root._s.label

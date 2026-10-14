@@ -18,6 +18,8 @@
 import QtQuick
 import QtQuick.Layouts
 import VLC.Style
+import VLC.Widgets as Widgets
+import QtQuick.Templates as T
 
 // a settings tab's page: scrolls by itself because the gear card is full height
 Flickable {
@@ -27,6 +29,8 @@ Flickable {
     contentWidth: width
     contentHeight: col.implicitHeight + VLCStyle.dp(16, VLCStyle.scale)
     boundsBehavior: Flickable.StopAtBounds
+
+    T.ScrollBar.vertical: Widgets.ScrollBarExt { }
 
     ColumnLayout { id: col; width: root.width; spacing: 0 }
 

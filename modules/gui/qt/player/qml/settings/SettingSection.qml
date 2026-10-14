@@ -48,6 +48,6 @@ ColumnLayout {
         Layout.rightMargin: VLCStyle.dp(20, VLCStyle.scale)
         Layout.topMargin: VLCStyle.dp(10, VLCStyle.scale)
         Layout.bottomMargin: VLCStyle.dp(20, VLCStyle.scale)
-        spacing: VLCStyle.dp(10, VLCStyle.scale)
+        spacing: VLCStyle.dp(5, VLCStyle.scale)
     }
 }
