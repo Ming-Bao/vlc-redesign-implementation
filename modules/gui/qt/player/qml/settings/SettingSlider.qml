@@ -57,12 +57,15 @@ ColumnLayout {
         from: root.from; to: root.to; stepSize: root.stepSize
         snapMode: root.stepSize > 0 ? T.Slider.SnapAlways : T.Slider.NoSnap
         value: root.value
-        // after a double tap the slider still reports the second press as a move: drop it until the next press
+        // after a double tap the slider still reports the second press as one stray move: drop that single move
+        // (a new press or a key press also disarms it, in case no stray move arrives)
         property bool _swallow: false
         onPressedChanged: if (pressed) _swallow = false
+        Keys.onPressed: _swallow = false
         onMoved: {
-            if (!_swallow) root.moved(value)
-            else value = Qt.binding(() => root.value)   // restore the handle
+            if (!_swallow) { root.moved(value); return }
+            _swallow = false
+            value = Qt.binding(() => root.value)   // restore the handle
         }
         Accessible.name: root.label
 

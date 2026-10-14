@@ -95,7 +95,7 @@ T.Popup {
 
     // start keyboard focus on the current page's selected track, else its first control; the
     // focus ring shows once the keyboard is used
-    function focusPage() {
+    function focusPage(parkOnTab = false) {
         const page = pageHolder.children[currentTab]
         for (const c of (page?.children ?? [])) {
             const row = c.focusRow?.()
@@ -105,15 +105,16 @@ T.Popup {
             }
         }
         const first = page?.nextItemInFocusChain(true)
-        // a text field would open selected and in edit mode: park on the current tab instead
-        if (first && typeof first.selectAll === "function")
+        // opening onto a text field would select it and start editing: park on the current tab instead
+        // (Down from the tab still enters the page)
+        if (parkOnTab && first && typeof first.selectAll === "function")
             tabRepeater.itemAt(currentTab)?.forceActiveFocus(Qt.OtherFocusReason)
         else
             first?.forceActiveFocus(Qt.OtherFocusReason)
     }
 
     // a popup without focus (the non-modal queue card) leaves the keys to the player's hotkeys
-    onOpened: if (focus) focusPage()
+    onOpened: if (focus) focusPage(true)
 
     background: Rectangle {
         radius: VLCStyle.dp(10, VLCStyle.scale)
