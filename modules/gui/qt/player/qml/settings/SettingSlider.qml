@@ -56,10 +56,16 @@ ColumnLayout {
         from: root.from; to: root.to; stepSize: root.stepSize
         snapMode: root.stepSize > 0 ? T.Slider.SnapAlways : T.Slider.NoSnap
         value: root.value
-        onMoved: root.moved(value)
+        onMoved: {
+            if (!resetGuard.running) root.moved(value)
+            else slider.value = Qt.binding(() => root.value)   // drop the stray move, restore the handle
+        }
         Accessible.name: root.label
 
-        TapHandler { acceptedButtons: Qt.LeftButton; onDoubleTapped: root.moved(root.defaultValue) }
+        TapHandler { acceptedButtons: Qt.LeftButton; onDoubleTapped: { resetGuard.restart(); root.moved(root.defaultValue) } }
+
+        // the slider also reports the second press as a move once the double tap has fired; drop that one
+        Timer { id: resetGuard; interval: 150 }
 
         background: Rectangle {
             y: (slider.height - height) / 2

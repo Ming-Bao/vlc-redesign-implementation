@@ -771,6 +771,7 @@ qml_modules += {
        'player/qml/settings/SettingSegments.qml',
        'player/qml/settings/EffectAccordion.qml',
        'player/qml/settings/SettingsPage.qml',
+       'player/qml/settings/DelaySlider.qml',
        'player/qml/VideoSettingsPage.qml',
        'player/qml/AudioSettingsPage.qml',
        'player/qml/SubtitleSettingsPage.qml',
