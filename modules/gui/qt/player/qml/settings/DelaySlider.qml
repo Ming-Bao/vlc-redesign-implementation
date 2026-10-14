@@ -16,56 +16,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 import QtQuick
-import QtQuick.Templates as T
 import QtQuick.Layouts
 import VLC.Style
 import VLC.Widgets as Widgets
 
-// Delay slider centred on 0 (Figma 1905:7352); the fill runs from the centre to the handle
+// Delay slider centred on 0 (Figma 1905:7352), with the -10 s / 0 s / +10 s scale below
 ColumnLayout {
     id: root
     property int valueMs: 0
     signal movedMs(int ms)
-    readonly property ColorContext colorContext: ColorContext { id: theme; colorSet: ColorContext.Slider; focused: slider.visualFocus }
+    readonly property ColorContext colorContext: ColorContext { id: theme; colorSet: ColorContext.Slider }
     readonly property SettingsStyle _s: SettingsStyle { theme: theme }
     Layout.fillWidth: true
     spacing: VLCStyle.dp(10, VLCStyle.scale)
 
-    T.Slider {
-        id: slider
-        Layout.fillWidth: true
-        implicitHeight: VLCStyle.dp(24, VLCStyle.scale)
-        from: -10000; to: 10000; stepSize: 50
-        snapMode: T.Slider.SnapAlways
+    SettingSlider {
+        label: qsTr("Delay")
+        showHeader: false
+        centred: true
+        from: -10000; to: 10000; stepSize: 50; defaultValue: 0
         value: root.valueMs
-        onMoved: {
-            if (!resetGuard.running) root.movedMs(Math.round(value))
-            else slider.value = Qt.binding(() => root.valueMs)   // drop the stray move, restore the handle
-        }
-        Accessible.name: qsTr("Delay")
-        TapHandler { onDoubleTapped: { resetGuard.restart(); root.movedMs(0) } }
-        // the slider also reports the second press as a move once the double tap has fired; drop that one
-        Timer { id: resetGuard; interval: 150 }
-        background: Rectangle {
-            y: (slider.height - height) / 2
-            width: slider.width; height: VLCStyle.dp(16, VLCStyle.scale)
-            radius: VLCStyle.dp(6, VLCStyle.scale); color: root._s.field
-            border.width: slider.visualFocus ? VLCStyle.focus_border : 0
-            border.color: theme.visualFocus
-            Rectangle {
-                readonly property real c: parent.width / 2
-                readonly property real h: slider.handle.x + slider.handle.width / 2
-                x: Math.min(c, h); width: Math.abs(h - c)
-                y: VLCStyle.dp(2, VLCStyle.scale); height: parent.height - 2 * y
-                radius: VLCStyle.dp(4, VLCStyle.scale); color: root._s.accentBg
-            }
-        }
-        handle: Rectangle {
-            x: slider.visualPosition * (slider.availableWidth - width)
-            anchors.verticalCenter: parent.verticalCenter
-            implicitWidth: VLCStyle.dp(8, VLCStyle.scale); implicitHeight: VLCStyle.dp(24, VLCStyle.scale)
-            radius: VLCStyle.dp(4, VLCStyle.scale); color: root._s.accentDim
-        }
+        onMoved: (v) => root.movedMs(Math.round(v))
     }
     RowLayout {
         Layout.fillWidth: true

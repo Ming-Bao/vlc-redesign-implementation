@@ -104,7 +104,12 @@ T.Popup {
                 return
             }
         }
-        page?.nextItemInFocusChain(true)?.forceActiveFocus(Qt.OtherFocusReason)
+        const first = page?.nextItemInFocusChain(true)
+        // a text field would open selected and in edit mode: park on the current tab instead
+        if (first && typeof first.selectAll === "function")
+            tabRepeater.itemAt(currentTab)?.forceActiveFocus(Qt.OtherFocusReason)
+        else
+            first?.forceActiveFocus(Qt.OtherFocusReason)
     }
 
     // a popup without focus (the non-modal queue card) leaves the keys to the player's hotkeys

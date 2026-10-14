@@ -24,6 +24,16 @@ import VLC.Player
 SettingsPage {
     id: root
 
+    // the stereo-mode model changes under us (rows arrive with the audio output, hotkeys flip the checked row)
+    property int _modelTick: 0
+    Connections {
+        target: Player.audioStereoMode
+        function onRowsInserted() { root._modelTick++ }
+        function onRowsRemoved() { root._modelTick++ }
+        function onModelReset() { root._modelTick++ }
+        function onDataChanged() { root._modelTick++ }
+    }
+
     SettingSection {
         title: qsTr("Defaults")
         divider: false
@@ -33,7 +43,11 @@ SettingsPage {
             SettingField {
                 validator: IntValidator { bottom: -1; top: 99 }
                 committedText: { void(Effects.revision); const n = Number(Effects.configValue("audio-track")); return n < 0 ? qsTr("Auto") : String(n + 1) }
-                onCommitted: (t) => Effects.setConfigValue("audio-track", t === "" || t === qsTr("Auto") ? -1 : Math.max(0, parseInt(t) - 1))
+                onCommitted: (t) => {
+                    if (t === "" || t === "-1" || t === qsTr("Auto")) { Effects.setConfigValue("audio-track", -1); return }
+                    const n = parseInt(t)
+                    if (!isNaN(n)) Effects.setConfigValue("audio-track", Math.max(0, n - 1))   // NaN (e.g. a lone "-") reverts
+                }
             }
         }
         SettingRow {
@@ -46,11 +60,11 @@ SettingsPage {
         SettingRow { label: qsTr("Stereo Mode") }
         SettingCombo {
             fullWidth: true
-            enabled: model.rowCount() > 0
+            enabled: { void(root._modelTick); return model.rowCount() > 0 }
             displayText: enabled ? currentText : qsTr("Unavailable")
             model: Player.audioStereoMode; textRole: "display"
             currentIndex: {
-                void(Effects.revision)
+                void(Effects.revision); void(root._modelTick)
                 for (let i = 0; i < model.rowCount(); ++i)
                     if (model.data(model.index(i, 0), Qt.CheckStateRole)) return i
                 return 0

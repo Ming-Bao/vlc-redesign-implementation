@@ -31,6 +31,7 @@ ColumnLayout {
     property real stepSize: 0
     property real value: 0
     property real defaultValue: from
+    property bool centred: false   // fill runs from the middle of the range to the handle
     property int ticks: 0          // number of tick marks including both ends; 0 = none
     signal moved(real v)
 
@@ -56,16 +57,16 @@ ColumnLayout {
         from: root.from; to: root.to; stepSize: root.stepSize
         snapMode: root.stepSize > 0 ? T.Slider.SnapAlways : T.Slider.NoSnap
         value: root.value
+        // after a double tap the slider still reports the second press as a move: drop it until the next press
+        property bool _swallow: false
+        onPressedChanged: if (pressed) _swallow = false
         onMoved: {
-            if (!resetGuard.running) root.moved(value)
-            else slider.value = Qt.binding(() => root.value)   // drop the stray move, restore the handle
+            if (!_swallow) root.moved(value)
+            else value = Qt.binding(() => root.value)   // restore the handle
         }
         Accessible.name: root.label
 
-        TapHandler { acceptedButtons: Qt.LeftButton; onDoubleTapped: { resetGuard.restart(); root.moved(root.defaultValue) } }
-
-        // the slider also reports the second press as a move once the double tap has fired; drop that one
-        Timer { id: resetGuard; interval: 150 }
+        TapHandler { acceptedButtons: Qt.LeftButton; onDoubleTapped: { slider._swallow = true; root.moved(root.defaultValue) } }
 
         background: Rectangle {
             y: (slider.height - height) / 2
@@ -75,9 +76,12 @@ ColumnLayout {
             border.width: slider.visualFocus ? VLCStyle.focus_border : 0
             border.color: theme.visualFocus
 
-            Rectangle {   // fill up to the handle
-                x: VLCStyle.dp(2, VLCStyle.scale); y: x
-                width: Math.max(0, slider.handle.x + slider.handle.width - x)
+            Rectangle {   // fill up to the handle, or between the centre and the handle
+                readonly property real c: root.centred ? parent.width / 2 : VLCStyle.dp(2, VLCStyle.scale)
+                readonly property real h: root.centred ? slider.handle.x + slider.handle.width / 2
+                                                       : slider.handle.x + slider.handle.width
+                x: Math.min(c, h); y: VLCStyle.dp(2, VLCStyle.scale)
+                width: Math.max(0, Math.abs(h - c))
                 height: parent.height - 2 * y
                 radius: VLCStyle.dp(4, VLCStyle.scale)
                 color: root._s.accentBg
