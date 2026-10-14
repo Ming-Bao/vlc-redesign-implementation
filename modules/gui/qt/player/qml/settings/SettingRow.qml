@@ -27,10 +27,11 @@ RowLayout {
     readonly property SettingsStyle _s: SettingsStyle { theme: theme }
 
     Layout.fillWidth: true
-    // Figma: a row with a (non full width) combo is 68 tall, the 48 px control sitting on 20 px of padding
+    // Figma: a row with a (non full width) combo is 63 tall, the 48 px control sitting on 15 px of padding: with the section's 5 px spacing
+    // that is Figma's 68 px pitch
     // and the label centred on the control; the other rows are 48
     property bool _combo: false
-    Layout.preferredHeight: VLCStyle.dp(_combo ? 68 : 48, VLCStyle.scale)
+    Layout.preferredHeight: VLCStyle.dp(_combo ? 63 : 48, VLCStyle.scale)
     spacing: VLCStyle.dp(12, VLCStyle.scale)
 
     function _scan() {

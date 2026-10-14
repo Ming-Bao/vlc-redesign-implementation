@@ -25,8 +25,15 @@ SettingsPage {
     id: root
 
     // re-read a VLCVarChoiceModel's checked row when the panel opens or the outputs change
+    // bumped when a checkable model changes under us (hotkeys, menus), which Effects.revision does not cover
+    property int _modelTick: 0
+    Connections { target: Player.zoom; function onDataChanged() { root._modelTick++ } function onModelReset() { root._modelTick++ } }
+    Connections { target: Player.aspectRatio; function onDataChanged() { root._modelTick++ } function onModelReset() { root._modelTick++ } }
+    Connections { target: Player.crop; function onDataChanged() { root._modelTick++ } function onModelReset() { root._modelTick++ } }
+
     function checkedRow(model) {
         void(Effects.revision)
+        void(_modelTick)
         for (let i = 0; i < model.rowCount(); ++i)
             if (model.data(model.index(i, 0), Qt.CheckStateRole))
                 return i
@@ -118,26 +125,37 @@ SettingsPage {
                 // RendererManager::Roles: NAME = Qt::UserRole (256) … SELECTED = 262
                 readonly property int _roleName: 256
                 readonly property int _roleSelected: 262
+                // updates the list in place: clearing it would reset an open popup
                 function rebuild() {
                     const rm = Player.rendererManager
-                    renderers.clear()
-                    renderers.append({ name: qsTr("Local") })
+                    const n = rm ? rm.rowCount() : 0
+                    if (renderers.count === 0)
+                        renderers.append({ name: qsTr("Local") })
                     let sel = 0
-                    for (let i = 0; i < rm.rowCount(); ++i) {
-                        renderers.append({ name: rm.data(rm.index(i, 0), _roleName) })
+                    for (let i = 0; i < n; ++i) {
+                        const name = rm.data(rm.index(i, 0), _roleName)
+                        if (i + 1 < renderers.count) renderers.set(i + 1, { name: name })
+                        else renderers.append({ name: name })
                         if (rm.data(rm.index(i, 0), _roleSelected)) sel = i + 1
                     }
+                    while (renderers.count > n + 1)
+                        renderers.remove(renderers.count - 1)
                     currentIndex = sel
                 }
                 onActivated: (i) => {
                     const rm = Player.rendererManager
+                    if (!rm) return
                     if (i === 0) {
                         for (let r = 0; r < rm.rowCount(); ++r)
                             if (rm.data(rm.index(r, 0), _roleSelected)) rm.setData(rm.index(r, 0), false, _roleSelected)
                     } else
                         rm.setData(rm.index(i - 1, 0), true, _roleSelected)
                 }
-                onPressedChanged: if (pressed) Player.rendererManager.StartScan()
+                // scan when the popup opens (a press that closes it must not restart the scan)
+                Connections {
+                    target: renderCombo.popup
+                    function onOpened() { if (Player.rendererManager) Player.rendererManager.StartScan() }
+                }
                 Connections {
                     target: Player.rendererManager
                     function onRowsInserted() { renderCombo.rebuild() }
