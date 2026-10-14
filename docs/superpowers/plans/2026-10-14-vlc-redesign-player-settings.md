@@ -116,7 +116,7 @@ Value mapping decisions:
   - Start with `$H start -vv build/redesign-media/plain.mp4 build/redesign-media/tracks2.mkv; sleep 6`. The driver already passes `--aout=dummy`. Any hand-rolled run must add it too.
   - The vlcrc being edited is `build/redesign-profile/config/vlc/vlcrc`.
 - **Coordinates at 1600×900** (computed from Figma; if a click misses, read the real position from a shot and note it in the ledger):
-  - Gear button (1515, 873). Card x 1180–1580, y 60–826.
+  - Gear button (1536, 873) (measured on omarchy; the subtitle-tracks button is at 1503). Card x 1180–1580, y 60–826.
   - Tab centres at y 85: Playback x 1240, Video x 1337, Audio x 1423, Subtitles x 1520.
   - Footer "Open Advanced Settings" at (1380, 806); preset button at (1380, 767).
   - Page content starts at y 111. It scrolls with the wheel: `xdotool mousemove 1380 400 click 5` scrolls down one step.
@@ -842,7 +842,7 @@ void PlayerEffects::resetToDefaults(const QStringList& names, const QStringList&
 - `ExtendedSettingsButton` gains `property int _lastTab`, so the panel reopens on the last tab.
 
 - [ ] **Step 1: Failing check.**
-  - Start the harness, click the gear (1515, 873) and take `$H shot /tmp/t3-before.png`.
+  - Start the harness, click the gear (1536, 873) and take `$H shot /tmp/t3-before.png`.
   - Run `docs/superpowers/scripts/count-px.sh /tmp/t3-before.png 1300 70 260 30 6B6B6B 6`.
   - Expected: under 30 (there is a single "Playback" tab, so no grey tab labels to its right).
 - [ ] **Step 2: `settings/SettingsStyle.qml`:**
