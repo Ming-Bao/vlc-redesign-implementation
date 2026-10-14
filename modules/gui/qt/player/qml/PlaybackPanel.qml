@@ -43,27 +43,33 @@ PlayerPanel {
         { text: qsTr("Subtitles"), icon: VLCIcons.audiosub }
     ]
 
-    readonly property var pageHolderPages: [null, videoPage, audioPage, subtitlePage]
-
     onClosed: Player.rendererManager.StopScan()
 
     footerHeader: T.Button {
         id: presetBtn
 
         readonly property SettingsStyle _s: SettingsStyle { theme: root.colorContext }
+        readonly property ColorContext colorContext: ColorContext {
+            id: presetTheme
+            colorSet: ColorContext.ButtonStandard
+            focused: presetBtn.visualFocus
+        }
 
         visible: root.currentTab > 0
         Layout.fillWidth: true
         implicitHeight: VLCStyle.dp(42, VLCStyle.scale)
         padding: VLCStyle.dp(2, VLCStyle.scale)
         text: qsTr("Default Preset")
+        focusPolicy: Qt.StrongFocus
         onClicked: presetMenu.open()
+        Keys.onReturnPressed: clicked()
+        Keys.onEnterPressed: clicked()
 
         background: Rectangle {
             radius: VLCStyle.dp(6, VLCStyle.scale)
             color: presetBtn._s.field
             border.width: presetBtn.visualFocus ? VLCStyle.focus_border : 0
-            border.color: root.colorContext.visualFocus
+            border.color: presetTheme.visualFocus
         }
 
         contentItem: RowLayout {
@@ -91,6 +97,11 @@ PlayerPanel {
             height: VLCStyle.dp(38, VLCStyle.scale)
             padding: 0
             closePolicy: T.Popup.CloseOnEscape | T.Popup.CloseOnPressOutside
+            focus: true
+
+            // keyboard: the entry takes focus on open; focus returns to the button on close
+            onOpened: resetItem.forceActiveFocus(Qt.TabFocusReason)
+            onClosed: presetBtn.forceActiveFocus(Qt.TabFocusReason)
 
             background: Rectangle { color: presetBtn._s.field; radius: VLCStyle.dp(6, VLCStyle.scale) }
 
@@ -98,25 +109,25 @@ PlayerPanel {
                 id: resetItem
                 implicitHeight: VLCStyle.dp(38, VLCStyle.scale)
                 text: qsTr("Reset to Default Preset")
+                readonly property bool _lit: hovered || visualFocus
+
                 onClicked: {
                     presetMenu.close()
-                    const page = root.pageHolderPages[root.currentTab]
-                    if (!page)
-                        return
-                    Effects.resetToDefaults(page.resetNames, page.resetModules)
-                    if (root.currentTab === 3)
-                        Effects.setSubtitleTextScale(100)
+                    // the page that is showing resets itself: no tab index to keep in step
+                    root.currentPage?.resetToDefaults?.()
                 }
+                Keys.onReturnPressed: clicked()
+                Keys.onEnterPressed: clicked()
 
                 contentItem: Widgets.LabelExt {
                     leftPadding: VLCStyle.dp(16, VLCStyle.scale)
                     verticalAlignment: Text.AlignVCenter
                     text: resetItem.text
                     font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-                    color: resetItem.hovered || resetItem.visualFocus ? presetBtn._s.accent : presetBtn._s.value
+                    color: resetItem._lit ? presetBtn._s.accent : presetBtn._s.value
                 }
                 background: Rectangle {
-                    color: resetItem.hovered || resetItem.visualFocus ? presetBtn._s.face : "transparent"
+                    color: resetItem._lit ? presetBtn._s.face : "transparent"
                     radius: VLCStyle.dp(4, VLCStyle.scale)
                 }
             }
@@ -263,7 +274,7 @@ PlayerPanel {
         }
     }
 
-    VideoSettingsPage { id: videoPage }
-    AudioSettingsPage { id: audioPage }
-    SubtitleSettingsPage { id: subtitlePage }
+    VideoSettingsPage {}
+    AudioSettingsPage {}
+    SubtitleSettingsPage {}
 }

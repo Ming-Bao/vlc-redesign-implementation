@@ -29,6 +29,12 @@ SettingsPage {
     readonly property var resetNames: ["sub-track", "sub-language", "subsdelay-factor", "freetype-font", "freetype-color", "freetype-outline-color", "sub-margin", "freetype-outline-thickness", "freetype-background-opacity", "sub-text-scale"]
     readonly property var resetModules: ["subsdelay"]
 
+    function resetToDefaults() {
+        Effects.resetToDefaults(resetNames, resetModules)
+        // the text scale is applied live as well
+        Effects.setSubtitleTextScale(100)
+    }
+
     // a small hint under a row (settings that the text renderer only reads when it opens)
     component Note: Widgets.LabelExt {
         readonly property ColorContext colorContext: ColorContext { id: noteTheme; colorSet: ColorContext.Window }

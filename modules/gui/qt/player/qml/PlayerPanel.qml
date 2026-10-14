@@ -36,6 +36,8 @@ T.Popup {
     property bool footerFlat: false
     // items placed above the footer button
     property alias footerHeader: footerHeaderHolder.data
+    // the page shown by the current tab, in the order the pages were declared
+    readonly property Item currentPage: pageHolder.children[currentTab] ?? null
     // the pages scroll when the card would be taller than this
     property real maximumHeight: Number.POSITIVE_INFINITY
     // the card takes maximumHeight and each page fills it (for pages that scroll themselves, like the queue)
