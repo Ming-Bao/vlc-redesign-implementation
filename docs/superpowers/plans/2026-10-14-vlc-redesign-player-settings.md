@@ -104,7 +104,8 @@ Value mapping decisions:
 - **New C++:**
   - meson: the header goes in `moc_headers` (next to `'player/player_controller.hpp'`), and the `.cpp`/`.hpp` go in `qt_plugin_sources` (next to `'player/player_controller.cpp'`).
   - Makefile.am: add to `libqt_plugin_la_SOURCES` (next to `player/player_controller.cpp …`) and add `player/player_effects.moc.cpp` to `nodist_libqt_plugin_la_SOURCES`.
-- **Inline components:** every `component X: …` declaration goes on the root object of its file. Some snippets show one nested for readability; move it to the root when writing the file.
+- **Inline components:** every `component X: …` declaration goes on the root object of its file. Some snippets show one nested for readability; move it to the root when writing the file. An inline component does not share the file's id scope, so it must not refer to ids outside itself (for example `cropGrid`). Pass that state in as properties set where the component is used, e.g. `CropField { side: "top"; linked: cropGrid.linkV }`.
+- **`SettingToggle` signal:** it emits `requested(bool on)`. `T.Switch` already has a `toggled()` signal, which cannot be redeclared.
 - **Icon font:** keys are append-only (charcodes go by index). This slice reuses existing glyphs, so no font change is expected. If a glyph is missing, append it as in slice 3b Task 1.
 - **Where to run:**
   - The build tree (`build/`), the profile (`build/redesign-profile`), sample media (`build/redesign-media`) and the X11/Wayland harness only exist on the Linux build machine used for slices 1–3b. Run this plan there.
@@ -165,7 +166,7 @@ Value mapping decisions:
 - `QString effects::formatBands(const QVector<float>& bands)`: one decimal, C locale, space-separated, always `EQZ_BANDS` (10) values (missing ones are 0).
 - `QVector<float> effects::parseBands(const QString& s)`: 10 values. Unparsable or missing entries become 0, and each is clamped to −20…20.
 - `QString effects::transformType(int flip, int rotation)`: flip 0 none / 1 horizontal / 2 vertical; rotation 0/90/180/270 (anything else is snapped to the nearest multiple of 90, mod 360). Returns `""` for identity.
-- `std::pair<int,int> effects::parseTransform(const QString& type)`: the inverse, giving a canonical `{flip, rotation}`.
+- `std::pair<int,int> effects::parseTransform(const QString& type)`: the inverse. Among the pairs that give the same type it returns the one with the smallest rotation, then the smaller flip.
 - `constexpr int effects::EQZ_BANDS = 10;`
 
 - [ ] **Step 1: Write the failing test** `modules/gui/qt/tests/test_effects_util.cpp`:
@@ -206,7 +207,7 @@ private slots:
 
     void bandsFormat()
     {
-        QCOMPARE(formatBands({1.25f, -3.f}), QString("1.2 -3.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"));
+        QCOMPARE(formatBands({1.24f, -3.f}), QString("1.2 -3.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"));
     }
     void bandsParse()
     {
@@ -255,6 +256,11 @@ private slots:
                 QCOMPARE(transformType(f, r), t);
             }
         QCOMPARE(parseTransform("bogus"), std::make_pair(0, 0));
+        // ambiguous types read back with the smallest rotation, so "Vertical" stays vertical
+        QCOMPARE(parseTransform("vflip"), std::make_pair(2, 0));
+        QCOMPARE(parseTransform("hflip"), std::make_pair(1, 0));
+        QCOMPARE(parseTransform("transpose"), std::make_pair(2, 90));
+        QCOMPARE(parseTransform("antitranspose"), std::make_pair(1, 90));
     }
 };
 
@@ -386,11 +392,16 @@ QString transformType(int flip, int rotation)
 
 std::pair<int, int> parseTransform(const QString& type)
 {
-    // first match wins: none before horizontal before vertical, so the result is canonical
+    // several (flip, rotation) pairs give the same transform: prefer the smallest rotation, then no flip
+    std::pair<int, int> best{ 0, 0 };
+    bool found = false;
     for (int i = 0; i < int(kTransforms.size()); ++i)
         if (type == QLatin1String(kTransforms[i]))
-            return { i / 4, (i % 4) * 90 };
-    return { 0, 0 };
+        {
+            const std::pair<int, int> cand{ i / 4, (i % 4) * 90 };
+            if (!found || cand.second < best.second) { best = cand; found = true; }
+        }
+    return best;
 }
 
 }
@@ -820,7 +831,7 @@ void PlayerEffects::resetToDefaults(const QStringList& names, const QStringList&
 - `SettingsStyle`: a `QtObject` with the Figma colours as readonly properties: `label` #6B6B6B, `value` #8F8F8F, `title` #969696, `field` #090909, `face` #191919, `accentBg` #371F06, `accent` #D37918, `accentDim` #AB6314, `knobOff` #404040, `divider` #222222, `box` #1B1B1B, `tick` #2A2A2A. Light-mode fallbacks come from `ColorContext`.
 - `SettingSection { title: string; divider: bool = true; default property alias content }`: a ColumnLayout that fills the width.
 - `SettingRow { label: string }`: a RowLayout, 48 dp tall, label inset 4 (the section body supplies the 20 px side padding). The control goes as a child.
-- `SettingToggle { checked: bool; signal toggled(bool on) }`: never flips itself; the owner binds `checked`.
+- `SettingToggle { checked: bool; signal requested(bool on) }`: never flips itself; the owner binds `checked`.
 - `SettingSlider { label; valueText; from; to; stepSize; value; ticks: int = 0; defaultValue; signal moved(real v) }`: the header row (label + valueText) plus the track. Double-click resets: `moved(defaultValue)`. `showHeader: bool = true`.
 - `SettingCombo { model; textRole; currentIndex; fullWidth: bool = false; signal activated(int index) }`.
 - `SettingField { text; suffix; validator; signal committed(string text) }`: emits on Enter or focus-out and reverts to `text` on Escape.
@@ -879,13 +890,13 @@ T.Switch {
     id: root
     readonly property ColorContext colorContext: ColorContext { id: theme; colorSet: ColorContext.Switch; focused: root.visualFocus }
     readonly property SettingsStyle _s: SettingsStyle { theme: theme }
-    signal toggled(bool on)
+    signal requested(bool on)
 
     implicitWidth: VLCStyle.dp(68, VLCStyle.scale)
     implicitHeight: VLCStyle.dp(32, VLCStyle.scale)
     // the owner binds `checked` to the real state; a click only asks for the change
     checkable: false
-    onClicked: toggled(!checked)
+    onClicked: requested(!checked)
 
     indicator: Rectangle {
         anchors.fill: parent
@@ -1390,7 +1401,7 @@ Flickable {
         }
 ```
 - [ ] **Step 8: Four tabs in `PlaybackPanel.qml`.**
-  - Delete the inline `component SettingRow` and replace the Reverse `T.Switch` with `SettingToggle { checked: Player.rate < 0; onToggled: Player.reverse(); Accessible.name: qsTr("Reverse") }`. Keep the Speed slider and labels as they are: that is the slice 3a design `2238:9432`, not the settings slider.
+  - Delete the inline `component SettingRow` and replace the Reverse `T.Switch` with `SettingToggle { checked: Player.rate < 0; onRequested: Player.reverse(); Accessible.name: qsTr("Reverse") }`. Keep the Speed slider and labels as they are: that is the slice 3a design `2238:9432`, not the settings slider.
   - Then set:
 ```qml
     fillHeight: true
@@ -1723,14 +1734,14 @@ SettingsPage {
                 }
                 SettingToggle {
                     checked: { void(Effects.revision); return Effects.filterEnabled(parent.module) }
-                    onToggled: (on) => Effects.setFilterEnabled(parent.module, on)
+                    onRequested: (on) => Effects.setFilterEnabled(parent.module, on)
                 }
             }
             component ModuleToggle: SettingRow {
                 required property string module
                 SettingToggle {
                     checked: { void(Effects.revision); return Effects.filterEnabled(parent.module) }
-                    onToggled: (on) => Effects.setFilterEnabled(parent.module, on)
+                    onRequested: (on) => Effects.setFilterEnabled(parent.module, on)
                 }
             }
 
@@ -1762,14 +1773,14 @@ SettingsPage {
                 label: qsTr("Color")
                 SettingToggle {
                     checked: { void(Effects.revision); return Number(Effects.value("gradient-type")) === 1 }
-                    onToggled: (on) => Effects.setValue("gradient-type", on ? 1 : 0)
+                    onRequested: (on) => Effects.setValue("gradient-type", on ? 1 : 0)
                 }
             }
             SettingRow {
                 label: qsTr("Cartoon")
                 SettingToggle {
                     checked: { void(Effects.revision); return Boolean(Effects.value("gradient-cartoon")) }
-                    onToggled: (on) => Effects.setValue("gradient-cartoon", on)
+                    onRequested: (on) => Effects.setValue("gradient-cartoon", on)
                 }
             }
             SettingSlider {
@@ -2041,7 +2052,7 @@ ColumnLayout {
             label: qsTr("2 Pass")
             SettingToggle {
                 checked: { void(Effects.revision); return Boolean(Effects.value("equalizer-2pass")) }
-                onToggled: (on) => Effects.setValue("equalizer-2pass", on)
+                onRequested: (on) => Effects.setValue("equalizer-2pass", on)
             }
         }
     }
@@ -2062,7 +2073,7 @@ ColumnLayout {
             label: block.blockTitle
             SettingToggle {
                 checked: { void(Effects.revision); return Effects.filterEnabled(block.module) }
-                onToggled: (on) => Effects.setFilterEnabled(block.module, on)
+                onRequested: (on) => Effects.setFilterEnabled(block.module, on)
             }
         }
         EffectAccordion {
