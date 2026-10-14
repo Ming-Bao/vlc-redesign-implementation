@@ -36,223 +36,176 @@ PlayerPanel {
     readonly property real _minRate: 0.25
     readonly property real _maxRate: 2
 
-    tabs: [ { text: qsTr("Playback"), icon: VLCIcons.effect_filter } ]
+    fillHeight: true
+    tabs: [
+        { text: qsTr("Playback"),  icon: VLCIcons.effect_filter },
+        { text: qsTr("Video"),     icon: VLCIcons.topbar_video },
+        { text: qsTr("Audio"),     icon: VLCIcons.topbar_music },
+        { text: qsTr("Subtitles"), icon: VLCIcons.audiosub }
+    ]
 
-    footerText: qsTr("Effects and Filters")
+    footerFlat: true
+    footerIcon: VLCIcons.settings
+    footerText: qsTr("Open Advanced Settings")
     onFooterClicked: {
         root.close()
-        DialogsProvider.extendedDialog()
+        DialogsProvider.prefsDialog()
     }
 
-    component SettingRow : RowLayout {
-        property alias label: lbl.text
-        property color labelColor
-
-        Layout.fillWidth: true
-        Layout.preferredHeight: VLCStyle.dp(52, VLCStyle.scale)
-        Layout.leftMargin: VLCStyle.dp(24, VLCStyle.scale)
-        Layout.rightMargin: VLCStyle.dp(20, VLCStyle.scale)
-        spacing: VLCStyle.dp(12, VLCStyle.scale)
-
-        Widgets.LabelExt {
-            id: lbl
+    SettingsPage {
+        ColumnLayout {
             Layout.fillWidth: true
-            font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-            color: parent.labelColor
-        }
-    }
+            Layout.leftMargin: VLCStyle.dp(20, VLCStyle.scale)
+            Layout.rightMargin: VLCStyle.dp(20, VLCStyle.scale)
+            spacing: 0
 
-    ColumnLayout {
-        spacing: 0
+            Item { Layout.preferredHeight: VLCStyle.dp(12, VLCStyle.scale) }
 
-        Item { Layout.preferredHeight: VLCStyle.dp(12, VLCStyle.scale) }
+            SettingRow {
+                label: qsTr("Reverse")
 
-        SettingRow {
-            label: qsTr("Reverse")
-            labelColor: root._labelColor
-
-            T.Switch {
-                id: reverseSwitch
-
-                readonly property ColorContext colorContext: ColorContext {
-                    id: reverseSwitchTheme
-                    colorSet: ColorContext.Switch
-                    focused: reverseSwitch.visualFocus
+                SettingToggle {
+                    checked: Player.rate < 0
+                    onRequested: Player.reverse()
+                    Accessible.name: qsTr("Reverse")
                 }
+            }
 
-                implicitWidth: VLCStyle.dp(68, VLCStyle.scale)
-                implicitHeight: VLCStyle.dp(32, VLCStyle.scale)
-                // a click never flips it by itself: it shows the real rate (most inputs refuse a negative one)
-                checkable: false
-                checked: Player.rate < 0
-                onClicked: Player.reverse()
-                Accessible.name: qsTr("Reverse")
+            SettingRow {
+                label: qsTr("Audio Visualizer")
 
-                indicator: Rectangle {
-                    anchors.fill: parent
-                    radius: VLCStyle.dp(6, VLCStyle.scale)
-                    color: root._fieldColor
-                    border.width: reverseSwitch.visualFocus ? VLCStyle.focus_border : 0
-                    border.color: reverseSwitchTheme.visualFocus
+                Widgets.ComboBoxExt {
+                    id: visCombo
 
-                    Rectangle {
-                        x: reverseSwitch.checked ? parent.width - width - VLCStyle.dp(2, VLCStyle.scale)
-                                                 : VLCStyle.dp(2, VLCStyle.scale)
-                        y: VLCStyle.dp(2, VLCStyle.scale)
-                        width: parent.height - VLCStyle.dp(4, VLCStyle.scale)
-                        height: width
-                        radius: VLCStyle.dp(4, VLCStyle.scale)
-                        color: reverseSwitch.checked ? root.colorContext.accent : "#3A3A3A"
+                    Layout.preferredWidth: VLCStyle.dp(220, VLCStyle.scale)
+                    Layout.preferredHeight: VLCStyle.dp(48, VLCStyle.scale)
+                    model: Player.audioVisualization
+                    textRole: "display"
+                    color: root._valueColor
+
+                    // Figma field: #191919 inside a 4 px #090909 frame, regular 14 px text
+                    background: Rectangle {
+                        radius: VLCStyle.dp(6, VLCStyle.scale)
+                        color: root._dark ? "#191919" : root.colorContext.bg.primary
+                        border.width: visCombo.visualFocus ? VLCStyle.focus_border : VLCStyle.dp(4, VLCStyle.scale)
+                        border.color: visCombo.visualFocus ? visCombo.colorContext.visualFocus : root._fieldColor
                     }
 
+                    contentItem: Widgets.LabelExt {
+                        leftPadding: VLCStyle.dp(16, VLCStyle.scale)
+                        rightPadding: visCombo.indicator.width + VLCStyle.dp(16, VLCStyle.scale)
+                        text: visCombo.displayText
+                        verticalAlignment: Text.AlignVCenter
+                        elide: Text.ElideRight
+                        font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
+                        color: root._valueColor
+                    }
+
+                    // re-read whenever the panel opens; the model has no "current index" property
+                    currentIndex: {
+                        void(root.opened)
+                        for (let i = 0; i < model.rowCount(); ++i)
+                            if (model.data(model.index(i, 0), Qt.CheckStateRole))
+                                return i
+                        return 0
+                    }
+                    onActivated: (i) => model.setData(model.index(i, 0), true, Qt.CheckStateRole)
+                }
+            }
+
+            SettingRow {
+                label: qsTr("Speed")
+
+                Widgets.LabelExt {
+                    Layout.preferredWidth: VLCStyle.dp(140, VLCStyle.scale)
+                    Layout.preferredHeight: VLCStyle.dp(32, VLCStyle.scale)
+                    leftPadding: VLCStyle.dp(12, VLCStyle.scale)
+                    verticalAlignment: Text.AlignVCenter
+                    text: qsTr("%1x").arg(+Math.abs(Player.rate).toFixed(2))
+                    font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
+                    color: root._valueColor
+                    background: Rectangle { color: root._fieldColor; radius: VLCStyle.dp(4, VLCStyle.scale) }
+                }
+            }
+
+            T.Slider {
+                id: speedSlider
+
+                readonly property ColorContext colorContext: ColorContext {
+                    id: speedSliderTheme
+                    colorSet: ColorContext.Slider
+                    focused: speedSlider.visualFocus
+                }
+
+                Layout.fillWidth: true
+                implicitHeight: VLCStyle.dp(16, VLCStyle.scale)
+
+                from: root._minRate
+                to: root._maxRate
+                stepSize: 0.05
+                snapMode: T.Slider.SnapAlways
+                value: Math.abs(Player.rate)
+                onMoved: Player.rate = (Player.rate < 0 ? -1 : 1) * Math.round(value * 100) / 100
+                Accessible.name: qsTr("Playback speed")
+
+                background: Rectangle {
+                    radius: VLCStyle.dp(6, VLCStyle.scale)
+                    color: root._fieldColor
+                    border.width: speedSlider.visualFocus ? VLCStyle.focus_border : 0
+                    border.color: speedSliderTheme.visualFocus
+
+                    Rectangle {
+                        width: speedSlider.handle.x + speedSlider.handle.width / 2
+                        height: parent.height
+                        radius: parent.radius
+                        color: Qt.alpha(root.colorContext.accent, 0.4)
+                    }
+
+                    Repeater {
+                        model: 6   // inner ticks at 0.5 … 1.75
+
+                        Rectangle {
+                            required property int index
+                            x: speedSlider.leftPadding + (index + 1) / 7 * speedSlider.availableWidth
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 1
+                            height: VLCStyle.dp(6, VLCStyle.scale)
+                            color: "#3A3A3A"
+                        }
+                    }
+                }
+
+                handle: Rectangle {
+                    x: speedSlider.leftPadding + speedSlider.visualPosition * (speedSlider.availableWidth - width)
+                    implicitWidth: VLCStyle.dp(8, VLCStyle.scale)
+                    implicitHeight: VLCStyle.dp(22, VLCStyle.scale)
+                    anchors.verticalCenter: parent.verticalCenter
+                    radius: VLCStyle.dp(2, VLCStyle.scale)
+                    color: root.colorContext.accent
+                }
+            }
+
+            Item {
+                Layout.fillWidth: true
+                Layout.topMargin: VLCStyle.dp(12, VLCStyle.scale)
+                implicitHeight: VLCStyle.dp(16, VLCStyle.scale)
+
+                Repeater {
+                    model: 8   // 0.25 … 2
+
                     Widgets.LabelExt {
-                        x: reverseSwitch.checked ? VLCStyle.dp(10, VLCStyle.scale)
-                                                 : parent.width - width - VLCStyle.dp(8, VLCStyle.scale)
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: reverseSwitch.checked ? qsTr("ON") : qsTr("OFF")
+                        required property int index
+                        x: index / 7 * parent.width - (index === 0 ? 0 : index === 7 ? width : width / 2)
+                        text: +(0.25 * (index + 1))
                         font.pixelSize: VLCStyle.dp(12, VLCStyle.scale)
                         color: root._valueColor
                     }
                 }
             }
         }
-
-        SettingRow {
-            label: qsTr("Audio Visualizer")
-            labelColor: root._labelColor
-
-            Widgets.ComboBoxExt {
-                id: visCombo
-
-                Layout.preferredWidth: VLCStyle.dp(220, VLCStyle.scale)
-                Layout.preferredHeight: VLCStyle.dp(48, VLCStyle.scale)
-                model: Player.audioVisualization
-                textRole: "display"
-                color: root._valueColor
-
-                // Figma field: #191919 inside a 4 px #090909 frame, regular 14 px text
-                background: Rectangle {
-                    radius: VLCStyle.dp(6, VLCStyle.scale)
-                    color: root._dark ? "#191919" : root.colorContext.bg.primary
-                    border.width: visCombo.visualFocus ? VLCStyle.focus_border : VLCStyle.dp(4, VLCStyle.scale)
-                    border.color: visCombo.visualFocus ? visCombo.colorContext.visualFocus : root._fieldColor
-                }
-
-                contentItem: Widgets.LabelExt {
-                    leftPadding: VLCStyle.dp(16, VLCStyle.scale)
-                    rightPadding: visCombo.indicator.width + VLCStyle.dp(16, VLCStyle.scale)
-                    text: visCombo.displayText
-                    verticalAlignment: Text.AlignVCenter
-                    elide: Text.ElideRight
-                    font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-                    color: root._valueColor
-                }
-
-                // re-read whenever the panel opens; the model has no "current index" property
-                currentIndex: {
-                    void(root.opened)
-                    for (let i = 0; i < model.rowCount(); ++i)
-                        if (model.data(model.index(i, 0), Qt.CheckStateRole))
-                            return i
-                    return 0
-                }
-                onActivated: (i) => model.setData(model.index(i, 0), true, Qt.CheckStateRole)
-            }
-        }
-
-        SettingRow {
-            label: qsTr("Speed")
-            labelColor: root._labelColor
-
-            Widgets.LabelExt {
-                Layout.preferredWidth: VLCStyle.dp(140, VLCStyle.scale)
-                Layout.preferredHeight: VLCStyle.dp(32, VLCStyle.scale)
-                leftPadding: VLCStyle.dp(12, VLCStyle.scale)
-                verticalAlignment: Text.AlignVCenter
-                text: qsTr("%1x").arg(+Math.abs(Player.rate).toFixed(2))
-                font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-                color: root._valueColor
-                background: Rectangle { color: root._fieldColor; radius: VLCStyle.dp(4, VLCStyle.scale) }
-            }
-        }
-
-        T.Slider {
-            id: speedSlider
-
-            readonly property ColorContext colorContext: ColorContext {
-                id: speedSliderTheme
-                colorSet: ColorContext.Slider
-                focused: speedSlider.visualFocus
-            }
-
-            Layout.fillWidth: true
-            Layout.leftMargin: VLCStyle.dp(20, VLCStyle.scale)
-            Layout.rightMargin: VLCStyle.dp(20, VLCStyle.scale)
-            implicitHeight: VLCStyle.dp(16, VLCStyle.scale)
-
-            from: root._minRate
-            to: root._maxRate
-            stepSize: 0.05
-            snapMode: T.Slider.SnapAlways
-            value: Math.abs(Player.rate)
-            onMoved: Player.rate = (Player.rate < 0 ? -1 : 1) * Math.round(value * 100) / 100
-            Accessible.name: qsTr("Playback speed")
-
-            background: Rectangle {
-                radius: VLCStyle.dp(6, VLCStyle.scale)
-                color: root._fieldColor
-                border.width: speedSlider.visualFocus ? VLCStyle.focus_border : 0
-                border.color: speedSliderTheme.visualFocus
-
-                Rectangle {
-                    width: speedSlider.handle.x + speedSlider.handle.width / 2
-                    height: parent.height
-                    radius: parent.radius
-                    color: Qt.alpha(root.colorContext.accent, 0.4)
-                }
-
-                Repeater {
-                    model: 6   // inner ticks at 0.5 … 1.75
-
-                    Rectangle {
-                        required property int index
-                        x: speedSlider.leftPadding + (index + 1) / 7 * speedSlider.availableWidth
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: 1
-                        height: VLCStyle.dp(6, VLCStyle.scale)
-                        color: "#3A3A3A"
-                    }
-                }
-            }
-
-            handle: Rectangle {
-                x: speedSlider.leftPadding + speedSlider.visualPosition * (speedSlider.availableWidth - width)
-                implicitWidth: VLCStyle.dp(8, VLCStyle.scale)
-                implicitHeight: VLCStyle.dp(22, VLCStyle.scale)
-                anchors.verticalCenter: parent.verticalCenter
-                radius: VLCStyle.dp(2, VLCStyle.scale)
-                color: root.colorContext.accent
-            }
-        }
-
-        Item {
-            Layout.fillWidth: true
-            Layout.leftMargin: VLCStyle.dp(20, VLCStyle.scale)
-            Layout.rightMargin: VLCStyle.dp(20, VLCStyle.scale)
-            Layout.topMargin: VLCStyle.dp(12, VLCStyle.scale)
-            implicitHeight: VLCStyle.dp(16, VLCStyle.scale)
-
-            Repeater {
-                model: 8   // 0.25 … 2
-
-                Widgets.LabelExt {
-                    required property int index
-                    x: index / 7 * parent.width - (index === 0 ? 0 : index === 7 ? width : width / 2)
-                    text: +(0.25 * (index + 1))
-                    font.pixelSize: VLCStyle.dp(12, VLCStyle.scale)
-                    color: root._valueColor
-                }
-            }
-        }
     }
+
+    VideoSettingsPage {}
+    AudioSettingsPage {}
+    SubtitleSettingsPage {}
 }

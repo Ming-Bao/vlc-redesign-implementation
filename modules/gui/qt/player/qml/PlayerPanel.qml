@@ -31,6 +31,11 @@ T.Popup {
     property var tabs: []
     property int currentTab: 0
     property string footerText: ""
+    property string footerIcon: ""
+    // transparent footer with a divider above it (the settings tabs)
+    property bool footerFlat: false
+    // items placed above the footer button
+    property alias footerHeader: footerHeaderHolder.data
     // the pages scroll when the card would be taller than this
     property real maximumHeight: Number.POSITIVE_INFINITY
     // the card takes maximumHeight and each page fills it (for pages that scroll themselves, like the queue)
@@ -281,6 +286,22 @@ T.Popup {
             }
         }
 
+        Rectangle {
+            visible: root.footerFlat && root.footerText.length > 0
+            Layout.fillWidth: true
+            implicitHeight: 1
+            color: root._dark ? "#222222" : theme.separator
+        }
+
+        ColumnLayout {
+            id: footerHeaderHolder
+            Layout.fillWidth: true
+            Layout.leftMargin: VLCStyle.dp(20, VLCStyle.scale)
+            Layout.rightMargin: VLCStyle.dp(20, VLCStyle.scale)
+            Layout.topMargin: children.length ? VLCStyle.dp(20, VLCStyle.scale) : 0
+            visible: children.length > 0
+        }
+
         T.Button {
             id: footer
 
@@ -292,6 +313,7 @@ T.Popup {
 
             Layout.fillWidth: true
             Layout.margins: VLCStyle.dp(20, VLCStyle.scale)
+            Layout.topMargin: footerHeaderHolder.visible ? VLCStyle.dp(10, VLCStyle.scale) : VLCStyle.dp(20, VLCStyle.scale)
             implicitHeight: VLCStyle.dp(32, VLCStyle.scale)
             visible: root.footerText.length > 0
             text: root.footerText
@@ -299,17 +321,30 @@ T.Popup {
 
             background: Rectangle {
                 radius: VLCStyle.dp(4, VLCStyle.scale)
-                color: root._dark ? "#090909" : theme.bg.secondary
+                color: root.footerFlat ? "transparent" : (root._dark ? "#090909" : theme.bg.secondary)
                 border.width: footer.visualFocus ? VLCStyle.focus_border : 0
                 border.color: footerTheme.visualFocus
             }
 
-            contentItem: Widgets.LabelExt {
-                text: footer.text
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-                color: root._dark ? "#8F8F8F" : theme.fg.primary
+            contentItem: Row {
+                spacing: VLCStyle.dp(6, VLCStyle.scale)
+                Widgets.IconLabel {
+                    visible: root.footerIcon.length > 0
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: root.footerIcon
+                    font.pixelSize: VLCStyle.dp(20, VLCStyle.scale)
+                    color: footerLabel.color
+                }
+                Widgets.LabelExt {
+                    id: footerLabel
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: footer.text
+                    font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
+                    color: root.footerFlat ? (root._dark ? "#6B6B6B" : theme.fg.secondary)
+                                           : (root._dark ? "#8F8F8F" : theme.fg.primary)
+                }
+                // centre the row in the button
+                x: (footer.availableWidth - implicitWidth) / 2
             }
         }
     }

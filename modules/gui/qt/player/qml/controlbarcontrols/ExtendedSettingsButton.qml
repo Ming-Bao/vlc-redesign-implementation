@@ -33,6 +33,9 @@ Widgets.IconToolButton {
 
     AccessibleCompat.id: "extendedSettingsButton"
 
+    // the panel reopens on the last tab
+    property int _lastTab: 0
+
     signal requestLockUnlockAutoHide(bool lock)
     signal menuOpened(var menu)
 
@@ -51,6 +54,9 @@ Widgets.IconToolButton {
             id: panel
 
             parent: extdSettingsBtn._parentItem
+
+            currentTab: extdSettingsBtn._lastTab
+            onCurrentTabChanged: extdSettingsBtn._lastTab = currentTab
 
             x: parent.width - width - VLCStyle.dp(20, VLCStyle.scale)
             y: parent.positionSliderY - height - VLCStyle.dp(20, VLCStyle.scale)
