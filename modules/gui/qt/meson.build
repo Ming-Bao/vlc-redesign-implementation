@@ -415,6 +415,8 @@ qt_plugin_sources = files(
     'style/systempalettethemeprovider.cpp',
     'player/input_models.cpp',
     'player/delay_estimator.cpp',
+    'player/effects_util.cpp',
+    'player/effects_util.hpp',
     'player/input_models.hpp',
     'player/player_controller.cpp',
     'player/player_controller.hpp',
@@ -1431,6 +1433,20 @@ if qt6_dep.found()
             'link_with': [libvlccore, libvlc],
             'link_args': qt_link_args,
             'dependencies': [qt6_dep, qt_extra_deps, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
+            'name': 'test_qt_effects_util',
+            'sources': files(
+                'tests/test_effects_util.cpp',
+                'player/effects_util.hpp',
+                'player/effects_util.cpp'
+            ),
+            'moc_sources': files('tests/test_effects_util.cpp'),
+            'suite': ['qt'],
+            'include_directories' : qt_include_dir,
+            'link_args': qt_link_args,
+            'dependencies': [qt6_dep, qtest_qt6_dep]
         }
 
         vlc_tests += {
