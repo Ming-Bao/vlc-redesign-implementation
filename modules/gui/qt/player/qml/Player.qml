@@ -40,16 +40,6 @@ FocusScope {
 
     readonly property int positionSliderY: controlBar.y + controlBar.sliderY
 
-    readonly property string coverSource: {
-        if (Player.artwork &&
-            Player.artwork.toString())
-            return Player.artwork
-        else if (Player.hasVideoOutput)
-            return VLCStyle.noArtVideoCover
-        else
-            return VLCStyle.noArtAlbumCover
-    }
-
     // Only applicable in video mode:
     // Figma: solid bars, no gradient over the video
     property bool displayFadeRectangles: false

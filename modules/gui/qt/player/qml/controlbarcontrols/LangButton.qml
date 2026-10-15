@@ -55,7 +55,12 @@ Widgets.IconToolButton {
     // Events
 
     // while the panel is open it is modal: a click on this button only closes it
-    onClicked: menuLoader.item.open()
+    onClicked: {
+        // the music bar's button is about the audio tracks
+        if (!Player.hasVideoOutput)
+            menuLoader.item.currentTab = 1
+        menuLoader.item.open()
+    }
 
     // Children
 

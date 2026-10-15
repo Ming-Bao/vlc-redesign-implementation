@@ -188,6 +188,11 @@ void PlayerWaveform::restart()
     input_item_AddOption(item, qtu(sout), VLC_INPUT_OPTION_TRUSTED);
     input_item_AddOption(item, "no-sout-video", VLC_INPUT_OPTION_TRUSTED);
     input_item_AddOption(item, "no-sout-spu", VLC_INPUT_OPTION_TRUSTED);
+    // the decode must not inherit the user's input options (paused start, start/stop/run time)
+    input_item_AddOption(item, "no-start-paused", VLC_INPUT_OPTION_TRUSTED);
+    input_item_AddOption(item, "start-time=0", VLC_INPUT_OPTION_TRUSTED);
+    input_item_AddOption(item, "stop-time=0", VLC_INPUT_OPTION_TRUSTED);
+    input_item_AddOption(item, "run-time=0", VLC_INPUT_OPTION_TRUSTED);
 
     vlc_player_Lock(job->player);
     job->listener = vlc_player_AddListener(job->player, playerCallbacks(), job);

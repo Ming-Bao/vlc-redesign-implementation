@@ -248,8 +248,9 @@ T.Pane {
 
                 Loader {
                     id: waveformLoader
-                    // no decode for videos, even during the moment before their video output appears
-                    active: trackPositionSlider.waveform && Player.videoTracks.count === 0
+                    // only once the tracks are known and are audio only: Player.url changes before the
+                    // demuxer lists any track, so a video would otherwise be decoded for a moment
+                    active: trackPositionSlider.waveform && Player.audioTracks.count > 0 && Player.videoTracks.count === 0
                     sourceComponent: Waveform {
                         ctx: MainCtx
                         uri: Player.url
