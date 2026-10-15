@@ -43,7 +43,8 @@ Widgets.IconToolButton {
 
     // Settings
 
-    text: VLCIcons.audiosub
+    // Figma Controls music 4778:26181: the music bar's tracks button shows the audio glyph
+    text: Player.hasVideoOutput ? VLCIcons.audiosub : VLCIcons.audio_tracks
 
     enabled: menuLoader.status === Loader.Ready
 
