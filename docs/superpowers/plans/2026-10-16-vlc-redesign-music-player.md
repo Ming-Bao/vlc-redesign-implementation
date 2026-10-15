@@ -85,7 +85,7 @@
 - `void normalize(QList<float>& peaks);` divides by the max (a no-op when the max is 0).
 - `qreal barHeight(float peak, qreal minH, qreal maxH, qreal step);` returns `minH + round(peak·(maxH−minH)/step)·step`, clamped to [minH, maxH].
 
-- [ ] **Step 1: Write the failing test** `modules/gui/qt/tests/test_waveform_util.cpp`. Use the same GPL header as `tests/test_effects_util.cpp`, year 2026.
+- [x] **Step 1: Write the failing test** `modules/gui/qt/tests/test_waveform_util.cpp`. Use the same GPL header as `tests/test_effects_util.cpp`, year 2026.
 
 ```cpp
 #include <QTest>
@@ -185,7 +185,7 @@ QTEST_GUILESS_MAIN(TestWaveformUtil)
 #include "test_waveform_util.moc"
 ```
 
-- [ ] **Step 2: Register the test.**
+- [x] **Step 2: Register the test.**
   - **meson.build:** after the whole `test_qt_effects_util` block:
 
 ```meson
@@ -227,9 +227,9 @@ TESTS += test_waveform_util
   - Also add `'player/waveform_util.cpp', 'player/waveform_util.hpp',` to meson `qt_plugin_sources` (after `'player/effects_util.hpp',`).
   - And add `player/waveform_util.cpp player/waveform_util.hpp \` to Makefile.am `libqt_plugin_la_SOURCES` (after `player/effects_util.cpp player/effects_util.hpp \`).
 
-- [ ] **Step 3: Run it and see it fail.** `ninja -C build 2>&1 | tail -5`. Expected: FAIL, because `player/waveform_util.hpp` does not exist.
+- [x] **Step 3: Run it and see it fail.** `ninja -C build 2>&1 | tail -5`. Expected: FAIL, because `player/waveform_util.hpp` does not exist.
 
-- [ ] **Step 4: Implement.**
+- [x] **Step 4: Implement.**
   - `modules/gui/qt/player/waveform_util.hpp`, with the GPL header:
 
 ```cpp
@@ -320,10 +320,10 @@ qreal barHeight(float peak, qreal minH, qreal maxH, qreal step)
 }
 ```
 
-- [ ] **Step 5: Run the tests and see them pass.**
+- [x] **Step 5: Run the tests and see them pass.**
   - `ninja -C build && meson test -C build --suite qt test_qt_waveform_util -v 2>&1 | tail -20`. Expected: `Totals: … passed, 0 failed`.
   - Then run `meson test -C build --suite qt`. Expected: 11/11 OK.
-- [ ] **Step 6: Commit** `qt: add tested helpers for the music player's waveform`.
+- [x] **Step 6: Commit** `qt: add tested helpers for the music player's waveform`.
 
 ---
 
@@ -344,7 +344,7 @@ qreal barHeight(float peak, qreal minH, qreal maxH, qreal step)
   - `Q_INVOKABLE list<real> heights(int count, real minH, real maxH, real step)`: bar heights in px. Flat `minH` bars while there are no peaks.
   - Log: `msg_Dbg` `waveform: <N> ms` when a decode finishes. `msg_Err` `waveform: failed to start` on a start failure.
 
-- [ ] **Step 1: Sample media.** Append to `docs/superpowers/scripts/make-samples.sh`, before `echo samples ready`:
+- [x] **Step 1: Sample media.** Append to `docs/superpowers/scripts/make-samples.sh`, before `echo samples ready`:
 
 ```sh
 # music player: a shaped envelope (silence, ramp, bursts) with an embedded cover, and a long file for cancel tests
@@ -361,7 +361,7 @@ rm -f "$M/cover.png"
   - Generate only these two files, by running the three ffmpeg lines from that block by hand with `M=build/redesign-music`. Rerunning the whole script would rewrite the other samples and the library's file dates.
   - Check: `ffprobe -v error -show_entries stream=codec_type:format=duration -of csv=p=0 build/redesign-music/waveform.mp3` prints `audio`, `video` (the attached picture) and `40.0…`.
 
-- [ ] **Step 2: Failing check.**
+- [x] **Step 2: Failing check.**
   - Add the registration line to `maininterface/mainui.cpp`, right after the `qmlRegisterSingletonInstance<PlayerEffects>(…);` statement:
 
 ```cpp
@@ -371,7 +371,7 @@ rm -f "$M/cover.png"
   - Add `#include "player/player_waveform.hpp"` next to the existing `#include "player/player_effects.hpp"`.
   - `ninja -C build 2>&1 | tail -3`. Expected: FAIL, because `player/player_waveform.hpp` is not found.
 
-- [ ] **Step 3: Header** `modules/gui/qt/player/player_waveform.hpp`, with the GPL header:
+- [x] **Step 3: Header** `modules/gui/qt/player/player_waveform.hpp`, with the GPL header:
 
 ```cpp
 #ifndef VLC_QT_PLAYER_WAVEFORM_HPP
@@ -436,7 +436,7 @@ private:
 #endif
 ```
 
-- [ ] **Step 4: Implementation** `modules/gui/qt/player/player_waveform.cpp`, with the GPL header.
+- [x] **Step 4: Implementation** `modules/gui/qt/player/player_waveform.cpp`, with the GPL header.
 
   **Why it is shaped this way:**
   - The hidden player's parent object pins `aout`/`vout` to `dummy`, as the fingerprinter does.
@@ -675,12 +675,12 @@ void PlayerWaveform::poll()
 }
 ```
 
-- [ ] **Step 5: Build registration.**
+- [x] **Step 5: Build registration.**
   - **meson.build:** add `'player/player_waveform.hpp',` to `moc_headers` after `'player/player_effects.hpp',`. Add `'player/player_waveform.cpp', 'player/player_waveform.hpp',` to `qt_plugin_sources` after `'player/player_effects.hpp',`.
   - **Makefile.am:** add `player/player_waveform.cpp player/player_waveform.hpp \` to `libqt_plugin_la_SOURCES` after `player/player_effects.cpp player/player_effects.hpp \`. Add `player/player_waveform.moc.cpp \` to `nodist_libqt_plugin_la_SOURCES` after `player/player_effects.moc.cpp \`.
   - `ninja -C build 2>&1 | tail -3` must be clean, with no warnings in the new files. If `vlc_player_cbs` value-initialisation warns about missing field initialisers, keep the lambda form: C++17 has no designated initialisers.
 
-- [ ] **Step 6: Temporary probe.** Shows the decode works before any UI uses it.
+- [x] **Step 6: Temporary probe.** Shows the decode works before any UI uses it.
   - Add this to the end of `ControlBar.qml`'s `contentItem` `ColumnLayout`, then build:
 
 ```qml
@@ -699,10 +699,10 @@ void PlayerWaveform::poll()
   - **If N is about 40000,** the input is pacing in real time, i.e. `no-time-sync` didn't take. Check the log for `set config option: sout-smem-time-sync`. Fix the chain option before going on.
   - **If `WAVEFORM` never prints,** grep the log for `smem` and `transcode` errors. A `Smem does only support raw audio format` error means the `acodec` did not resolve.
 
-- [ ] **Step 7: Review Focus 2 and 4 (cancel and no-decode).**
+- [x] **Step 7: Review Focus 2 and 4 (cancel and no-decode).**
   - **Quit mid-decode:** `$H start -vv build/redesign-music/long.mp3; sleep 1; $H stop`. Then `pgrep -x vlc-static` must print nothing, and `coredumpctl list vlc-static 2>/dev/null | tail -1` must show no new entry from today. Also check `$L` for `waveform:`: there must be no `waveform: <N> ms` line, because the decode was cancelled.
   - **Network URI:** `$H start -vv http://127.0.0.1:9/none.mp3; sleep 4; grep -c "waveform:" $L; $H stop`. Expected: `0`. No decode is attempted (the playback itself fails, which is expected).
-- [ ] **Step 8:** Remove the probe from `ControlBar.qml` and rebuild. Run the log check on a fresh run. Commit `qt: decode a waveform of the playing audio file in the background` (C++, build files, `make-samples.sh`).
+- [x] **Step 8:** Remove the probe from `ControlBar.qml` and rebuild. Run the log check on a fresh run. Commit `qt: decode a waveform of the playing audio file in the background` (C++, build files, `make-samples.sh`).
 
 ---
 
@@ -717,10 +717,10 @@ void PlayerWaveform::poll()
 - `VLCIcons.skip_back` and `VLCIcons.skip_for`, which now draw Figma's "15" arrows. Same keys, new SVGs.
 - `VLCIcons.audio_tracks`, a new key appended last: Figma's audio-tracks (waveform) glyph.
 
-- [ ] **Step 1: Failing check.**
+- [x] **Step 1: Failing check.**
   - Edit `mapping.json`: change `"backward-10-sec.svg": ["skip_back"]` to `"backward-15-sec.svg": ["skip_back"]`, change `"forward-10-sec.svg": ["skip_for"]` to `"forward-15-sec.svg": ["skip_for"]`, and add `"audio-tracks.svg": ["audio_tracks"]`.
   - Run `python3 -I docs/superpowers/scripts/check-icon-font.py modules/gui/qt/pixmaps`. Expected: FAIL, because the SVGs are missing.
-- [ ] **Step 2: Export from Figma.**
+- [x] **Step 2: Export from Figma.**
   - Load the `figma:figma-use` skill, then run `use_figma` on file `dSoAm0gN9ZterHSssJU9FN`:
 
 ```js
@@ -740,23 +740,23 @@ return out;
   - Write each string to `modules/gui/qt/pixmaps/redesign/<name>.svg`.
   - `45:36` is the backward variant: its inner frame is mirrored, and the export bakes that in. Check it points left and its "15" reads normally, not mirrored.
   - If an id is null, get the node's parent: run `get_metadata` on `4778:26181` and look for the `Icon` instances in `Frame 12` (back), `Frame 11` (forward) and the first `Icon Wrapper` of `Frame 23` (audio tracks). Export those instance ids instead.
-- [ ] **Step 3: Clean and flatten.** The "15" must end up as filled outlines and the strokes must be expanded, or FontForge drops them:
+- [x] **Step 3: Clean and flatten.** The "15" must end up as filled outlines and the strokes must be expanded, or FontForge drops them:
 
 ```sh
 python3 -I docs/superpowers/scripts/clean-figma-svg.py modules/gui/qt/pixmaps/redesign/{backward-15-sec,forward-15-sec,audio-tracks}.svg
 python3 -I docs/superpowers/scripts/flatten-figma-svg.py modules/gui/qt/pixmaps/redesign/{backward-15-sec,forward-15-sec,audio-tracks}.svg
 ```
 
-- [ ] **Step 4: Point the keys and regenerate.**
+- [x] **Step 4: Point the keys and regenerate.**
   - In `VLCIcons.json`, change the two existing entries' paths: `skip_back` → `./redesign/backward-15-sec.svg`, `skip_for` → `./redesign/forward-15-sec.svg`.
   - Append `{"key":"audio_tracks", "path": "./redesign/audio-tracks.svg"}` after the `link` entry, which is the current last.
   - From `modules/gui/qt/pixmaps`, run `python3 makeIconFont.py VLCIcons.json`.
   - Leave the old `backward-10-sec.svg`/`forward-10-sec.svg` in place: they are unreferenced, and deleting them is churn.
-- [ ] **Step 5: Check.**
+- [x] **Step 5: Check.**
   - `check-icon-font.py` must print `icon font OK`.
   - `git diff modules/gui/qt/style/vlcicons.hpp` must show exactly one added key (`audio_tracks`) and no renumbered key.
   - Render the three glyphs: `python3 -I -c "import fontforge,json;m=json.load(open('modules/gui/qt/pixmaps/VLCIcons.json'));o=[g['key'] for g in m['glyphs']];f=fontforge.open('modules/gui/qt/pixmaps/VLCIcons.ttf');[f[0xE000+o.index(k)].export(f'$S/g_{k}.png',64) for k in ('skip_back','skip_for','audio_tracks')]"`. Compare them by eye with `docs/superpowers/figma/3d/controls_music.png`: the 2nd and 4th icons of the left group, and the first icon after the volume meter.
-- [ ] **Step 6:** `ninja -C build`, then commit `qt: use the redesign's 15 second skip icons and add the audio tracks icon`.
+- [x] **Step 6:** `ninja -C build`, then commit `qt: use the redesign's 15 second skip icons and add the audio tracks icon`.
 
 ---
 
@@ -771,10 +771,10 @@ python3 -I docs/superpowers/scripts/flatten-figma-svg.py modules/gui/qt/pixmaps/
 - Consumes: Task 3's `VLCIcons.skip_back`/`skip_for` (15 s glyphs) and `VLCIcons.audio_tracks`.
 - Produces: `PlayerController::jumpBySeconds(int seconds)` (a public slot, callable from QML as `Player.jumpBySeconds(n)`).
 
-- [ ] **Step 1: Failing check.**
+- [x] **Step 1: Failing check.**
   - `cp /tmp/conf.bak …; $H start -vv build/redesign-music/waveform.mp3; sleep 6; $H shot $S/t4_before.png; $H stop`.
   - The left group shows only prev, play and next. The right group shows the subtitles glyph, as in `docs/superpowers/figma/3d/before_music.png`.
-- [ ] **Step 2: Default Audioplayer layout.** In `controlbar_profile_model.cpp`, edit the `Style::DEFAULT_STYLE` → `PlayerControlbarModel::Audioplayer` entry (the second entry of `DEFAULT_STYLE`) to read:
+- [x] **Step 2: Default Audioplayer layout.** In `controlbar_profile_model.cpp`, edit the `Style::DEFAULT_STYLE` → `PlayerControlbarModel::Audioplayer` entry (the second entry of `DEFAULT_STYLE`) to read:
 
 ```cpp
                     {
@@ -804,7 +804,7 @@ python3 -I docs/superpowers/scripts/flatten-figma-svg.py modules/gui/qt/pixmaps/
 
   Leave the `Videoplayer` and `Miniplayer` entries, and every other style, as they are.
 
-- [ ] **Step 3: `jumpBySeconds`.**
+- [x] **Step 3: `jumpBySeconds`.**
   - In `player_controller.hpp`, next to `void jumpTime( VLCTime i_time );` (the public slots), add `void jumpBySeconds( int seconds );`.
   - In `player_controller.cpp`, right after `PlayerController::jumpBwd()`:
 
@@ -819,8 +819,8 @@ void PlayerController::jumpBySeconds( int seconds )
 }
 ```
 
-- [ ] **Step 4: Skip buttons jump ±15 s, as their glyphs say.** `SkipBackButton.qml`: `onClicked: Player.jumpBySeconds(-15)` and `description: qsTr("Back 15 seconds")`. `SkipForwardButton.qml`: `onClicked: Player.jumpBySeconds(15)` and `description: qsTr("Forward 15 seconds")`. Keep `enabled: Player.seekable` and the accessibility ids. The keyboard shortcuts keep VLC's `short-jump-size`; they don't go through these buttons.
-- [ ] **Step 5: Audio-tracks glyph on the music bar.** In `LangButton.qml`, replace `text: VLCIcons.audiosub` with:
+- [x] **Step 4: Skip buttons jump ±15 s, as their glyphs say.** `SkipBackButton.qml`: `onClicked: Player.jumpBySeconds(-15)` and `description: qsTr("Back 15 seconds")`. `SkipForwardButton.qml`: `onClicked: Player.jumpBySeconds(15)` and `description: qsTr("Forward 15 seconds")`. Keep `enabled: Player.seekable` and the accessibility ids. The keyboard shortcuts keep VLC's `short-jump-size`; they don't go through these buttons.
+- [x] **Step 5: Audio-tracks glyph on the music bar.** In `LangButton.qml`, replace `text: VLCIcons.audiosub` with:
 
 ```qml
     // Figma Controls music 4778:26181: the music bar's tracks button shows the audio glyph
@@ -828,12 +828,12 @@ void PlayerController::jumpBySeconds( int seconds )
 ```
 
   `Player.hasVideoOutput` is the same condition `Player.qml` uses to choose the Audioplayer layout.
-- [ ] **Step 6: Check.**
+- [x] **Step 6: Check.**
   - Run with the same start as Step 1. In the shot, the left group is prev, back-15, play, forward-15, next, and the right group starts with the audio-tracks glyph.
   - Click forward-15: read its x from the shot (the 4th left icon, y ≈ 873) and run `$H click <x> 873`. The time label moves forward by 15 s (shot before and after, with playback paused: `$H key space` first).
   - Click back-15: the time moves back by 15 s.
   - The log check is empty.
-- [ ] **Step 7:** Commit `qml: music control bar with 15 second skips and the audio tracks button`.
+- [x] **Step 7:** Commit `qml: music control bar with 15 second skips and the audio tracks button`.
 
 ---
 
@@ -850,11 +850,11 @@ void PlayerController::jumpBySeconds( int seconds )
   - `SliderBar.waveform` (bool) and `SliderBar.waveformSource` (a `Waveform` or null).
   - `ControlBar.musicMode` (bool).
 
-- [ ] **Step 1: Failing check.**
+- [x] **Step 1: Failing check.**
   - Shot the music player (as in Task 4). The seek bar is a solid `#371F06` fill.
   - `count-px.sh $S/t5_before.png 280 862 1000 22 404040 4` prints fewer than 200. There are no grey bars yet.
   - Read the seek bar's x-range from the shot first, and adjust `280`/`1000` to lie inside it.
-- [ ] **Step 2: `SliderBar.qml` properties.** Add them after `property real touchHandlerMargin: …`:
+- [x] **Step 2: `SliderBar.qml` properties.** Add them after `property real touchHandlerMargin: …`:
 
 ```qml
     // Figma Controls 4778:26181 / 2139:8124: the music bar seeks on the track's waveform.
@@ -894,7 +894,7 @@ void PlayerController::jumpBySeconds( int seconds )
     }
 ```
 
-- [ ] **Step 3: `SliderBar.qml` visuals.** These changes are in `background: Item { … }` and the handle.
+- [x] **Step 3: `SliderBar.qml` visuals.** These changes are in `background: Item { … }` and the handle.
   - `sliderRect`: `visible: !Player.hasChapters || control.waveform`. It stays the `#090909` track, radius 6 in block style.
   - `seekpointsRptr`: `visible: Player.hasChapters && !control.waveform`. Chapter segments are not drawn on a waveform; chapter names in the tooltip and click-snapping still work.
   - `progressRect`: `visible: !Player.hasChapters && !control.waveform`.
@@ -938,7 +938,7 @@ void PlayerController::jumpBySeconds( int seconds )
 
     The height (`barHeight − 4` = 24), radius 4 and accent colour already come from `blockStyle`, which the music bar has.
 
-- [ ] **Step 4: Wiring.**
+- [x] **Step 4: Wiring.**
   - **`ControlBar.qml`:** add `property bool musicMode: false` next to `property bool compactStyle: false`.
   - In the `SliderBar { id: trackPositionSlider … }` declaration, add:
 
@@ -959,7 +959,7 @@ void PlayerController::jumpBySeconds( int seconds )
 
   - **`Player.qml`:** in `ControlBar { id: controlBar … }`, next to the `identifier:` binding, add `musicMode: !Player.hasVideoOutput`.
 
-- [ ] **Step 5: Check the look** (Review Focus 5).
+- [x] **Step 5: Check the look** (Review Focus 5).
   - `$H start -vv build/redesign-music/waveform.mp3; sleep 6`, then `$H key space` (pause) and shoot `$S/t5_wave.png`.
   - **Expected:**
     - Grey bars across the track: `count-px.sh` on the track box (as in Step 1) for `404040` prints > 1000.
@@ -968,7 +968,7 @@ void PlayerController::jumpBySeconds( int seconds )
     - The played part left of the playhead is orange (`AB6314` count > 50 after a few seconds of playback).
   - Put the shot next to `docs/superpowers/figma/3d/controls_music.png` and compare bar pitch, bar width, colours and playhead size.
   - **Resize:** `xdotool search --class vlc | while read w; do xdotool windowsize $w 1000 700; done; sleep 2`, then shoot. The bars keep their 5 px pitch: crop the track and count the bars per 100 px, which must be 20 ± 1. They still fill the track.
-- [ ] **Step 6: Check behaviour** (Review Focus 1, 3 and 4).
+- [x] **Step 6: Check behaviour** (Review Focus 1, 3 and 4).
   - **Seek:** click at 50 % of the track. The time label jumps to about 00:20, and the orange part reaches the click.
   - **Fast skips:** `$H start -vv build/redesign-music/waveform.mp3 build/redesign-music/long.mp3 build/redesign-music/untangle.mp3 build/redesign-music/waveform.mp3; sleep 5`, then `$H key n n n; sleep 3`, then shoot.
     - VLC is alive (`pgrep -x vlc-static`).
@@ -977,7 +977,7 @@ void PlayerController::jumpBySeconds( int seconds )
   - **Video after a song:** start with `build/redesign-music/waveform.mp3 build/redesign-media/plain.mp4`, `sleep 5`, `$H key n`, `sleep 4`, then shoot. The video bar has the plain seek bar (no grey bars), and the log has no `waveform:` line after the switch.
   - **Flat bars:** start `build/redesign-music/untangle.mp3`, a pure sine. The bars are all the same height, either all max or all flat: a steady sine normalises to 1 everywhere. The bar is clickable.
   - The log check is empty. After `$H stop`, `pgrep -x vlc-static` prints nothing.
-- [ ] **Step 7:** Commit `qml: music player seek bar drawn as the track's waveform`.
+- [x] **Step 7:** Commit `qml: music player seek bar drawn as the track's waveform`.
 
 ---
 
@@ -988,9 +988,9 @@ void PlayerController::jumpBySeconds( int seconds )
 
 **Interfaces:** consumes `Player.artwork`, `Player.title`, `Player.artist`, `Widgets.ImageExt` (`radius`, `fillMode`, `textureProviderItem`, `status`) and `Widgets.RoundedRectangleShadow`.
 
-- [ ] **Step 1: Failing check.** Shoot the music player paused. The cover is a square with no rounding, under it is "Tester", and there is a 4-button row; compare `before_music.png`. Note the cover's corner pixel: `magick $S/t6_before.png -crop 1x1+<cover x>+<cover y> txt:` is the cover colour, not the background.
-- [ ] **Step 2: Remove the lyrics state.** In `audioFocusScope`, delete the `lyricsMode` and `lyricsLayoutActive` properties and the `onLyricsModeChanged` handler (the block from `// Whether the full lyrics view is active` to the end of `onLyricsModeChanged`).
-- [ ] **Step 3: Replace the centre content.** Inside `MouseArea { id: centerContent … }`, delete everything from the line `// ── Two-panel lyrics layout ────────────────────────` down to the closing `}` of the `ColumnLayout` that holds `coverItem`, `albumLabel`, `artistLabel`, `lyricsLabel`, `audioControls` and `syncToPlaybackCheckBox`. Keep `Widgets.SubtitleLabel { id: labelVolume … }` after it. Put this in its place:
+- [x] **Step 1: Failing check.** Shoot the music player paused. The cover is a square with no rounding, under it is "Tester", and there is a 4-button row; compare `before_music.png`. Note the cover's corner pixel: `magick $S/t6_before.png -crop 1x1+<cover x>+<cover y> txt:` is the cover colour, not the background.
+- [x] **Step 2: Remove the lyrics state.** In `audioFocusScope`, delete the `lyricsMode` and `lyricsLayoutActive` properties and the `onLyricsModeChanged` handler (the block from `// Whether the full lyrics view is active` to the end of `onLyricsModeChanged`).
+- [x] **Step 3: Replace the centre content.** Inside `MouseArea { id: centerContent … }`, delete everything from the line `// ── Two-panel lyrics layout ────────────────────────` down to the closing `}` of the `ColumnLayout` that holds `coverItem`, `albumLabel`, `artistLabel`, `lyricsLabel`, `audioControls` and `syncToPlaybackCheckBox`. Keep `Widgets.SubtitleLabel { id: labelVolume … }` after it. Put this in its place:
 
 ```qml
                     // Figma Player - Music 4767:23726: the cover, then "title - artist", spaced
@@ -1080,7 +1080,7 @@ void PlayerController::jumpBySeconds( int seconds )
                     }
 ```
 
-- [ ] **Step 4: Point the blur at the new cover.**
+- [x] **Step 4: Point the blur at the new cover.**
   - In `blurredBackground`, set `TextureProviderIndirection { … source: cover.textureProviderItem }`. It was `cover`.
   - Add `visible: musicView.hasArt` to `blurredBackground`. Insert, as the first child of `audioFocusScope` (before `blurredBackground`), the no-art background:
 
@@ -1094,10 +1094,10 @@ void PlayerController::jumpBySeconds( int seconds )
 
   - `cover.sar` keeps working: Step 3 defines `sar` on the `ImageExt`.
   - In the old `Image`'s `Component.onCompleted` there was the hookup `blurredBackground.sourceTextureProviderObserver.hasMipmapsChanged.connect(…)`. Move that block into `cover`'s (`ImageExt`) `Component.onCompleted`, unchanged.
-- [ ] **Step 5: Navigation.**
+- [x] **Step 5: Navigation.**
   - The audio view has no focusable items any more. In `ControlBar { id: controlBar }`'s `Navigation.upItem`, delete the two lines `if (!MainCtx.hasEmbededVideo)` / `return playerSpecializationLoader`, so it falls through to `topBar`.
   - Grep the file for `audioControls`, `syncToPlaybackCheckBox`, `lyricsLoader`, `leftSideParent`, `albumLabel`, `artistLabel` and `lyricsLabel`. There must be no matches.
-- [ ] **Step 6: Check.**
+- [x] **Step 6: Check.**
   - Shoot `waveform.mp3`, paused. Compare with `docs/superpowers/figma/3d/player_music.png`:
     - The cover is square, rounded and centred. A corner pixel shows the background, not the cover.
     - The title reads `waveform - Tester` in grey, centred under the cover.
@@ -1107,7 +1107,7 @@ void PlayerController::jumpBySeconds( int seconds )
   - Resize to 1000×700 (as in Task 5): the cover shrinks and the gaps stay equal.
   - Keyboard: with focus on the control bar, `$H key Up` reaches the top bar (shot shows its focus ring), and `$H key Down` comes back.
   - The log check is empty.
-- [ ] **Step 7:** Commit `qml: music player view after the redesign (cover, title line)`.
+- [x] **Step 7:** Commit `qml: music player view after the redesign (cover, title line)`.
 
 ---
 
