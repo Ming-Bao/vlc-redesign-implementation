@@ -294,6 +294,7 @@ libqt_plugin_la_SOURCES = \
 	player/waveform_util.cpp player/waveform_util.hpp \
 	player/player_controller.cpp player/player_controller.hpp player/player_controller_p.hpp \
 	player/player_effects.cpp player/player_effects.hpp \
+	player/player_waveform.cpp player/player_waveform.hpp \
 	player/player_controlbar_model.cpp player/player_controlbar_model.hpp \
 	player/control_list_model.cpp player/control_list_model.hpp \
 	player/control_list_filter.cpp \
@@ -501,6 +502,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	player/input_models.moc.cpp \
 	player/player_controller.moc.cpp \
 	player/player_effects.moc.cpp \
+	player/player_waveform.moc.cpp \
 	player/player_controlbar_model.moc.cpp \
 	player/control_list_model.moc.cpp \
 	player/control_list_filter.moc.cpp \

@@ -26,4 +26,13 @@ ffmpeg -v error -y -f lavfi -i "testsrc=size=1280x720:rate=25:duration=120" \
        -map 0 -map 1 -map 2 -map 3 -map 4 -c:v libx264 -preset ultrafast -c:a aac -c:s srt \
        -metadata:s:a:0 language=eng -metadata:s:a:1 language=fra \
        -metadata:s:s:0 language=eng -metadata:s:s:1 language=fra -shortest "$P/tracks2.mkv"
+# music player: a shaped envelope (silence, ramp, bursts) with an embedded cover, and a long file for cancel tests
+ffmpeg -v error -y -f lavfi -i "testsrc2=size=600x600:duration=1" -frames:v 1 "$M/cover.png"
+ffmpeg -v error -y \
+       -f lavfi -i "aevalsrc='if(lt(t,3),0,if(lt(t,13),(t-3)/10*sin(2*PI*220*t),if(lt(mod(t-13,2),1),0.9*sin(2*PI*330*t),0.05*sin(2*PI*330*t))))':d=40:s=44100" \
+       -i "$M/cover.png" -map 0:a -map 1:v -c:a libmp3lame -q:a 6 -c:v png -disposition:v attached_pic \
+       -id3v2_version 3 -metadata title=waveform -metadata artist=Tester "$M/waveform.mp3"
+ffmpeg -v error -y -f lavfi -i "aevalsrc='0.5*sin(2*PI*220*t)*sin(2*PI*0.05*t)':d=1200:s=22050" \
+       -c:a libmp3lame -q:a 9 -metadata title=long -metadata artist=Tester "$M/long.mp3"
+rm -f "$M/cover.png"
 echo samples ready

@@ -30,6 +30,7 @@
 #include "player/control_list_filter.hpp"
 #include "player/delay_estimator.hpp"
 #include "player/player_effects.hpp"
+#include "player/player_waveform.hpp"
 
 #include "dialogs/toolbar/controlbar_profile_model.hpp"
 #include "dialogs/toolbar/controlbar_profile.hpp"
@@ -317,6 +318,7 @@ void MainUI::registerQMLTypes()
         qmlRegisterSingletonInstance<PlayerController>(uri, versionMajor, versionMinor, "Player", m_intf->p_mainPlayerController);
         qmlRegisterSingletonInstance<PlayerEffects>(uri, versionMajor, versionMinor, "Effects",
                                                     new PlayerEffects(m_intf, m_intf->p_mainPlayerController, this));
+        qmlRegisterType<PlayerWaveform>(uri, versionMajor, versionMinor, "Waveform");
         qmlRegisterTypesAndRevisions<TimedText>(uri, versionMajor);
         qmlRegisterType<PlayerHighResolutionTimeUpdater>(uri, versionMajor, versionMinor, "HighResolutionTimeUpdater");
         qmlRegisterUncreatableMetaObject(VLCTickForeign::staticMetaObject, uri, versionMajor, versionMinor, "VLCTick", "Not Instantiable" );
