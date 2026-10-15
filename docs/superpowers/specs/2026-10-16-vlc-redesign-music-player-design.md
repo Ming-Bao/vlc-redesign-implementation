@@ -79,7 +79,7 @@
 - Users with a saved custom profile keep theirs. Only the default changes.
 
 **Skip buttons:**
-- `SkipBackButton`/`SkipForwardButton` jump exactly ±15 s: `Player.setTime(Player.time ± 15 s)`, clamped to [0, length].
+- `SkipBackButton`/`SkipForwardButton` jump exactly ±15 s: a new `PlayerController::jumpBySeconds(int)` slot (`vlc_player_JumpTime`), since QML cannot build a `VLCTime`.
 - They use two new glyphs exported from Figma, "skip back 15" and "skip forward 15", appended to the icon font (append-only, as in slice 3b).
 - VLC's jump hotkeys keep the configurable `short-jump-size`.
 
@@ -95,9 +95,9 @@
 **Decode:** the in-repo pattern from `modules/misc/fingerprinter.c`.
 - A hidden `vlc_player_t` is created as a child of the interface object.
 - It plays an `input_item` for `uri` with trusted options:
-  - `sout=#transcode{acodec=fl32,channels=1,samplerate=8000}:smem{audio-prerender-callback=…,audio-postrender-callback=…,audio-data=…,time-sync=0}`.
+  - `sout=#transcode{acodec=fl32,channels=1,samplerate=8000}:smem{audio-prerender-callback=…,audio-postrender-callback=…,audio-data=…,no-time-sync}`. A chain bool is switched off by its `no-` prefix; a value like `time-sync=0` is ignored.
   - `no-sout-video` and `no-sout-spu`.
-- `time-sync=0` makes it run faster than real time. A sout chain has no audio output, so nothing reaches the speakers.
+- `no-time-sync` makes smem report itself as not synchronous, so the input runs faster than real time. A sout chain has no audio output, so nothing reaches the speakers.
 - **Callbacks:**
   - The prerender callback hands out a reusable buffer.
   - The postrender callback folds each sample into `bucket = (pts − VLC_TICK_0) / length × 1024`, keeping `max |x|`.
@@ -125,7 +125,7 @@
 
 **Mode:**
 - New `property bool waveform` and `property var peaks`.
-- In waveform mode only the visuals change. Pointer and touch seek, drag, keyboard steps, the hover time tooltip and the chapter marks all work as before.
+- In waveform mode only the visuals change. Pointer and touch seek, drag, keyboard steps, the hover time tooltip, chapter names in the tooltip and chapter snapping all work as before. Chapter segments are not drawn over the waveform.
 
 **Visuals:**
 - A `#090909` radius-6 track, 28 tall.
@@ -137,8 +137,8 @@
 - The bars use one `Canvas` per layer, redrawn only when `peaks` or the width changes.
 
 **Wiring in `ControlBar.qml`:**
-- The slider's `waveform` is `identifier === PlayerControlbarModel.Audioplayer`.
-- A `Waveform { uri: Player.url }` lives in the control bar and is active only in that mode. No decode runs for videos.
+- `ControlBar` gains `musicMode`; `Player.qml` sets it to `!Player.hasVideoOutput`, the same condition that picks the Audioplayer layout. The slider's `waveform` is `musicMode && _compact`.
+- A `Waveform { uri: Player.url }` lives in the control bar, in a Loader that is active only in that mode and only while `Player.videoTracks.count === 0`. No decode runs for videos.
 
 ### 5. Testing
 
