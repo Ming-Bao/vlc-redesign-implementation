@@ -49,6 +49,42 @@ T.ProgressBar {
     property color progressColor: theme.fg.primary
     property real touchHandlerMargin: VLCStyle.touchHandlerMargin
 
+    // Figma Controls 4778:26181 / 2139:8124: the music bar seeks on the track's waveform.
+    // Only the look changes; seeking, keys, the tooltip and chapter snapping work as before.
+    property bool waveform: false
+    property var waveformSource: null   // a VLC.Player Waveform, or null for flat bars
+    readonly property real _wavePitch: VLCStyle.dp(5, VLCStyle.scale)
+    readonly property real _waveBarWidth: VLCStyle.dp(2, VLCStyle.scale)
+    readonly property int _waveBars: waveform ? Math.max(0, Math.floor((width - VLCStyle.dp(12, VLCStyle.scale) - _waveBarWidth) / _wavePitch) + 1)
+                                              : 0
+    readonly property var _waveHeights: {
+        if (_waveBars <= 0)
+            return []
+        const minH = VLCStyle.dp(2, VLCStyle.scale)
+        const src = waveformSource
+        void (src?.peaks)   // re-evaluate when the peaks change
+        return src ? src.heights(_waveBars, minH, VLCStyle.dp(14, VLCStyle.scale), VLCStyle.dp(2, VLCStyle.scale))
+                   : Array(_waveBars).fill(minH)
+    }
+
+    function _paintWave(ctx, w, h, color) {
+        ctx.reset()
+        ctx.fillStyle = color
+        const hs = _waveHeights
+        const n = hs.length
+        const x0 = (w - ((n - 1) * _wavePitch + _waveBarWidth)) / 2
+        for (let i = 0; i < n; ++i) {
+            ctx.beginPath()
+            ctx.roundedRect(x0 + i * _wavePitch, (h - hs[i]) / 2, _waveBarWidth, hs[i], _waveBarWidth / 2, _waveBarWidth / 2)
+            ctx.fill()
+        }
+    }
+
+    on_WaveHeightsChanged: {
+        waveUnplayed.requestPaint()
+        wavePlayed.requestPaint()
+    }
+
     Keys.onRightPressed: Player.jumpFwd()
     Keys.onLeftPressed: Player.jumpBwd()
 
@@ -326,7 +362,7 @@ T.ProgressBar {
 
         Rectangle {
             id: sliderRect
-            visible: !Player.hasChapters
+            visible: !Player.hasChapters || control.waveform
             color: control.backgroundColor
             anchors.fill: parent
             radius: control.blockStyle ? VLCStyle.dp(6, VLCStyle.scale) : implicitHeight
@@ -338,7 +374,7 @@ T.ProgressBar {
             anchors.left: parent.left
             anchors.right: parent.right
             height: control.barHeight
-            visible: Player.hasChapters
+            visible: Player.hasChapters && !control.waveform
 
             model: Player.chapters
             Item {
@@ -437,7 +473,7 @@ T.ProgressBar {
             x: control.blockStyle ? control._blockInset : 0
             y: control.blockStyle ? control._blockInset : 0
             width: control.visualPosition * (parent.width - x * 2)
-            visible: !Player.hasChapters
+            visible: !Player.hasChapters && !control.waveform
             color: control.progressColor
             height: control.blockStyle ? control.barHeight - control._blockInset * 2 : control.barHeight
             radius: control.blockStyle ? VLCStyle.dp(4, VLCStyle.scale) : control._seekPointsRadius
@@ -454,6 +490,32 @@ T.ProgressBar {
             }
         }
 
+        Canvas {
+            id: waveUnplayed
+            anchors.fill: parent
+            visible: control.waveform
+            onPaint: control._paintWave(getContext("2d"), width, height,
+                                        theme.palette.isDark ? "#404040" : theme.fg.secondary)
+            onWidthChanged: requestPaint()
+        }
+
+        Item {
+            // the played bars: the same drawing in the accent shade, clipped at the progress point
+            width: control.visualPosition * parent.width
+            height: parent.height
+            clip: true
+            visible: control.waveform
+
+            Canvas {
+                id: wavePlayed
+                width: waveUnplayed.width
+                height: waveUnplayed.height
+                onPaint: control._paintWave(getContext("2d"), width, height,
+                                            theme.palette.isDark ? "#AB6314" : theme.accent)
+                onWidthChanged: requestPaint()
+            }
+        }
+
         Rectangle {
             id: bufferRect
             property int bufferAnimWidth: VLCStyle.dp(100, VLCStyle.scale)
@@ -464,7 +526,7 @@ T.ProgressBar {
             property bool buffering: Player.buffering > 0 && Player.buffering < 1
 
             height: control.barHeight
-            opacity: 0.4
+            opacity: control.waveform ? 0 : 0.4
             color: theme.fg.neutral //FIXME buffer color ?
             radius: control.barHeight
 
@@ -584,7 +646,8 @@ T.ProgressBar {
         }
         y: (control.barHeight - height) / 2
 
-        implicitWidth: control.blockStyle ? VLCStyle.dp(8, VLCStyle.scale) : sliderHandle._size
+        implicitWidth: control.waveform ? VLCStyle.dp(4, VLCStyle.scale)
+                     : control.blockStyle ? VLCStyle.dp(8, VLCStyle.scale) : sliderHandle._size
         implicitHeight: control.blockStyle ? control.barHeight - control._blockInset * 2 : sliderHandle._size
         radius: control.blockStyle ? VLCStyle.dp(4, VLCStyle.scale) : VLCStyle.margin_small
         color: control.blockStyle ? theme.accent : theme.fg.primary

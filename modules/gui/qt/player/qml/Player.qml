@@ -1255,6 +1255,7 @@ FocusScope {
 
         identifier: (Player.hasVideoOutput) ? PlayerControlbarModel.Videoplayer
                                             : PlayerControlbarModel.Audioplayer
+        musicMode: !Player.hasVideoOutput
 
         onHoveredChanged: rootPlayer.lockUnlockAutoHide(hovered)
 

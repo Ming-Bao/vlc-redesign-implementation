@@ -56,6 +56,8 @@ T.Pane {
 
     // compact (mini player) look: block seek bar, pill play button, muted time labels
     property bool compactStyle: false
+    // music player: the seek bar is drawn as the track's waveform (needs the compact look)
+    property bool musicMode: false
     property color backgroundColor: theme.bg.primary
 
     // Inline needs the spacer slot of the controls row; a profile that fills the
@@ -241,6 +243,19 @@ T.Pane {
                 barHeight: root.sliderHeight
 
                 blockStyle: root._compact
+                waveform: root.musicMode && root._compact
+                waveformSource: waveformLoader.item
+
+                Loader {
+                    id: waveformLoader
+                    // no decode for videos, even during the moment before their video output appears
+                    active: trackPositionSlider.waveform && Player.videoTracks.count === 0
+                    sourceComponent: Waveform {
+                        ctx: MainCtx
+                        uri: Player.url
+                    }
+                }
+
                 backgroundColor: !root._compact ? theme.bg.primary
                                                 : root._dark ? "#090909" : Qt.darker(root.backgroundColor, 1.15)
                 progressColor: root._compact ? Qt.tint(backgroundColor, Qt.alpha(theme.accent, root._dark ? 0.26 : 0.4))
