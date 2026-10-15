@@ -9,8 +9,8 @@
   "pause.svg": ["pause_filled"],
   "next.svg": ["next"],
   "previous.svg": ["previous"],
-  "backward-10-sec.svg": ["skip_back"],
-  "forward-10-sec.svg": ["skip_for"],
+  "backward-15-sec.svg": ["skip_back"],
+  "forward-15-sec.svg": ["skip_for"],
   "fullscreen.svg": ["fullscreen"],
   "minimize.svg": ["window_minimize"],
   "maximize.svg": ["window_maximize", "window_restore"],
@@ -52,5 +52,6 @@
   "queue-tab.svg": ["playqueue"],
   "chapters.svg": ["chapters"],
   "drag-handle.svg": ["drag_handle"],
-  "link.svg": ["link"]
+  "link.svg": ["link"],
+  "audio-tracks.svg": ["audio_tracks"]
 }

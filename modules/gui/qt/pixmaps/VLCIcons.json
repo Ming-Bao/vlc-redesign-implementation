@@ -64,8 +64,8 @@
         {"key":"search", "path": "./redesign/search.svg"},
         {"key":"settings", "path": "./redesign/settings.svg"},
         {"key":"shuffle", "path": "./redesign/shuffle.svg"},
-        {"key":"skip_back", "path": "./redesign/backward-10-sec.svg"},
-        {"key":"skip_for", "path": "./redesign/forward-10-sec.svg"},
+        {"key":"skip_back", "path": "./redesign/backward-15-sec.svg"},
+        {"key":"skip_for", "path": "./redesign/forward-15-sec.svg"},
         {"key":"slower", "path": "./icons/ic_fluent_rewind.svg"},
         {"key":"snapshot", "path": "./redesign/snapshot.svg"},
         {"key":"space", "path": "./icons/ic_fluent_spacebar.svg"},
@@ -105,6 +105,7 @@
         {"key":"playqueue", "path": "./redesign/queue-tab.svg"},
         {"key":"chapters", "path": "./redesign/chapters.svg"},
         {"key":"drag_handle", "path": "./redesign/drag-handle.svg"},
-        {"key":"link", "path": "./redesign/link.svg"}
+        {"key":"link", "path": "./redesign/link.svg"},
+        {"key":"audio_tracks", "path": "./redesign/audio-tracks.svg"}
     ]
 }
