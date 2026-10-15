@@ -1130,3 +1130,21 @@ void PlayerController::jumpBySeconds( int seconds )
 - [ ] **Step 5: Roadmap.** Change the 3d row's first cell to `3d Music player (done)`. Change its Notes cell to `Plan 2026-10-16-vlc-redesign-music-player; waveform via hidden-player decode (transcode→smem), music only; lyrics/visualisation row dropped (pure Figma).`
 - [ ] **Step 6:** Commit `doc: finish the music player slice` (roadmap, after shot, plan ledger).
 - [ ] **Step 7:** Write the session handoff with the `handoff-doc:handoff` skill. Merging `redesign/music-player` into `master` is the user's call.
+
+## Ledger
+
+Compared `docs/superpowers/figma/3d/after_music.png` (Xvfb 1600x900, `waveform.mp3`, paused; Wayland gives the same view) with `player_music.png` and `controls_music.png`.
+
+- **Cover:** rounded square, radius 20, faint glow, centred: matches. The side is 594 px against Figma's 614 px because the chrome around it is taller (see the bar heights below); the cover fills the same share of the space between the bars. Accepted.
+- **Title line:** one "title - artist" line, Inter Medium 24, #969696, centred under the cover: matches. Its glyph-to-glyph gaps look ~7 px wider than the box gaps because of font insets while the layout gaps are equal. Accepted.
+- **No-art tile:** #191919 with a music glyph (Figma only shows a cover). Fixed in this slice (added so a track without art is not a hole).
+- **Background blur:** Figma 10 px on dark art; ours keeps VLC's stronger blur plus a 50 % black tint so bright covers stay readable. Accepted (spec decision).
+- **Seek bar:** 2 px bars on a 5 px pitch, 2-14 px tall, #404040 unplayed, #AB6314 played, 4x24 #D37918 playhead, on the rounded dark track: matches. Figma's waveform is denser and more irregular because its sample is real music; ours is a test tone with sparse peaks. Accepted.
+- **Control order:** prev, back-15, play, forward-15, next | time, seek bar, duration | volume, audio tracks, settings, queue: matches. Skips jump exactly 15 s (checked paused: 00:20, +15 gives 00:35, -15 gives 00:20).
+- **Time labels:** Figma shows `00:02:10` / `00:25:40` (a long track); ours shows `00:13` / `00:40` for a 40 s file. VLC drops the hours field for short tracks. Accepted.
+- **Play button:** Figma shows the orange play button; ours is orange while paused and a grey pause button while playing (Figma has no playing frame for music). Accepted.
+- **Volume slider:** the Figma frame shows a filled volume slider; the dummy-audio test profile shows it empty with the 100 % tick. The slider itself is slice 2's and this slice did not touch it. Accepted.
+- **Window title bar:** shows "Tester - waveform" while Figma shows just the title; the bar also carries the queue and fullscreen buttons and no sidebar toggle. Slice 2's title and top-bar rules, out of scope. Accepted.
+- **Bar heights:** title bar 40 px and control bar 54 px against Figma's 33 px and 45 px. These come from slice 2's chrome sizing; this slice only fills the space between them. Accepted.
+- **Audio-tracks panel:** the button opens the 3a tracks panel, which always starts on its Subtitles tab (`currentTab: 2`), not on Audio. Not changed here (slice 3a behaviour); worth a follow-up so the music bar's button opens on Audio.
+- **Queue card:** opens from the queue button and matches slice 3b. After opening it with the mouse, the first Escape did nothing and the second closed it (the tracks panel closes on the first Escape). Seen under Xvfb only; not checked in the video player, so it may be slice 3b behaviour.
