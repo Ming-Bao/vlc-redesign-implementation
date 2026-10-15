@@ -51,5 +51,6 @@
   "folder.svg": ["folder"],
   "queue-tab.svg": ["playqueue"],
   "chapters.svg": ["chapters"],
-  "drag-handle.svg": ["drag_handle"]
+  "drag-handle.svg": ["drag_handle"],
+  "link.svg": ["link"]
 }

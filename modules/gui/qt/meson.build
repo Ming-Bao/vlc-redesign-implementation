@@ -122,6 +122,7 @@ moc_headers = files(
     'player/input_models.hpp',
     'player/delay_estimator.hpp',
     'player/player_controller.hpp',
+    'player/player_effects.hpp',
     'player/player_controlbar_model.hpp',
     'player/control_list_model.hpp',
     'player/control_list_filter.hpp',
@@ -415,10 +416,14 @@ qt_plugin_sources = files(
     'style/systempalettethemeprovider.cpp',
     'player/input_models.cpp',
     'player/delay_estimator.cpp',
+    'player/effects_util.cpp',
+    'player/effects_util.hpp',
     'player/input_models.hpp',
     'player/player_controller.cpp',
     'player/player_controller.hpp',
     'player/player_controller_p.hpp',
+    'player/player_effects.cpp',
+    'player/player_effects.hpp',
     'player/player_controlbar_model.cpp',
     'player/player_controlbar_model.hpp',
     'player/control_list_model.cpp',
@@ -756,6 +761,22 @@ qml_modules += {
        'player/qml/TrackSection.qml',
        'player/qml/TracksPanel.qml',
        'player/qml/PlaybackPanel.qml',
+       'player/qml/settings/SettingsStyle.qml',
+       'player/qml/settings/SettingSection.qml',
+       'player/qml/settings/SettingRow.qml',
+       'player/qml/settings/SettingToggle.qml',
+       'player/qml/settings/SettingSlider.qml',
+       'player/qml/settings/SettingCombo.qml',
+       'player/qml/settings/SettingField.qml',
+       'player/qml/settings/SettingSegments.qml',
+       'player/qml/settings/EffectAccordion.qml',
+       'player/qml/settings/SettingsPage.qml',
+       'player/qml/settings/DelaySlider.qml',
+       'player/qml/settings/TrackField.qml',
+       'player/qml/settings/ColorField.qml',
+       'player/qml/VideoSettingsPage.qml',
+       'player/qml/AudioSettingsPage.qml',
+       'player/qml/SubtitleSettingsPage.qml',
        'player/qml/BookmarksPage.qml',
        'player/qml/ChaptersPage.qml',
        'player/qml/PanelRow.qml',
@@ -1431,6 +1452,20 @@ if qt6_dep.found()
             'link_with': [libvlccore, libvlc],
             'link_args': qt_link_args,
             'dependencies': [qt6_dep, qt_extra_deps, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
+            'name': 'test_qt_effects_util',
+            'sources': files(
+                'tests/test_effects_util.cpp',
+                'player/effects_util.hpp',
+                'player/effects_util.cpp'
+            ),
+            'moc_sources': files('tests/test_effects_util.cpp'),
+            'suite': ['qt'],
+            'include_directories' : qt_include_dir,
+            'link_args': qt_link_args,
+            'dependencies': [qt6_dep, qtest_qt6_dep]
         }
 
         vlc_tests += {

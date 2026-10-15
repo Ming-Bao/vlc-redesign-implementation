@@ -104,6 +104,7 @@
         {"key":"folder", "path": "./redesign/folder.svg"},
         {"key":"playqueue", "path": "./redesign/queue-tab.svg"},
         {"key":"chapters", "path": "./redesign/chapters.svg"},
-        {"key":"drag_handle", "path": "./redesign/drag-handle.svg"}
+        {"key":"drag_handle", "path": "./redesign/drag-handle.svg"},
+        {"key":"link", "path": "./redesign/link.svg"}
     ]
 }
