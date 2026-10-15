@@ -372,21 +372,17 @@ FocusScope {
                 property real topPadding: playerSpecializationLoader.topPadding
                 property real bottomPadding: playerSpecializationLoader.bottomPadding
 
-                // Whether the full lyrics view is active
-                readonly property bool lyricsMode: MainCtx.lyricsMode
-                readonly property bool lyricsLayoutActive: lyricsMode
-                                                        && Player.hasLyrics
-                                                        && centerContent.width > VLCStyle.colWidth(6)
-
-                // Reset sync when entering lyrics mode
-                onLyricsModeChanged: {
-                    if (lyricsMode && lyricsLoader.item)
-                        lyricsLoader.item.lyricsSyncToPlayback = true
+                Rectangle {
+                    // Figma frame background, seen when there is no artwork to blur
+                    anchors.fill: parent
+                    color: bgtheme.palette.isDark ? "#1B1B1B" : bgtheme.bg.primary
                 }
 
                 // background image
                 Widgets.DualKawaseBlur {
                     id: blurredBackground
+
+                    visible: musicView.hasArt
 
                     // Six pass is free here since we release the intermediate layers
                     // through unsetting `live` (see `liveTimer`):
@@ -435,7 +431,7 @@ FocusScope {
                         // used where texture sampling becomes broken, we need this as
                         // `QSGTextureView` has a workaround for that bug. This is totally
                         // acceptable as there is virtually no overhead.
-                        source: cover
+                        source: cover.textureProviderItem
                     }
 
                     Component.onCompleted: {
@@ -496,409 +492,108 @@ FocusScope {
                         onVlcWheelKey: (key) => MainCtx.sendVLCHotkey(key)
                     }
 
-                    // ── Two-panel lyrics layout ────────────────────────
+                    // Figma Player - Music 4767:23726: the cover, then "title - artist", spaced
+                    // evenly between the title bar and the control bar (73 px gaps at 1080p)
                     Item {
-                        id: leftSideParent
+                        id: musicView
 
-                        visible: (opacity > 0.0) || (width > 0.0)
+                        // gaps are measured from the bars' edges, so undo centerContent's margin
+                        anchors.fill: parent
+                        anchors.topMargin: -VLCStyle.margin_xsmall
+                        anchors.bottomMargin: -VLCStyle.margin_xsmall
 
-                        opacity: (lyricsLoader.item ? 1.0 : 0.0)
+                        readonly property real gap: Math.round(height * 0.074)
+                        readonly property real coverSide: Math.max(0, Math.min(height - titleLabel.height - gap * 3,
+                                                                                width - gap * 2))
+                        readonly property real contentTop: (height - (coverSide + gap + titleLabel.height)) / 2
+                        readonly property bool hasArt: Player.artwork.toString().length > 0
+                                                       && cover.status !== Image.Error
 
-                        Behavior on opacity {
-                            id: opacityBehavior
+                        Widgets.ImageExt {
+                            id: cover
 
-                            enabled: false
+                            // source aspect ratio, for the blurred background
+                            readonly property real sar: (implicitHeight > 0) ? implicitWidth / implicitHeight : 1
+                            readonly property real eDPR: MainCtx.effectiveDevicePixelRatio(Window.window)
+                            readonly property int maximumSize: Math.min(Helpers.alignUp(Screen.desktopAvailableWidth * eDPR / 2, 32),
+                                                                        Helpers.alignUp(Screen.desktopAvailableHeight * eDPR / 2, 32))
 
-                            NumberAnimation {
-                                duration: VLCStyle.duration_long
+                            x: (parent.width - width) / 2
+                            y: musicView.contentTop
+                            width: musicView.coverSide
+                            height: musicView.coverSide
 
-                                easing.type: Easing.InOutSine
-                            }
+                            visible: musicView.hasArt
+                            source: Player.artwork.toString().length > 0 ? VLCAccessImage.uri(Player.artwork) : ""
+                            sourceSize: Qt.size(maximumSize, maximumSize)
+                            fillMode: Image.PreserveAspectCrop
+                            radius: VLCStyle.dp(20, VLCStyle.scale)
+                            cache: false
+
+                            onSourceChanged: liveTimer.transientTurnOnLive()
+
+                            Accessible.role: Accessible.Graphic
+                            Accessible.name: qsTr("Cover")
 
                             Component.onCompleted: {
-                                // The animation should not be used at initialization:
-                                Qt.callLater(() => { opacityBehavior.enabled = true })
+                                // After the update on source change, there can be another update when the mipmaps are generated.
+                                // We intentionally do not wait for this, initially using non-mipmapped source should be okay. As
+                                // the user should not be greeted with a black background until the mipmaps are ready, let alone
+                                // the possibility of knowing if the mipmaps are actually going to be ready as expected.
+                                // If the texture is not valid yet (which is signalled the latest), blur effect is going to queue
+                                // an update itself similar to the case when the source itself changes, so we do not check validity
+                                // of the texture here.
+                                blurredBackground.sourceTextureProviderObserver.hasMipmapsChanged.connect(blurredBackground,
+                                                                                                          (hasMipmaps /*: bool */) => {
+                                                                                                              if (hasMipmaps) {
+                                                                                                                  blurredBackground.scheduleUpdate()
+                                                                                                              }
+                                                                                                          })
+                            }
+
+                            // Figma: 0 0 90.5px 64px rgba(255,255,255,0.03)
+                            Widgets.RoundedRectangleShadow {
+                                color: Qt.rgba(1, 1, 1, 0.03)
+                                blurRadius: VLCStyle.dp(90, VLCStyle.scale)
+                                implicitWidth: parent.width + VLCStyle.dp(128, VLCStyle.scale) + blurRadius * compensationFactor * 2
+                                implicitHeight: parent.height + VLCStyle.dp(128, VLCStyle.scale) + blurRadius * compensationFactor * 2
                             }
                         }
 
-                        anchors.top: parent.top
-                        anchors.topMargin: VLCStyle.margin_large
-                        anchors.bottom: parent.bottom
-                        anchors.left: parent.left
+                        Rectangle {
+                            // no artwork: a dark tile instead of the light placeholder
+                            x: cover.x
+                            y: cover.y
+                            width: cover.width
+                            height: cover.height
+                            visible: !musicView.hasArt
+                            radius: cover.radius
+                            color: centerTheme.palette.isDark ? "#191919" : centerTheme.bg.secondary
 
-                        width: lyricsLoader.item ? (parent.width * 0.6) : 0.0
-
-                        Behavior on width {
-                            id: widthBehavior
-
-                            enabled: false
-
-                            NumberAnimation {
-                                duration: VLCStyle.duration_long
-
-                                easing.type: Easing.InOutSine
-                            }
-
-                            Component.onCompleted: {
-                                // The animation should not be used at initialization:
-                                Qt.callLater(() => { widthBehavior.enabled = true })
+                            Widgets.IconLabel {
+                                anchors.centerIn: parent
+                                text: VLCIcons.topbar_music
+                                font.pixelSize: VLCStyle.dp(96, VLCStyle.scale)
+                                color: centerTheme.palette.isDark ? "#404040" : centerTheme.fg.secondary
                             }
                         }
 
-                        Loader {
-                            id: lyricsLoader
+                        T.Label {
+                            id: titleLabel
 
-                            active: audioFocusScope.lyricsLayoutActive
-                            sourceComponent: T.Pane {
-                                // Swallow wheel events so scrolling the lyrics
-                                // does not bubble up to the player and change
-                                // the volume.
-                                wheelEnabled: true
+                            x: (parent.width - width) / 2
+                            y: cover.y + cover.height + musicView.gap
+                            width: Math.min(implicitWidth, Math.max(musicView.coverSide, VLCStyle.dp(200, VLCStyle.scale)))
 
-                                // Expose the inner Flickable's sync flag so the
-                                // Loader's `item.lyricsSyncToPlayback` reaches
-                                // through to LyricsFlickable in both directions.
-                                property alias lyricsSyncToPlayback: lyricsFlickable.lyricsSyncToPlayback
-
-                                implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
-                                                        implicitContentWidth + leftPadding + rightPadding)
-                                implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
-                                                         implicitContentHeight + topPadding + bottomPadding)
-
-                                contentItem: LyricsFlickable {
-                                    id: lyricsFlickable
-
-                                    onPlayerPositionChangeRequested: (time) => {
-                                        Player.setTime(time)
-                                        lyricsFlickable.lyricsSyncToPlayback = true
-                                    }
-                                }
-                            }
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.verticalCenter: parent.verticalCenter
-
-                            height: Math.min(implicitHeight, parent.height)
-                        }
-                    }
-
-                    Item {
-                        id: rightSideParent
-
-                        visible: leftSideParent.visible
-
-                        anchors.top: parent.top
-                        anchors.topMargin: VLCStyle.margin_large
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
-                        anchors.left: leftSideParent.right
-                    }
-
-                    ColumnLayout {
-                        parent: leftSideParent.visible ? rightSideParent : centerContent
-
-                        anchors.centerIn: parent
-                        spacing: 0
-
-                        Item {
-                            id: coverItem
-                            Layout.preferredHeight: rootPlayer.height / sizeConstant
-                            Layout.preferredWidth: cover.paintedWidth
-                            Layout.maximumHeight: centerContent.height
-                            Layout.alignment: Qt.AlignHCenter
-
-                            readonly property real sizeConstant: 2.7182
-
-                            Image {
-                                id: cover
-
-                                //source aspect ratio
-                                readonly property real sar: paintedWidth / paintedHeight
-                                readonly property int maximumWidth: Helpers.alignUp((Screen.desktopAvailableWidth * eDPR / coverItem.sizeConstant), 32)
-                                readonly property int maximumHeight: Helpers.alignUp((Screen.desktopAvailableHeight * eDPR / coverItem.sizeConstant), 32)
-
-                                readonly property int maximumSize: Math.min(maximumWidth, maximumHeight)
-
-                                readonly property real eDPR: MainCtx.effectiveDevicePixelRatio(Window.window)
-
-                                readonly property url targetSource: VLCAccessImage.uri(rootPlayer.coverSource)
-
-                                anchors.top: parent.top
-                                anchors.bottom: parent.bottom
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                source: targetSource
-                                fillMode: Image.PreserveAspectFit
-                                mipmap: true
-                                cache: false
-                                asynchronous: true
-
-                                onTargetSourceChanged: {
-                                    cover.source = targetSource
-                                }
-
-                                onSourceChanged: {
-                                    liveTimer.transientTurnOnLive()
-                                }
-
-                                onStatusChanged: {
-                                    if (status === Image.Error) {
-                                        cover.source = VLCStyle.noArtAlbumCover
-                                    }
-                                }
-
-                                sourceSize: Qt.size(maximumSize, maximumSize)
-
-                                Accessible.role: Accessible.Graphic
-                                Accessible.name: qsTr("Cover")
-
-                                Component.onCompleted: {
-                                    // After the update on source change, there can be another update when the mipmaps are generated.
-                                    // We intentionally do not wait for this, initially using non-mipmapped source should be okay. As
-                                    // the user should not be greeted with a black background until the mipmaps are ready, let alone
-                                    // the possibility of knowing if the mipmaps are actually going to be ready as expected.
-                                    // If the texture is not valid yet (which is signalled the latest), blur effect is going to queue
-                                    // an update itself similar to the case when the source itself changes, so we do not check validity
-                                    // of the texture here.
-                                    blurredBackground.sourceTextureProviderObserver.hasMipmapsChanged.connect(blurredBackground,
-                                                                                                              (hasMipmaps /*: bool */) => {
-                                                                                                                  if (hasMipmaps) {
-                                                                                                                      blurredBackground.scheduleUpdate()
-                                                                                                                  }
-                                                                                                              })
-                                }
-
-                                Widgets.RoundedRectangleShadow {
-                                    color: Qt.rgba(0, 0, 0, .18)
-                                    yOffset: VLCStyle.dp(24, VLCStyle.scale)
-                                    blurRadius: VLCStyle.dp(54, VLCStyle.scale)
-                                }
-
-                                Widgets.RoundedRectangleShadow {
-                                    color: Qt.rgba(0, 0, 0, .22)
-                                    yOffset: VLCStyle.dp(5, VLCStyle.scale)
-                                    blurRadius: VLCStyle.dp(14, VLCStyle.scale)
-                                }
-                            }
-                        }
-
-                        Widgets.SubtitleLabel {
-                            id: albumLabel
-
-                            Layout.alignment: Qt.AlignHCenter
-                            Layout.topMargin: VLCStyle.margin_xxlarge
-
-                            Binding on visible {
-                                delayed: true
-                                when: albumLabel.componentCompleted
-                                value: centerContent.height > (albumLabel.y + albumLabel.height)
-                            }
-
-                            text: Player.album
-                            font.pixelSize: VLCStyle.fontSize_xxlarge
+                            text: Player.artist ? qsTr("%1 - %2").arg(Player.title).arg(Player.artist) : Player.title
+                            elide: Text.ElideMiddle
                             horizontalAlignment: Text.AlignHCenter
-                            color: centerTheme.fg.primary
-                            Accessible.description: qsTr("album")
-
-                            property bool componentCompleted: false
-
-                            Component.onCompleted: {
-                                componentCompleted = true
-                            }
-                        }
-
-                        Widgets.MenuLabel {
-                            id: artistLabel
-
-                            Layout.alignment: Qt.AlignHCenter
-                            Layout.topMargin: VLCStyle.margin_small
-
-                            Binding on visible {
-                                delayed: true
-                                when: artistLabel.componentCompleted
-                                value: centerContent.height > (artistLabel.y + artistLabel.height)
-                            }
-
-                            text: Player.artist
-                            font.weight: Font.Light
-                            horizontalAlignment: Text.AlignHCenter
-                            color: centerTheme.fg.primary
-                            Accessible.description: qsTr("artist")
-
-                            property bool componentCompleted: false
-
-                            Component.onCompleted: {
-                                componentCompleted = true
-                            }
-                        }
-
-                        Widgets.SubtitleLabel {
-                            id: lyricsLabel
-
-                            Layout.alignment: Qt.AlignHCenter
-                            Layout.topMargin: VLCStyle.margin_large
-                            // Pin width and height so the surrounding centered
-                            // column does not shift when the current lyric
-                            // changes between empty / 1 line / 2 lines. Text
-                            // exceeding two lines wraps then elides on line 2.
-                            Layout.preferredWidth: parent.parent.width - VLCStyle.margin_xlarge * 2
-                            Layout.preferredHeight: (lyricsLabelTextMetrics.height * 2) + VLCStyle.margin_xxxsmall
-
-                            visible: false
-
-                            Binding on visible {
-                                delayed: true
-                                when: lyricsLabel.componentCompleted
-
-                                // Stay visible (reserving the 2-line slot) for the
-                                // entire track when it has any lyrics, so the
-                                // layout does not collapse between lyric lines.
-                                value: Player.hasLyrics && !audioFocusScope.lyricsLayoutActive &&
-                                       (centerContent.height > (lyricsLabel.y + lyricsLabel.height))
-                            }
-
-                            property bool componentCompleted: false
-
-                            Component.onCompleted: {
-                                componentCompleted = true
-                            }
-
-                            elide: Text.ElideRight
-
-                            text: Player.currentLyric.text
-                            font.pixelSize: VLCStyle.fontSize_xlarge
-                            font.weight: Font.DemiBold
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                            wrapMode: Text.WordWrap
-                            color: centerTheme.fg.primary
-
-                            // TODO: Do not use `Binding` when minimum Qt is 6.12:
-                            Binding {
-                                target: lyricsLabel
-                                property: "mutabilityGroup"
-                                when: (lyricsLabel.mutabilityGroup !== undefined)
-                                value: (Player.playingState === Player.PLAYING_STATE_PLAYING) ? Item.ModerateMutabilityGroup
-                                                                                              : Item.StaticMutabilityGroup
-                            }
-
-                            TextMetrics {
-                                id: lyricsLabelTextMetrics
-                                font: lyricsLabel.font
-                                text: "TEXT"
-                            }
+                            font.pixelSize: VLCStyle.dp(24, VLCStyle.scale)
+                            font.weight: Font.Medium
+                            color: centerTheme.palette.isDark ? "#969696" : centerTheme.fg.secondary
 
                             Accessible.role: Accessible.StaticText
-                            Accessible.name: qsTr("Lyrics")
-                            Accessible.description: text
-                        }
-
-                        Widgets.NavigableRow {
-                            id: audioControls
-
-                            Layout.alignment: Qt.AlignHCenter
-                            Layout.topMargin: VLCStyle.margin_large
-
-                            Binding on visible {
-                                delayed: true
-                                when: audioControls.componentCompleted
-                                value: Player.videoTracks.count === 0 && centerContent.height > (audioControls.y + audioControls.height)
-                            }
-
-                            focus: true
-                            spacing: VLCStyle.margin_xxsmall
-                            Navigation.parentItem: rootPlayer
-                            Navigation.upItem: topBar
-                            Navigation.downItem: syncToPlaybackCheckBox
-
-                            property bool componentCompleted: false
-
-                            Component.onCompleted: {
-                                componentCompleted = true
-                            }
-
-                            Widgets.IconToolButton {
-                                text: VLCIcons.skip_back
-                                font.pixelSize: VLCStyle.icon_audioPlayerButton
-                                onClicked: Player.jumpBwd()
-                                description: qsTr("Step back")
-
-                                AccessibleCompat.id: "audioStepBackButton"
-                            }
-
-                            Widgets.IconToolButton {
-                                text: VLCIcons.visualization
-                                font.pixelSize: VLCStyle.icon_audioPlayerButton
-                                onClicked: Player.toggleVisualization()
-                                description: qsTr("Visualization")
-
-                                AccessibleCompat.id: "audioVisualizationButton"
-                            }
-
-                            Widgets.IconToolButton {
-                                text: VLCIcons.topbar_music
-                                font.pixelSize: VLCStyle.icon_audioPlayerButton
-                                checked: MainCtx.lyricsMode
-                                onClicked: MainCtx.lyricsMode = !MainCtx.lyricsMode
-                                description: qsTr("Lyrics")
-
-                                Accessible.role: Accessible.Button
-                                Accessible.name: qsTr("Toggle lyrics view")
-                                AccessibleCompat.id: "audioLyricsButton"
-                            }
-
-                            Widgets.IconToolButton{
-                                text: VLCIcons.skip_for
-                                font.pixelSize: VLCStyle.icon_audioPlayerButton
-                                onClicked: Player.jumpFwd()
-                                description: qsTr("Step forward")
-
-                                AccessibleCompat.id: "audioStepForwardButton"
-                            }
-                        }
-
-                        // "Sync to Playback" checkbox pinned to bottom of right panel
-                        Widgets.CheckBoxExt {
-                            id: syncToPlaybackCheckBox
-
-                            Layout.alignment: Qt.AlignHCenter
-                            Layout.topMargin: VLCStyle.margin_small
-
-                            visible: false
-
-                            Binding on visible {
-                                delayed: true
-                                when: syncToPlaybackCheckBox.componentCompleted
-                                value: audioFocusScope.lyricsLayoutActive &&
-                                       centerContent.height > (syncToPlaybackCheckBox.y + syncToPlaybackCheckBox.height)
-                            }
-
-                            property bool componentCompleted: false
-
-                            Component.onCompleted: {
-                                componentCompleted = true
-                            }
-
-                            text: qsTr("Sync lyrics to playback")
-                            // Use a Binding element rather than an inline binding
-                            // so manual clicks (which write `checked` directly)
-                            // don't permanently break the source-of-truth link.
-                            Binding on checked {
-                                when: lyricsLoader.item
-                                value: lyricsLoader.item ? lyricsLoader.item.lyricsSyncToPlayback : true
-                                restoreMode: Binding.RestoreBindingOrValue
-                            }
-                            onClicked: {
-                                if (lyricsLoader.item)
-                                    lyricsLoader.item.lyricsSyncToPlayback = checked
-                            }
-
-                            Accessible.role: Accessible.CheckBox
-                            Accessible.name: qsTr("Sync lyrics to playback position")
-                            AccessibleCompat.id: "syncToPlaybackCheckBox"
-
-                            Navigation.parentItem: rootPlayer
-                            Navigation.upItem: audioControls
-                            Navigation.downItem: Player.isInteractive ? toggleControlBarButton : controlBar
+                            Accessible.name: text
                         }
                     }
 
@@ -1240,8 +935,6 @@ FocusScope {
                 return playlistpopup.currentList
             if (Player.isInteractive)
                 return toggleControlBarButton
-            if (!MainCtx.hasEmbededVideo)
-                return playerSpecializationLoader
             return topBar
         }
 
