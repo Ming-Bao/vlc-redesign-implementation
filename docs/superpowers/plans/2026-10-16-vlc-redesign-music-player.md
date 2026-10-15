@@ -1117,26 +1117,28 @@ void PlayerController::jumpBySeconds( int seconds )
 - Modify: `docs/superpowers/specs/2026-10-13-vlc-redesign-roadmap.md` (row 3d)
 - Create: `docs/superpowers/figma/3d/after_music.png` (final Xvfb shot)
 
-- [ ] **Step 1: Full test pass.** `ninja -C build && meson test -C build --suite qt`: 11/11 OK. `python3 -I docs/superpowers/scripts/check-icon-font.py modules/gui/qt/pixmaps`: `icon font OK`.
-- [ ] **Step 2: Xvfb pass.** In one session, with `waveform.mp3`:
+- [x] **Step 1: Full test pass.** `ninja -C build && meson test -C build --suite qt`: 11/11 OK. `python3 -I docs/superpowers/scripts/check-icon-font.py modules/gui/qt/pixmaps`: `icon font OK`.
+- [x] **Step 2: Xvfb pass.** In one session, with `waveform.mp3`:
   - Shoot it playing and paused.
   - Seek by click, ±15 s, open the audio-tracks panel, then open the queue.
   - Save the paused shot as `docs/superpowers/figma/3d/after_music.png`.
   - In a ledger at the end of this plan (a `## Ledger` section), record every visible difference from `player_music.png` and `controls_music.png` as fixed, or as accepted with the reason. For example: the title bar shows "Tester - waveform" while Figma shows the title only (out of scope, slice 2's title rule).
-- [ ] **Step 3: Wayland pass.** Run `dbus-run-session -- docs/superpowers/scripts/wl-drive.py $S/wl vlc:--aout=dummy,build/redesign-music/waveform.mp3 max sleep:6 shot:music key:space sleep:1 shot:paused`.
+- [x] **Step 3: Wayland pass.** Run `dbus-run-session -- docs/superpowers/scripts/wl-drive.py $S/wl vlc:--aout=dummy,build/redesign-music/waveform.mp3 max sleep:6 shot:music key:space sleep:1 shot:paused`.
   - `$S/wl/music.png` shows the cover, the title and the waveform bars.
   - `grep -E "TypeError|ReferenceError|waveform: failed" $S/wl/vlc.log` is empty.
-- [ ] **Step 4: Silence and leftovers.** `pgrep -x vlc-static` prints nothing. `grep -c "aout" $L` shows only the `dummy` aout lines, and nothing from the hidden player: `grep "waveform" $L` has no `aout` neighbour lines.
-- [ ] **Step 5: Roadmap.** Change the 3d row's first cell to `3d Music player (done)`. Change its Notes cell to `Plan 2026-10-16-vlc-redesign-music-player; waveform via hidden-player decode (transcode→smem), music only; lyrics/visualisation row dropped (pure Figma).`
-- [ ] **Step 6:** Commit `doc: finish the music player slice` (roadmap, after shot, plan ledger).
+- [x] **Step 4: Silence and leftovers.** `pgrep -x vlc-static` prints nothing. `grep -c "aout" $L` shows only the `dummy` aout lines, and nothing from the hidden player: `grep "waveform" $L` has no `aout` neighbour lines.
+- [x] **Step 5: Roadmap.** Change the 3d row's first cell to `3d Music player (done)`. Change its Notes cell to `Plan 2026-10-16-vlc-redesign-music-player; waveform via hidden-player decode (transcode→smem), music only; lyrics/visualisation row dropped (pure Figma).`
+- [x] **Step 6:** Commit `doc: finish the music player slice` (roadmap, after shot, plan ledger).
 - [ ] **Step 7:** Write the session handoff with the `handoff-doc:handoff` skill. Merging `redesign/music-player` into `master` is the user's call.
 
 ## Ledger
 
 Compared `docs/superpowers/figma/3d/after_music.png` (Xvfb 1600x900, `waveform.mp3`, paused; Wayland gives the same view) with `player_music.png` and `controls_music.png`.
 
+**Scale note:** every Figma reference is a 1920-wide frame rendered at 1600 wide (x0.833), while our window is 1600x900 at VLCStyle scale 1. Fixed-size elements (title text, bars, buttons, icons) therefore look about 1.2x larger in our shot than in the reference even when their values equal the Figma node; layout-proportional elements (cover, gaps) do not. Size differences below are read with this in mind.
+
 - **Cover:** rounded square, radius 20, faint glow, centred: matches. The side is 594 px against Figma's 614 px because the chrome around it is taller (see the bar heights below); the cover fills the same share of the space between the bars. Accepted.
-- **Title line:** one "title - artist" line, Inter Medium 24, #969696, centred under the cover: matches. Its glyph-to-glyph gaps look ~7 px wider than the box gaps because of font insets while the layout gaps are equal. Accepted.
+- **Title line:** one "title - artist" line, centred under the cover, Inter Medium 24, #969696: these values are the Figma node's (4778:24351). It looks ~20 % larger than in `player_music.png` only because of the reference's 1920 to 1600 render scale (see the scale note), not a size error. Its glyph-to-glyph gaps look ~7 px wider than the box gaps because of font insets while the layout gaps are equal. Accepted.
 - **No-art tile:** #191919 with a music glyph (Figma only shows a cover). Fixed in this slice (added so a track without art is not a hole).
 - **Background blur:** Figma 10 px on dark art; ours keeps VLC's stronger blur plus a 50 % black tint so bright covers stay readable. Accepted (spec decision).
 - **Seek bar:** 2 px bars on a 5 px pitch, 2-14 px tall, #404040 unplayed, #AB6314 played, 4x24 #D37918 playhead, on the rounded dark track: matches. Figma's waveform is denser and more irregular because its sample is real music; ours is a test tone with sparse peaks. Accepted.
@@ -1145,6 +1147,9 @@ Compared `docs/superpowers/figma/3d/after_music.png` (Xvfb 1600x900, `waveform.m
 - **Play button:** Figma shows the orange play button; ours is orange while paused and a grey pause button while playing (Figma has no playing frame for music). Accepted.
 - **Volume slider:** the Figma frame shows a filled volume slider; the dummy-audio test profile shows it empty with the 100 % tick. The slider itself is slice 2's and this slice did not touch it. Accepted.
 - **Window title bar:** shows "Tester - waveform" while Figma shows just the title; the bar also carries the queue and fullscreen buttons and no sidebar toggle. Slice 2's title and top-bar rules, out of scope. Accepted.
-- **Bar heights:** title bar 40 px and control bar 54 px against Figma's 33 px and 45 px. These come from slice 2's chrome sizing; this slice only fills the space between them. Accepted.
+- **Bar heights:** title bar 40 px and control bar 54 px against 33 px and 45 px in the reference: in the 1920 frame they are 40 px and 54 px (33 and 45 at x0.833), the same values ours has at scale 1. They come from slice 2's chrome sizing, which this slice only fills between. The cover is smaller than the reference (594 vs 614 px) as a consequence. Accepted.
 - **Audio-tracks panel:** the button opens the 3a tracks panel, which always starts on its Subtitles tab (`currentTab: 2`), not on Audio. Not changed here (slice 3a behaviour); worth a follow-up so the music bar's button opens on Audio.
 - **Queue card:** opens from the queue button and matches slice 3b. After opening it with the mouse, the first Escape did nothing and the second closed it (the tracks panel closes on the first Escape). Seen under Xvfb only; not checked in the video player, so it may be slice 3b behaviour.
+- **Prev / next:** dimmed in ours, bright in Figma. The test queue holds one item, so both are correctly disabled; Figma shows them enabled. Accepted (test data, correct disabled state).
+- **Settings button:** `player_music.png`'s bar has no gear, `controls_music.png` does. Ours follows `controls_music.png` (gear present).
+- **Background brightness:** on the bright colour-bar test art ours is much brighter and more saturated than Figma's near-black background. Accepted (spec decision: VLC's blur plus 50 % black tint; Figma's sample art is itself dark).
