@@ -42,11 +42,15 @@ Widgets.PageExt {
 
     title: qsTr("Videos")
 
-    sortMenu: SortMenuVideo {
-        ctx: MainCtx
-
-        onGrouping: (grouping) => { MainCtx.grouping = grouping }
-    }
+    // NOTE: the grouping choices of the old video sort menu, kept after the sort rows
+    sortExtraRows: [
+        { text: qsTr("Do not group videos"), checked: MainCtx.grouping === MainCtx.GROUPING_NONE,
+          run: () => { MainCtx.grouping = MainCtx.GROUPING_NONE } },
+        { text: qsTr("Group by name"), checked: MainCtx.grouping === MainCtx.GROUPING_NAME,
+          run: () => { MainCtx.grouping = MainCtx.GROUPING_NAME } },
+        { text: qsTr("Group by folder"), checked: MainCtx.grouping === MainCtx.GROUPING_FOLDER,
+          run: () => { MainCtx.grouping = MainCtx.GROUPING_FOLDER } }
+    ]
 
     VideoAll {
         id: videoAll

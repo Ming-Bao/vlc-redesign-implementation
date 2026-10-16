@@ -101,14 +101,6 @@ FocusScope {
     required property SearchCtx search
     required property SortCtx sort
 
-    SortMenuAlbums {
-        id: sortMenuAlbums
-
-        ctx: MainCtx
-
-        sectionsVisible: !MainCtx.gridView
-    }
-
     // current index of album model
     readonly property int currentIndex: {
         if (!_currentView)
@@ -400,7 +392,10 @@ FocusScope {
 
                     text: qsTr("Albums")
 
-                    sortMenu: sortMenuAlbums
+                    sortExtraRows: MainCtx.gridView ? [] : [
+                        { text: qsTr("Album sections"), checked: MainCtx.albumSections,
+                          run: () => { MainCtx.albumSections = !MainCtx.albumSections } }
+                    ]
 
                     search: root.search
                     sort: root.sort

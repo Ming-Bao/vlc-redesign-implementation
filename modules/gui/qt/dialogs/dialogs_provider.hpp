@@ -152,6 +152,9 @@ public:
                                               const QString& placeholder,
                                               bool* ok = nullptr);
 
+    /* redesign library actions, called from QML */
+    Q_INVOKABLE void addFolderToLibrary();
+
 protected:
     void customEvent( QEvent *) override;
 

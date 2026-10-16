@@ -21,7 +21,6 @@ import QtQuick.Templates as T
 
 import VLC.MainInterface
 import VLC.Style
-import VLC.Menus
 import VLC.Util
 
 T.Page {
@@ -44,8 +43,9 @@ T.Page {
 
     property var sortModel: _firstChild?.sortModel ?? null
 
-    //property is *not* readOnly, a PageLoader may define a localMenuDelegate common for its subviews (music, video)
-    property SortMenu sortMenu: null
+    // FigmaMenu rows the page adds to its sort menu and to its header "…" menu
+    property var sortExtraRows: []
+    property var headerMenuRows: []
 
     property int displayMarginBeginning: 0
     property int displayMarginEnd: 0
@@ -119,7 +119,8 @@ T.Page {
         leftPadding: VLCStyle.dynamicAppMargins(width) + VLCStyle.layout_left_margin + root.leftPadding
         rightPadding: VLCStyle.dynamicAppMargins(width) + VLCStyle.layout_right_margin + root.rightPadding
 
-        sortMenu: root.sortMenu
+        sortExtraRows: root.sortExtraRows
+        headerMenuRows: root.headerMenuRows
 
         search: _searchCtx
         sort: _sortCtx
@@ -143,7 +144,8 @@ T.Page {
 
         property int itemCount: -1
 
-        property alias sortMenu: gridSortFilter.sortMenu
+        property alias sortExtraRows: gridSortFilter.sortExtraRows
+        property alias headerMenuRows: gridSortFilter.menuExtraRows
 
         property alias search: gridSortFilter.search
         property alias sort: gridSortFilter.sort
@@ -164,8 +166,6 @@ T.Page {
                                 implicitContentWidth + leftPadding + rightPadding)
         implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
                                  implicitContentHeight + topPadding + bottomPadding)
-
-        Navigation.navigable: gridSortFilter.enabled
 
         // Children
 
@@ -235,7 +235,7 @@ T.Page {
                 T.Label {
                     visible: defaultPageHeader.itemCount >= 0
                     text: qsTr("%1 item", "%1 items", defaultPageHeader.itemCount).arg(defaultPageHeader.itemCount)
-                    color: theme.fg.secondary.alpha(0.75)
+                    color: theme.palette?.isDark ? "#6B6B6B" : theme.fg.secondary.alpha(0.75)
                     font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
                 }
 
