@@ -116,6 +116,8 @@ class VLCIcons : public QObject {
     Q_PROPERTY(QChar drag_handle MEMBER drag_handle CONSTANT FINAL)
     Q_PROPERTY(QChar link MEMBER link CONSTANT FINAL)
     Q_PROPERTY(QChar audio_tracks MEMBER audio_tracks CONSTANT FINAL)
+    Q_PROPERTY(QChar playlists MEMBER playlists CONSTANT FINAL)
+    Q_PROPERTY(QChar checkmark MEMBER checkmark CONSTANT FINAL)
 
 
 public:
@@ -228,6 +230,8 @@ public:
     static constexpr inline QChar drag_handle{ u'\ue063' };
     static constexpr inline QChar link{ u'\ue064' };
     static constexpr inline QChar audio_tracks{ u'\ue065' };
+    static constexpr inline QChar playlists{ u'\ue066' };
+    static constexpr inline QChar checkmark{ u'\ue067' };
 
 };
 

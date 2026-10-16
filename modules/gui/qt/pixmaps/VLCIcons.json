@@ -106,6 +106,8 @@
         {"key":"chapters", "path": "./redesign/chapters.svg"},
         {"key":"drag_handle", "path": "./redesign/drag-handle.svg"},
         {"key":"link", "path": "./redesign/link.svg"},
-        {"key":"audio_tracks", "path": "./redesign/audio-tracks.svg"}
+        {"key":"audio_tracks", "path": "./redesign/audio-tracks.svg"},
+        {"key":"playlists", "path": "./redesign/playlists.svg"},
+        {"key":"checkmark", "path": "./redesign/checkmark.svg"}
     ]
 }
