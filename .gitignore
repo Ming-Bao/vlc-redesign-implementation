@@ -63,3 +63,6 @@ static-lib/
 !buildsystem/
 !build.rs
 !extras/package/apple/build.sh
+
+# Claude Code tooling state
+**/.claude/handoff-nudge-state.json

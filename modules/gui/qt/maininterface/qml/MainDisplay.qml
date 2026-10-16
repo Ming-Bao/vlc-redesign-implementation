@@ -259,6 +259,11 @@ FocusScope {
         id: localTopbar
         z: 5
 
+        onDiscoverRequested: {
+            if (!stackView.isDefaulLoadedForPath(["discover"]))
+                History.push(["discover"])
+        }
+
         anchors {
             top: menuTopbar.visible ? menuTopbar.bottom : parent.top
             left: parent.left
@@ -616,7 +621,8 @@ FocusScope {
                       .concat([{ text: qsTr("Open network stream"), run: () => DialogsProvider.openNetDialog() }])
                       .concat(MainCtx.mediaLibraryAvailable ? [
                           { text: qsTr("New playlist"), run: () => {
-                              if (DialogsProvider.newPlaylist())
+                              if (DialogsProvider.newPlaylist() &&
+                                  !stackView.isDefaulLoadedForPath(["playlists"]))
                                   History.push(["playlists"])
                           } }
                       ] : [])

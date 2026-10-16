@@ -810,10 +810,10 @@ void DialogsProvider::addFolderToLibrary()
         return;
     p_intf->p_mi->setDialogFilePath( url );
 
-    // same call as MLFoldersModel::add
+    // same call as MLFoldersModel::add (queues match by name)
     ml->runOnMLThread( this, [url]( vlc_medialibrary_t* p_ml ) {
         vlc_ml_add_folder( p_ml, qtu( url.toString( QUrl::FullyEncoded ) ) );
-    } );
+    }, "ML_FOLDER_ADD_QUEUE" );
 }
 
 bool DialogsProvider::newPlaylist()

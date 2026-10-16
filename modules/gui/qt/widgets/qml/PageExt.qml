@@ -124,7 +124,7 @@ T.Page {
         if (!_firstChild)
             return
         _firstChild.Navigation.parentItem = root
-        _firstChild.Navigation.upItem = root.header
+        _firstChild.Navigation.upItem = Qt.binding(() => root.header?.contentUpItem ?? root.header)
     }
 
     function positionContentAtBeginning() {
@@ -155,7 +155,9 @@ T.Page {
         sort: _sortCtx
 
         Navigation.parentItem: root
-        Navigation.downAction: function() {
+        Navigation.downAction: focusContent
+
+        function focusContent() {
             if (typeof root.setCurrentItemFocus === "function")
                 root.setCurrentItemFocus(Qt.TabFocusReason)
             else if (typeof root._firstChild?.setCurrentItemFocus === "function")
@@ -207,6 +209,9 @@ T.Page {
         FontMetrics { id: lastCrumbFont; font.pixelSize: VLCStyle.dp(16, VLCStyle.scale); font.weight: Font.DemiBold }
 
         property int itemCount: -1
+
+        // what Up from the page content focuses: the tabs when shown, else the header row
+        readonly property Item contentUpItem: tabRow.visible ? tabRow : defaultPageHeader
 
         property alias sortExtraRows: gridSortFilter.sortExtraRows
         property alias headerMenuRows: gridSortFilter.menuExtraRows
@@ -399,6 +404,8 @@ T.Page {
                     Navigation.parentItem: defaultPageHeader
                     Navigation.leftItem: crumbRow
                     Navigation.downItem: tabRow.visible ? tabRow : null
+
+                    onEscaped: defaultPageHeader.focusContent()
                 }
             }
 
@@ -464,7 +471,15 @@ T.Page {
                         Keys.priority: Keys.AfterItem
                         Keys.onPressed: (event) => Navigation.defaultKeyAction(event)
 
-                        onClicked: History.push([defaultPageHeader.tabRoot, modelData.name])
+                        onClicked: {
+                            const path = [defaultPageHeader.tabRoot, modelData.name]
+                            // already on the tab's own root page (not a group or playlist under it)
+                            if (History.match(History.viewPath, path) &&
+                                    root.Navigation.parentItem?.isDefaulLoadedForPath?.([]))
+                                root.positionContentAtBeginning()
+                            else
+                                History.push(path)
+                        }
                     }
                 }
             }

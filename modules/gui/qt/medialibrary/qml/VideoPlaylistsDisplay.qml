@@ -59,6 +59,9 @@ Widgets.PageLoader {
 
             title: qsTr("Playlists")
 
+            // restored from the navigation history
+            property alias initialIndex: playlistView.initialIndex
+
             PlaylistMediaList {
                 id: playlistView
 

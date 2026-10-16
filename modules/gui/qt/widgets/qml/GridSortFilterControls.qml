@@ -12,6 +12,9 @@ NavigableRow {
 
     spacing: VLCStyle.dp(20, VLCStyle.scale)
 
+    // Escape pressed in the search field, after it was cleared
+    signal escaped()
+
     required property SortCtx sort
     required property SearchCtx search
 
@@ -162,7 +165,7 @@ NavigableRow {
 
         Keys.onEscapePressed: (event) => {
             searchField.clear()
-            root.Navigation.defaultNavigationDown()
+            root.escaped()
             event.accepted = true
         }
         Keys.priority: Keys.AfterItem

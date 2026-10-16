@@ -60,6 +60,7 @@ T.ToolBar {
     signal toggleNavigationVisibility()
     signal togglePlayqueueVisibility()
     signal folderClicked()
+    signal discoverRequested()
     // the player keeps its bars shown while the title bar is hovered or its menu is open
     signal requestLockUnlockAutoHide(bool lock)
 
@@ -151,7 +152,7 @@ T.ToolBar {
                         ctx: MainCtx
                         flat: true
 
-                        onDiscoverRequested: History.push(["discover"])
+                        onDiscoverRequested: root.discoverRequested()
 
                         onAboutToShow: root.requestLockUnlockAutoHide(true)
                         onAboutToHide: root.requestLockUnlockAutoHide(false)
