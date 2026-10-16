@@ -816,6 +816,27 @@ void DialogsProvider::addFolderToLibrary()
     } );
 }
 
+bool DialogsProvider::newPlaylist()
+{
+    MediaLib* ml = p_intf->p_mi->getMediaLibrary();
+    if( !ml )
+        return false;
+
+    bool ok = false;
+    const QString name = QInputDialog::getText( nullptr, qtr( "New Playlist" ),
+            qtr( "Playlist name:" ), QLineEdit::Normal, {}, &ok ).trimmed();
+    if( !ok || name.isEmpty() )
+        return false;
+
+    // same call as MLPlaylistListModel::create
+    ml->runOnMLThread( this, [name]( vlc_medialibrary_t* p_ml ) {
+        vlc_ml_playlist_t* playlist = vlc_ml_playlist_create( p_ml, qtu( name ) );
+        if( playlist )
+            vlc_ml_playlist_release( playlist );
+    } );
+    return true;
+}
+
 void DialogsProvider::PLOpenDir()
 {
     openDirectory( p_intf, true );

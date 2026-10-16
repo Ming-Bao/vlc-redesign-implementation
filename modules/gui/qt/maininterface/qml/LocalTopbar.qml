@@ -151,6 +151,8 @@ T.ToolBar {
                         ctx: MainCtx
                         flat: true
 
+                        onDiscoverRequested: History.push(["discover"])
+
                         onAboutToShow: root.requestLockUnlockAutoHide(true)
                         onAboutToHide: root.requestLockUnlockAutoHide(false)
                     }

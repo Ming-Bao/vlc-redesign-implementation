@@ -167,6 +167,7 @@ signals:
     void aboutToShow();
     void aboutToHide();
     void shownChanged();
+    void discoverRequested();
 
 public slots:
     void popup( QPoint pos );

@@ -29,6 +29,7 @@
 #include "custom_menus.hpp"
 #include "widgets/native/qvlcframe.hpp"
 
+#include <functional>
 #include <QObject>
 
 class VLCMenu : public QMenu
@@ -76,7 +77,7 @@ public:
 
     /* All main Menus */
     static void FileMenu( qt_intf_t *, QMenu * );
-    static void MainMenu( qt_intf_t *, QMenu * );
+    static void MainMenu( qt_intf_t *, QMenu *, std::function<void()> onDiscover = {} );
 
     static void ToolsMenu( qt_intf_t *, QMenu * );
 

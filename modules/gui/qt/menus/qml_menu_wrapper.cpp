@@ -265,7 +265,7 @@ void QmlGlobalMenu::popup(QPoint pos)
 
     if (m_flat)
     {
-        MainMenu( p_intf, m_menu.get() );
+        MainMenu( p_intf, m_menu.get(), [this]() { emit discoverRequested(); } );
         m_menu->popup(pos);
         return;
     }

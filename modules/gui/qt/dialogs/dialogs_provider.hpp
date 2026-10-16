@@ -154,6 +154,7 @@ public:
 
     /* redesign library actions, called from QML */
     Q_INVOKABLE void addFolderToLibrary();
+    Q_INVOKABLE bool newPlaylist();
 
 protected:
     void customEvent( QEvent *) override;

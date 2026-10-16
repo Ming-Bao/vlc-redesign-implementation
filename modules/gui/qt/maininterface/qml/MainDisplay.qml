@@ -606,10 +606,31 @@ FocusScope {
                 }
             }
 
+            // Figma sidebar "Add item": VLC's own add actions
+            Widgets.FigmaMenu {
+                id: addItemMenu
+
+                rows: (MainCtx.mediaLibraryAvailable ? [
+                          { text: qsTr("Add folder to library"), run: () => DialogsProvider.addFolderToLibrary() }
+                      ] : [])
+                      .concat([{ text: qsTr("Open network stream"), run: () => DialogsProvider.openNetDialog() }])
+                      .concat(MainCtx.mediaLibraryAvailable ? [
+                          { text: qsTr("New playlist"), run: () => {
+                              if (DialogsProvider.newPlaylist())
+                                  History.push(["playlists"])
+                          } }
+                      ] : [])
+            }
+
             onItemClicked: (modelUri, item) => {
                 console.assert(modelUri)
 
                 console.assert(item)
+                if (modelUri[0] === "additem") {
+                    addItemMenu.popup(item, item.width, 0)
+                    return
+                }
+
                 if ((sidebar.state !== 'expanded') && item.expandable) {
                     // TODO: Investigate opening the menu on hover, if
                     //       we switch to `Popup.Item` type of menus.

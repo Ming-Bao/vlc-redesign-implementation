@@ -238,7 +238,7 @@ void VLCMenuBar::FileMenu(qt_intf_t *p_intf, QMenu *menu)
 /**
  * Flat main ("…") menu of the redesigned interface
  **/
-void VLCMenuBar::MainMenu( qt_intf_t *p_intf, QMenu *menu )
+void VLCMenuBar::MainMenu( qt_intf_t *p_intf, QMenu *menu, std::function<void()> onDiscover )
 {
     auto mi = p_intf->p_mi;
 
@@ -279,6 +279,12 @@ void VLCMenuBar::MainMenu( qt_intf_t *p_intf, QMenu *menu )
     /* Everything the redesign does not list stays reachable */
     menu->addSeparator();
     QMenu* more = menu->addMenu( qtr( "&More" ) );
+    /* Discover left the redesign's sidebar; the QML side shows the page */
+    if( onDiscover )
+    {
+        more->addAction( qtr( "&Discover" ), onDiscover );
+        more->addSeparator();
+    }
     FileMenu( p_intf, more->addMenu( qtr( "&Media" ) ) );
     NavigMenu( p_intf, more->addMenu( qtr( "P&layback" ) ) );
     AudioMenu( p_intf, more->addMenu( qtr( "&Audio" ) ) );
