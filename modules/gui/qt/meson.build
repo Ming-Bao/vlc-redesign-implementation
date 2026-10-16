@@ -994,6 +994,7 @@ qml_modules += {
 
 qml_tests = {
     'tst_FSM': files('tests/tst_FSM.qml'),
+    'tst_LibraryHelpers': files('tests/tst_LibraryHelpers.qml'),
 }
 
 qmllibs = []

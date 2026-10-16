@@ -218,4 +218,53 @@ QtObject {
     }
 
     /// </flickable-extents>
+
+    // Label of one row of the redesign's sort menu (Figma "Sorting Options" 856:2215).
+    // `text` is the page's own sortModel label, used for criteria the table does not know.
+    function sortRowLabel(criteria : string, text : string, order : int) : string {
+        const asc = (order === Qt.AscendingOrder)
+        switch (criteria) {
+        case "title":
+        case "name":
+            return asc ? qsTr("Title A-Z") : qsTr("Title Z-A")
+        case "album_title":
+            return asc ? qsTr("Album A-Z") : qsTr("Album Z-A")
+        case "release_year":
+            return asc ? qsTr("Oldest First") : qsTr("Newest First")
+        case "duration":
+            return asc ? qsTr("Shortest First") : qsTr("Longest First")
+        case "last_played_date":
+            return asc ? qsTr("Unwatched First") : qsTr("Watched First")
+        case "main_artist":
+            return asc ? qsTr("Artist A-Z") : qsTr("Artist Z-A")
+        case "track_number":
+            return asc ? qsTr("Track Number Ascending") : qsTr("Track Number Descending")
+        case "disc_number":
+            return asc ? qsTr("Disc Number Ascending") : qsTr("Disc Number Descending")
+        case "mrl":
+        case "url":
+            return asc ? qsTr("URI Ascending") : qsTr("URI Descending")
+        case "nb_tracks":
+        case "nb_videos":
+            return asc ? qsTr("Fewest Items First") : qsTr("Most Items First")
+        default:
+            return (asc ? qsTr("%1 Ascending") : qsTr("%1 Descending")).arg(text)
+        }
+    }
+
+    // Page-header crumbs for the page at `prefix` titled `title`: one crumb per prefix level
+    // that `labels` names (keyed by the joined path, e.g. "music/albums"), then the title
+    // unless the last crumb already reads it. Each crumb is { title, path }.
+    function breadcrumbs(prefix : var, title : string, labels : var) : var {
+        const crumbs = []
+        for (let i = 1; i <= prefix.length; ++i) {
+            const path = prefix.slice(0, i)
+            const label = labels[path.join("/")]
+            if (label)
+                crumbs.push({ title: label, path: path })
+        }
+        if (title && (crumbs.length === 0 || crumbs[crumbs.length - 1].title !== title))
+            crumbs.push({ title: title, path: prefix.slice(0) })
+        return crumbs
+    }
 }
