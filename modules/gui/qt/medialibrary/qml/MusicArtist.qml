@@ -390,7 +390,7 @@ FocusScope {
                         right: parent.right
                     }
 
-                    text: qsTr("Albums")
+                    breadcrumbs: [{ title: qsTr("Albums"), path: [] }]
 
                     sortExtraRows: MainCtx.gridView ? [] : [
                         { text: qsTr("Album sections"), checked: MainCtx.albumSections,

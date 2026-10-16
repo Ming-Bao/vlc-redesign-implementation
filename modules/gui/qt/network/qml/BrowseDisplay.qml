@@ -62,10 +62,6 @@ Widgets.PageLoader {
         History.push([...root.pagePrefix, "browse"], { tree: tree }, reason)
     }
 
-    function _showHome(reason) {
-        History.push([...root.pagePrefix, "home"], reason)
-    }
-
 
     function _showBrowseFolder(title, reason) {
         History.push([...root.pagePrefix, "folders"], { title: title }, reason)
@@ -217,8 +213,6 @@ Widgets.PageLoader {
             onBrowse: (tree, reason) => {
                 root._showBrowseNode(tree, reason)
             }
-
-            onHomeButtonClicked: reason => root._showHome(reason)
 
             onCurrentIndexChanged: History.viewProp.initialIndex = currentIndex
         }

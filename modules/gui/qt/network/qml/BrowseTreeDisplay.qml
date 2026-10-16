@@ -39,28 +39,18 @@ Widgets.PageExt {
     readonly property var currentIndex: loader.currentItem?.currentIndex ?? -1
 
     signal browse(var tree, int reason)
-    signal homeButtonClicked(int reason)
 
     isSearchable: loader.isSearchable
 
-    header:  BrowseTreeHeader {
-        id: browseTreeHeader
+    // Network ▸ source ▸ folder…, each crumb browses back to its node
+    breadcrumbs: [{ title: qsTr("Network"), path: ["network"] }].concat(
+        headerPath.map((node) => ({ title: node.display, path: root.pagePrefix, props: { tree: node.tree } })))
 
-        path: root.headerPath
-        providerModel: root.model
-
-        leftPadding: VLCStyle.dynamicAppMargins(width) + VLCStyle.layout_left_margin + root.leftPadding
-        rightPadding: VLCStyle.dynamicAppMargins(width) + VLCStyle.layout_right_margin + root.rightPadding
-
-        sort: root.sort
-        search: root.search
-
-        Navigation.parentItem: root
-        Navigation.downItem: loader
-
-        onBrowse: (tree, reason) => root.browse(tree, reason)
-        onHomeButtonClicked: (reason) => root.homeButtonClicked(reason)
-    }
+    // the old header's "Add to / Remove from media library" button
+    headerMenuRows: (root.model?.canBeIndexed ?? false) ? [{
+        text: root.model.indexed ? qsTr("Remove from media library") : qsTr("Add to media library"),
+        run: () => { root.model.indexed = !root.model.indexed }
+    }] : []
 
     MainViewLoader {
         id: loader
@@ -199,7 +189,6 @@ Widgets.PageExt {
                 onActionAtIndex: (index) => { _actionAtIndex(index) }
 
                 Navigation.parentItem: root
-                Navigation.upItem: browseTreeHeader.networkAddressbar
             }
         }
 
@@ -291,7 +280,6 @@ Widgets.PageExt {
                 focus: true
 
                 Navigation.parentItem: root
-                Navigation.upItem: browseTreeHeader.networkAddressbar
 
                 rowHeight: VLCStyle.tableCoverRow_height
 
@@ -347,7 +335,6 @@ Widgets.PageExt {
                 }
 
                 Navigation.parentItem: root
-                Navigation.upItem: browseTreeHeader.networkAddressbar
             }
         }
     }

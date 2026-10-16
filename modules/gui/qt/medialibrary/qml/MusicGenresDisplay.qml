@@ -83,7 +83,7 @@ Widgets.PageLoader {
             property string genreName: ""
             property alias parentId: albumsView.parentId
 
-            title: qsTr("Genres - %1").arg(genreName)
+            title: genreName
 
             /* List View */
             MusicAlbums {

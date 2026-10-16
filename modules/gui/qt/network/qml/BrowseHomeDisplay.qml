@@ -64,7 +64,7 @@ Widgets.PageExt {
 
     signal browse(var tree, int reason)
 
-    title: qsTr("Browse")
+    title: qsTr("Network")
 
     focus: true
 

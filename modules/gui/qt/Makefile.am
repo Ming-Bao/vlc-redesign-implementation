@@ -1158,10 +1158,8 @@ libqml_module_network_a_QML = \
 	network/qml/BrowseDisplay.qml \
 	network/qml/BrowseHomeDisplay.qml \
 	network/qml/BrowseTreeDisplay.qml \
-	network/qml/BrowseTreeHeader.qml \
 	network/qml/DiscoverDisplay.qml \
 	network/qml/DiscoverUrlDisplay.qml \
-	network/qml/NetworkAddressbar.qml \
 	network/qml/NetworkGridItem.qml \
 	network/qml/NetworkThumbnailItem.qml \
 	network/qml/ServicesHomeDisplay.qml \
