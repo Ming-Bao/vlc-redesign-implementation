@@ -63,12 +63,14 @@ Widgets.PageLoader {
         History.push([...root.pagePrefix, "source_root"], { source_name: source_name }, reason)
     }
 
-    function _showServiceNode(tree, source_name, reason) {
+    // source_title is the source's display name, carried along for the page's breadcrumbs
+    function _showServiceNode(tree, source_name, source_title, reason) {
         History.push(
             [...root.pagePrefix, "source_browse"],
             {
                 tree: tree,
-                source_name: source_name
+                source_name: source_name,
+                source_title: source_title
             },
             reason)
     }
@@ -120,9 +122,14 @@ Widgets.PageLoader {
             contextMenu: contextMenu
             headerPath: [{display: deviceModel.name, tree: {}}]
 
-            onHomeButtonClicked: reason => _showServiceHome(reason)
+            // Services ▸ source (this page; not clickable)
+            breadcrumbs: [
+                { title: qsTr("Services"), path: [...root.pagePrefix, "all"] },
+                { title: deviceModel.name, path: [...root.pagePrefix, "source_root"], props: { source_name: deviceModel.source_name } }
+            ]
+
             onBrowse: (tree, reason) => {
-                root._showServiceNode(tree, deviceModel.source_name, reason)
+                root._showServiceNode(tree, deviceModel.source_name, deviceModel.name, reason)
             }
 
             onCurrentIndexChanged: History.viewProp.initialIndex = currentIndex
@@ -155,14 +162,14 @@ Widgets.PageLoader {
 
             property alias tree: mediaModel.tree
             property string source_name
+            property string source_title
 
             onBrowse: (tree, reason) => {
                 if (tree.isRoot)
                     root._showServiceRoot(source_name, reason)
                 else
-                    root._showServiceNode(tree, source_name, reason)
+                    root._showServiceNode(tree, source_name, source_title, reason)
             }
-            onHomeButtonClicked: (tree, reason) => root._showServiceHome(reason)
             onCurrentIndexChanged: History.viewProp.initialIndex = currentIndex
 
             model: NetworkMediaModel {
@@ -174,12 +181,15 @@ Widgets.PageLoader {
                 sortCriteria: sourceBrowsePage.sort.criteria
             }
 
-            headerPath:  {
-                let _path =  [{display: mediaModel.name, tree: {"source_name": source_name, "isRoot": true}}]
-                _path.concat(mediaModel.path)
-
-                return _path
-            }
+            // Services ▸ source ▸ folder…, each crumb pushes what onBrowse would push for its node
+            breadcrumbs: [
+                { title: qsTr("Services"), path: [...root.pagePrefix, "all"] },
+                { title: source_title || source_name, path: [...root.pagePrefix, "source_root"], props: { source_name: source_name } }
+            ].concat(headerPath.map((node) => ({
+                title: node.display,
+                path: [...root.pagePrefix, "source_browse"],
+                props: { tree: node.tree, source_name: source_name, source_title: source_title }
+            })))
 
             contextMenu: NetworkMediaContextMenu {
                 model: mediaModel

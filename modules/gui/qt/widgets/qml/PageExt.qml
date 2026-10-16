@@ -352,6 +352,9 @@ T.Page {
                                     }
 
                                     T.Label {
+                                        // a too-long crumb ends in "…" instead of being cut by crumbRow
+                                        width: Math.min(implicitWidth, Math.max(0, crumbRow.width - crumb.x - (crumb.index > 0 ? VLCStyle.dp(8 + 6, VLCStyle.scale) : 0)))
+                                        elide: Text.ElideRight
                                         text: crumb.text
                                         font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
                                         font.weight: crumb.isLast ? Font.DemiBold : Font.Normal

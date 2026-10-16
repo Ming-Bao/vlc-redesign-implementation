@@ -1153,7 +1153,6 @@ libqml_module_network_a_ModulePath = VLC/Network
 libqml_module_network_a_CXXFLAGS = $(libqt_plugin_la_CXXFLAGS)
 libqml_module_network_a_CPPFLAGS = $(libqt_plugin_la_CPPFLAGS)
 libqml_module_network_a_QML = \
-	network/qml/AddressbarButton.qml \
 	network/qml/BrowseDeviceView.qml \
 	network/qml/BrowseDisplay.qml \
 	network/qml/BrowseHomeDisplay.qml \

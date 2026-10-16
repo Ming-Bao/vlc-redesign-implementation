@@ -189,6 +189,7 @@ Widgets.PageExt {
                 onActionAtIndex: (index) => { _actionAtIndex(index) }
 
                 Navigation.parentItem: root
+                Navigation.upItem: root.header
             }
         }
 
@@ -280,6 +281,7 @@ Widgets.PageExt {
                 focus: true
 
                 Navigation.parentItem: root
+                Navigation.upItem: root.header
 
                 rowHeight: VLCStyle.tableCoverRow_height
 
@@ -335,6 +337,7 @@ Widgets.PageExt {
                 }
 
                 Navigation.parentItem: root
+                Navigation.upItem: root.header
             }
         }
     }

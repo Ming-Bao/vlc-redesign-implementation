@@ -726,7 +726,6 @@ qml_modules += {
     'target' : 'network',
     'outdir' : 'VLC/Network',
     'sources': files(
-        'network/qml/AddressbarButton.qml',
         'network/qml/BrowseDeviceView.qml',
         'network/qml/BrowseDisplay.qml',
         'network/qml/BrowseHomeDisplay.qml',
