@@ -51,10 +51,6 @@ Widgets.PageLoader {
     property bool enableBeginningFade: true
     property bool enableEndFade: true
 
-    function _showServiceHome(reason) {
-        History.push([...root.pagePrefix, "all"], reason)
-    }
-
     function _showServiceManage(reason) {
         History.push([...root.pagePrefix, "services_manage"], reason)
     }
@@ -120,7 +116,6 @@ Widgets.PageLoader {
 
             model: deviceModel
             contextMenu: contextMenu
-            headerPath: [{display: deviceModel.name, tree: {}}]
 
             // Services ▸ source (this page; not clickable)
             breadcrumbs: [
