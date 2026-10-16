@@ -35,6 +35,8 @@ Widgets.PageLoader {
     property bool enableBeginningFade: true
     property bool enableEndFade: true
 
+    property int playlistType: MLPlaylistListModel.PLAYLIST_TYPE_AUDIO
+
     //---------------------------------------------------------------------------------------------
     // Settings
     //---------------------------------------------------------------------------------------------
@@ -67,6 +69,7 @@ Widgets.PageLoader {
                 focus: true
 
                 isMusic: true
+                playlistType: root.playlistType
 
                 searchPattern: playlistPage.search.pattern
                 sortOrder: playlistPage.sort.order

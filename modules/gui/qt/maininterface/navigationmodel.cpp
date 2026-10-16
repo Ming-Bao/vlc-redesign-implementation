@@ -269,27 +269,20 @@ public:
 
         if (m_hasMedialib)
         {
-            ModelEntry videoEntry{ qtr("Videos"), "video", VLCIcons::topbar_video, QStringLiteral(":/icons/ic_fluent_filmstrip.svg") };
-            videoEntry.children.emplace_back(qtr("All"), "all");
-            videoEntry.children.emplace_back(qtr("Playlists"), "playlists");
-            m_model.children.push_back(std::move(videoEntry));
-
-            ModelEntry musicEntry{ qtr("Music"), "music", VLCIcons::topbar_music, QStringLiteral(":/icons/ic_fluent_music_note_2.svg") };
-            musicEntry.children.emplace_back(qtr("Artists"), "artists");
-            musicEntry.children.emplace_back(qtr("Albums"), "albums");
-            musicEntry.children.emplace_back(qtr("Tracks"), "tracks");
-            musicEntry.children.emplace_back(qtr("Genres"), "genres");
-            musicEntry.children.emplace_back(qtr("Playlists"), "playlists");
-            m_model.children.push_back(std::move(musicEntry));
+            m_model.children.emplace_back(qtr("Videos"), "video", VLCIcons::topbar_video, QStringLiteral(":/icons/ic_fluent_filmstrip.svg"));
+            m_model.children.emplace_back(qtr("Music"), "music", VLCIcons::topbar_music, QStringLiteral(":/icons/ic_fluent_music_note_2.svg"));
         }
 
         m_model.children.emplace_back(qtr("Network"), "network", VLCIcons::topbar_network, QStringLiteral(":/icons/ic_fluent_wifi_1.svg"));
 
-        ModelEntry discoverEntry{ qtr("Discover"), "discover", VLCIcons::topbar_discover, QStringLiteral(":/icons/ic_fluent_globe.svg") };
-        discoverEntry.children.emplace_back(qtr("Services"), "services");
+        if (m_hasMedialib)
+        {
+            m_model.children.emplace_back(qtr("Playlists"), "playlists", VLCIcons::playlists);
+            m_model.children.emplace_back(qtr("Recent"), "recent", VLCIcons::history);
+        }
 
-        discoverEntry.children.emplace_back(qtr("URL"), "url");
-        m_model.children.push_back(std::move(discoverEntry));
+        // not a page: the sidebar opens the add menu for this uri (MainDisplay)
+        m_model.children.emplace_back(qtr("Add item"), "additem", VLCIcons::add);
 
         m_model.visibleChildren = m_model.children.size();
     }

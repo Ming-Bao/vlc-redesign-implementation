@@ -685,6 +685,8 @@ qml_modules += {
         'medialibrary/qml/MusicGenres.qml',
         'medialibrary/qml/MusicGenresDisplay.qml',
         'medialibrary/qml/MusicPlaylistsDisplay.qml',
+        'medialibrary/qml/PlaylistsDisplay.qml',
+        'medialibrary/qml/RecentDisplay.qml',
         'medialibrary/qml/MusicTrackListDisplay.qml',
         'medialibrary/qml/MusicTracksDisplay.qml',
         'medialibrary/qml/UrlListDisplay.qml',
