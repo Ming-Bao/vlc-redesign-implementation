@@ -54,6 +54,29 @@ Widgets.PageExt {
     // see HomeSection.focusX
     property real _focusX: 0
 
+    // folders ranked from the play history (see Helpers.folderEntries)
+    property var folderEntries: []
+
+    MLRecentMediaModel {
+        id: historyModel
+
+        ml: MediaLib
+        limit: 100
+
+        function updateFolders() {
+            if (count === 0) {
+                root.folderEntries = []
+                return
+            }
+            getDataFlat(Array.from({ length: count }, (_, i) => i), (items) => {
+                root.folderEntries = Helpers.folderEntries(items.filter(i => i).map(i => i.mrl.toString()))
+            })
+        }
+
+        onCountChanged: updateFolders()
+        onModelReset: updateFolders()
+    }
+
     function positionContentAtBeginning() {
         contentYBehavior.enabled = true
         flickable.contentY = -flickable.originY
@@ -233,6 +256,134 @@ Widgets.PageExt {
                 }
 
                 onTitleClicked: (reason) => root.seeAllButtonClicked("listenAgain", reason)
+                focusX: root._focusX
+                onCardFocused: (x) => root._focusX = x
+                onActiveFocusChanged: if (activeFocus) flickable.showItem(this)
+            }
+
+            HomeSection {
+                id: folders
+
+                width: parent.width
+
+                title: qsTr("Frequently Visited Folders")
+                cardWidth: VLCStyle.dp(200, VLCStyle.scale)
+
+                model: {
+                    const pattern = root.search.pattern.toLowerCase()
+                    return root.folderEntries.filter(e => e.name.toLowerCase().includes(pattern))
+                                             .slice(0, folders.fit)
+                }
+
+                cardDelegate: Component {
+                    HomeSquareCard {
+                        required property var modelData
+
+                        glyph: VLCIcons.folder
+                        backing: "#1E1E1E"
+                        title: modelData.name
+
+                        onActivated: (reason) => {
+                            const tree = MainCtx.folderTree(modelData.mrl)
+                            if (tree)
+                                History.push(["network", "browse"], { tree: tree }, reason)
+                        }
+                    }
+                }
+
+                onTitleClicked: (reason) => root.seeAllButtonClicked("folders", reason)
+                focusX: root._focusX
+                onCardFocused: (x) => root._focusX = x
+                onActiveFocusChanged: if (activeFocus) flickable.showItem(this)
+            }
+
+            HomeSection {
+                id: playlists
+
+                width: parent.width
+
+                title: qsTr("Frequently Visited Playlists")
+                cardWidth: VLCStyle.dp(200, VLCStyle.scale)
+
+                // ponytail: library order; rank by the plays of a playlist's tracks if that ever matters
+                model: MLPlaylistListModel {
+                    id: playlistsModel
+
+                    ml: MediaLib
+                    playlistType: MLPlaylistListModel.PLAYLIST_TYPE_ALL
+
+                    searchPattern: root.search.pattern
+
+                    limit: playlists.fit
+                }
+
+                cardDelegate: Component {
+                    HomeSquareCard {
+                        required property var model
+                        required property int index
+
+                        image: model.thumbnail ?? ""
+                        glyph: VLCIcons.playlists
+                        title: model.name ?? ""
+                        subtitle: qsTr("%1 track", "%1 tracks", model.count).arg(model.count)
+
+                        onActivated: (reason) => History.push(["playlists", "list"], { parentId: model.id, title: model.name }, reason)
+                        onMenuRequested: (globalPos) => playlistsMenu.popup([playlistsModel.index(index, 0)], globalPos)
+                    }
+                }
+
+                MLContextMenu {
+                    id: playlistsMenu
+
+                    model: playlistsModel
+                }
+
+                onTitleClicked: (reason) => History.push(["playlists"], reason)
+                focusX: root._focusX
+                onCardFocused: (x) => root._focusX = x
+                onActiveFocusChanged: if (activeFocus) flickable.showItem(this)
+            }
+
+            HomeSection {
+                id: artists
+
+                width: parent.width
+
+                title: qsTr("Frequently Listened Artists")
+                cardWidth: VLCStyle.dp(200, VLCStyle.scale)
+
+                model: MLFrequentArtistModel {
+                    id: artistsModel
+
+                    ml: MediaLib
+
+                    searchPattern: root.search.pattern
+
+                    limit: artists.fit
+                }
+
+                cardDelegate: Component {
+                    HomeSquareCard {
+                        required property var model
+                        required property int index
+
+                        image: model.cover ?? ""
+                        glyph: VLCIcons.album_cover
+                        title: model.name ?? ""
+                        subtitle: qsTr("%1 track", "%1 tracks", model.nb_tracks).arg(model.nb_tracks)
+
+                        onActivated: (reason) => History.push(["music", "artists", "albums"], { artistId: model.id }, reason)
+                        onMenuRequested: (globalPos) => artistsMenu.popup([artistsModel.index(index, 0)], globalPos)
+                    }
+                }
+
+                MLContextMenu {
+                    id: artistsMenu
+
+                    model: artistsModel
+                }
+
+                onTitleClicked: (reason) => History.push(["music", "artists"], reason)
                 focusX: root._focusX
                 onCardFocused: (x) => root._focusX = x
                 onActiveFocusChanged: if (activeFocus) flickable.showItem(this)

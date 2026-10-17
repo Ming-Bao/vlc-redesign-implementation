@@ -24,6 +24,7 @@ import VLC.MediaLibrary
 import VLC.MainInterface
 import VLC.Widgets as Widgets
 import VLC.Util
+import VLC.Style
 
 Widgets.PageLoader {
     id: root
@@ -38,6 +39,9 @@ Widgets.PageLoader {
     }, {
         name: "listenAgain",
         component: listenAgainComponent
+    }, {
+        name: "folders",
+        component: foldersComponent
     }, {
         name: "favorites",
         component: favoritesComponent
@@ -153,6 +157,90 @@ Widgets.PageLoader {
 
                 fadingEdge.enableBeginningFade: root.enableBeginningFade
                 fadingEdge.enableEndFade: root.enableEndFade
+            }
+        }
+    }
+
+    Component {
+        id: foldersComponent
+
+        Widgets.PageExt {
+            id: foldersPage
+
+            title: qsTr("Frequently Visited Folders")
+
+            isSearchable: true
+
+            // like HomePage: folders ranked from the play history
+            property var folderEntries: []
+
+            MLRecentMediaModel {
+                id: historyModel
+
+                ml: MediaLib
+                limit: 100
+
+                function updateFolders() {
+                    if (count === 0) {
+                        foldersPage.folderEntries = []
+                        return
+                    }
+                    getDataFlat(Array.from({ length: count }, (_, i) => i), (items) => {
+                        foldersPage.folderEntries = Helpers.folderEntries(items.filter(i => i).map(i => i.mrl.toString()))
+                    })
+                }
+
+                onCountChanged: updateFolders()
+                onModelReset: updateFolders()
+
+                readonly property bool needToNavigateBack: !loading && count === 0
+                                                           && foldersPage.search.pattern === ""
+
+                onNeedToNavigateBackChanged: {
+                    if (needToNavigateBack)
+                        History.previous(Qt.BacktabFocusReason)
+                }
+            }
+
+            Flickable {
+                anchors.fill: parent
+
+                focus: true
+
+                contentWidth: width
+                contentHeight: flow.implicitHeight
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+
+                Flow {
+                    id: flow
+
+                    width: parent.width
+                    spacing: VLCStyle.dp(20, VLCStyle.scale)
+                    leftPadding: foldersPage.header?.leftPadding ?? 0
+                    topPadding: VLCStyle.dp(20, VLCStyle.scale)
+
+                    Repeater {
+                        model: {
+                            const pattern = foldersPage.search.pattern.toLowerCase()
+                            return foldersPage.folderEntries.filter(e => e.name.toLowerCase().includes(pattern))
+                        }
+
+                        HomeSquareCard {
+                            required property var modelData
+
+                            glyph: VLCIcons.folder
+                            backing: "#1E1E1E"
+                            title: modelData.name
+
+                            onActivated: (reason) => {
+                                const tree = MainCtx.folderTree(modelData.mrl)
+                                if (tree)
+                                    History.push(["network", "browse"], { tree: tree }, reason)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
