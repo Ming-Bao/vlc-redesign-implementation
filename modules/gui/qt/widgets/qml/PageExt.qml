@@ -405,7 +405,7 @@ T.Page {
                     Navigation.leftItem: crumbRow
                     Navigation.downItem: tabRow.visible ? tabRow : null
 
-                    onEscaped: defaultPageHeader.focusContent()
+                    onEscaped: defaultPageHeader.Navigation.defaultNavigationDown()
                 }
             }
 
