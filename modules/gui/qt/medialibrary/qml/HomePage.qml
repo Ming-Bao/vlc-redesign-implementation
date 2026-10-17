@@ -51,6 +51,9 @@ Widgets.PageExt {
 
     signal seeAllButtonClicked(string name, int reason)
 
+    // see HomeSection.focusX
+    property real _focusX: 0
+
     function positionContentAtBeginning() {
         contentYBehavior.enabled = true
         flickable.contentY = -flickable.originY
@@ -183,6 +186,8 @@ Widgets.PageExt {
                 }
 
                 onTitleClicked: (reason) => root.seeAllButtonClicked("continueWatching", reason)
+                focusX: root._focusX
+                onCardFocused: (x) => root._focusX = x
                 onActiveFocusChanged: if (activeFocus) flickable.showItem(this)
             }
 
@@ -228,6 +233,8 @@ Widgets.PageExt {
                 }
 
                 onTitleClicked: (reason) => root.seeAllButtonClicked("listenAgain", reason)
+                focusX: root._focusX
+                onCardFocused: (x) => root._focusX = x
                 onActiveFocusChanged: if (activeFocus) flickable.showItem(this)
             }
         }

@@ -106,6 +106,13 @@ T.AbstractButton {
                     color: root._dark ? "#D37918" : theme.accent
                 }
             }
+
+            // the library grid card's play button
+            Widgets.PlayCover {
+                anchors.centerIn: parent
+                visible: root.hovered || root.visualFocus
+                onTapped: MediaLib.addAndPlay(root.model.id)
+            }
         }
 
         T.Label {

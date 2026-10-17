@@ -33,6 +33,9 @@ FocusScope {
     property Component cardDelegate
     property Component listDelegate // list view (not used yet)
     property real cardWidth
+    // centre x (card row coordinates, the same in every section) of the card focused
+    // last on the page, so that moving between rows keeps the column
+    property real focusX: 0
 
     readonly property real _gap: VLCStyle.dp(20, VLCStyle.scale)
 
@@ -40,9 +43,22 @@ FocusScope {
     readonly property int fit: Math.max(1, Math.floor((width + _gap) / (cardWidth + _gap)))
 
     signal titleClicked(int reason)
+    signal cardFocused(real x)
 
+    // focus the card nearest `focusX`
     function setCurrentItemFocus(reason) {
-        cardRow.forceActiveFocus(reason)
+        let best = null
+        let bestDistance = Infinity
+        for (let i = 0; i < cards.count; ++i) {
+            const card = cards.itemAt(i)
+            const distance = Math.abs(card.x + card.width / 2 - focusX)
+            if (distance < bestDistance) {
+                best = card
+                bestDistance = distance
+            }
+        }
+        if (best)
+            best.forceActiveFocus(reason)
     }
 
     visible: cards.count > 0
@@ -107,7 +123,7 @@ FocusScope {
             }
 
             Navigation.parentItem: root
-            Navigation.downItem: cardRow
+            Navigation.downAction: () => root.setCurrentItemFocus(Qt.TabFocusReason)
 
             Keys.priority: Keys.AfterItem
             Keys.onPressed: (event) => {
@@ -139,6 +155,13 @@ FocusScope {
 
                 model: root.model
                 delegate: root.cardDelegate
+
+                onItemAdded: (index, card) => {
+                    card.activeFocusChanged.connect(() => {
+                        if (card.activeFocus)
+                            root.cardFocused(card.x + card.width / 2)
+                    })
+                }
             }
         }
     }
