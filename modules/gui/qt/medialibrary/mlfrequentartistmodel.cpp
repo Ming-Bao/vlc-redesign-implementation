@@ -64,7 +64,10 @@ MLFrequentArtistModel::Loader::rankedArtists(vlc_medialibrary_t* ml, const char*
 
     std::vector<int64_t> artistIds;
     for (const vlc_ml_media_t & media : ml_range_iterate<vlc_ml_media_t>(history))
-        artistIds.push_back(media.album_track.i_artist_id);
+    {
+        if (media.i_subtype == VLC_ML_MEDIA_SUBTYPE_ALBUMTRACK)
+            artistIds.push_back(media.album_track.i_artist_id);
+    }
 
     const QString needle = QString::fromUtf8(pattern ? pattern : "");
 

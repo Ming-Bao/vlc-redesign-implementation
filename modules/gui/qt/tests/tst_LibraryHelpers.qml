@@ -91,4 +91,14 @@ TestCase {
         compare(Helpers.folderEntries(["http://x/a.mp3", "dvd:///dev/sr0", "file:///m/My%20Music/t.mp3"]),
                 [{ mrl: "file:///m/My%20Music", name: "My Music" }])
     }
+
+    function test_folderEntries_skipsRootAndEmptyName() {
+        compare(Helpers.folderEntries(["file:///t.mp3", "file:///m/Shows//x.mkv", "file:///m/A/x.mp3"]),
+                [{ mrl: "file:///m/A", name: "A" }])
+    }
+
+    function test_folderEntries_malformedEscape() {
+        compare(Helpers.folderEntries(["file:///m/Caf%E9/x.mp3"]),
+                [{ mrl: "file:///m/Caf%E9", name: "Caf%E9" }])
+    }
 }

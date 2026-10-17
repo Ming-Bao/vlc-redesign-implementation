@@ -45,15 +45,27 @@ QtObject {
 
     // Folders of `file://` MRLs (most recent first), most played first
     function folderEntries(mrls: var) : var {
+        const names = {}
         const folders = []
         for (const mrl of mrls) {
-            if (mrl.startsWith("file://"))
-                folders.push(mrl.substring(0, mrl.lastIndexOf("/")))
+            const slash = mrl.lastIndexOf("/")
+            // skip non-file MRLs and files at the root (slash is the one ending "file:///")
+            if (!mrl.startsWith("file://") || slash <= "file://".length)
+                continue
+            const folder = mrl.substring(0, slash)
+            const segment = folder.substring(folder.lastIndexOf("/") + 1)
+            if (!segment)
+                continue
+            if (!(folder in names)) {
+                try {
+                    names[folder] = decodeURIComponent(segment)
+                } catch (e) {
+                    names[folder] = segment // malformed escape, e.g. a Latin-1 "%E9"
+                }
+            }
+            folders.push(folder)
         }
-        return rankByFrequency(folders).map(mrl => ({
-            mrl: mrl,
-            name: decodeURIComponent(mrl.substring(mrl.lastIndexOf("/") + 1))
-        }))
+        return rankByFrequency(folders).map(mrl => ({ mrl: mrl, name: names[mrl] }))
     }
 
     function isValidInstanceOf(object: var, type: var) : bool {
