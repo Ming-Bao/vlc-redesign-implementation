@@ -44,10 +44,6 @@ Widgets.PageExt {
 
     isSearchable: true
 
-    property real listCoverHeight: VLCStyle.listAlbumCover_height
-    property real listCoverWidth: VLCStyle.listAlbumCover_width
-    property real listCoverRadius: VLCStyle.listAlbumCover_radius
-
     readonly property ColorContext colorContext: ColorContext {
         id: theme
         colorSet: ColorContext.View
@@ -62,28 +58,23 @@ Widgets.PageExt {
     }
 
     function setCurrentItemFocus(reason) {
-        // `focus` is checked, because that indicates the item that has the focus within the focus scope
-        if (continueWatchingRow.focus)
-            continueWatchingRow.setCurrentItemFocus(reason)
-        else if (favoritesRow.focus)
-            favoritesRow.setCurrentItemFocus(reason)
-        else if (newVideoRow.focus)
-            newVideoRow.setCurrentItemFocus(reason)
-        else if (newMusicRow.focus)
-            newMusicRow.setCurrentItemFocus(reason)
-        else
-            coneNButtons.forceActiveFocus(reason)
+        for (let i = 0; i < sections.count; ++i) {
+            const section = sections.itemAt(i)
+            if (section.visible) {
+                section.setCurrentItemFocus(reason)
+                return
+            }
+        }
     }
 
     contentItem: Flickable {
         id: flickable
 
-        implicitWidth: Math.max(coneNButtons.implicitWidth, mediaRows.implicitWidth)
-        implicitHeight: coneNButtons.implicitHeight + (_hasMedias ? mediaRows.implicitHeight : 0)
+        implicitWidth: sections.implicitWidth
+        implicitHeight: sections.implicitHeight
 
         contentWidth: width
-        contentHeight: _hasMedias ? coneNButtons.implicitHeight + mediaRows.implicitHeight
-                                  : height - topMargin - bottomMargin
+        contentHeight: sections.implicitHeight
 
         flickableDirection: Flickable.AutoFlickIfNeeded
 
@@ -94,16 +85,6 @@ Widgets.PageExt {
 
         pixelAligned: (MainCtx.qtVersion() >= MainCtx.qtVersionCheck(6, 2, 5)) // QTBUG-103996
                       && (Screen.pixelDensity >= VLCStyle.highPixelDensityThreshold) // no need for sub-pixel alignment with high pixel density
-
-        property bool _hasMedias: true
-
-        Binding on _hasMedias {
-            when: !continueWatchingRow.model.loading && !favoritesRow.model.loading
-                  && !newVideoRow.model.loading && !newMusicRow.model.loading
-            value: continueWatchingRow.visible || favoritesRow.visible
-                   || newVideoRow.visible || newMusicRow.visible
-            restoreMode: Binding.RestoreNone
-        }
 
         T.ScrollBar.vertical: Widgets.ScrollBarExt {}
 
@@ -119,6 +100,13 @@ Widgets.PageExt {
                 duration: VLCStyle.duration_veryLong
                 easing.type: Easing.InOutSine
             }
+        }
+
+        // scroll so that the item is fully shown
+        function showItem(item) {
+            contentYBehavior.enabled = true
+            Helpers.positionFlickableToContainItem(flickable, item)
+            contentYBehavior.enabled = false
         }
 
         property Component implicitFlickableScrollHandler: DefaultFlickableScrollHandler { }
@@ -153,349 +141,94 @@ Widgets.PageExt {
             // jumps when it is enabled again later on.
         }
 
-        NoMedialibHome.ConeNButtons {
-            id: coneNButtons
-
-            focus: true
-
-            orientation: flickable._hasMedias ? Qt.Horizontal : Qt.Vertical
-
-            anchors.centerIn: flickable._hasMedias ? undefined : parent
-            anchors.top: flickable._hasMedias ? parent.top : undefined
-            anchors.left: flickable._hasMedias ? parent.left : undefined
-            anchors.leftMargin: flickable._hasMedias ? newVideoRow.contentLeftMargin : 0
-
-            Navigation.parentItem: root
-            Navigation.upItem: root.header
-            Navigation.downItem: mediaRows
-
-            onActiveFocusChanged: {
-                contentYBehavior.enabled = true
-                Helpers.positionFlickableToContainItem(flickable, this)
-                contentYBehavior.enabled = false
-            }
-        }
-
         Widgets.NavigableCol {
-            id: mediaRows
+            id: sections
 
-            anchors.top: coneNButtons.bottom
             anchors.left: parent.left
             anchors.right: parent.right
 
-            spacing: 0 // NOTE: We depend on the top padding of view header currently.
+            // Figma: the content column (header included) has 20 px padding. Line up with the
+            // header, and count the top 20 from the header rule, which already has padding below.
+            leftPadding: root.header?.leftPadding ?? 0
+            rightPadding: root.header?.rightPadding ?? 0
+            topPadding: Math.max(0, VLCStyle.dp(20, VLCStyle.scale) - (root.header?.bottomPadding ?? 0))
 
             Navigation.parentItem: root
-            Navigation.upItem: coneNButtons
+            Navigation.upItem: root.header
 
-            Widgets.ViewHeader {
-                visible: continueWatchingRow.visible
-                text: qsTr("Continue Watching")
-                view: continueWatchingRow
-                seeAllButton.visible: continueWatchingRow.model.maximumCount > continueWatchingRow.model.count
+            HomeSection {
+                id: continueWatching
 
-                onSeeAllButtonClicked: function (reason) {
-                    root.seeAllButtonClicked("continueWatching", reason)
-                }
-            }
+                width: parent.width
 
-            VideoAll {
-                id: continueWatchingRow
-
-                AccessibleCompat.id: "continueWatching"
-
-                anchors.left: parent.left
-                anchors.right: parent.right
-
-                height: currentItem?.contentHeight ?? implicitHeight
-
-                visible: model.count !== 0
-
-                headerPositioning: ListView.InlineHeader
-                enableBeginningFade: false
-                enableEndFade: false
-                sectionProperty: ""
-
-                interactive: false
-
-                emptyLabel: null
-
-                // FIXME: `ExpandGridView` causes extreme performance degradation when `reuseItems`
-                //        is true and items provided by the model change (#29084).
-                reuseItems: !MainCtx.gridView
-
-                listCoverWidth: root.listCoverWidth
-                listCoverHeight: root.listCoverHeight
-                listCoverRadius: root.listCoverRadius
-
-                Navigation.parentItem: mediaRows
+                title: qsTr("Continue Watching")
+                cardWidth: VLCStyle.dp(316, VLCStyle.scale)
 
                 model: MLRecentVideoModel {
+                    id: continueWatchingModel
+
                     ml: MediaLib
 
                     sortCriteria: root.sort.criteria
                     sortOrder: root.sort.order
                     searchPattern: root.search.pattern
 
-                    // FIXME: Make limit 0 load no items, instead of loading all items.
-                    limit: MainCtx.gridView ? Math.max(continueWatchingRow.currentItem?.nbItemPerRow ?? null, 1) : 5
+                    limit: continueWatching.fit
                 }
 
-                contextMenu: MLContextMenu {
-                    model: continueWatchingRow.model
-
-                    showPlayAsAudioAction: true
-                }
-
-                onActiveFocusChanged: {
-                    if (activeFocus) {
-                        const item = currentItem?.currentItem ?? currentItem?._getItem(currentIndex) // FIXME: `ExpandGridView` does not have `currentItem`.
-                        contentYBehavior.enabled = true
-                        Helpers.positionFlickableToContainItem(flickable, item ?? this)
-                        contentYBehavior.enabled = false
+                cardDelegate: Component {
+                    HomeVideoCard {
+                        contextModel: continueWatchingModel
                     }
                 }
 
-                onCurrentIndexChanged: {
-                    if (activeFocus) {
-                        const item = currentItem?.currentItem ?? currentItem?._getItem(currentIndex) // FIXME: `ExpandGridView` does not have `currentItem`.
-                        if (item) {
-                            contentYBehavior.enabled = true
-                            Helpers.positionFlickableToContainItem(flickable, item)
-                            contentYBehavior.enabled = false
-                        }
-                    }
-                }
+                onTitleClicked: (reason) => root.seeAllButtonClicked("continueWatching", reason)
+                onActiveFocusChanged: if (activeFocus) flickable.showItem(this)
             }
 
-            Widgets.ViewHeader {
-                visible: favoritesRow.visible
-                text: qsTr("Favorites")
-                view: favoritesRow
-                seeAllButton.visible: favoritesRow.model.maximumCount > favoritesRow.model.count
+            HomeSection {
+                id: listenAgain
 
-                onSeeAllButtonClicked: function (reason) {
-                    root.seeAllButtonClicked("favorites", reason)
-                }
-            }
+                width: parent.width
 
-            MediaView {
-                id: favoritesRow
+                title: qsTr("Listen Again")
+                cardWidth: VLCStyle.dp(200, VLCStyle.scale)
 
-                AccessibleCompat.id: "favourites"
-
-                anchors.left: parent.left
-                anchors.right: parent.right
-
-                height: currentItem?.contentHeight ?? implicitHeight
-
-                visible: model.count !== 0
-
-                listHeaderPositioning: ListView.InlineHeader
-                enableBeginningFade: false
-                enableEndFade: false
-                listSectionProperty: ""
-
-                interactive: false
-
-                emptyLabel: null
-
-                // FIXME: `ExpandGridView` causes extreme performance degradation when `reuseItems`
-                //        is true and items provided by the model change (#29084).
-                reuseItems: !MainCtx.gridView
-
-                listCoverWidth: root.listCoverWidth
-                listCoverHeight: root.listCoverHeight
-                listCoverRadius: root.listCoverRadius
-
-                Navigation.parentItem: mediaRows
-
-                model: MLMediaModel {
-                    favoriteOnly: true
+                model: MLRecentAudioModel {
+                    id: listenAgainModel
 
                     ml: MediaLib
 
-                    sortCriteria: root.sort.criteria || "insertion"
+                    sortCriteria: root.sort.criteria
                     sortOrder: root.sort.order
                     searchPattern: root.search.pattern
 
-                    // FIXME: Make limit 0 load no items, instead of loading all items.
-                    limit: MainCtx.gridView ? Math.max(favoritesRow.currentItem?.nbItemPerRow ?? null, 1) : 5
+                    limit: listenAgain.fit
                 }
 
-                onActiveFocusChanged: {
-                    if (activeFocus) {
-                        const item = currentItem?.currentItem ?? currentItem?._getItem(currentIndex) // FIXME: `ExpandGridView` does not have `currentItem`.
-                        contentYBehavior.enabled = true
-                        Helpers.positionFlickableToContainItem(flickable, item ?? this)
-                        contentYBehavior.enabled = false
+                cardDelegate: Component {
+                    HomeSquareCard {
+                        required property var model
+                        required property int index
+
+                        image: model.cover ?? ""
+                        glyph: VLCIcons.album_cover
+                        title: model.title ?? ""
+                        subtitle: model.main_artist ?? ""
+
+                        onActivated: MediaLib.addAndPlay(model.id)
+                        onMenuRequested: (globalPos) => listenAgainMenu.popup([listenAgainModel.index(index, 0)], globalPos)
                     }
                 }
 
-                onCurrentIndexChanged: {
-                    if (activeFocus) {
-                        const item = currentItem?.currentItem ?? currentItem?._getItem(currentIndex) // FIXME: `ExpandGridView` does not have `currentItem`.
-                        if (item) {
-                            contentYBehavior.enabled = true
-                            Helpers.positionFlickableToContainItem(flickable, item)
-                            contentYBehavior.enabled = true
-                        }
-                    }
-                }
-            }
+                MLContextMenu {
+                    id: listenAgainMenu
 
-            Widgets.ViewHeader {
-                text: qsTr("New Videos")
-                visible: newVideoRow.visible
-                view: newVideoRow
-                seeAllButton.visible: newVideoRow.model.maximumCount > newVideoRow.model.count
-
-                onSeeAllButtonClicked: function (reason) {
-                    root.seeAllButtonClicked("newVideo", reason)
-                }
-            }
-
-            VideoAll {
-                id: newVideoRow
-
-                AccessibleCompat.id: "newVideo"
-
-                anchors.left: parent.left
-                anchors.right: parent.right
-
-                height: currentItem?.contentHeight ?? implicitHeight
-
-                visible: model.count !== 0
-
-                headerPositioning: ListView.InlineHeader
-                enableBeginningFade: false
-                enableEndFade: false
-                sectionProperty: ""
-
-                interactive: false
-
-                emptyLabel: null
-
-                // FIXME: `ExpandGridView` causes extreme performance degradation when `reuseItems`
-                //        is true and items provided by the model change (#29084).
-                reuseItems: !MainCtx.gridView
-
-                listCoverWidth: root.listCoverWidth
-                listCoverHeight: root.listCoverHeight
-                listCoverRadius: root.listCoverRadius
-
-                Navigation.parentItem: mediaRows
-
-                model: MLVideoModel {
-                    ml: MediaLib
-
-                    sortCriteria: root.sort.criteria || "insertion"
-                    sortOrder: root.sort.order
-                    searchPattern: root.search.pattern
-
-                    // FIXME: Make limit 0 load no items, instead of loading all items.
-                    limit: MainCtx.gridView ? Math.max(newVideoRow.currentItem?.nbItemPerRow ?? null, 1) : 5
+                    model: listenAgainModel
                 }
 
-                contextMenu: MLContextMenu {
-                    model: newVideoRow.model
-
-                    showPlayAsAudioAction: true
-                }
-
-                onActiveFocusChanged: {
-                    if (activeFocus) {
-                        const item = currentItem?.currentItem ?? currentItem?._getItem(currentIndex) // FIXME: `ExpandGridView` does not have `currentItem`.
-                        contentYBehavior.enabled = true
-                        Helpers.positionFlickableToContainItem(flickable, item ?? this)
-                        contentYBehavior.enabled = false
-                    }
-                }
-
-                onCurrentIndexChanged: {
-                    if (activeFocus) {
-                        const item = currentItem?.currentItem ?? currentItem?._getItem(currentIndex) // FIXME: `ExpandGridView` does not have `currentItem`.
-                        if (item) {
-                            contentYBehavior.enabled = true
-                            Helpers.positionFlickableToContainItem(flickable, item)
-                            contentYBehavior.enabled = false
-                        }
-                    }
-                }
-            }
-
-            Widgets.ViewHeader {
-                text: qsTr("New Music")
-                visible: newMusicRow.visible
-                view: newMusicRow
-                seeAllButton.visible: newMusicRow.model.maximumCount > newMusicRow.model.count
-
-                onSeeAllButtonClicked: function (reason) {
-                    root.seeAllButtonClicked("newMusic", reason)
-                }
-            }
-
-            MediaView {
-                id: newMusicRow
-
-                AccessibleCompat.id: "newMusic"
-
-                anchors.left: parent.left
-                anchors.right: parent.right
-
-                height: currentItem?.contentHeight ?? implicitHeight
-
-                visible: model.count !== 0
-
-                listHeaderPositioning: ListView.InlineHeader
-                enableBeginningFade: false
-                enableEndFade: false
-                listSectionProperty: ""
-
-                interactive: false
-
-                emptyLabel: null
-
-                // FIXME: `ExpandGridView` causes extreme performance degradation when `reuseItems`
-                //        is true and items provided by the model change (#29084).
-                reuseItems: !MainCtx.gridView
-
-                listCoverWidth: root.listCoverWidth
-                listCoverHeight: root.listCoverHeight
-                listCoverRadius: root.listCoverRadius
-
-                Navigation.parentItem: mediaRows
-
-                model: MLAudioModel {
-                    ml: MediaLib
-
-                    sortCriteria: root.sort.criteria || "insertion"
-                    sortOrder: root.sort.order
-                    searchPattern: root.search.pattern
-
-                    // FIXME: Make limit 0 load no items, instead of loading all items.
-                    limit: MainCtx.gridView ? Math.max(newMusicRow.currentItem?.nbItemPerRow ?? null, 1) : 5
-                }
-
-                onActiveFocusChanged: {
-                    if (activeFocus) {
-                        const item = currentItem?.currentItem ?? currentItem?._getItem(currentIndex) // FIXME: `ExpandGridView` does not have `currentItem`.
-                        contentYBehavior.enabled = true
-                        Helpers.positionFlickableToContainItem(flickable, item ?? this)
-                        contentYBehavior.enabled = false
-                    }
-                }
-
-                onCurrentIndexChanged: {
-                    if (activeFocus) {
-                        const item = currentItem?.currentItem ?? currentItem?._getItem(currentIndex) // FIXME: `ExpandGridView` does not have `currentItem`.
-                        if (item) {
-                            contentYBehavior.enabled = true
-                            Helpers.positionFlickableToContainItem(flickable, item)
-                            contentYBehavior.enabled = false
-                        }
-                    }
-                }
+                onTitleClicked: (reason) => root.seeAllButtonClicked("listenAgain", reason)
+                onActiveFocusChanged: if (activeFocus) flickable.showItem(this)
             }
         }
     }

@@ -1100,6 +1100,9 @@ libqml_module_medialibrary_a_QML = \
 	medialibrary/qml/AudioGridItem.qml \
 	medialibrary/qml/HomeDisplay.qml \
 	medialibrary/qml/HomePage.qml \
+	medialibrary/qml/HomeSection.qml \
+	medialibrary/qml/HomeSquareCard.qml \
+	medialibrary/qml/HomeVideoCard.qml \
 	medialibrary/qml/MediaView.qml \
 	medialibrary/qml/VideoGroupDisplay.qml \
 	medialibrary/qml/MusicAlbums.qml \
