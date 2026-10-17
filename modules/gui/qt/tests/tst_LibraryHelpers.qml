@@ -77,4 +77,18 @@ TestCase {
                 [{ title: "Music", path: ["music"] }, { title: "Albums", path: ["music", "albums"] }])
         compare(Helpers.breadcrumbs([], "", labels), [])
     }
+
+    function test_rankByFrequency() {
+        compare(Helpers.rankByFrequency(["a", "b", "a", "", "c", "b", "a"]), ["a", "b", "c"])
+    }
+
+    function test_folderEntries() {
+        compare(Helpers.folderEntries(["file:///m/Shows/e1.mkv", "file:///m/Films/f.mkv", "file:///m/Shows/e2.mkv"]),
+                [{ mrl: "file:///m/Shows", name: "Shows" }, { mrl: "file:///m/Films", name: "Films" }])
+    }
+
+    function test_folderEntries_skipsNonFile() {
+        compare(Helpers.folderEntries(["http://x/a.mp3", "dvd:///dev/sr0", "file:///m/My%20Music/t.mp3"]),
+                [{ mrl: "file:///m/My%20Music", name: "My Music" }])
+    }
 }

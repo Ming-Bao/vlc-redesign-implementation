@@ -91,6 +91,7 @@ moc_headers = files(
     'medialibrary/mlbookmarkmodel.hpp',
     'medialibrary/mlbasemodel.hpp',
     'medialibrary/mlfoldersmodel.hpp',
+    'medialibrary/mlfrequentartistmodel.hpp',
     'medialibrary/mlgenremodel.hpp',
     'medialibrary/mlthreadpool.hpp',
     'medialibrary/mlqmltypes.hpp',
@@ -341,6 +342,8 @@ qt_plugin_sources = files(
     'medialibrary/mlfolder.hpp',
     'medialibrary/mlfoldersmodel.cpp',
     'medialibrary/mlfoldersmodel.hpp',
+    'medialibrary/mlfrequentartistmodel.cpp',
+    'medialibrary/mlfrequentartistmodel.hpp',
     'medialibrary/mlgenre.cpp',
     'medialibrary/mlgenre.hpp',
     'medialibrary/mlgenremodel.cpp',
@@ -1485,6 +1488,19 @@ if qt6_dep.found()
                 'player/waveform_util.cpp'
             ),
             'moc_sources': files('tests/test_waveform_util.cpp'),
+            'suite': ['qt'],
+            'include_directories' : qt_include_dir,
+            'link_args': qt_link_args,
+            'dependencies': [qt6_dep, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
+            'name': 'test_qt_frequency_rank',
+            'sources': files(
+                'tests/test_frequency_rank.cpp',
+                'util/frequency_rank.hpp'
+            ),
+            'moc_sources': files('tests/test_frequency_rank.cpp'),
             'suite': ['qt'],
             'include_directories' : qt_include_dir,
             'link_args': qt_link_args,

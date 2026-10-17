@@ -214,6 +214,8 @@ libqt_plugin_la_SOURCES = \
 	medialibrary/mlfolder.hpp \
 	medialibrary/mlfoldersmodel.cpp \
 	medialibrary/mlfoldersmodel.hpp \
+	medialibrary/mlfrequentartistmodel.cpp \
+	medialibrary/mlfrequentartistmodel.hpp \
 	medialibrary/mlgenre.cpp \
 	medialibrary/mlgenre.hpp \
 	medialibrary/mlgenremodel.cpp \
@@ -472,6 +474,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	medialibrary/mlbookmarkmodel.moc.cpp \
 	medialibrary/mlbasemodel.moc.cpp \
 	medialibrary/mlfoldersmodel.moc.cpp \
+	medialibrary/mlfrequentartistmodel.moc.cpp \
 	medialibrary/mlgenremodel.moc.cpp \
 	medialibrary/mlthreadpool.moc.cpp \
 	medialibrary/mlqmltypes.moc.cpp \
@@ -1872,6 +1875,20 @@ test_effects_util_LDADD = $(QT_QTEST_COMMON_ldadd)
 test_effects_util_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
 check_PROGRAMS += test_effects_util
 TESTS += test_effects_util
+
+# test_frequency_rank
+test_frequency_rank_SOURCES = \
+	tests/test_frequency_rank.cpp \
+	util/frequency_rank.hpp
+nodist_test_frequency_rank_SOURCES = tests/test_frequency_rank.moc
+BUILT_SOURCES += tests/test_frequency_rank.moc
+CLEANFILES += tests/test_frequency_rank.moc
+test_frequency_rank_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)
+test_frequency_rank_CXXFLAGS = $(QT_QTEST_COMMON_cxxflags)
+test_frequency_rank_LDADD = $(QT_QTEST_COMMON_ldadd)
+test_frequency_rank_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
+check_PROGRAMS += test_frequency_rank
+TESTS += test_frequency_rank
 
 # test_waveform_util
 

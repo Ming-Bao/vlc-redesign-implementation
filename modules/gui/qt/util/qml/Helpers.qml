@@ -26,6 +26,36 @@ QtObject {
       return num <= min ? min : num >= max ? max : num;
     }
 
+    // Distinct non-empty keys, most frequent first; ties keep the earliest (most recent) key.
+    function rankByFrequency(keys: var) : var {
+        const counts = {}
+        const order = []
+        for (const key of keys) {
+            if (!key)
+                continue
+            if (!(key in counts)) {
+                counts[key] = 0
+                order.push(key)
+            }
+            ++counts[key]
+        }
+        // Array.sort is stable
+        return order.sort((a, b) => counts[b] - counts[a])
+    }
+
+    // Folders of `file://` MRLs (most recent first), most played first
+    function folderEntries(mrls: var) : var {
+        const folders = []
+        for (const mrl of mrls) {
+            if (mrl.startsWith("file://"))
+                folders.push(mrl.substring(0, mrl.lastIndexOf("/")))
+        }
+        return rankByFrequency(folders).map(mrl => ({
+            mrl: mrl,
+            name: decodeURIComponent(mrl.substring(mrl.lastIndexOf("/") + 1))
+        }))
+    }
+
     function isValidInstanceOf(object: var, type: var) : bool {
         return (!!object && (object instanceof type))
     }
