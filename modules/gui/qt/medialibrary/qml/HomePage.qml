@@ -54,27 +54,8 @@ Widgets.PageExt {
     // see HomeSection.focusX
     property real _focusX: 0
 
-    // folders ranked from the play history (see Helpers.folderEntries)
-    property var folderEntries: []
-
-    MLRecentMediaModel {
-        id: historyModel
-
-        ml: MediaLib
-        limit: 100
-
-        function updateFolders() {
-            if (count === 0) {
-                root.folderEntries = []
-                return
-            }
-            getDataFlat(Array.from({ length: count }, (_, i) => i), (items) => {
-                root.folderEntries = Helpers.folderEntries(items.filter(i => i).map(i => i.mrl.toString()))
-            })
-        }
-
-        onCountChanged: updateFolders()
-        onModelReset: updateFolders()
+    HomeFolderModel {
+        id: folderModel
     }
 
     function positionContentAtBeginning() {
@@ -271,7 +252,7 @@ Widgets.PageExt {
 
                 model: {
                     const pattern = root.search.pattern.toLowerCase()
-                    return root.folderEntries.filter(e => e.name.toLowerCase().includes(pattern))
+                    return folderModel.entries.filter(e => e.name.toLowerCase().includes(pattern))
                                              .slice(0, folders.fit)
                 }
 

@@ -171,38 +171,24 @@ Widgets.PageLoader {
 
             isSearchable: true
 
-            // like HomePage: folders ranked from the play history
-            property var folderEntries: []
+            HomeFolderModel {
+                id: folderModel
 
-            MLRecentMediaModel {
-                id: historyModel
-
-                ml: MediaLib
-                limit: 100
-
-                function updateFolders() {
-                    if (count === 0) {
-                        foldersPage.folderEntries = []
-                        return
-                    }
-                    getDataFlat(Array.from({ length: count }, (_, i) => i), (items) => {
-                        foldersPage.folderEntries = Helpers.folderEntries(items.filter(i => i).map(i => i.mrl.toString()))
-                    })
-                }
-
-                onCountChanged: updateFolders()
-                onModelReset: updateFolders()
-
-                readonly property bool needToNavigateBack: !loading && count === 0
-                                                           && foldersPage.search.pattern === ""
-
-                onNeedToNavigateBackChanged: {
-                    if (needToNavigateBack)
+                onEmptyChanged: {
+                    if (empty && foldersPage.search.pattern === "")
                         History.previous(Qt.BacktabFocusReason)
                 }
             }
 
+            function setCurrentItemFocus(reason) {
+                const first = cards.itemAt(0)
+                if (first)
+                    first.forceActiveFocus(reason)
+            }
+
             Flickable {
+                id: foldersFlickable
+
                 anchors.fill: parent
 
                 focus: true
@@ -220,18 +206,55 @@ Widgets.PageLoader {
                     leftPadding: foldersPage.header?.leftPadding ?? 0
                     topPadding: VLCStyle.dp(20, VLCStyle.scale)
 
+                    // cards on one line, for Up/Down
+                    readonly property int perLine: Math.max(1, Math.floor((width - leftPadding + spacing) / (VLCStyle.dp(200, VLCStyle.scale) + spacing)))
+
                     Repeater {
+                        id: cards
+
                         model: {
                             const pattern = foldersPage.search.pattern.toLowerCase()
-                            return foldersPage.folderEntries.filter(e => e.name.toLowerCase().includes(pattern))
+                            return folderModel.entries.filter(e => e.name.toLowerCase().includes(pattern))
                         }
 
                         HomeSquareCard {
+                            id: card
+
                             required property var modelData
+                            required property int index
 
                             glyph: VLCIcons.folder
                             backing: "#1E1E1E"
                             title: modelData.name
+
+                            Navigation.parentItem: foldersFlickable
+                            Navigation.leftAction: () => {
+                                if (index > 0)
+                                    cards.itemAt(index - 1).forceActiveFocus(Qt.BacktabFocusReason)
+                                else
+                                    foldersFlickable.Navigation.defaultNavigationLeft()
+                            }
+                            Navigation.rightAction: () => {
+                                if (index < cards.count - 1)
+                                    cards.itemAt(index + 1).forceActiveFocus(Qt.TabFocusReason)
+                                else
+                                    foldersFlickable.Navigation.defaultNavigationRight()
+                            }
+                            Navigation.upAction: () => {
+                                if (index >= flow.perLine)
+                                    cards.itemAt(index - flow.perLine).forceActiveFocus(Qt.BacktabFocusReason)
+                                else
+                                    foldersFlickable.Navigation.defaultNavigationUp()
+                            }
+                            // the last line may be short: land on its last card
+                            Navigation.downAction: () => {
+                                if (index + flow.perLine < cards.count)
+                                    cards.itemAt(index + flow.perLine).forceActiveFocus(Qt.TabFocusReason)
+                                else if (Math.floor(index / flow.perLine) < Math.floor((cards.count - 1) / flow.perLine))
+                                    cards.itemAt(cards.count - 1).forceActiveFocus(Qt.TabFocusReason)
+                            }
+
+                            onActiveFocusChanged: if (activeFocus) Helpers.positionFlickableToContainItem(foldersFlickable, card)
 
                             onActivated: (reason) => {
                                 const tree = MainCtx.folderTree(modelData.mrl)
