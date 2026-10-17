@@ -238,7 +238,7 @@ Widgets.TableViewExt {
     MLContextMenu {
         id: contextMenu
 
-        model: rootmodel
+        model: root.model
     }
 
     Widgets.ProgressIndicator {

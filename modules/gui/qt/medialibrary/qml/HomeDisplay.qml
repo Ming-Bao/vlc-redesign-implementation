@@ -36,14 +36,11 @@ Widgets.PageLoader {
         name: "continueWatching",
         component: continueWatchingComponent
     }, {
+        name: "listenAgain",
+        component: listenAgainComponent
+    }, {
         name: "favorites",
         component: favoritesComponent
-    }, {
-        name: "newVideo",
-        component: newVideoComponent
-    }, {
-        name: "newMusic",
-        component: newMusicComponent
     }]
 
     property int displayMarginBeginning: 0
@@ -118,6 +115,49 @@ Widgets.PageLoader {
     }
 
     Component {
+        id: listenAgainComponent
+
+        Widgets.PageExt {
+            id: listenAgainPage
+
+            title: qsTr("Listen Again")
+
+            MusicTrackListDisplay {
+                anchors.fill: parent
+
+                focus: true
+
+                model: MLRecentAudioModel {
+                    ml: MediaLib
+
+                    sortCriteria: listenAgainPage.sort.criteria
+                    sortOrder: listenAgainPage.sort.order
+                    searchPattern: listenAgainPage.search.pattern
+
+                    readonly property bool needToNavigateBack: !loading && count === 0
+                                                               && listenAgainPage.search.pattern === ""
+
+                    onNeedToNavigateBackChanged: {
+                        if (needToNavigateBack)
+                            History.previous(Qt.BacktabFocusReason)
+                    }
+                }
+
+                section.property: model.sortCriteria === "title" ? "title_first_symbol" : ""
+
+                Navigation.parentItem: listenAgainPage
+                Navigation.upItem: listenAgainPage.header
+
+                displayMarginBeginning: root.displayMarginBeginning
+                displayMarginEnd: root.displayMarginEnd
+
+                fadingEdge.enableBeginningFade: root.enableBeginningFade
+                fadingEdge.enableEndFade: root.enableEndFade
+            }
+        }
+    }
+
+    Component {
         id: favoritesComponent
 
         Widgets.PageExt {
@@ -138,76 +178,6 @@ Widgets.PageLoader {
                     sortCriteria: favoritesPage.sort.criteria || "insertion"
                     sortOrder: favoritesPage.sort.order
                     searchPattern: favoritesPage.search.pattern
-                }
-
-                displayMarginBeginning: root.displayMarginBeginning
-                displayMarginEnd: root.displayMarginEnd
-
-                enableBeginningFade: root.enableBeginningFade
-                enableEndFade: root.enableEndFade
-            }
-        }
-    }
-
-    Component {
-        id: newVideoComponent
-
-        Widgets.PageExt {
-            id: newVideoPage
-
-            title: qsTr("New Videos")
-
-            VideoAll {
-                id: newVideo
-
-                anchors.fill: parent
-
-                focus: true
-
-                model: MLVideoModel {
-                    ml: MediaLib
-
-                    sortCriteria: newVideoPage.sort.criteria || "insertion"
-                    sortOrder: newVideoPage.sort.order
-                    searchPattern: newVideoPage.search.pattern
-                }
-
-                sectionProperty: model.sortCriteria === "title" ? "title_first_symbol" : ""
-
-                contextMenu: MLContextMenu {
-                    model: newVideo.model
-
-                    showPlayAsAudioAction: true
-                }
-
-                displayMarginBeginning: root.displayMarginBeginning
-                displayMarginEnd: root.displayMarginEnd
-
-                enableBeginningFade: root.enableBeginningFade
-                enableEndFade: root.enableEndFade
-            }
-        }
-    }
-
-    Component {
-        id: newMusicComponent
-
-        Widgets.PageExt {
-            id: newMusicPage
-
-            title: qsTr("New Music")
-
-            MediaView {
-                focus: true
-
-                anchors.fill: parent
-
-                model: MLAudioModel {
-                    ml: MediaLib
-
-                    sortCriteria: newMusicPage.sort.criteria || "insertion"
-                    sortOrder: newMusicPage.sort.order
-                    searchPattern: newMusicPage.search.pattern
                 }
 
                 displayMarginBeginning: root.displayMarginBeginning
