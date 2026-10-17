@@ -33,12 +33,18 @@ Widgets.PageExt {
 
     property var pagePrefix: [] // behave like a Page
 
-    property var sortModel: [
+    // not a new property: PageExt's own sortModel feeds the header's sort button
+    sortModel: [
         { text: qsTr("Alphabetic"), criteria: "title" },
         { text: qsTr("Duration"), criteria: "duration" }
     ]
 
     title: qsTr("Home")
+
+    // the total number of media in the library
+    itemCount: libraryCount.maximumCount
+
+    headerMenuRows: [{ text: qsTr("Favorites"), run: () => root.seeAllButtonClicked("favorites", Qt.OtherFocusReason) }]
 
     hasGridListMode: true
 
@@ -58,6 +64,28 @@ Widgets.PageExt {
         id: folderModel
     }
 
+    // only counts the library: `limit` keeps it from loading every media
+    MLMediaModel {
+        id: libraryCount
+
+        ml: MediaLib
+        limit: 1
+    }
+
+    readonly property bool _modelsLoaded: !continueWatchingModel.loading && !listenAgainModel.loading
+                                          && !folderModel.history.loading && !playlistsModel.loading
+                                          && !artistsModel.loading
+
+    // no row has anything to show; kept through a model reloading (a new search) to avoid flashing
+    property bool _empty: false
+
+    Binding on _empty {
+        when: root._modelsLoaded
+        value: !continueWatching.visible && !listenAgain.visible && !folders.visible
+               && !playlists.visible && !artists.visible
+        restoreMode: Binding.RestoreNone
+    }
+
     function positionContentAtBeginning() {
         contentYBehavior.enabled = true
         flickable.contentY = -flickable.originY
@@ -65,6 +93,10 @@ Widgets.PageExt {
     }
 
     function setCurrentItemFocus(reason) {
+        if (root._empty) {
+            emptyLabel.forceActiveFocus(reason)
+            return
+        }
         for (let i = 0; i < sections.count; ++i) {
             const section = sections.itemAt(i)
             if (section.visible) {
@@ -148,6 +180,30 @@ Widgets.PageExt {
             // jumps when it is enabled again later on.
         }
 
+        // not scrolled with the sections
+        Widgets.EmptyLabelButton {
+            id: emptyLabel
+
+            parent: flickable
+            anchors.centerIn: parent
+            visible: root._empty && root.search.pattern === ""
+
+            focus: true
+            cover: VLCStyle.noArtVideoCover
+            text: qsTr("No media found\nPlease try adding sources")
+
+            Navigation.parentItem: root
+            Navigation.upItem: root.header?.contentUpItem ?? root.header
+        }
+
+        Widgets.EmptyLabel {
+            parent: flickable
+            anchors.centerIn: parent
+            visible: root._empty && root.search.pattern !== ""
+
+            text: qsTr("No results")
+        }
+
         Widgets.NavigableCol {
             id: sections
 
@@ -187,6 +243,28 @@ Widgets.PageExt {
                     HomeVideoCard {
                         contextModel: continueWatchingModel
                     }
+                }
+
+                listDelegate: Component {
+                    HomeListRow {
+                        required property var model
+                        required property int index
+
+                        image: model.thumbnail ?? ""
+                        glyph: VLCIcons.album_cover
+                        progress: model.progress ?? -1
+                        text: model.title ?? ""
+
+                        onActivated: MediaLib.addAndPlay(model.id)
+                        onMenuRequested: (globalPos) => continueWatchingMenu.popup([continueWatchingModel.index(index, 0)], globalPos)
+                    }
+                }
+
+                MLContextMenu {
+                    id: continueWatchingMenu
+
+                    model: continueWatchingModel
+                    showPlayAsAudioAction: true
                 }
 
                 onTitleClicked: (reason) => root.seeAllButtonClicked("continueWatching", reason)
@@ -230,6 +308,20 @@ Widgets.PageExt {
                     }
                 }
 
+                listDelegate: Component {
+                    HomeListRow {
+                        required property var model
+                        required property int index
+
+                        image: model.cover ?? ""
+                        glyph: VLCIcons.album_cover
+                        text: model.main_artist ? model.title + " - " + model.main_artist : (model.title ?? "")
+
+                        onActivated: MediaLib.addAndPlay(model.id)
+                        onMenuRequested: (globalPos) => listenAgainMenu.popup([listenAgainModel.index(index, 0)], globalPos)
+                    }
+                }
+
                 MLContextMenu {
                     id: listenAgainMenu
 
@@ -256,6 +348,12 @@ Widgets.PageExt {
                                              .slice(0, folders.fit)
                 }
 
+                function open(entry, reason) {
+                    const tree = MainCtx.folderTree(entry.mrl)
+                    if (tree)
+                        History.push(["network", "browse"], { tree: tree }, reason)
+                }
+
                 cardDelegate: Component {
                     HomeSquareCard {
                         required property var modelData
@@ -264,11 +362,18 @@ Widgets.PageExt {
                         backing: "#1E1E1E"
                         title: modelData.name
 
-                        onActivated: (reason) => {
-                            const tree = MainCtx.folderTree(modelData.mrl)
-                            if (tree)
-                                History.push(["network", "browse"], { tree: tree }, reason)
-                        }
+                        onActivated: (reason) => folders.open(modelData, reason)
+                    }
+                }
+
+                listDelegate: Component {
+                    HomeListRow {
+                        required property var modelData
+
+                        glyph: VLCIcons.folder
+                        text: modelData.name
+
+                        onActivated: (reason) => folders.open(modelData, reason)
                     }
                 }
 
@@ -307,6 +412,19 @@ Widgets.PageExt {
                         glyph: VLCIcons.playlists
                         title: model.name ?? ""
                         subtitle: qsTr("%1 track", "%1 tracks", model.count).arg(model.count)
+
+                        onActivated: (reason) => History.push(["playlists", "list"], { parentId: model.id, title: model.name }, reason)
+                        onMenuRequested: (globalPos) => playlistsMenu.popup([playlistsModel.index(index, 0)], globalPos)
+                    }
+                }
+
+                listDelegate: Component {
+                    HomeListRow {
+                        required property var model
+                        required property int index
+
+                        glyph: VLCIcons.playlists
+                        text: model.name ?? ""
 
                         onActivated: (reason) => History.push(["playlists", "list"], { parentId: model.id, title: model.name }, reason)
                         onMenuRequested: (globalPos) => playlistsMenu.popup([playlistsModel.index(index, 0)], globalPos)
@@ -352,6 +470,19 @@ Widgets.PageExt {
                         glyph: VLCIcons.album_cover
                         title: model.name ?? ""
                         subtitle: qsTr("%1 track", "%1 tracks", model.nb_tracks).arg(model.nb_tracks)
+
+                        onActivated: (reason) => History.push(["music", "artists", "albums"], { artistId: model.id }, reason)
+                        onMenuRequested: (globalPos) => artistsMenu.popup([artistsModel.index(index, 0)], globalPos)
+                    }
+                }
+
+                listDelegate: Component {
+                    HomeListRow {
+                        required property var model
+                        required property int index
+
+                        image: model.cover ? model.cover : VLCStyle.noArtArtistSmall
+                        text: model.name ?? ""
 
                         onActivated: (reason) => History.push(["music", "artists", "albums"], { artistId: model.id }, reason)
                         onMenuRequested: (globalPos) => artistsMenu.popup([artistsModel.index(index, 0)], globalPos)

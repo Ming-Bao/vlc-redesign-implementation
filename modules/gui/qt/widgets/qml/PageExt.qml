@@ -39,7 +39,7 @@ T.Page {
     property bool isSearchable: _firstChild?.isSearchable ?? false
 
     // number of items in the current subview, -1 when the subview has no model count
-    readonly property int itemCount: (typeof _firstChild?.count === "number") ? _firstChild.count : -1
+    property int itemCount: (typeof _firstChild?.count === "number") ? _firstChild.count : -1
 
     property var sortModel: _firstChild?.sortModel ?? null
 

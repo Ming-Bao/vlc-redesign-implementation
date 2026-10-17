@@ -1103,6 +1103,7 @@ libqml_module_medialibrary_a_QML = \
 	medialibrary/qml/HomeSection.qml \
 	medialibrary/qml/HomeSquareCard.qml \
 	medialibrary/qml/HomeFolderModel.qml \
+	medialibrary/qml/HomeListRow.qml \
 	medialibrary/qml/HomeVideoCard.qml \
 	medialibrary/qml/MediaView.qml \
 	medialibrary/qml/VideoGroupDisplay.qml \

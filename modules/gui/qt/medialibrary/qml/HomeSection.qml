@@ -23,7 +23,7 @@ import VLC.Widgets as Widgets
 import VLC.Util
 import VLC.Style
 
-// A Home row (Figma 6261:15142): "Title ›" over one line of cards
+// A Home row (Figma 6261:15142): "Title ›" over one line of cards, or over compact rows in list view (1106:5633)
 FocusScope {
     id: root
 
@@ -31,7 +31,7 @@ FocusScope {
     // an ML model (whose `limit` the page binds to `fit`) or a JS array
     property var model
     property Component cardDelegate
-    property Component listDelegate // list view (not used yet)
+    property Component listDelegate
     property real cardWidth
     // centre x (card row coordinates, the same in every section) of the card focused
     // last on the page, so that moving between rows keeps the column
@@ -39,14 +39,19 @@ FocusScope {
 
     readonly property real _gap: VLCStyle.dp(20, VLCStyle.scale)
 
-    // number of cards that fit the width on one line
-    readonly property int fit: Math.max(1, Math.floor((width + _gap) / (cardWidth + _gap)))
+    // number of cards that fit the width on one line, or the number of list rows
+    readonly property int fit: MainCtx.gridView ? Math.max(1, Math.floor((width + _gap) / (cardWidth + _gap))) : 5
+    readonly property int count: MainCtx.gridView ? cards.count : rows.count
 
     signal titleClicked(int reason)
     signal cardFocused(real x)
 
-    // focus the card nearest `focusX`
+    // focus the card nearest `focusX`, or the first row (the last one coming from below)
     function setCurrentItemFocus(reason) {
+        if (!MainCtx.gridView) {
+            rows.itemAt(reason === Qt.BacktabFocusReason ? rows.count - 1 : 0)?.forceActiveFocus(reason)
+            return
+        }
         let best = null
         let bestDistance = Infinity
         for (let i = 0; i < cards.count; ++i) {
@@ -61,7 +66,7 @@ FocusScope {
             best.forceActiveFocus(reason)
     }
 
-    visible: cards.count > 0
+    visible: count > 0
 
     implicitHeight: column.implicitHeight
 
@@ -75,8 +80,9 @@ FocusScope {
         id: column
 
         width: parent.width
-        topPadding: root._gap
-        bottomPadding: root._gap
+        topPadding: MainCtx.gridView ? root._gap : VLCStyle.dp(14, VLCStyle.scale)
+        bottomPadding: MainCtx.gridView ? root._gap : VLCStyle.dp(15, VLCStyle.scale)
+        spacing: MainCtx.gridView ? 0 : VLCStyle.dp(14, VLCStyle.scale)
 
         T.AbstractButton {
             id: titleButton
@@ -84,7 +90,8 @@ FocusScope {
             focusPolicy: Qt.StrongFocus
             text: root.title
 
-            implicitWidth: implicitContentWidth
+            // list view pushes the chevron to the far right
+            implicitWidth: MainCtx.gridView ? implicitContentWidth : column.width
             implicitHeight: implicitContentHeight
 
             readonly property ColorContext colorContext: ColorContext {
@@ -93,19 +100,23 @@ FocusScope {
                 focused: titleButton.visualFocus
             }
 
-            contentItem: Row {
-                spacing: VLCStyle.dp(5, VLCStyle.scale)
+            contentItem: Item {
+                implicitWidth: titleLabel.implicitWidth + VLCStyle.dp(5 + 24, VLCStyle.scale)
+                implicitHeight: Math.max(titleLabel.implicitHeight, VLCStyle.dp(24, VLCStyle.scale))
 
                 T.Label {
+                    id: titleLabel
+
                     anchors.verticalCenter: parent.verticalCenter
                     text: titleButton.text
-                    font.pixelSize: VLCStyle.dp(20, VLCStyle.scale)
+                    font.pixelSize: VLCStyle.dp(MainCtx.gridView ? 20 : 16, VLCStyle.scale)
                     font.underline: titleButton.hovered
                     color: root._titleColor
                 }
 
                 // there is no right chevron glyph
                 Widgets.IconLabel {
+                    x: MainCtx.gridView ? titleLabel.width + VLCStyle.dp(5, VLCStyle.scale) : parent.width - width
                     anchors.verticalCenter: parent.verticalCenter
                     width: VLCStyle.dp(24, VLCStyle.scale)
                     height: width
@@ -142,6 +153,7 @@ FocusScope {
             id: cardRow
 
             focus: true
+            visible: MainCtx.gridView
             width: parent.width
             topPadding: root._gap
             bottomPadding: root._gap
@@ -153,7 +165,7 @@ FocusScope {
             Repeater {
                 id: cards
 
-                model: root.model
+                model: MainCtx.gridView ? root.model : null
                 delegate: root.cardDelegate
 
                 onItemAdded: (index, card) => {
@@ -162,6 +174,23 @@ FocusScope {
                             root.cardFocused(card.x + card.width / 2)
                     })
                 }
+            }
+        }
+
+        Widgets.NavigableCol {
+            id: listCol
+
+            visible: !MainCtx.gridView
+            width: parent.width
+
+            Navigation.parentItem: root
+            Navigation.upItem: titleButton
+
+            Repeater {
+                id: rows
+
+                model: MainCtx.gridView ? null : root.model
+                delegate: root.listDelegate
             }
         }
     }
