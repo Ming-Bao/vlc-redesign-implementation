@@ -260,29 +260,29 @@ function test_withShares() {
 
 ## Ledger
 
-Shots (1600×900, dark, test library with `redesign-media` and `redesign-music`) in `docs/superpowers/figma/4d/`: `after_network_grid.png`, `after_network_list.png`, `after_podcasts.png`, `after_radio.png`, `after_playlists_grid.png`, `after_playlists_list.png`, `after_recent_grid.png`, `after_recent_list.png`. `before_*.png` are the old pages. References: `sb_network.png`, `sb_playlists.png` (the sidebar variants, 427×986). Figma has no main-view frame for Recent, nor for any grid; those follow the Figma video card and the 4c list.
+Shots (1600×900, dark, test library with `redesign-media` and `redesign-music`) in `docs/superpowers/figma/4d/`: `after_network_grid.png`, `after_network_list.png`, `after_podcasts.png`, `after_radio.png`, `after_playlists_grid.png`, `after_playlists_list.png`, `after_recent_grid.png`, `after_recent_list.png`. `before_*.png` are the old pages. References: `sb_network.png`, `sb_playlists.png` (the sidebar variants, 427×986). Figma has no main-view frame for Recent, nor for the 4d grids (Network, Playlists, Recent); those follow the Figma video card and the 4c list.
 
 ### Figma comparison
 
 | Shot against reference | Figma | Built | Verdict |
 |---|---|---|---|
-| `after_network_list` / `sb_network.png` | Add Network Stream, Podcasts, Radio as compact rows; "2 items"; sort, view, search | The same three rows and glyphs (compact `HomeListRow`, 400 wide), plus one row per LAN share (truenas, folder glyph). Count 3 = 2 + 1 share. Header has the view toggle only | rows match, plus the LAN shares; header deviates: no sort or search, by the spec (departure 12) |
+| `after_network_list` / `sb_network.png` | Add Network Stream, Podcasts, Radio as compact rows; "2 items"; sort, view, search | The same three rows and glyphs (compact `HomeListRow`, 400 wide), plus one row per LAN share (truenas, folder glyph). Count 3 = 2 + 1 share. Header has the view toggle only | rows match, plus the LAN shares; header deviates: no sort or search, by the spec's call (departure 12) |
 | `after_network_grid` | none | `HomeSquareCard` tiles (200, `#1E1E1E`) as the Music root | no frame; same cards as 4c |
 | `after_podcasts`, `after_radio` | none | `BrowseTreeDisplay` pages. Podcasts has an "Add podcast" strip above the view (empty: "Nothing to see here"). Radio: 240 country nodes with flags | no frame; data is the live radio list |
 | `after_playlists_list` / `sb_playlists.png` | Create playlist, then one row per playlist with the playlist glyph; "2 items" | "Create playlist" row, then compact rows laid out in columns at 1600; "…" appears on the hovered row (t1) and name goes `#C6C6C6` | match; the columns follow the width |
 | `after_playlists_grid` | none | Create tile, then `HomeSquareCard` (cover, name, "N tracks"). Empty playlists show the library's default cover (light tile, orange note), as Home's playlist cards | no frame; deviation from the spec's dark glyph tile, see departure 6 |
-| `after_recent_grid`, `after_recent_list` | none | Grid: `HomeVideoCard` (316, 16:9), audio and cover-less items on a `#171717` backing with a 48 px note glyph. List: compact `HomeListRow`, audio reads "title - artist" (e.g. "moonlight - Tester") | no frame; the 4c card and rows |
+| `after_recent_grid`, `after_recent_list` | none | Grid: `HomeVideoCard` (316, 16:9); cover-less items on a `#171717` backing with a 48 px glyph: `topbar_video` for videos, the note (`topbar_music`) for audio. List: compact `HomeListRow`, audio reads "title - artist" (e.g. "moonlight - Tester") | no frame; the 4c card and rows |
 | All: shell | window chrome, sidebar about 216 px at 1920 | 4a's shell, sidebar 152 px at 1600; the player strip is a harness artefact | not 4d |
 
 ### Departures
 
 1. LAN shares (`NetworkDeviceModel` CAT_LAN) are tiles on the Network root, after Add, Podcasts and Radio. A share that is a directory, node or playlist opens `[network, browse]`; any other share plays. Right-click on a share opens `NetworkDeviceContextMenu`.
-2. The Folders and Devices (`StandardPathModel`) sections are dropped; nothing pushes `network/folders` or `network/device`.
+2. The Folders / Computer / Devices (`StandardPathModel`) sections are dropped; nothing pushes `network/folders` or `network/device`.
 3. Podcasts has an "Add podcast" row (opens `podcastConfigureDialog`), a strip above the view that hides while a search runs. Radio has none.
 4. `LibraryRootPage` is the tile page for both the Network and Music roots. The Music root now opens on Songs (not Add) and restores its tile on Back, like Network. The view toggle is Network's only (`hasGridListMode` is on `NetworkHomeDisplay`, not the shared page).
 5. `BrowseTreeDisplay` restores its item on Back for every user (LAN browse, Discover ▸ Services, Podcasts, Radio). They recorded `History.viewProp.initialIndex` before but nothing read it. It also gained `setCurrentItemFocus`, so those pages focus on load.
-6. The Playlists grid uses the model's default cover for empty playlists (as Home). The spec's "glyph when no thumbnail" is wired but never fires.
-7. Playlist drag-and-drop, multi-select delete and the "Processing…" indicator are dropped; Figma shows none of them.
+6. The Playlists grid uses the model's default cover for empty playlists (as Home). The spec's "glyph when no thumbnail" is wired but never fires. Awaiting the user's sign-off.
+7. Playlist drag-and-drop, multi-select delete and the "Processing…" indicator are dropped; Figma shows none of them. Awaiting the user's sign-off.
 8. Recent uses the 16:9 `HomeVideoCard` (new `glyph`, for audio and cover-less items) and compact `HomeListRow`s. The glyphs are `VLCIcons.topbar_video` / `topbar_music` (`movie` doesn't exist).
 9. `thumbnail`, `isNew` and `main_artist` are roles of `MLMediaModel`. The duplicates `VIDEO_THUMBNAIL`, `VIDEO_IS_NEW` and `AUDIO_ARTIST` are removed (the same name under two ids breaks `dataChanged` refresh), as are `MLFolderBrowseModel`'s `FOLDER_*` copies. `MLMediaModel::thumbnailUpdated` replaces the two subclass overrides.
 10. `PlaylistsPage` copies `LibraryFolderPage`'s move/focus/restore plumbing and `RecentDisplay` copies it again (about 100 lines each). A shared base would have reworked 4c mid-slice.
@@ -301,21 +301,32 @@ Shots (1600×900, dark, test library with `redesign-media` and `redesign-music`)
 2. Search field keeps its text: click search, type one key per 1.5 s: "coo" on Playlists, "tra" on Recent. Menu Escape also checked.
 3. Create playlist: `DialogsProvider::newPlaylist()` already returns on Cancel or an empty name; checked, nothing added. A named one appears and the count goes up.
 4. Recent audio without a cover (`sine.ogg`, `huge.mp3`) shows the note glyph. A video whose file is gone: not exercised.
-5. Back restores the tile: Network ▸ Radio, Podcasts and Music ▸ Albums, and Playlists ▸ a playlist (by index), Recent (3rd item). A share not yet discovered on Back (temporary hook) is focused when it appears. Podcasts and Radio offline or slow, and their busy indicator: not exercised (Radio loaded online, 240 countries within 15 s, and no busy state was reported).
+5. Back restores the tile: Network ▸ Radio, Podcasts and Music ▸ Albums, and Playlists ▸ a playlist (by index), Recent (3rd item). A share not yet discovered on Back (temporary hook) is focused when it appears. Podcasts and Radio offline or slow, and their busy indicator: not exercised (Radio loaded online, 240 countries within 15 s, and no busy state was recorded).
 
 ### Known pre-existing issues (not fixed)
 - Enter/Space on a `BrowseTreeDisplay` grid item does nothing on Xvfb (`actionAtIndex` is never emitted); double-click works. The code path is untouched since upstream (`GridItem`, `NetworkGridItem`); check on master or a real desktop.
-- Playlist search returns nothing for any term ("0 items"); same result with the old page stashed.
+- Playlist search returns nothing for the terms tried (coo, cool, t1: "0 items"); same result with the old page stashed.
 
 ### Known minors (not fixed)
 - No automated check of the role names; `MLVideoGroupsModel` and the audio models outside the folder page are harness-unchecked.
 - `LibraryRootPage`: `_pending` stays true if the focused restored tile shrinks away; the Add tile records `initialIndex` 0.
-- `BrowseTreeDisplay`: `restoreOnce` stays armed when the restored count never exceeds the index; shares are not refreshed on `dataChanged`/`modelReset`; Podcasts and Radio pages have no Escape → Back (as Services); the 400 dp Add row width is duplicated.
-- `PlaylistsPage`: with a search that finds nothing, the "No playlists found" text sits under the hidden Create tile; the restore index isn't clamped (also `LibraryFolderPage`); the ~80 px gap under the Create tile (as 4c); `qsTr` gets `undefined` without `?? 0`; `LibraryFolderPage` may have the same entry-focus gap after sidebar Right.
-- Recent: "Play as audio" shows for audio items in the card and page menus; import order.
+- `BrowseTreeDisplay`: `restoreOnce` stays armed when the restored count never exceeds the index; Podcasts and Radio pages have no Escape → Back (as Services); the 400 dp Add row width is duplicated.
+- `PlaylistsPage`: the ~80 px gap under the Create tile (as 4c); `qsTr` gets `undefined` without `?? 0`; `LibraryFolderPage` may have the same entry-focus gap after sidebar Right.
+- Recent: import order.
+- `LibraryRootPage`: `tileCard` and `tileRow` repeat the same Navigation/focus block; the `_current` regrow jump (Task 2 review): an index kept past the end (a pending restore) sends the focus back to it when the list regrows.
 - Dialogs can't take Escape on Xvfb (no window manager); they were closed by their buttons.
 - The Add dialog, Escape on the Add Network Stream dialog and real LAN shares (truenas was listed, never opened) were not exercised.
 
 ### Verification
 - Build clean; `QT_QPA_PLATFORM=offscreen meson test -C build --suite qt`: 14/14 OK after each task.
-- Harness (1600×900, `-vv`) per task. Final log greps, all empty: Tasks 1, 2, 3 and 5 grepped `TypeError`, `ReferenceError` and "non-existent property"; Task 4 also grepped "unable to load" and "is not defined". One `DialogsProvider is not defined` showed up in Task 3's first run and was fixed (`import VLC.Dialogs`); that grep was not part of its final check.
+- Harness (1600×900, `-vv`) per task. Final log greps, all empty: Tasks 1, 2, 3 and 5 grepped `TypeError`, `ReferenceError` and "non-existent property"; Task 4 also grepped "unable to load" and "is not defined". One `ReferenceError: DialogsProvider is not defined` showed up in Task 3's first run and was fixed (`import VLC.Dialogs`). Task 3's final grep lacked the "is not defined" pattern (and "unable to load"), but that error is a `ReferenceError`, which it did grep.
+
+### Final review fix wave
+- `LibraryRootPage` scrolls: the tiles sit in a `Flickable` (wheel, scrollbar), the focused tile is kept in view, and a grid/list switch starts at the top. The list is one column that grows down (a `TopToBottom` Flow with no height never wraps). Checked with 15 temporary fake shares (removed): the last share scrolls into view in both modes. Music still matches `4c/after_music_root.png` and opens on Songs.
+- `PlaylistsPage` and `LibraryFolderPage` clamp the restored index (as `RecentDisplay`).
+- `NetworkHomeDisplay` rebuilds the share tiles on `dataChanged`, `modelReset` and row inserts/removes/moves too; the model sorts by name explicitly (its default already did).
+- Podcasts opens on its feeds; the Add podcast row takes the focus only when there are none (checked with no feeds; with feeds not exercised).
+- Playlists: a search with no hits shows "No results", centred; an empty library entered while it loads moves the focus to Create once it has loaded.
+- "Play as audio" shows for videos only (Recent's list menu and `HomeVideoCard`).
+- The Network root looks the same, so `after_network_grid.png` and `after_network_list.png` were not re-shot.
+- Removed from Known minors above: the playlist "No playlists found" offset, the unclamped restore index, the stale shares, and "Play as audio" on audio items.
