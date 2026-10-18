@@ -139,6 +139,8 @@ T.AbstractButton {
         onTapped: (eventPoint) => contextMenu.popup([root.contextModel.index(root.index, 0)], eventPoint.globalPosition)
     }
 
+    Keys.onMenuPressed: contextMenu.popup([root.contextModel.index(root.index, 0)], root.mapToGlobal(0, root.height))
+
     Keys.priority: Keys.AfterItem
     Keys.onPressed: (event) => {
         if (KeyHelper.matchOk(event)) {

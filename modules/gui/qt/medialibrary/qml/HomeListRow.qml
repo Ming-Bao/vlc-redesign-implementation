@@ -140,6 +140,8 @@ T.AbstractButton {
         onTapped: (eventPoint) => root.menuRequested(eventPoint.globalPosition)
     }
 
+    Keys.onMenuPressed: root.menuRequested(root.mapToGlobal(0, root.height))
+
     Keys.priority: Keys.AfterItem
     Keys.onPressed: (event) => {
         if (KeyHelper.matchOk(event)) {
