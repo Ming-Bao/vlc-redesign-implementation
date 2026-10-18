@@ -247,3 +247,64 @@
   - A "Departures" list with every *(my call)* from the spec.
 - [ ] **Step 3:** Update the roadmap row 4b to "(done)" with the plan name and one line of departures.
 - [ ] **Step 4:** Commit: `doc: finish the library home slice`.
+
+## Ledger
+
+Shots (1600×900, dark, test library with history) in `docs/superpowers/figma/4b/`: `after_home_grid.png`, `after_home_grid_scrolled.png` (rows 3 and 4), `after_home_list.png`, `after_home_empty_search.png`, `after_home_empty_library.png`. References: `home.png`, `sidebar_home.png`. The Figma frame is 1920 wide and the shots are 1600, so the number of cards per row differs (the row fits as many as the width allows). Every px below is `VLCStyle.dp(px, VLCStyle.scale)`.
+
+| Figma value | Built | Verdict |
+|---|---|---|
+| Section: column, padding 20 top and bottom (`6261:15142`) | `HomeSection` column `topPadding`/`bottomPadding` 20. The first section's top 20 is counted from the header rule, which already carries its own bottom padding. | match |
+| Title: Inter Regular 20, `#969696` | 20 px, `#969696` (light: `fg.primary`) | match |
+| Title row gap 5, 24 px right chevron, same colour | 5 px, 24 px `chevron_down` rotated −90°, same colour | match (rotated glyph, my call) |
+| Card row: padding 20 top and bottom, gap 20 (`6272:13818`) | `NavigableRow` top/bottom padding 20, spacing 20 | match |
+| Video card 316 wide, 16:9, radius 12, bg `#171717` (`6272:13852`) | 316, `width*9/16`, radius 12, `#171717` | match |
+| Video card: 20 % black veil | `rgba(0,0,0,0.2)` over the image | match |
+| Progress bar `#D37918`, 4 px, bottom-left, width = thumb × progress | 4 px, `#D37918`, bottom-left, `thumb.width * progress`, rounded with the thumbnail corners | match |
+| Video card gap 20, title Inter 16 `#969696`, one line | 20, 16 px, `#969696`, elided | match |
+| Square card 200×200, radius 12, bg `#171717`, column gap 20 (`6272:13898`) | 200, 12, `#171717`, 20 | match |
+| Square card text column gap 10; title 16 `#969696`; subtitle 16 `#6B6B6B`; one line each | 10, 16 `#969696`, 16 `#6B6B6B`, elided | match |
+| Folder card 200×200, bg `#1E1E1E`, radius 12 (`6284:13980`) | 200, `#1E1E1E`, 12 | match |
+| Folder glyph 48 px centred, gap 20 to name (16, `#969696`) | 48 px `folder` in `#969696`, gap 20, 16 px, elided | match |
+| List view (`1106:5633`): header Inter 16 `#969696`, chevron at the right | 16 px, chevron at the far right | match |
+| List row 42 high, 32 px thumbnail, 4 px progress mark | 42, 32 (radius 4), 4 px `#D37918` mark | match |
+| List text `title - subtitle`, Inter 14 `#8F8F8F`; 24 px glyph for folder, playlist, artist | 14 px `#8F8F8F`; 24 px `#8F8F8F` glyphs | match |
+| Header: crumbs, "110 items", sort, view, search, "…" | 4a's `PageExt` header; "18 items" here (the Figma number is sample text) | match |
+| Row content per frame (5 video cards, 6 square cards at 1920) | as many cards as fit the width (4 videos, 6 squares at 1600) | deviation: responsive, by design |
+| Light theme | not in the Figma; same roles as 4a (`theme.*`) | n/a |
+
+### Departures
+
+Every *(my call)* in the spec:
+1. "Frequently" data: folders and artists are ranked over the last 100 history entries (ties to the most recent, each once). Playlists show the library's order (marked `ponytail:`, the upgrade is ranking by track plays).
+2. Row length: one line per row, as many cards as fit at a 20 px gap, no wrapping or horizontal scroll.
+3. "Title ›" targets: `continueWatching`, a new `listenAgain` sub-page, a new `folders` sub-page, the Playlists page, Music ▸ Artists.
+4. The right chevron is `chevron_down` rotated −90° (no right-chevron glyph exists).
+5. Video card hover and focus follow the 4a grid card.
+6. Playlist card: playlist cover, title = name, subtitle = "N tracks".
+7. Artist card: artist cover kept square, title = name, subtitle = "N tracks".
+8. Folder card glyph: the existing 48 px redesign `folder` icon in `#969696`.
+9. Header item count on Home: all media in the library, video and audio together.
+10. A chosen sort applies to the media rows only; the folder, playlist and artist rows are not re-sorted.
+11. "…" menu gets a Favorites row (Favorites leaves the body, the page stays reachable).
+12. List view artist glyph: the existing artist placeholder (`noArtArtistSmall`).
+13. Empty library: the library's standard empty label with its Browse button (→ Network).
+
+Controller rulings made during execution:
+- Video cards use the library grid's `PlayCover` on hover and focus (follows from 5).
+- Up/down keeps the column through a page-level `focusX`.
+- `HomeFolderModel.qml` is one component shared by `HomePage` and the folders page, instead of two copies of the ranking.
+- Unknown Artist and Various Artists are not filtered out of the Artists row; they are named library entries.
+- The header sort icon was made to work: `HomePage` assigns `sortModel` instead of declaring a property that shadowed `PageExt`'s. `PageExt.itemCount` is no longer `readonly`, and `HomePage` sets it from `MLMediaModel.maximumCount` (`limit: 1`, so counting does not load every media).
+
+### Known minors (not fixed)
+- `0 items` can flash at startup until the count loads.
+- A playlist without a cover shows the library's light placeholder, not `#171717` with a glyph.
+- In the "No results" state, `setCurrentItemFocus` targets the hidden empty label.
+- The `#171717` backing hex is repeated across cards and rows.
+- The Listen Again sort dropdown offers Track/Disc criteria the history query may ignore.
+
+### Verification
+- Empty library (fresh `XDG_*` dirs): Home shows "No media found / Please try adding sources" with Browse; Browse opens Network. No QML errors in that run's log. Shot: `after_home_empty_library.png`.
+- No-match search "zzzz", then select-all + BackSpace, 22 shots 50–100 ms apart (rounds of 6, 8 and 8): every frame already shows the rows; no "No media found" or "No results" frame.
+- QML error grep on the harness log (TypeError, ReferenceError, non-existent property, unavailable): empty.
