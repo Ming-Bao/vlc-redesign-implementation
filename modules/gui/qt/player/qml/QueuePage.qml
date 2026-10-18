@@ -27,7 +27,7 @@ import VLC.PlayerControls
 import VLC.Menus
 import VLC.Dialogs
 
-// Figma queue tab: count and length with sort/repeat/shuffle/remove/add, then the queue
+// Figma queue tab: count and length with sort/repeat/shuffle/remove/clear/add, then the queue
 ColumnLayout {
     id: root
 
@@ -94,6 +94,15 @@ ColumnLayout {
             description: qsTr("Remove from the queue")
             enabled: list.currentIndex >= 0
             onClicked: list.removeCurrent()
+        }
+
+        // not in the Figma: VLC's own glyph
+        Widgets.IconToolButton {
+            text: VLCIcons.playlist_clear
+            font.pixelSize: VLCStyle.icon_normal
+            description: qsTr("Clear the queue")
+            enabled: queueModel.count > 0
+            onClicked: MainPlaylistController.clear()
         }
 
         Widgets.IconToolButton {
