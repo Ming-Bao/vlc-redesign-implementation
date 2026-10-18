@@ -41,15 +41,12 @@ Widgets.PageLoader {
             name: "songs",
             component: songsComponent
         }, {
-            displayText: qsTr("Artists"),
             name: "artists",
             url: "qrc:///qt/qml/VLC/MediaLibrary/MusicArtistsDisplay.qml"
         }, {
-            displayText: qsTr("Albums"),
             name: "albums",
             url: "qrc:///qt/qml/VLC/MediaLibrary/MusicAlbumsDisplay.qml"
         }, {
-            displayText: qsTr("Genres"),
             name: "genres" ,
             url: "qrc:///qt/qml/VLC/MediaLibrary/MusicGenresDisplay.qml"
         }

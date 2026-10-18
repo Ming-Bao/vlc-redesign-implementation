@@ -1110,7 +1110,6 @@ libqml_module_medialibrary_a_QML = \
 	medialibrary/qml/HomeVideoCard.qml \
 	medialibrary/qml/LibraryFolderPage.qml \
 	medialibrary/qml/MediaView.qml \
-	medialibrary/qml/VideoGroupDisplay.qml \
 	medialibrary/qml/MusicAlbums.qml \
 	medialibrary/qml/MusicAlbumsDisplay.qml \
 	medialibrary/qml/MusicAlbumsGridExpandDelegate.qml \
@@ -1126,16 +1125,12 @@ libqml_module_medialibrary_a_QML = \
 	medialibrary/qml/PlaylistsDisplay.qml \
 	medialibrary/qml/RecentDisplay.qml \
 	medialibrary/qml/MusicTrackListDisplay.qml \
-	medialibrary/qml/MusicTracksDisplay.qml \
 	medialibrary/qml/UrlListDisplay.qml \
 	medialibrary/qml/VideoDisplay.qml \
 	medialibrary/qml/VideoAll.qml \
-	medialibrary/qml/VideoAllDisplay.qml \
-	medialibrary/qml/VideoAllSubDisplay.qml \
 	medialibrary/qml/PlaylistMediaList.qml \
 	medialibrary/qml/PlaylistMedia.qml \
 	medialibrary/qml/PlaylistMediaDisplay.qml \
-	medialibrary/qml/VideoPlaylistsDisplay.qml \
 	medialibrary/qml/VideoGridItem.qml \
 	medialibrary/qml/VideoInfoExpandPanel.qml \
 	medialibrary/qml/VideoListDisplay.qml \
