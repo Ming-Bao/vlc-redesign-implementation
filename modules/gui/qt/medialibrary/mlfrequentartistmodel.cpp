@@ -50,8 +50,8 @@ void MLFrequentArtistModel::onVlcMlEvent(const MLEvent & event) /* override */
 
 // Loader
 
-std::vector<std::unique_ptr<MLArtist>>
-MLFrequentArtistModel::Loader::rankedArtists(vlc_medialibrary_t* ml, const char* pattern) const
+std::vector<int64_t>
+MLFrequentArtistModel::Loader::rankedArtistIds(vlc_medialibrary_t* ml) const
 {
     vlc_ml_query_params_t params = vlc_ml_query_params_create();
     params.i_nbResults = 100;
@@ -69,10 +69,16 @@ MLFrequentArtistModel::Loader::rankedArtists(vlc_medialibrary_t* ml, const char*
             artistIds.push_back(media.album_track.i_artist_id);
     }
 
+    return rankByFrequency<int64_t>(artistIds, 0);
+}
+
+std::vector<std::unique_ptr<MLArtist>>
+MLFrequentArtistModel::Loader::rankedArtists(vlc_medialibrary_t* ml, const char* pattern) const
+{
     const QString needle = QString::fromUtf8(pattern ? pattern : "");
 
     std::vector<std::unique_ptr<MLArtist>> res;
-    for (int64_t id : rankByFrequency<int64_t>(artistIds, 0))
+    for (int64_t id : rankedArtistIds(ml))
     {
         ml_unique_ptr<vlc_ml_artist_t> artist(vlc_ml_get_artist(ml, id));
         if (!artist)
@@ -86,6 +92,11 @@ MLFrequentArtistModel::Loader::rankedArtists(vlc_medialibrary_t* ml, const char*
 
 size_t MLFrequentArtistModel::Loader::count(vlc_medialibrary_t* ml, const vlc_ml_query_params_t* queryParams) const /* override */
 {
+    // ponytail: without a search, count the ranked ids instead of fetching every artist; load
+    // skips an id whose artist is gone (deleted between the two queries), leaving count one too
+    // high until the next reset. Count the fetched artists if that race ever shows.
+    if (!queryParams->psz_pattern || !*queryParams->psz_pattern)
+        return rankedArtistIds(ml).size();
     return rankedArtists(ml, queryParams->psz_pattern).size();
 }
 

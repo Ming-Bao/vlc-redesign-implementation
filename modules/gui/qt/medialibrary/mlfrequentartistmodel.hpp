@@ -52,6 +52,7 @@ private:
         std::unique_ptr<MLItem> loadItemById(vlc_medialibrary_t* ml, MLItemId itemId) const override;
 
     private:
+        std::vector<int64_t> rankedArtistIds(vlc_medialibrary_t* ml) const;
         std::vector<std::unique_ptr<MLArtist>> rankedArtists(vlc_medialibrary_t* ml, const char* pattern) const;
     };
 };
