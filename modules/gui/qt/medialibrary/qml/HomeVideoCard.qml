@@ -36,6 +36,8 @@ T.AbstractButton {
     property var contextModel
     // a watched video: the title greys out
     property bool dimmed: false
+    // VLCIcons glyph shown on the backing when there is no thumbnail
+    property string glyph
 
     readonly property bool _dark: theme.palette?.isDark ?? false
     readonly property real _radius: VLCStyle.dp(12, VLCStyle.scale)
@@ -83,9 +85,18 @@ T.AbstractButton {
                 readonly property real eDPR: MainCtx.effectiveDevicePixelRatio(Window.window)
             }
 
+            Widgets.IconLabel {
+                anchors.centerIn: parent
+                visible: !root.model.thumbnail
+                text: root.glyph
+                font.pixelSize: VLCStyle.dp(48, VLCStyle.scale)
+                color: root._dark ? "#969696" : theme.fg.primary
+            }
+
             // 20 % veil
             Rectangle {
                 anchors.fill: parent
+                visible: !!root.model.thumbnail
                 radius: thumb.radius
                 color: Qt.rgba(0, 0, 0, 0.2)
             }
