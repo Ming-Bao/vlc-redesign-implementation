@@ -79,6 +79,11 @@ public:
         return Parent::cachable() && q->m_mediaLib;
     }
 
+    bool repaintKeptRows() const override {
+        Q_Q(const MLBaseModel);
+        return q->repaintKeptRows();
+    }
+
     bool loading() const override
     {
         Q_Q(const MLBaseModel);

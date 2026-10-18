@@ -171,6 +171,12 @@ public:
     int updateItem(ItemType&& newItem);
 
     /**
+     * after a reload, also notify the rows that kept their place: the diff compares ids only,
+     * so their changed data (a playlist's track count...) would not reach the view
+     */
+    void setRepaintKept(bool repaintKept) { m_repaintKept = repaintKept; }
+
+    /**
      * insert an item in the cache and notify changes
      */
     void insertItem(ItemType&& item, int position);
@@ -267,6 +273,7 @@ private:
     size_t fixupIndexForMove(size_t index) const;
 
     bool m_useMove = false;
+    bool m_repaintKept = false;
 
     /* Ownershipshared between this cache and the runnable spawned to execute
      * loader callbacks */

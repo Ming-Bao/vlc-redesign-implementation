@@ -141,6 +141,9 @@ public:
 
     virtual std::unique_ptr<ListCacheLoader<T>> createLoader() const = 0;
 
+    // see ListCache::setRepaintKept
+    virtual bool repaintKeptRows() const { return false; }
+
 protected:
     mutable std::unique_ptr<ListCache<T>> m_cache;
 };
@@ -213,6 +216,7 @@ void BaseModelPrivateT<T>::validateCache() const
 
     auto loader = createLoader();
     m_cache = std::make_unique<ListCache<T>>(std::move(loader), false, m_limit, m_offset);
+    m_cache->setRepaintKept(repaintKeptRows());
     validateCacheImpl(m_cache.get());
 }
 

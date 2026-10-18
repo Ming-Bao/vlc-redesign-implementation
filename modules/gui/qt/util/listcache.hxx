@@ -508,6 +508,9 @@ void ListCache<T>::partialUpdate()
         m_partialIndexRedirect.clear();
     m_oldData.reset();
 
+    if (m_repaintKept && m_cachedData->loadedCount > 0)
+        emit localDataChanged(0, m_cachedData->loadedCount - 1);
+
     //if we have change outside our cache
     //just notify for addition/removal at a the end of the list
     if (partialQueryCount != m_cachedData->queryCount)

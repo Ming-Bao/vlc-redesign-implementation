@@ -94,6 +94,9 @@ protected: // MLBaseModel implementation
 
     std::unique_ptr<MLListCacheLoader> createMLLoader() const override;
 
+    // adding to or removing from a playlist changes its count and cover, not its place
+    bool repaintKeptRows() const override { return true; }
+
 private: // Functions
     QString getCover(const MLPlaylist* playlist) const;
 
