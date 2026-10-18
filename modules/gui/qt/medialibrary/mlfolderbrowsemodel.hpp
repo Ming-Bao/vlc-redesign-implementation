@@ -38,9 +38,6 @@ public:
     enum Roles
     {
         FOLDER_IS_FOLDER = MLMediaModel::MEDIA_ROLES_COUNT,
-        FOLDER_IS_NEW,
-        FOLDER_ARTIST,
-        FOLDER_THUMBNAIL, // same as MEDIA_SMALL_COVER, so the video cards work unchanged
         FOLDER_ROLES_COUNT,
     };
 
@@ -71,8 +68,6 @@ protected: // MLMediaModel reimplementation
     QVariant itemRoleData(const MLItem * item, int role) const override;
 
     void onVlcMlEvent(const MLEvent & event) override;
-
-    void thumbnailUpdated(const QModelIndex &, MLItem *, const QString &, vlc_ml_thumbnail_status_t) override;
 
 private:
     struct Loader : public MLListCacheLoader::MLOp

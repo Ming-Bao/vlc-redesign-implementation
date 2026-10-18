@@ -45,7 +45,7 @@ void MLVideoModel::setItemPlayed(const QModelIndex & index, bool played)
     // NOTE: We want the change to be visible right away.
     video->setIsNew(played == false);
 
-    emit dataChanged(index, index, { VIDEO_IS_NEW });
+    emit dataChanged(index, index, { MEDIA_IS_NEW });
 }
 
 QVariant MLVideoModel::itemRoleData(const MLItem *item, int role) const
@@ -56,10 +56,6 @@ QVariant MLVideoModel::itemRoleData(const MLItem *item, int role) const
 
     switch (role)
     {
-    case VIDEO_THUMBNAIL: // TODO: remove (a similar role already MEDIA_SMALL_COVER)
-        return MLMediaModel::itemRoleData(item, MLMediaModel::MEDIA_SMALL_COVER);
-    case VIDEO_IS_NEW:
-        return QVariant::fromValue(video->isNew());
     case VIDEO_RESOLUTION:
         return QVariant::fromValue(video->getResolutionName());
     case VIDEO_CHANNEL:
@@ -84,8 +80,6 @@ QHash<int, QByteArray> MLVideoModel::roleNames() const
     QHash<int, QByteArray> hash = MLMediaModel::roleNames();
 
     hash.insert({
-        {VIDEO_THUMBNAIL, QByteArrayLiteral("thumbnail")}, // TODO: remove (a similar roleName already "small_cover")
-        {VIDEO_IS_NEW, QByteArrayLiteral("isNew")},
         {VIDEO_RESOLUTION, QByteArrayLiteral("resolution_name")},
         {VIDEO_CHANNEL, QByteArrayLiteral("channel")},
         {VIDEO_DISPLAY_MRL, QByteArrayLiteral("display_mrl")},
@@ -143,13 +137,6 @@ void MLVideoModel::onVlcMlEvent(const MLEvent &event)
     }
 
     MLBaseModel::onVlcMlEvent(event);
-}
-
-void MLVideoModel::thumbnailUpdated(const QModelIndex& idx, MLItem* mlitem, const QString& mrl, vlc_ml_thumbnail_status_t status)
-{
-    auto videoItem = static_cast<MLVideo*>(mlitem);
-    videoItem->setSmallCover(status, mrl);
-    emit dataChanged(idx, idx, {VIDEO_THUMBNAIL});
 }
 
 void MLVideoModel::generateThumbnail(uint64_t id) const

@@ -36,8 +36,6 @@ QVariant MLAudioModel::itemRoleData(const MLItem *item, const int role) const
         return QVariant::fromValue(audio->getTrackNumber());
     case AUDIO_DISC_NUMBER:
         return QVariant::fromValue(audio->getDiscNumber());
-    case AUDIO_ARTIST:
-        return QVariant::fromValue(audio->getArtist());
     case AUDIO_ARTIST_FIRST_SYMBOL:
         return QVariant::fromValue(getFirstSymbol(audio->getArtist()));
     case AUDIO_ALBUM:
@@ -63,7 +61,6 @@ QHash<int, QByteArray> MLAudioModel::roleNames() const
         {AUDIO_COVER, QByteArrayLiteral("cover")}, // TODO: remove (a similar roleName already "small_cover")
         {AUDIO_TRACK_NUMBER, QByteArrayLiteral("track_number")},
         {AUDIO_DISC_NUMBER, QByteArrayLiteral("disc_number")},
-        {AUDIO_ARTIST, QByteArrayLiteral("main_artist")},
         {AUDIO_ARTIST_FIRST_SYMBOL, QByteArrayLiteral("main_artist_first_symbol")},
         {AUDIO_ALBUM, QByteArrayLiteral("album_title")},
         {AUDIO_ALBUM_FIRST_SYMBOL, QByteArrayLiteral("album_title_first_symbol")},

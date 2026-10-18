@@ -35,7 +35,6 @@ public:
         AUDIO_COVER = MLMediaModel::MEDIA_ROLES_COUNT, // TODO: remove (a similar role already MEDIA_SMALL_COVER)
         AUDIO_TRACK_NUMBER,
         AUDIO_DISC_NUMBER,
-        AUDIO_ARTIST,
         AUDIO_ARTIST_FIRST_SYMBOL,
         AUDIO_ALBUM,
         AUDIO_ALBUM_FIRST_SYMBOL,

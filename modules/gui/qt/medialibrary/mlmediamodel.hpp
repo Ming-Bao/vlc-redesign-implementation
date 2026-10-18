@@ -48,6 +48,9 @@ public:
         MEDIA_PLAYCOUNT,
         MEDIA_LAST_PLAYED_DATE,
         MEDIA_IS_DELETABLE_FILE,
+        MEDIA_THUMBNAIL, // same as MEDIA_SMALL_COVER
+        MEDIA_IS_NEW, // videos only
+        MEDIA_MAIN_ARTIST, // audio only
         MEDIA_ROLES_COUNT,
     };
 
@@ -64,6 +67,7 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
     QVariant itemRoleData(const MLItem *item, int role) const override;
     void onVlcMlEvent(const MLEvent &event) override;
+    void thumbnailUpdated(const QModelIndex &idx, MLItem *item, const QString &mrl, vlc_ml_thumbnail_status_t status) override;
     std::unique_ptr<MLListCacheLoader> createMLLoader() const override;
 
 private:

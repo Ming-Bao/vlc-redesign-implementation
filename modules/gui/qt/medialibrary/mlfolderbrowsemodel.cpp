@@ -100,9 +100,6 @@ QHash<int, QByteArray> MLFolderBrowseModel::roleNames() const /* override */
 
     hash.insert({
         {FOLDER_IS_FOLDER, QByteArrayLiteral("isFolder")},
-        {FOLDER_IS_NEW, QByteArrayLiteral("isNew")},
-        {FOLDER_ARTIST, QByteArrayLiteral("main_artist")},
-        {FOLDER_THUMBNAIL, QByteArrayLiteral("thumbnail")},
     });
 
     return hash;
@@ -132,16 +129,6 @@ QVariant MLFolderBrowseModel::itemRoleData(const MLItem * item, int role) const 
     {
         case FOLDER_IS_FOLDER:
             return false;
-        case FOLDER_IS_NEW:
-            if (const auto video = dynamic_cast<const MLVideo *>(item))
-                return video->isNew();
-            return {};
-        case FOLDER_ARTIST:
-            if (const auto audio = dynamic_cast<const MLAudio *>(item))
-                return audio->getArtist();
-            return {};
-        case FOLDER_THUMBNAIL:
-            return MLMediaModel::itemRoleData(item, MEDIA_SMALL_COVER);
         default:
             return MLMediaModel::itemRoleData(item, role);
     }
@@ -170,17 +157,6 @@ void MLFolderBrowseModel::onVlcMlEvent(const MLEvent & event) /* override */
     }
 
     MLMediaModel::onVlcMlEvent(event);
-}
-
-void MLFolderBrowseModel::thumbnailUpdated(const QModelIndex & idx, MLItem * item, const QString & mrl,
-                                           vlc_ml_thumbnail_status_t status) /* override */
-{
-    const auto video = dynamic_cast<MLVideo *>(item);
-    if (video == nullptr)
-        return;
-
-    video->setSmallCover(status, mrl);
-    emit dataChanged(idx, idx, {MEDIA_SMALL_COVER, FOLDER_THUMBNAIL});
 }
 
 // Loader

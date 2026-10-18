@@ -137,6 +137,9 @@ QHash<int, QByteArray> MLMediaModel::roleNames() const
         {MEDIA_PLAYCOUNT, QByteArrayLiteral("playcount")},
         {MEDIA_LAST_PLAYED_DATE, QByteArrayLiteral("last_played_date")},
         {MEDIA_IS_DELETABLE_FILE, QByteArrayLiteral("isDeletableFile")},
+        {MEDIA_THUMBNAIL, QByteArrayLiteral("thumbnail")},
+        {MEDIA_IS_NEW, QByteArrayLiteral("isNew")},
+        {MEDIA_MAIN_ARTIST, QByteArrayLiteral("main_artist")},
     };
 }
 
@@ -155,6 +158,7 @@ QVariant MLMediaModel::itemRoleData(const MLItem *item, int role) const
         return QVariant::fromValue(getFirstSymbol(media->title()));
     case MEDIA_FILENAME:
         return QVariant::fromValue(media->fileName());
+    case MEDIA_THUMBNAIL:
     case MEDIA_SMALL_COVER: // depends on the type of media
         if (const auto video = dynamic_cast<const MLVideo *>(media))
         {
@@ -189,6 +193,14 @@ QVariant MLMediaModel::itemRoleData(const MLItem *item, int role) const
         return QVariant::fromValue( media->lastPlayedDate().toString( QLocale::system().dateFormat( QLocale::ShortFormat ) ) );
     case MEDIA_IS_DELETABLE_FILE:
         return QVariant::fromValue(getPermissions(media));
+    case MEDIA_IS_NEW:
+        if (const auto video = dynamic_cast<const MLVideo *>(media))
+            return video->isNew();
+        return {};
+    case MEDIA_MAIN_ARTIST:
+        if (const auto audio = dynamic_cast<const MLAudio *>(media))
+            return audio->getArtist();
+        return {};
     }
     return {};
 }
@@ -229,6 +241,17 @@ void MLMediaModel::onVlcMlEvent(const MLEvent &event)
     default:
         MLBaseModel::onVlcMlEvent(event);
     }
+}
+
+void MLMediaModel::thumbnailUpdated(const QModelIndex &idx, MLItem *item, const QString &mrl,
+                                    vlc_ml_thumbnail_status_t status) /* override */
+{
+    const auto video = dynamic_cast<MLVideo *>(item);
+    if (video == nullptr)
+        return;
+
+    video->setSmallCover(status, mrl);
+    emit dataChanged(idx, idx, {MEDIA_SMALL_COVER, MEDIA_THUMBNAIL});
 }
 
 void MLMediaModel::generateThumbnail(const MLVideo *video) const

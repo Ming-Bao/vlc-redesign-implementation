@@ -93,7 +93,7 @@ QVariant MLVideoGroupsModel::itemRoleData(const MLItem * item, const int role) c
                 return QVariant::fromValue(group->getId());
             case MEDIA_TITLE:
                 return QVariant::fromValue(group->getTitle());
-            case VIDEO_THUMBNAIL:
+            case MEDIA_THUMBNAIL:
             {
                 return MLCustomCover::url(
                     group->getId(),

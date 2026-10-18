@@ -32,9 +32,7 @@ class MLVideoModel : public MLMediaModel
 public:
     enum Roles
     {
-        VIDEO_THUMBNAIL = MLMediaModel::MEDIA_ROLES_COUNT, // TODO: remove (a similar role already MEDIA_SMALL_COVER)
-        VIDEO_IS_NEW,
-        VIDEO_RESOLUTION,
+        VIDEO_RESOLUTION = MLMediaModel::MEDIA_ROLES_COUNT,
         VIDEO_CHANNEL,
         VIDEO_DISPLAY_MRL,
         VIDEO_VIDEO_TRACK,
@@ -56,8 +54,6 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
     QVariant itemRoleData(const MLItem *item, int role) const override;
-
-    void thumbnailUpdated(const QModelIndex& , MLItem* , const QString& , vlc_ml_thumbnail_status_t ) override;
 
     std::unique_ptr<MLListCacheLoader> createMLLoader() const override;
 
