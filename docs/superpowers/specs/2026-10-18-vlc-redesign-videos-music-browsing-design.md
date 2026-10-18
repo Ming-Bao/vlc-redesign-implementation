@@ -31,24 +31,22 @@ Out of scope:
 
 The media library has no "subfolders that contain videos" query. `VLC_ML_LIST_SUBFOLDERS` lists every subfolder, including ones with no media of the type. So the tree is derived from two flat lists:
 
-1. **Roots:** the library's entry points, through the existing `MLFolderModel` (`MLFoldersModel`). These are the folders the user added (Shows, Films, Anime).
-2. **Media folders:** the folders that hold media of the type, through `vlc_ml_list_folders_by_type(VIDEO | AUDIO)`.
-   - `MLVideoFoldersModel` already lists the video ones.
-   - It gains an MRL role and a media-type choice, so it can list audio folders too. This can be a rename or a property; that's the builder's call.
+1. **Roots:** the library's entry points (`vlc_ml_list_entry_points`). These are the folders the user added (Shows, Films, Anime).
+2. **Media folders:** the folders that directly hold media of the type (`vlc_ml_list_folders_by_type(VIDEO | AUDIO)`).
 
-Two pure helpers in `Helpers.qml` turn these into a level and its crumbs. They are unit-tested in `tests/tst_LibraryHelpers.qml`.
+**One model per level:** a new C++ model, `MLFolderBrowseModel` (a subclass of `MLMediaModel`). It lists one level as a single list: the child folders first, then the files. This gives one grid / list with free keyboard navigation, count, sort, paging and empty state.
+- **Properties:**
+  - `audio` (bool): video folders when false, audio when true.
+  - `folderMrl` (string): `""` is the root.
+- **Child folders:** from a pure, unit-tested function, `folderChildren(roots, mediaFolders, parent)`.
+  - **At the root (`parent` is `""`):** each root that is an ancestor of, or equal to, at least one media folder. Roots holding no media of the type are hidden.
+  - **Otherwise:** the distinct next path segment under `parent` of every media folder below it.
+  - **Names:** the percent-decoded last path segment, sorted A→Z, case-insensitively.
+  - **MRLs:** compared with one trailing slash normalised away, and matched at path-segment boundaries, so `…/Shows` is not a parent of `…/Shows2`.
+- **Files:** the media of the folder whose MRL equals `folderMrl`, through `vlc_ml_list_video_of` / `vlc_ml_list_audio_of` with `VLC_ML_PARENT_FOLDER`. There are none when no media folder has that MRL.
+- **Updates:** media and folder events reset the model.
 
-- **`folderLevel(roots, mediaFolders, parent)`** returns `{ folders: [{ name, mrl }], folderId }`.
-  - **`parent === ""` (the root):** returns each root that is an ancestor of, or equal to, at least one media folder. Roots holding no media of the type are hidden.
-  - **Otherwise:** returns the distinct next path segment under `parent` of every media folder below it.
-  - **`folderId`:** the id of the media folder whose MRL equals `parent`, or 0 when there is none. With 0, the level has only folders and no files.
-  - **Names:** the decoded last path segment, sorted A→Z, case-insensitively and locale-aware.
-  - **MRL handling:** compares MRLs with one trailing slash normalised away, and matches at path-segment boundaries, so `…/Shows` is not a parent of `…/Shows2`. It must not throw on a malformed `%` escape (4b's `folderEntries` already handles this).
-- **`folderCrumbs(roots, mrl)`** returns `[{ name, mrl }]`, from the root that contains `mrl` down to `mrl` itself.
-
-**Files at a level:** an `MLVideoModel` / `MLAudioModel` with `parentId = { folderId, VLC_ML_PARENT_FOLDER }`. `vlc_ml_list_video_of` and `vlc_ml_list_media_of` already route `VLC_ML_PARENT_FOLDER` to `VLC_ML_LIST_FOLDER_MEDIA`. When `folderId` is 0, no media model is bound, because an unset `parentId` would list the whole library.
-
-**Updates:** the levels refresh when folders or media are added or removed. The base models already reset on media-library events, so the derived level is recomputed when either model changes.
+**Crumbs** come from the history, not the model: each push into a folder carries the trail of `{ name, mrl }` that led to it.
 
 ## Navigation and history
 
@@ -118,8 +116,9 @@ Colours are dark-theme tokens. Light theme maps them through the same `theme`/`C
 **Items:**
 - **A folder tile:** click / Enter opens that level.
 - **A video or track:**
-  - Same as today's grid: click selects; double-click / Enter plays; the hover play button plays.
-  - Ctrl/Shift multi-selection and drag stay. The context menu (`MLContextMenu`) acts on the selection.
+  - Click / Enter plays it, the same as Home's cards in 4b. On video cards, the hover play button plays too.
+  - Right-click / the menu key opens `MLContextMenu` for that item.
+  - *(My call)* There is no multi-selection or drag. The Figma shows no selection state, and Home already works this way. Mark it `ponytail:`; the upgrade is to wire the grid's `selectionModel` into the cards.
 - **Folder tiles** have no context menu *(my call)*.
 
 **Order within a level:** folders come first, then files.
@@ -152,11 +151,11 @@ Colours are dark-theme tokens. Light theme maps them through the same `theme`/`C
   - **The test library** needs nested folders: a root with two levels of subfolders holding videos, and one holding audio. Build it under `build/redesign-profile` from the existing test clips: copies or symlinks, never the user's real media folders.
   - **Shots** go to `docs/superpowers/figma/4c/after_*.png`: Videos root, a folder level in grid and list, the Music root, and a Songs level. Compare them with the Figma frames; the ledger goes in the plan.
 - **Log:** grep `vlc.log` for TypeError, ReferenceError and "non-existent property" after each task.
-- **Automated tests:** `tst_LibraryHelpers.qml` cases for `folderLevel` and `folderCrumbs`:
+- **Automated tests:** a C++ test for `folderChildren` and the folder/file paging split:
   - nesting and the root filter;
   - trailing slashes;
   - the `Shows`/`Shows2` boundary;
   - percent-encoded names;
   - a root that is itself a media folder;
-  - an MRL outside every root, which gives an empty level and empty crumbs.
+  - an MRL outside every root, which gives an empty level.
 - **Suite:** the qt suite passes.
