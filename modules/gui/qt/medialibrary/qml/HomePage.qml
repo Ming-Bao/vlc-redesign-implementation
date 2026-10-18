@@ -92,9 +92,11 @@ Widgets.PageExt {
         contentYBehavior.enabled = false
     }
 
+    // "No results" has nothing to focus
     function setCurrentItemFocus(reason) {
         if (root._empty) {
-            emptyLabel.forceActiveFocus(reason)
+            if (emptyLabel.visible)
+                emptyLabel.forceActiveFocus(reason)
             return
         }
         for (let i = 0; i < sections.count; ++i) {
@@ -105,6 +107,20 @@ Widgets.PageExt {
             }
         }
     }
+
+    // the page takes the focus for itself (from the sidebar, or before its rows load): hand it to a row
+    function _restoreFocus(reason) {
+        if (!root.activeFocus || (root.header?.activeFocus ?? false) || emptyLabel.activeFocus)
+            return
+        for (let i = 0; i < sections.count; ++i) {
+            if (sections.itemAt(i).activeFocus)
+                return
+        }
+        root.setCurrentItemFocus(reason)
+    }
+
+    onActiveFocusChanged: if (activeFocus) Qt.callLater(_restoreFocus, focusReason)
+    on_ModelsLoadedChanged: if (_modelsLoaded) Qt.callLater(_restoreFocus, Qt.OtherFocusReason)
 
     contentItem: Flickable {
         id: flickable
@@ -188,7 +204,6 @@ Widgets.PageExt {
             anchors.centerIn: parent
             visible: root._empty && root.search.pattern === ""
 
-            focus: true
             cover: VLCStyle.noArtVideoCover
             text: qsTr("No media found\nPlease try adding sources")
 
@@ -481,7 +496,8 @@ Widgets.PageExt {
                         required property var model
                         required property int index
 
-                        image: model.cover ? model.cover : VLCStyle.noArtArtistSmall
+                        image: model.cover ?? ""
+                        glyph: VLCIcons.album_cover
                         text: model.name ?? ""
 
                         onActivated: (reason) => History.push(["music", "artists", "albums"], { artistId: model.id }, reason)

@@ -186,6 +186,20 @@ Widgets.PageLoader {
                     first.forceActiveFocus(reason)
             }
 
+            // the page takes the focus for itself (from the sidebar, or before the folders arrive),
+            // and a reload destroys the focused card: hand it to a card
+            function _restoreFocus(reason) {
+                if (!foldersPage.activeFocus || (foldersPage.header?.activeFocus ?? false))
+                    return
+                for (let i = 0; i < cards.count; ++i) {
+                    if (cards.itemAt(i).activeFocus)
+                        return
+                }
+                setCurrentItemFocus(reason)
+            }
+
+            onActiveFocusChanged: if (activeFocus) Qt.callLater(_restoreFocus, focusReason)
+
             Flickable {
                 id: foldersFlickable
 
@@ -216,6 +230,8 @@ Widgets.PageLoader {
                             const pattern = foldersPage.search.pattern.toLowerCase()
                             return folderModel.entries.filter(e => e.name.toLowerCase().includes(pattern))
                         }
+
+                        onItemAdded: Qt.callLater(foldersPage._restoreFocus, Qt.OtherFocusReason)
 
                         HomeSquareCard {
                             id: card

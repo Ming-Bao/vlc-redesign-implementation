@@ -41,7 +41,8 @@ FocusScope {
 
     // number of cards that fit the width on one line, or the number of list rows
     readonly property int fit: MainCtx.gridView ? Math.max(1, Math.floor((width + _gap) / (cardWidth + _gap))) : 5
-    readonly property int count: MainCtx.gridView ? cards.count : rows.count
+    // from the model, not the delegates: swapping grid/list empties the Repeaters for a moment
+    readonly property int count: model?.count ?? model?.length ?? 0
 
     signal titleClicked(int reason)
     signal cardFocused(real x)
@@ -64,6 +65,33 @@ FocusScope {
         }
         if (best)
             best.forceActiveFocus(reason)
+    }
+
+    // a reload destroys the focused card or row and leaves the focus on the section: hand it to a new one
+    function _restoreFocus() {
+        if (!root.activeFocus || titleButton.activeFocus)
+            return
+        const items = MainCtx.gridView ? cards : rows
+        for (let i = 0; i < items.count; ++i) {
+            if (items.itemAt(i).activeFocus)
+                return
+        }
+        root.setCurrentItemFocus(Qt.OtherFocusReason)
+    }
+
+    // NavigableRow/Col step by the index an item had when it was added, which a model move (the
+    // history reordering) leaves stale: step through the Repeater's live order instead
+    function _step(repeater, item, delta, reason, otherwise) {
+        for (let i = 0; i < repeater.count; ++i) {
+            if (repeater.itemAt(i) === item) {
+                const next = repeater.itemAt(i + delta)
+                if (next)
+                    next.forceActiveFocus(reason)
+                else
+                    otherwise()
+                return
+            }
+        }
     }
 
     visible: count > 0
@@ -173,6 +201,9 @@ FocusScope {
                         if (card.activeFocus)
                             root.cardFocused(card.x + card.width / 2)
                     })
+                    card.Navigation.leftAction = () => root._step(cards, card, -1, Qt.BacktabFocusReason, () => cardRow.Navigation.defaultNavigationLeft())
+                    card.Navigation.rightAction = () => root._step(cards, card, 1, Qt.TabFocusReason, () => cardRow.Navigation.defaultNavigationRight())
+                    Qt.callLater(root._restoreFocus)
                 }
             }
         }
@@ -191,6 +222,12 @@ FocusScope {
 
                 model: MainCtx.gridView ? null : root.model
                 delegate: root.listDelegate
+
+                onItemAdded: (index, row) => {
+                    row.Navigation.upAction = () => root._step(rows, row, -1, Qt.BacktabFocusReason, () => listCol.Navigation.defaultNavigationUp())
+                    row.Navigation.downAction = () => root._step(rows, row, 1, Qt.TabFocusReason, () => listCol.Navigation.defaultNavigationDown())
+                    Qt.callLater(root._restoreFocus)
+                }
             }
         }
     }
