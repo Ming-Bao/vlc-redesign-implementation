@@ -16,6 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 import QtQuick
+import QtQuick.Templates as T
 
 import VLC.MainInterface
 
@@ -101,6 +102,7 @@ Widgets.PageExt {
         if (!(_pending() && index === tiles.length - 1))
             _current = index
         _reason = tile.focusReason
+        Helpers.positionFlickableToContainItem(flick, tile)
     }
 
     function _activate(tile, index, reason) {
@@ -118,23 +120,44 @@ Widgets.PageExt {
         anchors.fill: parent
         focus: true
 
-        Flow {
-            id: grid
+        // the Network root lists every share found: it scrolls
+        Flickable {
+            id: flick
 
             anchors.fill: parent
-            leftPadding: root.header?.leftPadding ?? 0
-            rightPadding: root.header?.rightPadding ?? 0
-            // Figma 970:4079: 20 under the header rule, which already has padding below it
-            topPadding: Math.max(0, VLCStyle.dp(20, VLCStyle.scale) - (root.header?.bottomPadding ?? 0))
-            flow: MainCtx.gridView ? Flow.LeftToRight : Flow.TopToBottom
-            spacing: MainCtx.gridView ? root._gap : VLCStyle.dp(10, VLCStyle.scale)
+            clip: true
+            contentWidth: width
+            contentHeight: grid.implicitHeight
+            boundsBehavior: Flickable.StopAtBounds
 
-            Repeater {
-                id: repeater
+            T.ScrollBar.vertical: Widgets.ScrollBarExt {}
 
-                model: root.tiles
+            // a new layout starts at the top, not at the old one's offset
+            Connections {
+                target: MainCtx
+                function onGridViewChanged() { flick.contentY = 0 }
+            }
 
-                delegate: MainCtx.gridView ? tileCard : tileRow
+            Flow {
+                id: grid
+
+                // no height: a TopToBottom flow without one never wraps, the list stays one column
+                width: flick.width
+                leftPadding: root.header?.leftPadding ?? 0
+                rightPadding: root.header?.rightPadding ?? 0
+                // Figma 970:4079: 20 under the header rule, which already has padding below it
+                topPadding: Math.max(0, VLCStyle.dp(20, VLCStyle.scale) - (root.header?.bottomPadding ?? 0))
+                bottomPadding: VLCStyle.dp(20, VLCStyle.scale)
+                flow: MainCtx.gridView ? Flow.LeftToRight : Flow.TopToBottom
+                spacing: MainCtx.gridView ? root._gap : VLCStyle.dp(10, VLCStyle.scale)
+
+                Repeater {
+                    id: repeater
+
+                    model: root.tiles
+
+                    delegate: MainCtx.gridView ? tileCard : tileRow
+                }
             }
         }
     }
