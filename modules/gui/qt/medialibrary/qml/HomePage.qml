@@ -208,7 +208,7 @@ Widgets.PageExt {
             text: qsTr("No media found\nPlease try adding sources")
 
             Navigation.parentItem: root
-            Navigation.upItem: root.header?.contentUpItem ?? root.header
+            Navigation.upItem: root.header
         }
 
         Widgets.EmptyLabel {

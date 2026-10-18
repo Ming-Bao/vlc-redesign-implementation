@@ -108,6 +108,8 @@
         {"key":"link", "path": "./redesign/link.svg"},
         {"key":"audio_tracks", "path": "./redesign/audio-tracks.svg"},
         {"key":"playlists", "path": "./redesign/playlists.svg"},
-        {"key":"checkmark", "path": "./redesign/checkmark.svg"}
+        {"key":"checkmark", "path": "./redesign/checkmark.svg"},
+        {"key":"artist", "path": "./redesign/artist.svg"},
+        {"key":"genre", "path": "./redesign/genre.svg"}
     ]
 }

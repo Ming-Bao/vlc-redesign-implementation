@@ -118,6 +118,8 @@ class VLCIcons : public QObject {
     Q_PROPERTY(QChar audio_tracks MEMBER audio_tracks CONSTANT FINAL)
     Q_PROPERTY(QChar playlists MEMBER playlists CONSTANT FINAL)
     Q_PROPERTY(QChar checkmark MEMBER checkmark CONSTANT FINAL)
+    Q_PROPERTY(QChar artist MEMBER artist CONSTANT FINAL)
+    Q_PROPERTY(QChar genre MEMBER genre CONSTANT FINAL)
 
 
 public:
@@ -232,6 +234,8 @@ public:
     static constexpr inline QChar audio_tracks{ u'\ue065' };
     static constexpr inline QChar playlists{ u'\ue066' };
     static constexpr inline QChar checkmark{ u'\ue067' };
+    static constexpr inline QChar artist{ u'\ue068' };
+    static constexpr inline QChar genre{ u'\ue069' };
 
 };
 

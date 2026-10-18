@@ -55,5 +55,7 @@
   "link.svg": ["link"],
   "audio-tracks.svg": ["audio_tracks"],
   "playlists.svg": ["playlists"],
-  "checkmark.svg": ["checkmark"]
+  "checkmark.svg": ["checkmark"],
+  "artist.svg": ["artist"],
+  "genre.svg": ["genre"]
 }

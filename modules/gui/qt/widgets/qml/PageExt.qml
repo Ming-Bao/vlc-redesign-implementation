@@ -56,20 +56,12 @@ T.Page {
         "music": qsTr("Music"),
         "music/artists": qsTr("Artists"),
         "music/albums": qsTr("Albums"),
-        "music/tracks": qsTr("Tracks"),
         "music/genres": qsTr("Genres"),
-        "music/playlists": qsTr("Playlists"),
+        "music/songs": qsTr("Songs"),
         "network": qsTr("Network"),
         "playlists": qsTr("Playlists"),
         "recent": qsTr("Recent")
     })
-
-    // ponytail: the old sidebar sub-items, shown as tabs under the header until 4c replaces Videos/Music browsing
-    readonly property var _tabs: ({
-        "music": [{ name: "artists", text: qsTr("Artists") }, { name: "albums", text: qsTr("Albums") },
-                  { name: "tracks", text: qsTr("Tracks") }, { name: "genres", text: qsTr("Genres") },
-                  { name: "playlists", text: qsTr("Playlists") }]
-    })[pagePrefix[0]] ?? []
 
     property int displayMarginBeginning: 0
     property int displayMarginEnd: 0
@@ -122,7 +114,7 @@ T.Page {
         if (!_firstChild)
             return
         _firstChild.Navigation.parentItem = root
-        _firstChild.Navigation.upItem = Qt.binding(() => root.header?.contentUpItem ?? root.header)
+        _firstChild.Navigation.upItem = Qt.binding(() => root.header)
     }
 
     function positionContentAtBeginning() {
@@ -138,9 +130,6 @@ T.Page {
 
     header: DefaultPageHeader {
         breadcrumbs: root.breadcrumbs
-        tabs: root._tabs
-        tabRoot: root.pagePrefix[0] ?? ""
-        currentTab: root.pagePrefix[1] ?? ""
         itemCount: root.itemCount
 
         leftPadding: VLCStyle.dynamicAppMargins(width) + VLCStyle.layout_left_margin + root.leftPadding
@@ -170,9 +159,6 @@ T.Page {
 
         // Properties
         property var breadcrumbs: []
-        property var tabs: []
-        property string tabRoot: ""
-        property string currentTab: ""
 
         readonly property bool _dark: theme.palette?.isDark ?? false
 
@@ -207,9 +193,6 @@ T.Page {
         FontMetrics { id: lastCrumbFont; font.pixelSize: VLCStyle.dp(16, VLCStyle.scale); font.weight: Font.DemiBold }
 
         property int itemCount: -1
-
-        // what Up from the page content focuses: the tabs when shown, else the header row
-        readonly property Item contentUpItem: tabRow.visible ? tabRow : defaultPageHeader
 
         property alias sortExtraRows: gridSortFilter.sortExtraRows
         property alias headerMenuRows: gridSortFilter.menuExtraRows
@@ -275,7 +258,6 @@ T.Page {
 
                             Navigation.parentItem: defaultPageHeader
                             Navigation.rightItem: forwardBtn
-                            Navigation.downItem: tabRow.visible ? tabRow : null
 
                             onClicked: History.previous()
                         }
@@ -295,7 +277,6 @@ T.Page {
                             Navigation.parentItem: defaultPageHeader
                             Navigation.leftItem: backBtn
                             Navigation.rightItem: crumbRow
-                            Navigation.downItem: tabRow.visible ? tabRow : null
 
                             onClicked: History.next()
                         }
@@ -314,7 +295,6 @@ T.Page {
                         Navigation.parentItem: defaultPageHeader
                         Navigation.leftItem: forwardBtn
                         Navigation.rightItem: gridSortFilter
-                        Navigation.downItem: tabRow.visible ? tabRow : null
 
                         Repeater {
                             id: crumbRepeater
@@ -401,7 +381,6 @@ T.Page {
                     search: _searchCtx
                     Navigation.parentItem: defaultPageHeader
                     Navigation.leftItem: crumbRow
-                    Navigation.downItem: tabRow.visible ? tabRow : null
 
                     onEscaped: defaultPageHeader.Navigation.defaultNavigationDown()
                 }
@@ -411,75 +390,6 @@ T.Page {
                 Layout.fillWidth: true
                 implicitHeight: VLCStyle.dp(1, VLCStyle.scale)
                 color: theme.separator
-            }
-
-            // ponytail: temporary (until 4c) tabs for the old Videos/Music sidebar sub-items
-            NavigableRow {
-                id: tabRow
-
-                visible: defaultPageHeader.tabs.length > 0
-                Layout.preferredHeight: VLCStyle.dp(40, VLCStyle.scale)
-
-                Navigation.parentItem: defaultPageHeader
-                Navigation.upItem: gridSortFilter
-
-                Repeater {
-                    model: defaultPageHeader.tabs
-
-                    delegate: T.TabButton {
-                        id: tab
-
-                        required property var modelData
-                        readonly property bool selected: modelData.name === defaultPageHeader.currentTab
-
-                        text: modelData.text
-                        height: VLCStyle.dp(40, VLCStyle.scale)
-                        leftPadding: VLCStyle.dp(16, VLCStyle.scale)
-                        rightPadding: VLCStyle.dp(16, VLCStyle.scale)
-                        implicitWidth: implicitContentWidth + leftPadding + rightPadding
-                        focusPolicy: Qt.StrongFocus
-
-                        readonly property ColorContext colorContext: ColorContext {
-                            id: tabTheme
-                            colorSet: ColorContext.View
-                            focused: tab.visualFocus
-                        }
-
-                        contentItem: T.Label {
-                            text: tab.text
-                            verticalAlignment: Text.AlignVCenter
-                            font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-                            color: defaultPageHeader._dark ? (tab.selected ? "#C6C6C6" : "#8F8F8F")
-                                                           : (tab.selected ? theme.fg.primary : theme.fg.secondary)
-                        }
-
-                        background: Rectangle {
-                            color: "transparent"
-                            border.color: tab.visualFocus ? tabTheme.visualFocus : "transparent"
-
-                            Rectangle {
-                                visible: tab.selected
-                                anchors.bottom: parent.bottom
-                                width: parent.width
-                                height: VLCStyle.dp(2, VLCStyle.scale)
-                                color: defaultPageHeader._dark ? "#D37918" : theme.accent
-                            }
-                        }
-
-                        Keys.priority: Keys.AfterItem
-                        Keys.onPressed: (event) => Navigation.defaultKeyAction(event)
-
-                        onClicked: {
-                            const path = [defaultPageHeader.tabRoot, modelData.name]
-                            // already on the tab's own root page (not a group or playlist under it)
-                            if (History.match(History.viewPath, path) &&
-                                    root.Navigation.parentItem?.isDefaulLoadedForPath?.([]))
-                                root.positionContentAtBeginning()
-                            else
-                                History.push(path)
-                        }
-                    }
-                }
             }
         }
     }
