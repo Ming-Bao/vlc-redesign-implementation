@@ -24,7 +24,7 @@ import VLC.MainInterface
 import VLC.Style
 
 // The redesign's popup menu (Figma "View Options" 858:3290, "Sorting Options" 856:2215).
-// rows: [{ text, icon (glyph, optional), checked (optional), run (function, optional) }]
+// rows: [{ text, icon (glyph, optional), checked (optional), enabled (optional), run (function, optional) }]
 T.Menu {
     id: root
 
@@ -78,6 +78,7 @@ T.Menu {
             required property int index
 
             text: modelData.text
+            enabled: modelData.enabled ?? true
 
             implicitHeight: VLCStyle.dp(48, VLCStyle.scale)
             leftPadding: VLCStyle.dp(14, VLCStyle.scale)
@@ -87,6 +88,7 @@ T.Menu {
 
             contentItem: RowLayout {
                 spacing: VLCStyle.dp(10, VLCStyle.scale)
+                opacity: item.enabled ? 1 : 0.4
 
                 IconLabel {
                     visible: !!item.modelData.icon

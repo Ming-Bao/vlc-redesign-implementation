@@ -369,6 +369,49 @@ Widgets.PageExt {
                         History.push(["network", "browse"], { tree: tree }, reason)
                 }
 
+                // the menu acts on the videos directly in the folder (not its subfolders), as the library has them
+                function popupMenu(entry, globalPos) {
+                    folderVideos.folderMrl = entry.mrl
+                    folderMenu.popup(folders.mapFromGlobal(globalPos.x, globalPos.y))
+                }
+
+                MLFolderBrowseModel {
+                    id: folderVideos
+
+                    ml: MediaLib
+                    audio: false
+                    sortCriteria: "title"
+
+                    // the ids of the level's files, in name order (its folder rows come first and are skipped)
+                    property var videoIds: []
+                    property int _request: 0
+
+                    function update() {
+                        const request = ++_request
+                        videoIds = []
+                        if (count === 0)
+                            return
+                        getDataFlat(Array.from({ length: count }, (_, i) => i), (items) => {
+                            if (request === _request) // the folder changed meanwhile
+                                videoIds = items.filter(i => i && !i.isFolder).map(i => i.id)
+                        })
+                    }
+
+                    onCountChanged: update()
+                    onModelReset: update()
+                }
+
+                Widgets.FigmaMenu {
+                    id: folderMenu
+
+                    rows: [
+                        { text: qsTr("Play all videos"), enabled: folderVideos.videoIds.length > 0,
+                          run: () => MediaLib.addAndPlay(folderVideos.videoIds) },
+                        { text: qsTr("Add all videos to the queue"), enabled: folderVideos.videoIds.length > 0,
+                          run: () => MediaLib.addToPlaylist(folderVideos.videoIds) }
+                    ]
+                }
+
                 cardDelegate: Component {
                     HomeSquareCard {
                         required property var modelData
@@ -378,6 +421,7 @@ Widgets.PageExt {
                         title: modelData.name
 
                         onActivated: (reason) => folders.open(modelData, reason)
+                        onMenuRequested: (globalPos) => folders.popupMenu(modelData, globalPos)
                     }
                 }
 
@@ -389,6 +433,7 @@ Widgets.PageExt {
                         text: modelData.name
 
                         onActivated: (reason) => folders.open(modelData, reason)
+                        onMenuRequested: (globalPos) => folders.popupMenu(modelData, globalPos)
                     }
                 }
 
