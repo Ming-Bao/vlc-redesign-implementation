@@ -84,10 +84,6 @@ Loader {
                 "z": 1
             })
         else if (!isLoading && _loadingItem) _loadingItem.visible = false
-
-        // the count can change while the rows still load, and resetFocus() then bails out
-        if (!isLoading && !selectionModel.hasSelection)
-            resetFocus()
     }
 
     readonly property int count: model.count

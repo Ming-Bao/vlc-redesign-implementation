@@ -44,7 +44,8 @@ Widgets.PageExt {
     property bool showAdd: false
 
     // restored from the navigation history on Back / a crumb, recorded by the views
-    property alias initialIndex: loader.initialIndex
+    // (not bound to the loader's: it re-applies it on every count change, a search's too, stealing focus)
+    property int initialIndex: -1
     // the first focus of a restored level goes to that item rather than to the Add tile
     property bool _restoring: initialIndex >= 0
 
@@ -122,7 +123,7 @@ Widgets.PageExt {
     }
 
     // the header's Down and Escape in its search field: the Add tile when shown, else the first item
-    // (a restored level: the item MainViewLoader restores from initialIndex, once)
+    // (a restored level: the item restoreOnce puts the view on, once)
     function setCurrentItemFocus(reason) {
         const restoring = root._restoring
         root._restoring = false
@@ -153,6 +154,23 @@ Widgets.PageExt {
         searchPattern: root.search.pattern
         sortCriteria: root.sort.criteria
         sortOrder: root.sort.order
+    }
+
+    // a restored level: put the view on its item once the rows have loaded, once
+    // (setting the loader's initialIndex positions the view; -1 again stops later resets)
+    Connections {
+        id: restoreOnce
+
+        target: browseModel
+        enabled: root.initialIndex >= 0
+
+        function onLoadingChanged() {
+            if (browseModel.loading)
+                return
+            restoreOnce.enabled = false
+            loader.initialIndex = root.initialIndex
+            loader.initialIndex = -1
+        }
     }
 
     MLContextMenu {
