@@ -328,3 +328,70 @@
   - A Figma comparison per shot: `after_videos_s01_grid` against `videos_grid.png`, and `after_videos_s01_list` against `videos_list.png`, at 1600 against 1920.
   - The departures from the spec, and the rulings.
 - [ ] **Step 4: Commit** `doc: finish the videos & music browsing slice`.
+
+## Ledger
+
+Shots (1600×900, dark, test library with `redesign-media` and `redesign-music`) in `docs/superpowers/figma/4c/`: `after_videos_root.png`, `after_videos_s01_grid.png`, `after_videos_s01_list.png`, `after_music_root.png`, `after_music_songs.png`, `after_music_songs_level.png`, `after_music_songs_list.png`. References: `videos_grid.png`, `videos_list.png` (1920×1080) and `sb_music_1..3.png`, `sb_videos_1..3.png` (the sidebar variants, 427×986). The Figma frames are 1920 wide and the shots 1600, so the number of columns differs; the cards themselves are the same size.
+
+### Figma comparison
+
+| Shot against reference | Figma | Built | Verdict |
+|---|---|---|---|
+| `after_videos_s01_grid` / `videos_grid.png`: card | 316 wide, 16:9, radius 12, title 16 px `#969696`, watched = `#6B6B6B` title and a 4 px accent line | The same card (`HomeVideoCard`, `dimmed`): E03 and E01 are dimmed, E01 has the orange line | match |
+| Grid: gaps | 20 horizontal, 40 vertical | 20 / 40 | match |
+| Grid: columns | 5 per row at 1920 | 4 per row at 1600 (the row fits as many as the width allows) | deviation: responsive, by design |
+| Grid: header | crumbs Videos ▸ Shows ▸ The Wand ▸ S01, count, sort, view, search, "…" | crumbs carry the root folder too: Videos ▸ redesign-media ▸ Shows ▸ The Clip ▸ S01 (the spec's trail starts at the library folder); same controls | match, plus the root crumb the spec asks for |
+| Grid: titles | file names with `.mp4` | the library's title (no extension) | deviation: the ML title is shown, as everywhere in 4b |
+| Grid: thumbnails | cartoon stills | colour-bar test clips (the fixture) | data only |
+| `after_videos_s01_list` / `videos_list.png`: rows | 4 columns of compact rows, small thumbnail, 14 px text; current input in the accent colour; watched rows dim with a short progress mark | 3 columns at 1600; compact rows (32 high, 14 px `#969696`), `playing` = accent text plus a veiled thumbnail with a play glyph, dimmed and progress mark on E03/E01 | match, columns differ with the width |
+| List: header | crumbs, "110 items" (sample text), sort, list toggle, search, "…" | the same controls, real count | match |
+| Both: shell | window chrome, sidebar about 216 px wide at 1920 | 4a's shell, sidebar 152 px at 1600; the mini player and control bar are there because the harness auto-plays the last item | not 4c: outside this slice; the player strip is a harness artefact |
+| `after_music_root` / `sb_music_1.png` | Add, Songs, Albums, Artists, Genres, count 4, no search | the same five tiles and glyphs in grid form (200 tiles, `#1E1E1E`, 20 gaps); list form is a 400-wide column of the same rows. Header has no sort, view toggle or search | match; Figma's sidebar variant draws the icons, the spec drops them |
+| `after_music_songs` / `sb_music_2.png` | Music ▸ Songs, Add, then a folder row | Music ▸ Songs with one folder tile per library folder, no Add (the spec's call) | deviation: no Add on Songs, by the spec |
+| `after_music_songs_level`, `_list` / `sb_music_3.png` | tracks as `title - artist` rows | list rows read `title - artist`; the grid shows 200 square cards with the artist as subtitle | match (the grid has no Figma frame) |
+
+### Departures
+
+Every *(my call)* in the spec, and what the build added:
+1. Video groups no longer appear in Videos: the folder hierarchy replaces them.
+2. A folder level that a rescan emptied stays on the page with "No results" and does not navigate back.
+3. The Music root is a hand-built `PageExt` (not a model page): five tiles, the count is 4 (Add isn't counted), not searchable, no sort, no view toggle.
+4. In list view the Music root is a 400-wide column (marked `ponytail:`); Figma has only the sidebar variant.
+5. The Add tile appears in both views at the Videos root (grid tile, list compact row), as each view's `headerDelegate`. In the grid it sits alone on its row, because Figma has no main-view root frame.
+6. While a search runs, the Add header collapses to height 0 instead of unloading, because `ExpandGridView` doesn't relayout when its header is removed.
+7. `MLFolderBrowseModel` answers a `thumbnail` role (= `small_cover`) for files, so `HomeVideoCard` stays untouched.
+8. `LibraryFolderPage` plays state: `Qt.resolvedUrl(model.mrl)` against `Player.url`, because `Player.url` is decoded and the ML mrl is encoded.
+9. `VLCIcons.artist` and `VLCIcons.genre` are new (from the Figma exports). `artist.svg` was flattened with a one-off per-element variant of the flatten script (winding fix), not committed.
+10. The Songs page is a nested `PageLoader` (`base`, `folder`), so the paths read as the spec's table.
+11. `PageExt._tabs`, the tab row and every `Navigation.downItem: tabRow` are gone.
+12. Removed pages and their redirects: `["video","all"]`, `["video","playlists"]`, `["music","tracks"]`, `["music","playlists"]` no longer exist. A grep of `modules/gui/qt` (QML and C++) finds nothing that pushes them. The history is in memory only and starts at `["home"]`, so nothing can restore them either. The only mentions left are test inputs (`test_navigation_history.cpp`, `tst_LibraryHelpers.qml`). So there was nothing to redirect, and no redirect code was added.
+
+Files removed with no remaining reference: `VideoAllDisplay.qml`, `VideoAllSubDisplay.qml`, `VideoGroupDisplay.qml`, `VideoPlaylistsDisplay.qml`, `MusicTracksDisplay.qml` (also from `meson.build`, `Makefile.am` and `po/POTFILES.in`).
+
+Kept:
+- `MusicPlaylistsDisplay.qml`: `PlaylistsDisplay.qml` is built on it.
+- `VideoAll.qml`: Home's `continueWatching` page uses it.
+- `MusicTrackListDisplay`, `PlaylistMediaDisplay` and `PlaylistMediaList`: Home's `listenAgain` and `MusicPlaylistsDisplay` still use them.
+
+Controller rulings made during execution:
+- Task 2 also answers a `thumbnail` role (departure 7).
+- Task 3 shows the Add tile in both views (departure 5).
+- Header Down and Escape on a page with an Add tile land on the Add tile; opening the Videos root therefore starts with the Add tile focused, ringless.
+- The dead `displayText` fields on the Music albums/artists/genres entries were swept (nothing read them; `BannerTabButton` is used only by the toolbar editor, with its own model).
+
+### Known minors (not fixed)
+- `folder_tree` dedupe is a linear `QStringList::contains` (a `QSet` is the upgrade); the sort is unstable for names that differ only by case (`Shows`/`shows`); duplicate roots give duplicate root children; `splitRange` boundary cases are only partly pinned in tests.
+- `onVlcMlEvent` returns after a reset instead of deferring to the base class (harmless: the base handles none of those events).
+- `MLBaseModel::addAndPlay` would pass a folder row's synthetic id; the page opens folders in QML and never plays them.
+- No C++ model test for `MLFolderBrowseModel`; its ML wiring is evidenced by the harness.
+- The grid and list Components in `LibraryFolderPage` repeat about 15 lines (column maths, margins, Add header shape); inline components can't see the file's ids and a single Component breaks the view's item pool.
+- `ExpandGridView.qml` `'_getItem'` / `'layout'` TypeError from a delayed layout after a grid ↔ list switch (pre-existing `callLater` pattern; once seen in Task 3, absent from the final runs).
+- `_emptyButton` is assigned in `onCompleted`.
+- The non-searchable Music root header is about 5 px shorter than on searchable pages, so the header jumps entering Songs (fix: a minimum row height equal to the search field's).
+- The Add dialog (`DialogsProvider.addFolderToLibrary()`) was not opened in the harness; a modal file dialog on Xvfb without a window manager is awkward, and it is the same call on both roots.
+- The root empty state (Add tile plus the Browse button, with an empty library) was not exercised.
+
+### Verification
+- Build clean; `QT_QPA_PLATFORM=offscreen meson test -C build --suite qt`: 14/14 OK after the deletions.
+- Harness smoke (1600×900, `-vv`) after the deletions: Videos, Music, Network, Playlists, Recent, Add item (opens its menu), Home, Home ▸ "Continue Watching ›" (opens the 12-item page, Back returns to Home) and Home ▸ "Frequently Listened Artists ›" (Music ▸ Artists, 2 items) all load and render.
+- Log grep (TypeError, ReferenceError, non-existent property, unavailable, "unable to load"): empty.
