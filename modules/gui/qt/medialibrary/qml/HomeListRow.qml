@@ -39,12 +39,15 @@ T.AbstractButton {
     property bool dimmed: false
     // the current input: accent text and a play mark over the thumbnail
     property bool playing: false
+    // a trailing "…" button, shown while hovered or focused: it emits menuRequested (Figma 2459:9352)
+    property bool showMore: false
 
     // mouse -> Qt.MouseFocusReason, Enter/Return -> Qt.OtherFocusReason
     signal activated(int reason)
     signal menuRequested(point globalPos)
 
     readonly property bool _dark: theme.palette?.isDark ?? false
+    readonly property real _moreSize: VLCStyle.dp(24, VLCStyle.scale)
     readonly property real _art: VLCStyle.dp(32, VLCStyle.scale)
     readonly property real _artRadius: VLCStyle.dp(compact ? 2 : 4, VLCStyle.scale)
 
@@ -124,14 +127,32 @@ T.AbstractButton {
 
         T.Label {
             anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - root._art - parent.spacing
+            width: parent.width - root._art - parent.spacing - (root.showMore ? root._moreSize + parent.spacing : 0)
             elide: Text.ElideRight
             text: root.text
             font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
             color: root.playing ? (root._dark ? "#D37918" : theme.accent)
                  : root.dimmed ? (root._dark ? "#6B6B6B" : theme.fg.secondary)
-                 : root.compact ? (root._dark ? "#969696" : theme.fg.primary)
+                 : root.compact ? (root._dark ? (root.showMore && root.hovered ? "#C6C6C6" : "#969696") : theme.fg.primary)
                  : (root._dark ? "#8F8F8F" : theme.fg.secondary)
+        }
+    }
+
+    // not a tab stop: the menu key already opens the menu
+    MouseArea {
+        visible: root.showMore && (root.hovered || root.visualFocus)
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        width: root._moreSize
+        height: root._moreSize
+
+        onClicked: root.menuRequested(mapToGlobal(0, height))
+
+        Widgets.IconLabel {
+            anchors.centerIn: parent
+            text: VLCIcons.more
+            font.pixelSize: VLCStyle.dp(24, VLCStyle.scale)
+            color: root._dark ? "#8F8F8F" : theme.fg.secondary
         }
     }
 

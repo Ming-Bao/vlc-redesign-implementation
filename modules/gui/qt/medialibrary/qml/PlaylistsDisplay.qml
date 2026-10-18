@@ -17,9 +17,61 @@
  *****************************************************************************/
 import QtQuick
 
-import VLC.MediaLibrary
+import VLC.MainInterface
+import VLC.Widgets as Widgets
 
 // The library's Playlists page (sidebar): every playlist, whatever its media
-MusicPlaylistsDisplay {
-    playlistType: MLPlaylistListModel.PLAYLIST_TYPE_ALL
+Widgets.PageLoader {
+    id: root
+
+    property int displayMarginBeginning: 0
+    property int displayMarginEnd: 0
+
+    property bool enableBeginningFade: true
+    property bool enableEndFade: true
+
+    pageModel: [{
+        name: "all",
+        default: true,
+        component: componentAll
+    }, {
+        name: "list",
+        component: componentList
+    }]
+
+    Component {
+        id: componentAll
+
+        PlaylistsPage {
+            listPath: [...root.pagePrefix, "list"]
+
+            displayMarginBeginning: root.displayMarginBeginning
+            displayMarginEnd: root.displayMarginEnd
+
+            enableBeginningFade: root.enableBeginningFade
+            enableEndFade: root.enableEndFade
+        }
+    }
+
+    Component {
+        id: componentList
+
+        PlaylistMediaDisplay {
+            id: playlist
+
+            isMusic: true
+
+            searchPattern: playlist.search.pattern
+            sortOrder: playlist.sort.order
+            sortCriteria: playlist.sort.criteria
+
+            displayMarginBeginning: root.displayMarginBeginning
+            displayMarginEnd: root.displayMarginEnd
+
+            enableBeginningFade: root.enableBeginningFade
+            enableEndFade: root.enableEndFade
+
+            onCurrentIndexChanged: History.viewProp.initialIndex = currentIndex
+        }
+    }
 }
