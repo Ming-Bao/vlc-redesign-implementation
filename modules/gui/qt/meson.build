@@ -686,6 +686,7 @@ qml_modules += {
         'medialibrary/qml/HomeListRow.qml',
         'medialibrary/qml/HomeVideoCard.qml',
         'medialibrary/qml/LibraryFolderPage.qml',
+        'medialibrary/qml/LibraryRootPage.qml',
         'medialibrary/qml/MediaView.qml',
         'medialibrary/qml/MusicAlbums.qml',
         'medialibrary/qml/MusicAlbumsDisplay.qml',

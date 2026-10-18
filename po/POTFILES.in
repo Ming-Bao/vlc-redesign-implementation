@@ -777,6 +777,7 @@ modules/gui/qt/medialibrary/qml/AudioGridItem.qml
 modules/gui/qt/medialibrary/qml/HomeDisplay.qml
 modules/gui/qt/medialibrary/qml/HomePage.qml
 modules/gui/qt/medialibrary/qml/LibraryFolderPage.qml
+modules/gui/qt/medialibrary/qml/LibraryRootPage.qml
 modules/gui/qt/medialibrary/qml/MediaView.qml
 modules/gui/qt/medialibrary/qml/MusicAlbums.qml
 modules/gui/qt/medialibrary/qml/MusicAlbumsDisplay.qml

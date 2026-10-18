@@ -39,6 +39,16 @@ QtObject {
         return Math.floor(from / columns) < Math.floor((count - 1) / columns) ? Math.min(from + columns, count - 1) : -1
     }
 
+    // Tiles that count as items on a library root: everything but the Add tile
+    function rootItemCount(tiles : var) : int {
+        return tiles.filter(t => !t.add).length
+    }
+
+    // `fixed` tiles, then one tile per share (in order), each carrying its index as `share`
+    function withShares(fixed : var, shares : var, glyph : string) : var {
+        return [...fixed, ...shares.map((s, i) => ({ glyph: glyph, text: s.name, share: i }))]
+    }
+
     // Distinct non-empty keys, most frequent first; ties keep the earliest (most recent) key.
     function rankByFrequency(keys: var) : var {
         const counts = {}

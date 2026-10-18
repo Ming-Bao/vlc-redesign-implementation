@@ -130,4 +130,20 @@ TestCase {
         compare(Helpers.gridStep(2, 0, 1, 1, 3), -1)
         compare(Helpers.gridStep(1, -1, 0, 1, 3), -1)
     }
+
+    function test_rootItemCount() {
+        compare(Helpers.rootItemCount([]), 0)
+        compare(Helpers.rootItemCount([{ add: true }, { text: "a" }, { text: "b" }]), 2)
+        compare(Helpers.rootItemCount([{ add: true }]), 0)
+    }
+
+    function test_withShares() {
+        const fixed = [{ add: true, text: "Add" }, { text: "Podcasts" }]
+        compare(Helpers.withShares(fixed, [], "g"), fixed)
+        const r = Helpers.withShares(fixed, [{ name: "truenas" }, { name: "nas2" }], "g")
+        compare(r.length, 4)
+        compare(r[2].text, "truenas"); compare(r[2].share, 0); compare(r[2].glyph, "g")
+        compare(r[3].share, 1)
+        compare(fixed.length, 2) // input untouched
+    }
 }
