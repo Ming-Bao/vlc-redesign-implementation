@@ -34,6 +34,8 @@ T.AbstractButton {
     property color backing: theme.palette?.isDark ? "#171717" : theme.bg.secondary
     property string title
     property string subtitle
+    // the art box is width × artHeight (a 16:9 folder tile on a video level)
+    property real artHeight: width
 
     // mouse -> Qt.MouseFocusReason, Enter/Return -> Qt.OtherFocusReason
     signal activated(int reason)
@@ -68,7 +70,7 @@ T.AbstractButton {
 
         Rectangle {
             width: root.width
-            height: width
+            height: root.artHeight
             radius: VLCStyle.dp(12, VLCStyle.scale)
             color: root.backing
 

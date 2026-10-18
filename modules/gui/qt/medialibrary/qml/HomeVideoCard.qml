@@ -34,6 +34,8 @@ T.AbstractButton {
     required property var model
     required property int index
     property var contextModel
+    // a watched video: the title greys out
+    property bool dimmed: false
 
     readonly property bool _dark: theme.palette?.isDark ?? false
     readonly property real _radius: VLCStyle.dp(12, VLCStyle.scale)
@@ -120,7 +122,8 @@ T.AbstractButton {
             elide: Text.ElideRight
             text: root.text
             font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
-            color: root._dark ? "#969696" : theme.fg.primary
+            color: root.dimmed ? (root._dark ? "#6B6B6B" : theme.fg.secondary)
+                               : (root._dark ? "#969696" : theme.fg.primary)
         }
     }
 

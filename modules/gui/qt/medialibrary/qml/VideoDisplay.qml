@@ -44,16 +44,34 @@ Widgets.PageLoader {
     //---------------------------------------------------------------------------------------------
 
     pageModel: [{
-            name: "all",
+            name: "base",
             default: true,
-            displayText: qsTr("All"),
-            url: "qrc:///qt/qml/VLC/MediaLibrary/VideoAllDisplay.qml"
-        },{
-            name: "playlists",
-            displayText: qsTr("Playlists"),
-            url: "qrc:///qt/qml/VLC/MediaLibrary/VideoPlaylistsDisplay.qml"
+            component: rootComponent
+        }, {
+            name: "folder",
+            component: folderComponent
         }
     ]
+
+    Component {
+        id: rootComponent
+
+        LibraryFolderPage {
+            rootCrumbs: [{ title: qsTr("Videos"), path: ["video"] }]
+            folderPath: [...root.pagePrefix, "folder"]
+            showAdd: true
+        }
+    }
+
+    // mrl and trail come from the History properties; without them it shows the root level
+    Component {
+        id: folderComponent
+
+        LibraryFolderPage {
+            rootCrumbs: [{ title: qsTr("Videos"), path: ["video"] }]
+            folderPath: [...root.pagePrefix, "folder"]
+        }
+    }
 
     Accessible.role: Accessible.Client
     Accessible.name: qsTr("Video view")

@@ -53,7 +53,6 @@ T.Page {
     readonly property var _crumbLabels: ({
         "home": qsTr("Home"),
         "video": qsTr("Videos"),
-        "video/playlists": qsTr("Playlists"),
         "music": qsTr("Music"),
         "music/artists": qsTr("Artists"),
         "music/albums": qsTr("Albums"),
@@ -67,7 +66,6 @@ T.Page {
 
     // ponytail: the old sidebar sub-items, shown as tabs under the header until 4c replaces Videos/Music browsing
     readonly property var _tabs: ({
-        "video": [{ name: "all", text: qsTr("All") }, { name: "playlists", text: qsTr("Playlists") }],
         "music": [{ name: "artists", text: qsTr("Artists") }, { name: "albums", text: qsTr("Albums") },
                   { name: "tracks", text: qsTr("Tracks") }, { name: "genres", text: qsTr("Genres") },
                   { name: "playlists", text: qsTr("Playlists") }]

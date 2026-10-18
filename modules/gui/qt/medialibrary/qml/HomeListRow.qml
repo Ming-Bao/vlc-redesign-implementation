@@ -33,6 +33,12 @@ T.AbstractButton {
     property string glyph
     // 0..1 plays as a mark under the image, -1 hides it
     property real progress: -1
+    // the Videos/Music list row (Figma 970:3792): 32 high, a #303030 square thumbnail
+    property bool compact: false
+    // a watched video: greyed text
+    property bool dimmed: false
+    // the current input: accent text and a play mark over the thumbnail
+    property bool playing: false
 
     // mouse -> Qt.MouseFocusReason, Enter/Return -> Qt.OtherFocusReason
     signal activated(int reason)
@@ -40,11 +46,12 @@ T.AbstractButton {
 
     readonly property bool _dark: theme.palette?.isDark ?? false
     readonly property real _art: VLCStyle.dp(32, VLCStyle.scale)
+    readonly property real _artRadius: VLCStyle.dp(compact ? 2 : 4, VLCStyle.scale)
 
     focusPolicy: Qt.StrongFocus
 
     width: parent?.width ?? 0
-    height: VLCStyle.dp(42, VLCStyle.scale)
+    height: VLCStyle.dp(compact ? 32 : 42, VLCStyle.scale)
 
     readonly property ColorContext colorContext: ColorContext {
         id: theme
@@ -67,16 +74,17 @@ T.AbstractButton {
             anchors.verticalCenter: parent.verticalCenter
             width: root._art
             height: root._art
-            radius: VLCStyle.dp(4, VLCStyle.scale)
+            radius: root._artRadius
             // backing under the image like the cards have; without it the ImageExt rows painted blank
-            color: root.image.toString() !== "" ? (root._dark ? "#171717" : theme.bg.secondary) : "transparent"
+            color: root.image.toString() === "" ? "transparent"
+                                                : root._dark ? (root.compact ? "#303030" : "#171717") : theme.bg.secondary
 
             Widgets.ImageExt {
                 anchors.fill: parent
                 visible: root.image.toString() !== ""
                 source: root.image
                 fillMode: Image.PreserveAspectCrop
-                radius: VLCStyle.dp(4, VLCStyle.scale)
+                radius: root._artRadius
                 sourceSize: Qt.size(width * eDPR, height * eDPR)
 
                 readonly property real eDPR: MainCtx.effectiveDevicePixelRatio(Window.window)
@@ -93,9 +101,24 @@ T.AbstractButton {
             Rectangle {
                 visible: root.progress >= 0
                 anchors.bottom: parent.bottom
-                width: parent.width * root.progress
-                height: VLCStyle.dp(4, VLCStyle.scale)
+                // compact: 3 px, ending 4 px before the thumbnail's right edge
+                width: (parent.width - (root.compact ? VLCStyle.dp(4, VLCStyle.scale) : 0)) * root.progress
+                height: VLCStyle.dp(root.compact ? 3 : 4, VLCStyle.scale)
                 color: root._dark ? "#D37918" : theme.accent
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                visible: root.playing
+                radius: parent.radius
+                color: Qt.rgba(0, 0, 0, 0.7)
+
+                Widgets.IconLabel {
+                    anchors.centerIn: parent
+                    text: VLCIcons.play
+                    font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
+                    color: root._dark ? "#D37918" : theme.accent
+                }
             }
         }
 
@@ -105,7 +128,10 @@ T.AbstractButton {
             elide: Text.ElideRight
             text: root.text
             font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-            color: root._dark ? "#8F8F8F" : theme.fg.secondary
+            color: root.playing ? (root._dark ? "#D37918" : theme.accent)
+                 : root.dimmed ? (root._dark ? "#6B6B6B" : theme.fg.secondary)
+                 : root.compact ? (root._dark ? "#969696" : theme.fg.primary)
+                 : (root._dark ? "#8F8F8F" : theme.fg.secondary)
         }
     }
 
