@@ -1513,6 +1513,19 @@ if qt6_dep.found()
         }
 
         vlc_tests += {
+            'name': 'test_qt_folder_tree',
+            'sources': files(
+                'tests/test_folder_tree.cpp',
+                'util/folder_tree.hpp'
+            ),
+            'moc_sources': files('tests/test_folder_tree.cpp'),
+            'suite': ['qt'],
+            'include_directories' : qt_include_dir,
+            'link_args': qt_link_args,
+            'dependencies': [qt6_dep, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
             'name': 'test_qt_thread_runner',
             'sources': files(
                 'tests/test_thread_runner.cpp',

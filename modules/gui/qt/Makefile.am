@@ -1895,6 +1895,20 @@ test_frequency_rank_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
 check_PROGRAMS += test_frequency_rank
 TESTS += test_frequency_rank
 
+# test_folder_tree
+test_folder_tree_SOURCES = \
+	tests/test_folder_tree.cpp \
+	util/folder_tree.hpp
+nodist_test_folder_tree_SOURCES = tests/test_folder_tree.moc
+BUILT_SOURCES += tests/test_folder_tree.moc
+CLEANFILES += tests/test_folder_tree.moc
+test_folder_tree_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)
+test_folder_tree_CXXFLAGS = $(QT_QTEST_COMMON_cxxflags)
+test_folder_tree_LDADD = $(QT_QTEST_COMMON_ldadd)
+test_folder_tree_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
+check_PROGRAMS += test_folder_tree
+TESTS += test_folder_tree
+
 # test_waveform_util
 
 test_waveform_util_SOURCES = \
