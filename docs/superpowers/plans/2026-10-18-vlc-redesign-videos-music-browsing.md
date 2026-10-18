@@ -343,7 +343,7 @@ Shots (1600×900, dark, test library with `redesign-media` and `redesign-music`)
 | Grid: header | crumbs Videos ▸ Shows ▸ The Wand ▸ S01, count, sort, view, search, "…" | crumbs carry the root folder too: Videos ▸ redesign-media ▸ Shows ▸ The Clip ▸ S01 (the spec's trail starts at the library folder); same controls | match, plus the root crumb the spec asks for |
 | Grid: titles | file names with `.mp4` | the library's title (no extension) | deviation: the ML title is shown, as everywhere in 4b |
 | Grid: thumbnails | cartoon stills | colour-bar test clips (the fixture) | data only |
-| `after_videos_s01_list` / `videos_list.png`: rows | 4 columns of compact rows, small thumbnail, 14 px text; current input in the accent colour; watched rows dim with a short progress mark | 3 columns at 1600; compact rows (32 high, 14 px `#969696`), `playing` = accent text plus a veiled thumbnail with a play glyph, dimmed and progress mark on E03/E01 | match, columns differ with the width |
+| `after_videos_s01_list` / `videos_list.png`: rows | 4 columns of compact rows, small thumbnail, 14 px text; current input in the accent colour; watched rows dim with a short progress mark | 3 columns at 1600; compact rows (32 high, 14 px `#969696`), `playing` = accent text plus a veiled thumbnail with a play glyph; E03/E01 dimmed with no progress mark (both are finished, and finished media carry no progress, so the mark only shows on a partly watched file) | match, columns differ with the width |
 | List: header | crumbs, "110 items" (sample text), sort, list toggle, search, "…" | the same controls, real count | match |
 | Both: shell | window chrome, sidebar about 216 px wide at 1920 | 4a's shell, sidebar 152 px at 1600; the mini player and control bar are there because the harness auto-plays the last item | not 4c: outside this slice; the player strip is a harness artefact |
 | `after_music_root` / `sb_music_1.png` | Add, Songs, Albums, Artists, Genres, count 4, no search | the same five tiles and glyphs in grid form (200 tiles, `#1E1E1E`, 20 gaps); list form is a 400-wide column of the same rows. Header has no sort, view toggle or search | match; Figma's sidebar variant draws the icons, the spec drops them |
@@ -376,11 +376,11 @@ Kept:
 Controller rulings made during execution:
 - Task 2 also answers a `thumbnail` role (departure 7).
 - Task 3 shows the Add tile in both views (departure 5).
-- Header Down and Escape on a page with an Add tile land on the Add tile; opening the Videos root therefore starts with the Add tile focused, ringless.
+- Header Down and Escape on a page with an Add tile land on the Add tile; opening the Videos root therefore starts with the Add tile focused, ringless. A level restored by Back or a crumb is the exception: its first focus goes to the restored item (fix wave).
 - The dead `displayText` fields on the Music albums/artists/genres entries were swept (nothing read them; `BannerTabButton` is used only by the toolbar editor, with its own model).
 
 ### Known minors (not fixed)
-- `folder_tree` dedupe is a linear `QStringList::contains` (a `QSet` is the upgrade); the sort is unstable for names that differ only by case (`Shows`/`shows`); duplicate roots give duplicate root children; `splitRange` boundary cases are only partly pinned in tests.
+- `folder_tree`: duplicate roots give duplicate root children; `splitRange` boundary cases are only partly pinned in tests.
 - `onVlcMlEvent` returns after a reset instead of deferring to the base class (harmless: the base handles none of those events).
 - `MLBaseModel::addAndPlay` would pass a folder row's synthetic id; the page opens folders in QML and never plays them.
 - No C++ model test for `MLFolderBrowseModel`; its ML wiring is evidenced by the harness.
@@ -390,6 +390,15 @@ Controller rulings made during execution:
 - The non-searchable Music root header is about 5 px shorter than on searchable pages, so the header jumps entering Songs (fix: a minimum row height equal to the search field's).
 - The Add dialog (`DialogsProvider.addFolderToLibrary()`) was not opened in the harness; a modal file dialog on Xvfb without a window manager is awkward, and it is the same call on both roots.
 - The root empty state (Add tile plus the Browse button, with an empty library) was not exercised.
+
+### Fix wave (final review)
+- Back / a crumb restores the place in a level: the views record `History.viewProp.initialIndex` on `currentIndexChanged`, `_open` records the opened folder's index (a click doesn't make the card current, and index 0 is no change), and the page aliases `initialIndex` to its `MainViewLoader`. The first focus of a restored level skips the Add tile and sets the view's `currentIndex` before the rows load, so the view focuses that cell as it creates it. `MainViewLoader` also runs `resetFocus()` when loading ends (it only ran on a count change, which can land while still loading, and then bailed out); that is what scrolls a far item into view.
+- Songs sort like the tracks: the menu has the old `MusicTracksDisplay` rows (Title, Album, Artist, Duration, Track; its Disc row is dropped, as `MLAudioModel` never sorted by it) and `MLFolderBrowseModel::nameToCriteria` takes `MLAudioModel`'s map. Videos keep Alphabetic / Duration / Date added.
+- The menu key opens the context menu on `HomeVideoCard`, `HomeSquareCard` and `HomeListRow` (`Keys.onMenuPressed`, as `GridItem` does), so Home gets it too.
+- `MLFolderBrowseModel` resets on `VLC_ML_EVENT_FOLDER_UPDATED`.
+- `folder_tree` dedupes with a `QSet` and breaks case-insensitive ties case-sensitively (`Shows` before `shows`), pinned by a test.
+- `LibraryFolderPage.qml` is in `po/POTFILES.in` (Home's QML files with strings already were).
+- Harness: Videos ▸ redesign-media ▸ Shows (2nd folder), Back: Shows focused, by mouse and by keyboard; Back again: redesign-media focused at the Videos root, not Add. Songs sort menu lists the five track rows. With `ml.db` edited for the check (backed up first) to give `waveform` another artist and `black bird` an album "Zebra", Artist A-Z put waveform first and Z-A last, Album A-Z put black bird last and Z-A first (the fixture's tags are all "Tester" with no album; the original `ml.db` was put back). Menu key opened MLContextMenu on a video card, an audio card, a Songs list row and a Home Listen Again card. Log grep clean.
 
 ### Verification
 - Build clean; `QT_QPA_PLATFORM=offscreen meson test -C build --suite qt`: 14/14 OK after the deletions.
