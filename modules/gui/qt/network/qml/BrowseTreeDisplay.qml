@@ -24,6 +24,7 @@ import VLC.Widgets as Widgets
 import VLC.MainInterface
 import VLC.Style
 import VLC.Network
+import VLC.MediaLibrary
 
 Widgets.PageExt {
 
@@ -38,7 +39,21 @@ Widgets.PageExt {
 
     readonly property var currentIndex: loader.currentItem?.currentIndex ?? -1
 
+    // restored from the navigation history on Back / a crumb, recorded by the pages' onCurrentIndexChanged
+    // (not bound to the loader's: it re-applies it on every count change, a search's too, stealing focus)
+    property int initialIndex: -1
+    // the first focus of a restored level goes to that item rather than to the add row
+    property bool _restoring: initialIndex >= 0
+
+    // a compact row above the view ("Add podcast"), shown while the search is empty; "" hides it
+    property string addText: ""
+
+    readonly property bool _addShown: addText !== "" && search.pattern === ""
+    // up from the first row or from the empty label
+    readonly property Item _aboveView: _addShown ? addRow : root.header
+
     signal browse(var tree, int reason)
+    signal addActivated(int reason)
 
     isSearchable: loader.isSearchable
 
@@ -52,10 +67,41 @@ Widgets.PageExt {
         run: () => { root.model.indexed = !root.model.indexed }
     }] : []
 
+    // the header's Down and Escape in its search field: the add row when shown, else the view
+    function setCurrentItemFocus(reason) {
+        const restoring = root._restoring
+        root._restoring = false
+        if (!restoring && root._addShown)
+            addRow.forceActiveFocus(reason)
+        else
+            loader.setCurrentItemFocus(reason)
+    }
+
+    // a restored level: put the view on its item once it has loaded, once (setting the loader's
+    // initialIndex positions the view; -1 again stops later resets). A device model leaves
+    // `loading` before its rows trickle in, so wait for the row too.
+    Connections {
+        id: restoreOnce
+
+        target: root.model
+        enabled: root.initialIndex >= 0
+
+        function onLoadingChanged() {
+            if (root.model.loading || root.model.count <= root.initialIndex)
+                return
+            restoreOnce.enabled = false
+            loader.initialIndex = root.initialIndex
+            loader.initialIndex = -1
+        }
+    }
+
     MainViewLoader {
         id: loader
 
-        anchors.fill: parent
+        anchors.top: root._addShown ? addRow.bottom : parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
 
         isSearchable: true
 
@@ -189,7 +235,7 @@ Widgets.PageExt {
                 onActionAtIndex: (index) => { _actionAtIndex(index) }
 
                 Navigation.parentItem: root
-                Navigation.upItem: root.header
+                Navigation.upItem: root._aboveView
             }
         }
 
@@ -281,7 +327,7 @@ Widgets.PageExt {
                 focus: true
 
                 Navigation.parentItem: root
-                Navigation.upItem: root.header
+                Navigation.upItem: root._aboveView
 
                 rowHeight: VLCStyle.tableCoverRow_height
 
@@ -337,8 +383,29 @@ Widgets.PageExt {
                 }
 
                 Navigation.parentItem: root
-                Navigation.upItem: root.header
+                Navigation.upItem: root._aboveView
             }
         }
+    }
+
+    // declared after the loader, which stays PageExt's first child (the header's count, sort and view toggle)
+    HomeListRow {
+        id: addRow
+
+        visible: root._addShown
+        // Figma: 20 under the header rule, which already has padding below it
+        y: Math.max(0, VLCStyle.dp(20, VLCStyle.scale) - (root.header?.bottomPadding ?? 0))
+        x: root.header?.leftPadding ?? 0
+        width: VLCStyle.dp(400, VLCStyle.scale)
+        compact: true
+        glyph: VLCIcons.add
+        text: root.addText
+
+        Navigation.parentItem: root
+        Navigation.upItem: root.header
+        // nothing to enter while the view is empty: the focus stays here
+        Navigation.downAction: () => { if (loader.count > 0) loader.setCurrentItemFocus(Qt.TabFocusReason) }
+
+        onActivated: (reason) => root.addActivated(reason)
     }
 }

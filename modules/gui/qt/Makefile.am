@@ -1166,13 +1166,12 @@ libqml_module_network_a_ModulePath = VLC/Network
 libqml_module_network_a_CXXFLAGS = $(libqt_plugin_la_CXXFLAGS)
 libqml_module_network_a_CPPFLAGS = $(libqt_plugin_la_CPPFLAGS)
 libqml_module_network_a_QML = \
-	network/qml/BrowseDeviceView.qml \
 	network/qml/BrowseDisplay.qml \
-	network/qml/BrowseHomeDisplay.qml \
 	network/qml/BrowseTreeDisplay.qml \
 	network/qml/DiscoverDisplay.qml \
 	network/qml/DiscoverUrlDisplay.qml \
 	network/qml/NetworkGridItem.qml \
+	network/qml/NetworkHomeDisplay.qml \
 	network/qml/NetworkThumbnailItem.qml \
 	network/qml/ServicesHomeDisplay.qml \
 	network/qml/ServicesManage.qml \

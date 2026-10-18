@@ -25,6 +25,7 @@ import VLC.Widgets as Widgets
 import VLC.Util
 import VLC.Style
 import VLC.Network
+import VLC.Dialogs
 
 Widgets.PageLoader {
     id: root
@@ -42,11 +43,11 @@ Widgets.PageLoader {
         default: true,
         component: browseHome
     }, {
-        name: "folders",
-        component: browseFolders,
+        name: "podcasts",
+        component: sourcePages
     }, {
-        name: "device",
-        component: browseDevice,
+        name: "radio",
+        component: sourcePages
     }, {
         name: "browse",
         component: browseComponent,
@@ -62,117 +63,124 @@ Widgets.PageLoader {
         History.push([...root.pagePrefix, "browse"], { tree: tree }, reason)
     }
 
-
-    function _showBrowseFolder(title, reason) {
-        History.push([...root.pagePrefix, "folders"], { title: title }, reason)
-    }
-
-    function _showBrowseDevices(title, sd_source, reason) {
-        History.push([...root.pagePrefix, "device"], { title: title, sd_source: sd_source }, reason)
-    }
-
     // Children
     Component {
         id: browseHome
 
-        BrowseHomeDisplay {
-            onSeeAllDevices: (title, sd_source, reason) => {
-                root._showBrowseDevices(title, sd_source, reason)
-            }
-
-            onSeeAllFolders:(title, reason) => {
-                root._showBrowseFolder(title, reason)
-            }
-
-            onBrowse: (tree, reason) => {
-                root._showBrowseNode(tree, reason)
-            }
-        }
+        NetworkHomeDisplay { }
     }
 
-
+    // Podcasts / Radio: the service discovery source's root, then the nodes below it
     Component {
-        id: browseFolders
+        id: sourcePages
 
-        Widgets.PageExt {
-            id: browseFoldersPage
+        Widgets.PageLoader {
+            id: sourceLoader
 
-            title: folderModel.name
+            // "podcasts" | "radio": this loader's name, the last of its path
+            readonly property bool podcasts: pagePrefix[pagePrefix.length - 1] === "podcasts"
+            readonly property string sourceTitle: podcasts ? qsTr("Podcasts") : qsTr("Radio")
 
-            BrowseDeviceView {
-                property var sortModel: [
-                    { text: qsTr("Alphabetic"), criteria: "name" },
-                    { text: qsTr("Url"),        criteria: "mrl"  }
-                ]
-
-                anchors.fill: parent
-
-                displayMarginBeginning: root.displayMarginBeginning
-                displayMarginEnd: root.displayMarginEnd
-
-                enableBeginningFade: root.enableBeginningFade
-                enableEndFade: root.enableEndFade
-
-                model: StandardPathModel {
-                    id: folderModel
-                    sortCriteria: browseFoldersPage.sort.criteria
-                    sortOrder: browseFoldersPage.sort.order
-                    searchPattern: browseFoldersPage.search.pattern
-                }
-
-                onBrowse: (tree, reason) => { root._showBrowseNode(tree, reason) }
-
-                onCurrentIndexChanged: History.viewProp.initialIndex = currentIndex
-            }
-        }
-    }
-
-    Component {
-        id: browseDevice
-
-        Widgets.PageExt {
-
-            id: browseDevicePage
-
-            //@type {NetworkDeviceModel.SDCatType}
-            required property int sd_source
-
-            title: deviceModel.name
-
-            sortModel: [
-                { text: qsTr("Alphabetic"), criteria: "name" },
-                { text: qsTr("Url"),        criteria: "mrl"  }
+            readonly property var _crumbs: [
+                { title: qsTr("Network"), path: root.pagePrefix },
+                { title: sourceTitle, path: pagePrefix }
             ]
 
-            BrowseDeviceView {
-                id: viewDevice
+            function _showNode(tree, reason) {
+                History.push([...pagePrefix, "browse"], { tree: tree }, reason)
+            }
 
-                anchors.fill: parent
+            pageModel: [{
+                name: "base",
+                default: true,
+                component: sourceRoot
+            }, {
+                name: "browse",
+                component: sourceBrowse,
+                guard: function (prop) { return !!prop.tree }
+            }]
 
-                displayMarginBeginning: root.displayMarginBeginning
-                displayMarginEnd: root.displayMarginEnd
+            Component {
+                id: sourceRoot
 
-                enableBeginningFade: root.enableBeginningFade
-                enableEndFade: root.enableEndFade
+                BrowseTreeDisplay {
+                    id: sourceRootPage
 
-                model: NetworkDeviceModel {
-                    id: deviceModel
+                    displayMarginBeginning: root.displayMarginBeginning
+                    displayMarginEnd: root.displayMarginEnd
 
-                    ctx: MainCtx
+                    enableBeginningFade: root.enableBeginningFade
+                    enableEndFade: root.enableEndFade
 
-                    sd_source: browseDevicePage.sd_source
-                    source_name: "*"
+                    title: sourceLoader.sourceTitle
+                    breadcrumbs: sourceLoader._crumbs
 
-                    sortCriteria: browseDevicePage.sort.criteria
-                    sortOrder: browseDevicePage.sort.order
-                    searchPattern: browseDevicePage.search.pattern
+                    addText: sourceLoader.podcasts ? qsTr("Add podcast") : ""
+                    onAddActivated: DialogsProvider.podcastConfigureDialog()
+
+                    model: NetworkDeviceModel {
+                        id: deviceModel
+
+                        ctx: MainCtx
+                        sd_source: NetworkDeviceModel.CAT_INTERNET
+                        source_name: sourceLoader.podcasts ? "podcast" : "radio"
+
+                        searchPattern: sourceRootPage.search.pattern
+                        sortOrder: sourceRootPage.sort.order
+                        sortCriteria: sourceRootPage.sort.criteria
+                    }
+
+                    contextMenu: NetworkDeviceContextMenu {
+                        model: deviceModel
+                        ctx: MainCtx
+                    }
+
+                    onBrowse: (tree, reason) => sourceLoader._showNode(tree, reason)
+
+                    onCurrentIndexChanged: History.viewProp.initialIndex = currentIndex
                 }
+            }
 
-                onBrowse: (tree, reason) => {
-                    root._showBrowseNode(tree, reason)
+            Component {
+                id: sourceBrowse
+
+                BrowseTreeDisplay {
+                    id: sourceBrowsePage
+
+                    property alias tree: mediaModel.tree
+
+                    displayMarginBeginning: root.displayMarginBeginning
+                    displayMarginEnd: root.displayMarginEnd
+
+                    enableBeginningFade: root.enableBeginningFade
+                    enableEndFade: root.enableEndFade
+
+                    // Network ▸ source ▸ node…, each crumb pushes what onBrowse would push for its node
+                    breadcrumbs: sourceLoader._crumbs.concat(headerPath.map((node) => ({
+                        title: node.display,
+                        path: [...sourceLoader.pagePrefix, "browse"],
+                        props: { tree: node.tree }
+                    })))
+
+                    model: NetworkMediaModel {
+                        id: mediaModel
+
+                        ctx: MainCtx
+
+                        searchPattern: sourceBrowsePage.search.pattern
+                        sortOrder: sourceBrowsePage.sort.order
+                        sortCriteria: sourceBrowsePage.sort.criteria
+                    }
+
+                    contextMenu: NetworkMediaContextMenu {
+                        model: mediaModel
+                        ctx: MainCtx
+                    }
+
+                    onBrowse: (tree, reason) => sourceLoader._showNode(tree, reason)
+
+                    onCurrentIndexChanged: History.viewProp.initialIndex = currentIndex
                 }
-
-                onCurrentIndexChanged: History.viewProp.initialIndex = currentIndex
             }
         }
     }
