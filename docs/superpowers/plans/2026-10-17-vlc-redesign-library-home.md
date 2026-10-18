@@ -270,13 +270,13 @@ Shots (1600×900, dark, test library with history) in `docs/superpowers/figma/4b
 | List row 42 high, 32 px thumbnail, 4 px progress mark | 42, 32 (radius 4), 4 px `#D37918` mark | match |
 | List text `title - subtitle`, Inter 14 `#8F8F8F`; 24 px glyph for folder, playlist, artist | 14 px `#8F8F8F`; 24 px `#8F8F8F` glyphs | match |
 | Header: crumbs, "110 items", sort, view, search, "…" | 4a's `PageExt` header; "18 items" here (the Figma number is sample text) | match |
-| Row content per frame (5 video cards, 6 square cards at 1920) | as many cards as fit the width (4 videos, 6 squares at 1600) | deviation: responsive, by design |
+| Row content per frame (4 video cards, 3 square cards at 1920; the data sets the count, a 5th video card would fit) | as many cards as fit the width (4 videos, 6 squares at 1600) | deviation: responsive, by design |
 | Light theme | not in the Figma; same roles as 4a (`theme.*`) | n/a |
 
 ### Departures
 
 Every *(my call)* in the spec:
-1. "Frequently" data: folders and artists are ranked over the last 100 history entries (ties to the most recent, each once). Playlists show the library's order (marked `ponytail:`, the upgrade is ranking by track plays).
+1. "Frequently" data: folders are ranked over the last 100 play-history entries; artists over the last 100 audio-history entries (main artist); ties go to the most recent, each appears once. Playlists show the library's order (marked `ponytail:`, the upgrade is ranking by track plays).
 2. Row length: one line per row, as many cards as fit at a 20 px gap, no wrapping or horizontal scroll.
 3. "Title ›" targets: `continueWatching`, a new `listenAgain` sub-page, a new `folders` sub-page, the Playlists page, Music ▸ Artists.
 4. The right chevron is `chevron_down` rotated −90° (no right-chevron glyph exists).
