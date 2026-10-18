@@ -412,6 +412,7 @@ Widgets.PageExt {
 
                     ml: MediaLib
                     playlistType: MLPlaylistListModel.PLAYLIST_TYPE_ALL
+        coverDefault: VLCStyle.noArtPlaylistCover
 
                     searchPattern: root.search.pattern
 

@@ -36,10 +36,17 @@ T.AbstractButton {
     property string subtitle
     // the art box is width × artHeight (a 16:9 folder tile on a video level)
     property real artHeight: width
+    // the Playlists page's multi-selection: a Ctrl/Shift+click emits selectClicked instead of activated
+    property bool selectable: false
+    property bool selected: false
+    // a drag hovers the item and it takes the drop
+    property bool dropTarget: false
+    property int _pressModifiers: Qt.NoModifier
 
     // mouse -> Qt.MouseFocusReason, Enter/Return -> Qt.OtherFocusReason
     signal activated(int reason)
     signal menuRequested(point globalPos)
+    signal selectClicked(int modifiers)
 
     readonly property bool _dark: theme.palette?.isDark ?? false
 
@@ -62,7 +69,8 @@ T.AbstractButton {
         height: root.height + 2 * VLCStyle.gridItemSelectedBorder
         color: "transparent"
         radius: VLCStyle.dp(12, VLCStyle.scale) + VLCStyle.gridItemSelectedBorder
-        border.color: root.visualFocus ? theme.visualFocus : "transparent"
+        border.color: root.visualFocus ? theme.visualFocus
+                    : root.selected || root.dropTarget ? (root._dark ? "#D37918" : theme.accent) : "transparent"
     }
 
     contentItem: Column {
@@ -91,6 +99,14 @@ T.AbstractButton {
                 text: root.glyph
                 font.pixelSize: VLCStyle.dp(48, VLCStyle.scale)
                 color: root._dark ? "#969696" : theme.fg.primary
+            }
+
+            // selected: the tint shows under the focus ring too
+            Rectangle {
+                anchors.fill: parent
+                visible: root.selected
+                radius: parent.radius
+                color: Qt.alpha(root._dark ? "#D37918" : theme.accent, 0.15)
             }
         }
 
@@ -134,5 +150,17 @@ T.AbstractButton {
         }
     }
 
-    onClicked: root.activated(Qt.MouseFocusReason)
+    // a Ctrl/Shift press selects, before the press focuses the item (so the view's current item is still the
+    // Shift range's start), and its click activates nothing. Passive: the button still gets the press.
+    TapHandler {
+        enabled: root.selectable
+        onPressedChanged: {
+            if (!pressed)
+                return
+            root._pressModifiers = point.modifiers & (Qt.ControlModifier | Qt.ShiftModifier)
+            if (root._pressModifiers)
+                root.selectClicked(root._pressModifiers)
+        }
+    }
+    onClicked: if (!root.selectable || !root._pressModifiers) root.activated(Qt.MouseFocusReason)
 }

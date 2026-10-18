@@ -27,7 +27,8 @@ import VLC.Style
 import VLC.Dialogs
 
 // The Playlists root (Figma sidebar variant 858:5374, row 2459:9352): Create playlist, then every playlist
-// ponytail: no drag-and-drop of media onto the page and no multi-selection (the Figma shows none)
+// Not in the Figma, kept from VLC's page: media dropped on a playlist joins it, Ctrl/Shift+click and Ctrl+A
+// select several playlists for the menu and Delete, and a busy cursor and indicator while it works
 Widgets.PageExt {
     id: root
 
@@ -66,21 +67,52 @@ Widgets.PageExt {
         History.push(root.listPath, { parentId: playlist.id, title: playlist.name }, reason)
     }
 
-    // the playlist the context menu / Delete key acts on
+    // the playlists the context menu / Delete key acts on
     property var _targetIds: []
 
+    // the selection when it holds the item, else the item alone
     function _target(index) {
-        root._targetIds = [playlistModel.data(playlistModel.index(index, 0), MLPlaylistListModel.PLAYLIST_ID)]
+        const selection = loader.currentItem?.selectionModel
+        const rows = selection?.isSelected(index) ? selection.sortedSelectedIndexesFlat : [index]
+        root._targetIds = rows.map(i => playlistModel.data(playlistModel.index(i, 0), MLPlaylistListModel.PLAYLIST_ID))
+        return rows
     }
 
     function _popup(index, globalPos) {
-        _target(index)
-        contextMenu.popup([playlistModel.index(index, 0)], globalPos)
+        contextMenu.popup(_target(index).map(i => playlistModel.index(i, 0)), globalPos)
     }
 
     function _delete(index) {
         _target(index)
         _deleteTarget()
+    }
+
+    // Ctrl toggles the item, Shift selects from the current item to it
+    function _select(view, index, modifiers) {
+        view.selectionModel.updateSelection(modifiers, view.currentIndex, index)
+        view.currentIndex = index
+    }
+
+    function _acceptsDrag(drag) {
+        drag.accepted = !playlistModel.transactionPending
+                && (Helpers.isValidInstanceOf(drag.source, Widgets.DragItem) || drag.hasUrls)
+    }
+
+    // onto a playlist (index): appended to it; elsewhere on the page: the add-to-playlist dialog
+    function _drop(drop, index) {
+        const add = (items) => {
+            if (index === undefined)
+                DialogsProvider.playlistsDialog(items, MLPlaylistListModel.PLAYLIST_TYPE_ALL)
+            else
+                playlistModel.append(playlistModel.getItemId(index), items)
+        }
+        if (Helpers.isValidInstanceOf(drop.source, Widgets.DragItem)) {
+            drop.accepted = true
+            drop.source.getSelectedInputItem().then(add)
+        } else if (drop.hasUrls) {
+            drop.accepted = true
+            add(Array.from(drop.urls))
+        }
     }
 
     function _deleteTarget() {
@@ -144,6 +176,7 @@ Widgets.PageExt {
 
         ml: MediaLib
         playlistType: MLPlaylistListModel.PLAYLIST_TYPE_ALL
+        coverDefault: VLCStyle.noArtPlaylistCover
 
         searchPattern: root.search.pattern
         sortOrder: root.sort.order
@@ -178,6 +211,48 @@ Widgets.PageExt {
             if (!playlistModel.loading && playlistModel.count === 0 && loader.activeFocus
                     && !(view?.headerItem?.activeFocus ?? false))
                 root._focusHeaderItem(view, view?.focusReason ?? Qt.OtherFocusReason)
+        }
+    }
+
+    // a load or a playlist change running: busy cursor at once, the indicator if it lasts
+    readonly property bool _busy: playlistModel.transactionPending || playlistModel.loading
+
+    on_BusyChanged: {
+        if (_busy) {
+            MainCtx.setCursor(root, Qt.BusyCursor)
+            busyTimer.start()
+        } else {
+            busyTimer.stop()
+            busyIndicator.visible = false
+            MainCtx.unsetCursor(root)
+        }
+    }
+
+    Component.onDestruction: MainCtx.unsetCursor(root)
+
+    DropArea {
+        anchors.fill: parent
+
+        onEntered: (drag) => root._acceptsDrag(drag)
+        onDropped: (drop) => root._drop(drop)
+    }
+
+    Widgets.ProgressIndicator {
+        id: busyIndicator
+
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        anchors.margins: VLCStyle.margin_small
+        z: 99
+        visible: false
+
+        text: playlistModel.transactionPending ? qsTr("Processing...") : ""
+
+        Timer {
+            id: busyTimer
+
+            interval: VLCStyle.duration_humanMoment
+            onTriggered: busyIndicator.visible = true
         }
     }
 
@@ -299,6 +374,9 @@ Widgets.PageExt {
                     glyph: VLCIcons.playlists
                     title: cell.model?.name ?? ""
                     subtitle: qsTr("%1 track", "%1 tracks", cell.model?.count).arg(cell.model?.count ?? 0)
+                    selectable: true
+                    selected: cell.selected
+                    dropTarget: cellDrop.containsDrag
 
                     Navigation.parentItem: cell
 
@@ -306,6 +384,16 @@ Widgets.PageExt {
 
                     onActivated: (reason) => root._open(cell.model, cell.index, reason)
                     onMenuRequested: (globalPos) => root._popup(cell.index, globalPos)
+                    onSelectClicked: (modifiers) => root._select(gridView, cell.index, modifiers)
+                }
+
+                DropArea {
+                    id: cellDrop
+
+                    anchors.fill: parent
+
+                    onEntered: (drag) => root._acceptsDrag(drag)
+                    onDropped: (drop) => root._drop(drop, cell.index)
                 }
             }
         }
@@ -372,14 +460,17 @@ Widgets.PageExt {
             }
 
             delegate: HomeListRow {
+                id: row
+
                 property Item view
                 property var model
                 property int index
-                property bool selected
 
                 width: listView.cellWidth
                 compact: true
                 showMore: true
+                selectable: true
+                dropTarget: rowDrop.containsDrag
 
                 // the Figma row never shows the cover
                 glyph: VLCIcons.playlists
@@ -397,6 +488,16 @@ Widgets.PageExt {
 
                 onActivated: (reason) => root._open(model, index, reason)
                 onMenuRequested: (globalPos) => root._popup(index, globalPos)
+                onSelectClicked: (modifiers) => root._select(listView, index, modifiers)
+
+                DropArea {
+                    id: rowDrop
+
+                    anchors.fill: parent
+
+                    onEntered: (drag) => root._acceptsDrag(drag)
+                    onDropped: (drop) => root._drop(drop, row.index)
+                }
             }
         }
     }

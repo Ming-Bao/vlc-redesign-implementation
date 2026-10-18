@@ -313,6 +313,8 @@ QtObject {
     readonly property url noArtArtist: "qrc:///placeholder/noart_artist.svg";
     readonly property url noArtArtistSmall: "qrc:///placeholder/noart_artist_small.svg";
     readonly property url noArtAlbumCover: "qrc:///placeholder/noart_albumCover.svg";
+    // the dark playlist tile (HomeSquareCard's empty art), also the playlist cover mosaic's empty cells
+    readonly property url noArtPlaylistCover: "qrc:///placeholder/noart_playlistCover.svg";
     readonly property url noArtArtistCover: "qrc:///placeholder/noart_artistCover.svg";
     readonly property url noArtVideoCover: "qrc:///placeholder/noart_videoCover.svg";
 

@@ -41,10 +41,17 @@ T.AbstractButton {
     property bool playing: false
     // a trailing "…" button, shown while hovered or focused: it emits menuRequested (Figma 2459:9352)
     property bool showMore: false
+    // the Playlists page's multi-selection: a Ctrl/Shift+click emits selectClicked instead of activated
+    property bool selectable: false
+    property bool selected: false
+    // a drag hovers the item and it takes the drop
+    property bool dropTarget: false
+    property int _pressModifiers: Qt.NoModifier
 
     // mouse -> Qt.MouseFocusReason, Enter/Return -> Qt.OtherFocusReason
     signal activated(int reason)
     signal menuRequested(point globalPos)
+    signal selectClicked(int modifiers)
 
     readonly property bool _dark: theme.palette?.isDark ?? false
     readonly property real _moreSize: VLCStyle.dp(24, VLCStyle.scale)
@@ -63,9 +70,11 @@ T.AbstractButton {
     }
 
     background: Rectangle {
-        color: "transparent"
+        // the tint shows under the focus ring too
+        color: root.selected ? Qt.alpha(root._dark ? "#D37918" : theme.accent, 0.15) : "transparent"
         radius: VLCStyle.dp(4, VLCStyle.scale)
-        border.color: root.visualFocus ? theme.visualFocus : "transparent"
+        border.color: root.visualFocus ? theme.visualFocus
+                    : root.selected || root.dropTarget ? (root._dark ? "#D37918" : theme.accent) : "transparent"
     }
 
     contentItem: Row {
@@ -173,5 +182,17 @@ T.AbstractButton {
         }
     }
 
-    onClicked: root.activated(Qt.MouseFocusReason)
+    // a Ctrl/Shift press selects, before the press focuses the item (so the view's current item is still the
+    // Shift range's start), and its click activates nothing. Passive: the button still gets the press.
+    TapHandler {
+        enabled: root.selectable
+        onPressedChanged: {
+            if (!pressed)
+                return
+            root._pressModifiers = point.modifiers & (Qt.ControlModifier | Qt.ShiftModifier)
+            if (root._pressModifiers)
+                root.selectClicked(root._pressModifiers)
+        }
+    }
+    onClicked: if (!root.selectable || !root._pressModifiers) root.activated(Qt.MouseFocusReason)
 }
