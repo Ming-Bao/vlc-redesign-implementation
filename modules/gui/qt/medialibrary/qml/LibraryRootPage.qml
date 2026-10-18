@@ -38,15 +38,29 @@ Widgets.PageExt {
         ? Math.max(1, Math.floor((grid.width - grid.leftPadding - grid.rightPadding + _gap) / (VLCStyle.dp(200, VLCStyle.scale) + _gap)))
         : 1
 
-    // the last tile that had focus (-1: none yet); `tiles` is reassigned live, so the delegates
-    // are rebuilt and the focus is put back on this index, clamped to the new length
-    property int _current: -1
+    // restored from the navigation history on Back, recorded when a tile is activated
+    property int initialIndex: -1
+
+    // the last tile that had focus (-1: none yet), seeded with the restored one; `tiles` is
+    // reassigned live, so the delegates are rebuilt and the focus is put back on this index,
+    // clamped to the new length
+    property int _current: initialIndex
     // and how it got it: a rebuilt tile keeps the keyboard's focus ring
     property int _reason: Qt.OtherFocusReason
     // clamped here too: a tile only updates _current when it gains focus, which the rebuilt
-    // last tile does not while the grid is unfocused
-    onTilesChanged: if (_current >= tiles.length) _current = tiles.length - 1
-    readonly property int _target: {
+    // last tile does not while the grid is unfocused; a pending restore waits for its tile
+    onTilesChanged: if (_current >= tiles.length && !_pending()) _current = tiles.length - 1
+
+    // functions, not bindings: the Repeater rebuilds the delegates on the same `tiles` change,
+    // possibly before a binding on `tiles` has been re-evaluated
+
+    // a restored tile that isn't there yet (a share still being discovered): its last tile stands in
+    function _pending() {
+        return _current === initialIndex && _current >= tiles.length
+    }
+
+    // the tile to focus: the last focused / restored one, else the first that isn't Add
+    function _target() {
         if (_current >= 0)
             return Math.min(_current, tiles.length - 1)
         const first = tiles.findIndex(t => !t.add)
@@ -54,8 +68,6 @@ Widgets.PageExt {
     }
 
     isSearchable: false
-    // the header's grid / list toggle (the body is a Flow, not a MainViewLoader that would report it)
-    hasGridListMode: true
     itemCount: Helpers.rootItemCount(tiles)
 
     focus: true
@@ -84,8 +96,20 @@ Widgets.PageExt {
             tile.focusReason = reason
     }
 
+    // the stand-in for a pending restore doesn't end it
+    function _focused(tile, index) {
+        if (!(_pending() && index === tiles.length - 1))
+            _current = index
+        _reason = tile.focusReason
+    }
+
+    function _activate(tile, index, reason) {
+        History.viewProp.initialIndex = index
+        tileActivated(tile, index, reason)
+    }
+
     function setCurrentItemFocus(reason) {
-        repeater.itemAt(_target)?.forceActiveFocus(reason)
+        repeater.itemAt(_target())?.forceActiveFocus(reason)
     }
 
     FocusScope {
@@ -133,10 +157,10 @@ Widgets.PageExt {
             Navigation.downAction: () => root._move(index, 0, 1)
 
             // only the delegates' creation picks the target
-            Component.onCompleted: if (index === root._target) root._takeFocus(this)
-            onActiveFocusChanged: if (activeFocus) { root._current = index; root._reason = focusReason }
+            Component.onCompleted: if (index === root._target()) root._takeFocus(this)
+            onActiveFocusChanged: if (activeFocus) root._focused(this, index)
 
-            onActivated: (reason) => root.tileActivated(modelData, index, reason)
+            onActivated: (reason) => root._activate(modelData, index, reason)
             onMenuRequested: (globalPos) => root.tileMenuRequested(modelData, index, globalPos)
         }
     }
@@ -160,10 +184,10 @@ Widgets.PageExt {
             Navigation.upAction: () => root._move(index, 0, -1)
             Navigation.downAction: () => root._move(index, 0, 1)
 
-            Component.onCompleted: if (index === root._target) root._takeFocus(this)
-            onActiveFocusChanged: if (activeFocus) { root._current = index; root._reason = focusReason }
+            Component.onCompleted: if (index === root._target()) root._takeFocus(this)
+            onActiveFocusChanged: if (activeFocus) root._focused(this, index)
 
-            onActivated: (reason) => root.tileActivated(modelData, index, reason)
+            onActivated: (reason) => root._activate(modelData, index, reason)
             onMenuRequested: (globalPos) => root.tileMenuRequested(modelData, index, globalPos)
         }
     }

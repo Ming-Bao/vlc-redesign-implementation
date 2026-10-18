@@ -36,6 +36,8 @@ LibraryRootPage {
     readonly property var _networkPath: pagePrefix.slice(0, -1)
 
     title: qsTr("Network")
+    // the view toggle stays on Network (the Music root has none)
+    hasGridListMode: true
 
     tiles: Helpers.withShares([
         { glyph: VLCIcons.add, text: qsTr("Add Network Stream"), add: true },
