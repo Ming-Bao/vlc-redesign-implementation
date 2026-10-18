@@ -142,7 +142,8 @@ T.AbstractButton {
         id: contextMenu
 
         model: root.contextModel
-        showPlayAsAudioAction: true
+        // Recent mixes in audio; the video models have no isVideo role
+        showPlayAsAudioAction: root.model?.isVideo ?? true
     }
 
     TapHandler {

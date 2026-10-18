@@ -79,9 +79,15 @@ LibraryRootPage {
         ctx: MainCtx
         sd_source: NetworkDeviceModel.CAT_LAN
         source_name: "*"
+        sortCriteria: "name"
 
         onCountChanged: root._rebuildShares()
         onLoadingChanged: root._rebuildShares()
+        onDataChanged: root._rebuildShares()
+        onModelReset: root._rebuildShares()
+        onRowsInserted: root._rebuildShares()
+        onRowsRemoved: root._rebuildShares()
+        onRowsMoved: root._rebuildShares()
     }
 
     NetworkDeviceContextMenu {

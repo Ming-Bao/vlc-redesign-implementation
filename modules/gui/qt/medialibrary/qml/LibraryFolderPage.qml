@@ -135,7 +135,8 @@ Widgets.PageExt {
         }
         // set before the rows load, so the view focuses that cell as it creates it
         if (loader.currentItem)
-            loader.currentItem.currentIndex = restoring ? root.initialIndex : 0
+            loader.currentItem.currentIndex = !restoring ? 0
+                : browseModel.count > 0 ? Math.min(root.initialIndex, browseModel.count - 1) : root.initialIndex
         loader.setCurrentItemFocus(reason)
     }
 
@@ -168,7 +169,7 @@ Widgets.PageExt {
             if (browseModel.loading)
                 return
             restoreOnce.enabled = false
-            loader.initialIndex = root.initialIndex
+            loader.initialIndex = Math.min(root.initialIndex, browseModel.count - 1)
             loader.initialIndex = -1
         }
     }

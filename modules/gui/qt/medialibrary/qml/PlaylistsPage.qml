@@ -16,6 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 import QtQuick
+import QtQuick.Templates as T
 
 import VLC.MediaLibrary
 
@@ -126,8 +127,10 @@ Widgets.PageExt {
             return
         }
         // set before the rows load, so the view focuses that cell as it creates it
+        // (an empty library still loading: emptyFocus moves to Create once it has loaded)
         if (loader.currentItem)
-            loader.currentItem.currentIndex = restoring ? root.initialIndex : 0
+            loader.currentItem.currentIndex = !restoring ? 0
+                : playlistModel.count > 0 ? Math.min(root.initialIndex, playlistModel.count - 1) : root.initialIndex
         loader.setCurrentItemFocus(reason)
     }
 
@@ -159,8 +162,22 @@ Widgets.PageExt {
             if (playlistModel.loading)
                 return
             restoreOnce.enabled = false
-            loader.initialIndex = root.initialIndex
+            loader.initialIndex = Math.min(root.initialIndex, playlistModel.count - 1)
             loader.initialIndex = -1
+        }
+    }
+
+    // entered while the library was loading: the view took the focus, but it loaded empty
+    Connections {
+        id: emptyFocus
+
+        target: playlistModel
+
+        function onLoadingChanged() {
+            const view = loader.currentItem
+            if (!playlistModel.loading && playlistModel.count === 0 && loader.activeFocus
+                    && !(view?.headerItem?.activeFocus ?? false))
+                root._focusHeaderItem(view, view?.focusReason ?? Qt.OtherFocusReason)
         }
     }
 
@@ -183,7 +200,7 @@ Widgets.PageExt {
 
         grid: gridComponent
         list: listComponent
-        emptyLabel: emptyComponent
+        emptyLabel: root.search.pattern === "" ? emptyComponent : noResultsComponent
 
         // entered by a plain focus (the sidebar's Right), not through setCurrentItemFocus: the view
         // holds the focus but no item does. Land on the first playlist, unless the Create tile has it.
@@ -395,6 +412,16 @@ Widgets.PageExt {
             hint: qsTr("Right click on a media\nto add it to a playlist")
 
             cover: VLCStyle.noArtAlbumCover
+        }
+    }
+
+    Component {
+        id: noResultsComponent
+
+        T.Label {
+            text: qsTr("No results")
+            font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
+            color: theme.palette?.isDark ? "#6B6B6B" : theme.fg.secondary
         }
     }
 }

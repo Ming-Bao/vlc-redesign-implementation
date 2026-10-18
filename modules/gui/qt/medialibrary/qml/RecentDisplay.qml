@@ -112,7 +112,7 @@ Widgets.PageExt {
         id: contextMenu
 
         model: recentModel
-        showPlayAsAudioAction: true
+        // set per item by the rows: videos only
     }
 
     MainViewLoader {
@@ -252,7 +252,10 @@ Widgets.PageExt {
                 onActiveFocusChanged: if (activeFocus) listView.currentIndex = index
 
                 onActivated: MediaLib.addAndPlay(model.id)
-                onMenuRequested: (globalPos) => contextMenu.popup([recentModel.index(index, 0)], globalPos)
+                onMenuRequested: (globalPos) => {
+                    contextMenu.showPlayAsAudioAction = _video
+                    contextMenu.popup([recentModel.index(index, 0)], globalPos)
+                }
             }
         }
     }

@@ -67,11 +67,12 @@ Widgets.PageExt {
         run: () => { root.model.indexed = !root.model.indexed }
     }] : []
 
-    // the header's Down and Escape in its search field: the add row when shown, else the view
+    // the header's Down and Escape in its search field: the view, or the add row when it is shown
+    // and there is nothing else
     function setCurrentItemFocus(reason) {
         const restoring = root._restoring
         root._restoring = false
-        if (!restoring && root._addShown)
+        if (!restoring && root._addShown && loader.count === 0)
             addRow.forceActiveFocus(reason)
         else
             loader.setCurrentItemFocus(reason)
