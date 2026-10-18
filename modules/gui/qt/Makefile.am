@@ -214,6 +214,8 @@ libqt_plugin_la_SOURCES = \
 	medialibrary/mlfolder.hpp \
 	medialibrary/mlfoldersmodel.cpp \
 	medialibrary/mlfoldersmodel.hpp \
+	medialibrary/mlfolderbrowsemodel.cpp \
+	medialibrary/mlfolderbrowsemodel.hpp \
 	medialibrary/mlfrequentartistmodel.cpp \
 	medialibrary/mlfrequentartistmodel.hpp \
 	medialibrary/mlgenre.cpp \
@@ -474,6 +476,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	medialibrary/mlbookmarkmodel.moc.cpp \
 	medialibrary/mlbasemodel.moc.cpp \
 	medialibrary/mlfoldersmodel.moc.cpp \
+	medialibrary/mlfolderbrowsemodel.moc.cpp \
 	medialibrary/mlfrequentartistmodel.moc.cpp \
 	medialibrary/mlgenremodel.moc.cpp \
 	medialibrary/mlthreadpool.moc.cpp \

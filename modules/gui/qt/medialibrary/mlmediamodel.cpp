@@ -32,8 +32,10 @@ void MLMediaModel::setMediaIsFavorite(const QModelIndex &index, bool isFavorite)
 {
     assert(m_mediaLib != nullptr);
 
-    const auto media = static_cast<MLMedia *>(item(index.row()));
-    assert(media != nullptr);
+    // not a media when it is a folder row of MLFolderBrowseModel
+    const auto media = dynamic_cast<MLMedia *>(item(index.row()));
+    if (media == nullptr)
+        return;
 
     // on ML thread
     m_mediaLib->runOnMLThread(this, [id = media->getId().id, isFavorite](vlc_medialibrary_t *ml)
@@ -47,8 +49,9 @@ void MLMediaModel::setMediaIsFavorite(const QModelIndex &index, bool isFavorite)
 }
 
 QUrl MLMediaModel::getParentURL(const QModelIndex &index) {
-    const auto media = static_cast<MLMedia *>(item(index.row()));
-    assert(media != nullptr);
+    const auto media = dynamic_cast<MLMedia *>(item(index.row()));
+    if (media == nullptr)
+        return {};
     return getParentURL(media);
 }
 
@@ -85,7 +88,9 @@ bool MLMediaModel::getPermissions(const MLMedia* media) const
 
 void MLMediaModel::deleteFileFromSource(const QModelIndex &index)
 {
-    const auto media = static_cast<MLMedia *>(item(index.row()));
+    const auto media = dynamic_cast<MLMedia *>(item(index.row()));
+    if (media == nullptr)
+        return;
     QString mrl = media->mrl();
 
     QUrl fileUrl(mrl);
