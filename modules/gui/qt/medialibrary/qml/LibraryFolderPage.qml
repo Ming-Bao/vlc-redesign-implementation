@@ -81,25 +81,22 @@ Widgets.PageExt {
 
     // the cards eat the arrow keys before the grid sees them: step like ExpandGridView's own Keys
     // handler, or return false to fall through to the view's Navigation (the Add tile, the header)
-    function _move(view, from, delta) {
-        const n = view.nbItemPerRow
-        const last = browseModel.count - 1
-        const to = from + delta
-        if (Math.abs(delta) === 1 ? (to < 0 || to > last || Math.floor(to / n) !== Math.floor(from / n))
-                                  : (to < 0 || Math.floor(from / n) === Math.floor(last / n)))
+    function _move(view, from, dx, dy) {
+        const to = Helpers.gridStep(from, dx, dy, view.nbItemPerRow, browseModel.count)
+        if (to < 0)
             return false
-        view.currentIndex = Math.min(to, last)
-        view.setCurrentItemFocus(delta > 0 ? Qt.TabFocusReason : Qt.BacktabFocusReason)
+        view.currentIndex = to
+        view.setCurrentItemFocus(dx + dy > 0 ? Qt.TabFocusReason : Qt.BacktabFocusReason)
         return true
     }
 
     // up from the first row or from the empty label: the Add tile, if any
-    function _focusHeaderItem(view) {
+    function _focusHeaderItem(view, reason = Qt.BacktabFocusReason) {
         if (!view?.headerItem?.visible)
             return false
         // enforceFocus: focusing it the first time flips the header Loader's focus, which leaves
         // the tile with OtherFocusReason and no focus ring
-        Helpers.enforceFocus(view.headerItem.tile, Qt.BacktabFocusReason)
+        Helpers.enforceFocus(view.headerItem.tile, reason)
         return true
     }
 
@@ -110,13 +107,12 @@ Widgets.PageExt {
             root._emptyButton?.forceActiveFocus(Qt.TabFocusReason)
     }
 
-    // the header's Down and Escape in its search field land on the first item
+    // the header's Down and Escape in its search field: the Add tile when shown, else the first item
     function setCurrentItemFocus(reason) {
+        if (root._focusHeaderItem(loader.currentItem, reason))
+            return
         if (browseModel.count === 0 && !browseModel.loading) {
-            if (root._emptyButton)
-                root._emptyButton.forceActiveFocus(reason)
-            else
-                root._focusHeaderItem(loader.currentItem)
+            root._emptyButton?.forceActiveFocus(reason)
             return
         }
         if (loader.currentItem)
@@ -235,10 +231,10 @@ Widgets.PageExt {
                 height: gridView.cellHeight
 
                 Navigation.parentItem: gridView
-                Navigation.leftAction: () => root._move(gridView, index, -1)
-                Navigation.rightAction: () => root._move(gridView, index, 1)
-                Navigation.upAction: () => root._move(gridView, index, -gridView.nbItemPerRow)
-                Navigation.downAction: () => root._move(gridView, index, gridView.nbItemPerRow)
+                Navigation.leftAction: () => root._move(gridView, index, -1, 0)
+                Navigation.rightAction: () => root._move(gridView, index, 1, 0)
+                Navigation.upAction: () => root._move(gridView, index, 0, -1)
+                Navigation.downAction: () => root._move(gridView, index, 0, 1)
 
                 onActiveFocusChanged: if (activeFocus) gridView.currentIndex = index
 
@@ -381,10 +377,10 @@ Widgets.PageExt {
                                                                      : (model?.title ?? "")
 
                 Navigation.parentItem: listView
-                Navigation.leftAction: () => root._move(listView, index, -1)
-                Navigation.rightAction: () => root._move(listView, index, 1)
-                Navigation.upAction: () => root._move(listView, index, -listView.nbItemPerRow)
-                Navigation.downAction: () => root._move(listView, index, listView.nbItemPerRow)
+                Navigation.leftAction: () => root._move(listView, index, -1, 0)
+                Navigation.rightAction: () => root._move(listView, index, 1, 0)
+                Navigation.upAction: () => root._move(listView, index, 0, -1)
+                Navigation.downAction: () => root._move(listView, index, 0, 1)
 
                 onActiveFocusChanged: if (activeFocus) listView.currentIndex = index
 

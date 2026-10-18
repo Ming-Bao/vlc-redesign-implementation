@@ -26,6 +26,19 @@ QtObject {
       return num <= min ? min : num >= max ? max : num;
     }
 
+    // The index an arrow key (dx or dy is ±1) reaches in a grid of `count` items, `columns` per row,
+    // or -1 when it leaves the grid: Left/Right stop at the row's ends, Up leaves from the first row,
+    // Down leaves from the last row and lands on the last item when the row below is short.
+    function gridStep(from : int, dx : int, dy : int, columns : int, count : int) : int {
+        if (dx !== 0) {
+            const to = from + dx
+            return (to >= 0 && to < count && Math.floor(to / columns) === Math.floor(from / columns)) ? to : -1
+        }
+        if (dy < 0)
+            return from - columns >= 0 ? from - columns : -1
+        return Math.floor(from / columns) < Math.floor((count - 1) / columns) ? Math.min(from + columns, count - 1) : -1
+    }
+
     // Distinct non-empty keys, most frequent first; ties keep the earliest (most recent) key.
     function rankByFrequency(keys: var) : var {
         const counts = {}

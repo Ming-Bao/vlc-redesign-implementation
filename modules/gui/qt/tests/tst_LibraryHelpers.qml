@@ -101,4 +101,33 @@ TestCase {
         compare(Helpers.folderEntries(["file:///m/Caf%E9/x.mp3"]),
                 [{ mrl: "file:///m/Caf%E9", name: "Caf%E9" }])
     }
+
+    // 6 items in 4 columns: [0 1 2 3] [4 5]
+    function test_gridStep_data() {
+        return [
+            { tag: "up from 4", from: 4, dx: 0, dy: -1, to: 0 },
+            { tag: "up from 5", from: 5, dx: 0, dy: -1, to: 1 },
+            { tag: "up from the first row leaves", from: 1, dx: 0, dy: -1, to: -1 },
+            { tag: "down from 1", from: 1, dx: 0, dy: 1, to: 5 },
+            { tag: "down onto a short row", from: 2, dx: 0, dy: 1, to: 5 },
+            { tag: "down from the last row leaves", from: 4, dx: 0, dy: 1, to: -1 },
+            { tag: "right", from: 0, dx: 1, dy: 0, to: 1 },
+            { tag: "right at a row end leaves", from: 3, dx: 1, dy: 0, to: -1 },
+            { tag: "right at the last item leaves", from: 5, dx: 1, dy: 0, to: -1 },
+            { tag: "left", from: 5, dx: -1, dy: 0, to: 4 },
+            { tag: "left at a row start leaves", from: 4, dx: -1, dy: 0, to: -1 },
+            { tag: "left at the first item leaves", from: 0, dx: -1, dy: 0, to: -1 },
+        ]
+    }
+
+    function test_gridStep(data) {
+        compare(Helpers.gridStep(data.from, data.dx, data.dy, 4, 6), data.to)
+    }
+
+    function test_gridStep_oneColumn() {
+        compare(Helpers.gridStep(1, 0, -1, 1, 3), 0)
+        compare(Helpers.gridStep(1, 0, 1, 1, 3), 2)
+        compare(Helpers.gridStep(2, 0, 1, 1, 3), -1)
+        compare(Helpers.gridStep(1, -1, 0, 1, 3), -1)
+    }
 }
