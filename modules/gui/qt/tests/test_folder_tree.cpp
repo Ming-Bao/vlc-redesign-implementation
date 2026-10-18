@@ -78,6 +78,11 @@ private slots:
         QCOMPARE(res[2].name, QString::fromUtf8("Caf\xC3\xA9"));
         QCOMPARE(res[3].name, QString("My Shows"));
     }
+    void caseTiebreak()
+    {
+        auto res = folder_tree::children({R + "/"}, {R + "/shows/", R + "/Films/", R + "/Shows/"}, R);
+        QCOMPARE(names(res), QStringList({"Films", "Shows", "shows"}));
+    }
     void outsideRoots()
     {
         QVERIFY(folder_tree::children({R + "/"}, {R + "/a/"}, "file:///elsewhere").empty());

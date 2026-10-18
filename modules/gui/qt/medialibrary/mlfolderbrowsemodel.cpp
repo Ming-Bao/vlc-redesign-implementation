@@ -153,6 +153,7 @@ void MLFolderBrowseModel::onVlcMlEvent(const MLEvent & event) /* override */
     {
         case VLC_ML_EVENT_FOLDER_ADDED:
         case VLC_ML_EVENT_FOLDER_DELETED:
+        case VLC_ML_EVENT_FOLDER_UPDATED:
         case VLC_ML_EVENT_ENTRY_POINT_ADDED:
         case VLC_ML_EVENT_ENTRY_POINT_REMOVED:
         case VLC_ML_EVENT_ENTRY_POINT_BANNED:

@@ -18,6 +18,7 @@
 #ifndef VLC_QT_FOLDER_TREE_HPP
 #define VLC_QT_FOLDER_TREE_HPP
 
+#include <QSet>
 #include <QString>
 #include <QStringList>
 #include <QUrl>
@@ -67,7 +68,7 @@ inline std::vector<Child> children(const QStringList& roots, const QStringList& 
     {
         const QString p = normalized(parent);
         const QString prefix = p + '/';
-        QStringList seen;
+        QSet<QString> seen;
         for (const QString& m : mediaFolders)
         {
             if (!m.startsWith(prefix))
@@ -75,12 +76,14 @@ inline std::vector<Child> children(const QStringList& roots, const QStringList& 
             const QString segment = m.mid(prefix.size()).section('/', 0, 0);
             if (segment.isEmpty() || seen.contains(segment))
                 continue;
-            seen << segment;
+            seen.insert(segment);
             res.push_back({displayName(segment), prefix + segment});
         }
     }
     std::sort(res.begin(), res.end(), [](const Child& a, const Child& b) {
-        return QString::compare(a.name, b.name, Qt::CaseInsensitive) < 0;
+        // case-sensitive tiebreak, so "Shows" and "shows" keep a stable order
+        const int c = QString::compare(a.name, b.name, Qt::CaseInsensitive);
+        return c != 0 ? c < 0 : QString::compare(a.name, b.name, Qt::CaseSensitive) < 0;
     });
     return res;
 }
