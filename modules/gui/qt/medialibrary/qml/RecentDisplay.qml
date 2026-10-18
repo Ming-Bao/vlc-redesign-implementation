@@ -74,7 +74,8 @@ Widgets.PageExt {
         root._restoring = false
         // set before the rows load, so the view focuses that cell as it creates it
         if (loader.currentItem)
-            loader.currentItem.currentIndex = restoring ? Math.max(0, Math.min(root.initialIndex, recentModel.count - 1)) : 0
+            loader.currentItem.currentIndex = !restoring ? 0
+                : recentModel.count > 0 ? Math.min(root.initialIndex, recentModel.count - 1) : root.initialIndex
         loader.setCurrentItemFocus(reason)
     }
 
