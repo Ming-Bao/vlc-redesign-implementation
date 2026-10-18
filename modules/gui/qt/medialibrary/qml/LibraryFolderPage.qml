@@ -43,13 +43,25 @@ Widgets.PageExt {
     property var folderPath: []
     property bool showAdd: false
 
+    // restored from the navigation history on Back / a crumb, recorded by the views
+    property alias initialIndex: loader.initialIndex
+    // the first focus of a restored level goes to that item rather than to the Add tile
+    property bool _restoring: initialIndex >= 0
+
     readonly property bool _addShown: showAdd && search.pattern === ""
     readonly property real _titleLine: Math.ceil(titleMetrics.height)
 
     // the empty label's button, when shown
     property Item _emptyButton: null
 
-    sortModel: [
+    // Songs: the tracks' rows (the old MusicTracksDisplay, less its Disc row the model never sorted by)
+    sortModel: root.audio ? [
+        { text: qsTr("Title"), criteria: "title" },
+        { text: qsTr("Album"), criteria: "album_title" },
+        { text: qsTr("Artist"), criteria: "main_artist" },
+        { text: qsTr("Duration"), criteria: "duration" },
+        { text: qsTr("Track"), criteria: "track_number" }
+    ] : [
         { text: qsTr("Alphabetic"), criteria: "title" },
         { text: qsTr("Duration"), criteria: "duration" },
         { text: qsTr("Date added"), criteria: "insertion" }
@@ -72,7 +84,9 @@ Widgets.PageExt {
         colorSet: ColorContext.View
     }
 
-    function _open(folder, reason) {
+    function _open(folder, index, reason) {
+        // recorded here too: a click does not make the card current, and opening index 0 changes nothing
+        History.viewProp.initialIndex = index
         History.push(folderPath, {
             mrl: folder.mrl,
             trail: [...trail, { name: folder.title, mrl: folder.mrl }]
@@ -108,15 +122,19 @@ Widgets.PageExt {
     }
 
     // the header's Down and Escape in its search field: the Add tile when shown, else the first item
+    // (a restored level: the item MainViewLoader restores from initialIndex, once)
     function setCurrentItemFocus(reason) {
-        if (root._focusHeaderItem(loader.currentItem, reason))
+        const restoring = root._restoring
+        root._restoring = false
+        if (!restoring && root._focusHeaderItem(loader.currentItem, reason))
             return
         if (browseModel.count === 0 && !browseModel.loading) {
             root._emptyButton?.forceActiveFocus(reason)
             return
         }
+        // set before the rows load, so the view focuses that cell as it creates it
         if (loader.currentItem)
-            loader.currentItem.currentIndex = 0
+            loader.currentItem.currentIndex = restoring ? root.initialIndex : 0
         loader.setCurrentItemFocus(reason)
     }
 
@@ -179,6 +197,8 @@ Widgets.PageExt {
             Navigation.parentItem: loader
             // up from the first row: the Add tile, then the page header
             Navigation.upAction: () => root._focusHeaderItem(gridView)
+
+            onCurrentIndexChanged: History.viewProp.initialIndex = currentIndex
 
             cellHeight: artHeight + VLCStyle.dp(20, VLCStyle.scale) + root._titleLine
                         + (root.audio ? VLCStyle.dp(10, VLCStyle.scale) + root._titleLine : 0)
@@ -257,7 +277,7 @@ Widgets.PageExt {
 
                         Navigation.parentItem: cell
 
-                        onActivated: (reason) => root._open(cell.model, reason)
+                        onActivated: (reason) => root._open(cell.model, cell.index, reason)
                     }
                 }
 
@@ -319,6 +339,8 @@ Widgets.PageExt {
             Navigation.parentItem: loader
             // up from the first row: the Add tile, then the page header
             Navigation.upAction: () => root._focusHeaderItem(listView)
+
+            onCurrentIndexChanged: History.viewProp.initialIndex = currentIndex
 
             cellHeight: VLCStyle.dp(32, VLCStyle.scale)
             horizontalSpacing: VLCStyle.dp(10, VLCStyle.scale)
@@ -386,7 +408,7 @@ Widgets.PageExt {
 
                 onActivated: (reason) => {
                     if (_folder)
-                        root._open(model, reason)
+                        root._open(model, index, reason)
                     else
                         MediaLib.addAndPlay(model.id)
                 }

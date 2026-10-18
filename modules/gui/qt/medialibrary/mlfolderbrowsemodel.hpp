@@ -64,6 +64,8 @@ protected: // MLBaseModel implementation
     std::unique_ptr<MLListCacheLoader> createMLLoader() const override;
 
 protected: // MLMediaModel reimplementation
+    vlc_ml_sorting_criteria_t nameToCriteria(QByteArray name) const override;
+
     QHash<int, QByteArray> roleNames() const override;
 
     QVariant itemRoleData(const MLItem * item, int role) const override;

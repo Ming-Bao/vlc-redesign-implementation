@@ -80,6 +80,20 @@ MLFolderBrowseModel::createMLLoader() const /* override */
 
 // Protected MLMediaModel reimplementation
 
+vlc_ml_sorting_criteria_t MLFolderBrowseModel::nameToCriteria(QByteArray name) const /* override */
+{
+    // the tracks' criteria (MLAudioModel), a superset of the media ones: only Songs offers the extra ones
+    return QHash<QByteArray, vlc_ml_sorting_criteria_t> {
+        {QByteArrayLiteral("title"), VLC_ML_SORTING_ALPHA},
+        {QByteArrayLiteral("album_title"), VLC_ML_SORTING_ALBUM},
+        {QByteArrayLiteral("track_number"), VLC_ML_SORTING_TRACKNUMBER},
+        {QByteArrayLiteral("release_year"), VLC_ML_SORTING_RELEASEDATE},
+        {QByteArrayLiteral("main_artist"), VLC_ML_SORTING_ARTIST},
+        {QByteArrayLiteral("duration"), VLC_ML_SORTING_DURATION},
+        {QByteArrayLiteral("insertion"), VLC_ML_SORTING_INSERTIONDATE},
+    }.value(name, VLC_ML_SORTING_DEFAULT);
+}
+
 QHash<int, QByteArray> MLFolderBrowseModel::roleNames() const /* override */
 {
     QHash<int, QByteArray> hash = MLMediaModel::roleNames();
