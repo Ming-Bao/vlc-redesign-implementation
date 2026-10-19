@@ -279,3 +279,55 @@ A pure refactor: the library must behave exactly as before.
 - [ ] **Step 1: Ledger.** Add a `## Ledger` here comparing each after-shot with its Figma frame: what matches, and each departure with its reason. Known in advance: the title bar toggle keeps the library's checked look; the video's half-filled toggle glyph isn't done.
 - [ ] **Step 2: Roadmap.** Mark the 4e row done in `docs/superpowers/specs/2026-10-13-vlc-redesign-roadmap.md`, naming the plan and the departures (including the skipped grid-page extraction).
 - [ ] **Step 3: Commit, then merge and push.** Commit `doc: record slice 4e`. After the whole-branch review, fast-forward `master` and push.
+
+## Ledger
+
+Shots (1600×900, dark, test library with `redesign-media` and `redesign-music`) in `docs/superpowers/figma/4e/`: `after_sidebar_home.png`, `after_sidebar_deeper.png`, `after_compact_header.png`, `after_compact_search.png`, `after_panel_video.png`, `after_panel_music.png`, `after_playing_panel.png`, `after_playing_home.png`. References: `sb_default.png` (848:1995, the panel at 427×986), `sidebar_all.png` (the variants), `player_music.png` (4767:23726, the player with the toggle in the title bar; the panel instance is off-canvas), and 4b `home.png` / 4a `grid.png` for the library sidebar. Figma has no frame of the panel open beside a playing video or of the compact header outside the 427 panel; those follow `sb_default.png` and the 4a header.
+
+### after_sidebar_home / after_sidebar_deeper (library sidebar)
+Against 4b `home.png` / 4a `grid.png`. Seven entries (Home, Videos, Music, Network, Playlists, Recent, Add item), 152 px wide at 1600. The active entry has the filled glyph (Home orange house, Videos filled play) and a `#C6C6C6` label (Figma 198 against 143 inactive); the others are outline glyphs with `#8F8F8F` labels. Music shows the new `music_folder` glyph (folder and note, as Figma's rail) instead of the plain note.
+Departures:
+- Active label `#C6C6C6`, inactive stay primary grey: matches the 4b sample; the first build had all labels at 141.
+- `recent_filled` is the outline glyph: Figma has no active Recent.
+- `music_folder` is a new font glyph for the sidebar entry only; `topbar_music` stays the note (Songs tile, audio tabs, player glyph).
+- `network_filled` / `playlists_filled` are stroke glyphs with a filled detail, as Figma's active icons.
+
+### after_compact_header / after_compact_search (560 px window)
+Against the header of `sb_default.png`. Two rows: back, forward, crumbs ("Music ▸ Albums"), "…" on row 1; "2 items" left and sort, view, search on the right of row 2, with a hairline under. Icons on row 2 are 36 apart as in Figma. Search opens a field in place of the count (orange search icon while open), "Tes" typed, empty state "No albums found".
+Departures:
+- The compact header switches by width (< 600 px), not by the panel being open, so a narrow library window gets it too. Reason: one rule, and the library at that width has the same space problem.
+- Crossing 600 px with a non-empty compact search drops the filter while the compact field keeps its text; the search icon doesn't toggle. Known, not fixed.
+
+### after_panel_video / `sb_default.png`
+Panel 427 wide beside the video (video starts at x 427), rail 50 wide with six glyphs and "+" (Home, Videos filled, Music folder, Network, Playlists, Recent, Add), same order and spacing (rows 46 apart); crumbs "… ▸ The Clip ▸ S01", "…" and the open-in-player arrow ↗ in row 1; "6 items", sort, view, search in row 2; compact list rows with 32 px thumbs, 42 px apart; the title bar shows the toggle and the folder crumb.
+Departures:
+- The title bar toggle keeps the library's checked look (orange outline); the video's half-filled toggle glyph isn't done.
+- Panel width is capped at half the window (`rootPlayer.width / 2`): below an 854 px window it is narrower than Figma's 427; this keeps the video visible.
+- Page-area right margin is the pages' own 32, not Figma's 20: keeps the scroll bar inside the panel. "…" and ↗ stay 36 apart, so they sit 12 px left of Figma (347 / 383 against 359 / 395).
+- Rail icons are 1 px right of Figma: the shared `SideNavigationPane` padding; changing it moves the library sidebar too.
+- Escape at the history root focuses the title bar toggle; the panel stays open.
+- Sort icon has no orange dot (Figma's frame shows an active sort); no sort is set in the build.
+- The playing row (E05) has an accent title and a play mark over its thumbnail; Figma's frame has no playing row. Later rows are dimmed as in Figma.
+
+### after_panel_music
+Music playing ("Tester - waveform"), the panel on `redesign-music` (crumb "redesign-m…", "5 items") as a grid of square cards at the panel width, rail with Music active (filled folder glyph), title bar crumb `redesign-music`. The audio player view fills the rest (cover, "waveform - Tester"). Same measurements and departures as `after_panel_video`. The panel instance in `player_music.png` is off-canvas, so the shot is checked against `sb_default.png`; the title bar there reads "My Songs" (a folder crumb, as the build).
+
+### after_playing_panel (1600×900, E06 playing)
+Against the 4c list/video-card look. Panel in grid view: the playing card `The_Clip_S01E06` has its title in the accent, a 70 % dark overlay and an orange play mark; E05 has none. Same toggle and crumbs as above; the scroll bar sits inside the panel (x 425).
+Departures:
+- The playing mark reuses 4c's `HomeListRow.playing` look (accent title, play mark) on `HomeSquareCard` / `HomeVideoCard`, overlay 70 %; Figma has no playing variant for the card (`get_metadata` shows none). `Helpers.sameMedia` replaces the two inline `Qt.resolvedUrl` compares. The video card's hover play button covers the mark while hovered.
+
+### after_playing_home
+Library Home while E06 plays: the Continue Watching card E06 carries the same mark; the sidebar and the page match `after_sidebar_home`; panel closed (toggle in the title bar unchecked). The picture-in-picture video at the lower left is the harness's mini player, not part of 4e.
+
+### Departures not tied to one shot
+- The extraction of a shared grid page (the roadmap's "Before 4e") is skipped: the panel needed no change to `LibraryFolderPage`, `PlaylistsPage` or `RecentDisplay`.
+- `SideNavigationDelegate` reads `model.uri`; an unmapped uri falls back silently to the outline glyph.
+- `closeRequested()` is `navigationCancel()` (`QueuePage`'s name for the same hand-back).
+- `PageExt` and `Player.qml` hold the same three-line leave rule (↗ with no picture-in-picture); `PageExt` can't reach the player's function.
+
+### Known minors (not fixed)
+- `MainDisplay.loadView` is near-dead; `LibraryPanel`'s `onItemClicked` repeats `MainDisplay`'s 3-line handler.
+- Resizing below 854 with the panel closed can flash a sliver during the x Behavior.
+- `sameMedia`: a literal `%25` in a name gives a false negative; it decodes `%2F` / `%3F`; the card overlay Rectangle is duplicated.
+- Pre-existing: `ExpandGridView.qml` TypeError when playing from a grid; Escape after a mouse click becomes a hotkey; Home sections have no Navigation parent, so Escape goes nowhere.
