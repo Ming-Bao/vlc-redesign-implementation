@@ -22,6 +22,7 @@ import QtQuick.Templates as T
 import VLC.MainInterface
 import VLC.Style
 import VLC.Util
+import VLC.Playlist
 
 T.Page {
     id: root
@@ -62,6 +63,9 @@ T.Page {
         "playlists": qsTr("Playlists"),
         "recent": qsTr("Recent")
     })
+
+    // two-row header (and the library pages inside the player's side panel)
+    readonly property bool compact: width < VLCStyle.dp(600, VLCStyle.scale)
 
     property int displayMarginBeginning: 0
     property int displayMarginEnd: 0
@@ -130,6 +134,7 @@ T.Page {
 
     header: DefaultPageHeader {
         breadcrumbs: root.breadcrumbs
+        compact: root.compact
         itemCount: root.itemCount
 
         leftPadding: VLCStyle.dynamicAppMargins(width) + VLCStyle.layout_left_margin + root.leftPadding
@@ -193,12 +198,33 @@ T.Page {
         FontMetrics { id: lastCrumbFont; font.pixelSize: VLCStyle.dp(16, VLCStyle.scale); font.weight: Font.DemiBold }
 
         property int itemCount: -1
+        property bool compact: false
+        property bool _searchOpen: false
 
         property alias sortExtraRows: gridSortFilter.sortExtraRows
         property alias headerMenuRows: gridSortFilter.menuExtraRows
 
         property alias search: gridSortFilter.search
         property alias sort: gridSortFilter.sort
+
+        function _openSearch() {
+            _searchOpen = true
+            compactSearch.forceActiveFocus(Qt.MouseFocusReason)
+        }
+
+        function _closeSearch() {
+            compactSearch.clear()
+            _searchOpen = false
+            gridSortFilter.forceActiveFocus(Qt.BacktabFocusReason)
+        }
+
+        Connections {
+            target: MainCtx.search
+            function onAskShow() {
+                if (defaultPageHeader.compact && gridSortFilter.search.available)
+                    defaultPageHeader._openSearch()
+            }
+        }
 
         position: T.ToolBar.Header
 
@@ -232,14 +258,18 @@ T.Page {
             anchors.fill: parent
             spacing: VLCStyle.dp(17, VLCStyle.scale)
 
-            RowLayout {
+            // wide: one row; compact: row 1 = nav + crumbs + "…" + open-in-library, row 2 = count/search + sort, view, search
+            GridLayout {
                 id: row
 
                 Layout.fillWidth: true
-                spacing: VLCStyle.dp(20, VLCStyle.scale)
+                columnSpacing: defaultPageHeader.compact ? VLCStyle.dp(12, VLCStyle.scale) : VLCStyle.dp(20, VLCStyle.scale)
+                rowSpacing: VLCStyle.dp(20, VLCStyle.scale)
 
                 RowLayout {
                     Layout.fillWidth: true
+                    Layout.row: 0
+                    Layout.column: 0
                     spacing: VLCStyle.dp(10, VLCStyle.scale)
 
                     Row {
@@ -294,7 +324,8 @@ T.Page {
 
                         Navigation.parentItem: defaultPageHeader
                         Navigation.leftItem: forwardBtn
-                        Navigation.rightItem: gridSortFilter
+                        Navigation.rightItem: defaultPageHeader.compact ? moreBtn : gridSortFilter
+                        Navigation.downItem: defaultPageHeader.compact ? gridSortFilter : null
 
                         Repeater {
                             id: crumbRepeater
@@ -368,21 +399,110 @@ T.Page {
                 }
 
                 T.Label {
-                    visible: defaultPageHeader.itemCount >= 0
+                    visible: defaultPageHeader.itemCount >= 0 && !(defaultPageHeader.compact && defaultPageHeader._searchOpen)
+                    Layout.row: defaultPageHeader.compact ? 1 : 0
+                    Layout.column: defaultPageHeader.compact ? 0 : 1
+                    Layout.fillWidth: defaultPageHeader.compact
                     text: qsTr("%1 item", "%1 items", defaultPageHeader.itemCount).arg(defaultPageHeader.itemCount)
                     color: theme.palette?.isDark ? "#6B6B6B" : theme.fg.secondary.alpha(0.75)
                     font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
                 }
 
+                // compact only: replaces the count while searching
+                GridSortFilterControls.SearchField {
+                    id: compactSearch
+
+                    visible: defaultPageHeader.compact && defaultPageHeader._searchOpen && gridSortFilter.search.available
+                    Layout.row: 1
+                    Layout.column: 0
+                    Layout.fillWidth: true
+                    height: VLCStyle.dp(24, VLCStyle.scale)
+                    searchCtx: _searchCtx
+
+                    Navigation.parentItem: defaultPageHeader
+                    Navigation.rightItem: gridSortFilter
+                    Navigation.upItem: crumbRow
+
+                    onEscaped: defaultPageHeader._closeSearch()
+                    // leaving the field while it is empty folds it back
+                    onActiveFocusChanged: if (!activeFocus && !length) defaultPageHeader._searchOpen = false
+                }
+
+                // keeps the row-2 group 96 wide while row 1 only has two buttons
+                Item {
+                    visible: defaultPageHeader.compact
+                    Layout.row: 0
+                    Layout.column: 1
+                    implicitWidth: VLCStyle.icon_normal
+                    implicitHeight: VLCStyle.icon_normal
+                }
+
+                IconToolButton {
+                    id: moreBtn
+
+                    visible: defaultPageHeader.compact
+                    enabled: visible
+                    Layout.row: 0
+                    Layout.column: openBtn.visible ? 2 : 3     // right-aligned without the ↗
+                    implicitWidth: VLCStyle.icon_normal
+                    implicitHeight: VLCStyle.icon_normal
+                    font.pixelSize: VLCStyle.icon_normal
+                    text: VLCIcons.ellipsis
+                    description: qsTr("More")
+
+                    Navigation.parentItem: defaultPageHeader
+                    Navigation.leftItem: crumbRow
+                    Navigation.rightItem: openBtn
+                    Navigation.downItem: gridSortFilter
+
+                    onClicked: gridSortFilter.openMore(moreBtn)
+                }
+
                 GridSortFilterControls {
                     id: gridSortFilter
+
+                    Layout.row: defaultPageHeader.compact ? 1 : 0
+                    Layout.column: defaultPageHeader.compact ? 1 : 2
+                    Layout.columnSpan: defaultPageHeader.compact ? 3 : 1
+                    Layout.alignment: Qt.AlignRight
                     focus: true
                     sort: _sortCtx
                     search: _searchCtx
+                    compact: defaultPageHeader.compact
+                    searchOpen: defaultPageHeader._searchOpen
                     Navigation.parentItem: defaultPageHeader
-                    Navigation.leftItem: crumbRow
+                    Navigation.leftItem: defaultPageHeader.compact && compactSearch.visible ? compactSearch : crumbRow
+                    Navigation.rightItem: openBtn.visible ? openBtn : null
+                    Navigation.upItem: crumbRow
 
+                    onSearchRequested: defaultPageHeader._openSearch()
                     onEscaped: defaultPageHeader.Navigation.defaultNavigationDown()
+                }
+
+                // Figma 848:1995 "Open in library", only shown in the player's side panel
+                IconToolButton {
+                    id: openBtn
+
+                    visible: MainCtx.playerView
+                    enabled: visible
+                    Layout.row: 0
+                    Layout.column: 3
+                    implicitWidth: VLCStyle.icon_normal
+                    implicitHeight: VLCStyle.icon_normal
+                    font.pixelSize: VLCStyle.icon_normal
+                    text: VLCIcons.open_in_library
+                    description: qsTr("Open in library")
+
+                    Navigation.parentItem: defaultPageHeader
+                    Navigation.leftItem: defaultPageHeader.compact ? moreBtn : gridSortFilter
+                    Navigation.downItem: defaultPageHeader.compact ? gridSortFilter : null
+
+                    // twin of Player.qml's leavePlayer()
+                    onClicked: {
+                        if (MainCtx.hasEmbededVideo && !MainCtx.canShowVideoPIP)
+                            MainPlaylistController.stop()
+                        MainCtx.playerView = false
+                    }
                 }
             }
 

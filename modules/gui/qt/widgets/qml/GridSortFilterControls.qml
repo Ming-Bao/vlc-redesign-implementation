@@ -15,6 +15,16 @@ NavigableRow {
     // Escape pressed in the search field, after it was cleared
     signal escaped()
 
+    // compact (two-row) header: the search field is PageExt's, this row only has the icon that opens it,
+    // and the "…" button is PageExt's too (it calls openMore())
+    property bool compact: false
+    property bool searchOpen: false
+    signal searchRequested()
+
+    function openMore(button : Item) {
+        _popup(moreMenu, button)
+    }
+
     required property SortCtx sort
     required property SearchCtx search
 
@@ -99,83 +109,38 @@ NavigableRow {
     }
 
     // Figma 1040:2876: always visible, filters as you type
-    T.TextField {
+    SearchField {
         id: searchField
 
-        visible: root.search.available
-        enabled: visible
-        width: VLCStyle.dp(325, VLCStyle.scale)
-        height: VLCStyle.dp(34, VLCStyle.scale)
-        leftPadding: VLCStyle.dp(8 + 24 + 10, VLCStyle.scale)
-        rightPadding: VLCStyle.dp(8, VLCStyle.scale)
-        verticalAlignment: TextInput.AlignVCenter
-        font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-        color: theme.fg.primary
-        selectionColor: theme.bg.highlight
-        selectedTextColor: theme.fg.highlight
-        placeholderText: qsTr("Search")
-        placeholderTextColor: root._dark ? "#404040" : theme.fg.secondary
-        selectByMouse: true
-
-        Accessible.name: qsTr("Search")
-
-        background: Rectangle {
-            color: root._dark ? "#151515" : theme.bg.secondary
-            radius: VLCStyle.dp(6, VLCStyle.scale)
-            border.width: searchField.activeFocus ? VLCStyle.dp(1, VLCStyle.scale) : 0
-            border.color: theme.visualFocus
-
-            IconLabel {
-                x: VLCStyle.dp(8, VLCStyle.scale)
-                anchors.verticalCenter: parent.verticalCenter
-                text: VLCIcons.search
-                font.pixelSize: VLCStyle.icon_normal
-                color: root._dark ? "#8F8F8F" : theme.fg.secondary
-            }
-        }
-
-        // T.TextField draws no placeholder of its own
-        T.Label {
-            x: searchField.leftPadding
-            width: searchField.width - searchField.leftPadding - searchField.rightPadding
-            height: searchField.height
-            verticalAlignment: Text.AlignVCenter
-            elide: Text.ElideRight
-            visible: !searchField.length && !searchField.preeditText
-            text: searchField.placeholderText
-            font: searchField.font
-            color: searchField.placeholderTextColor
-        }
-
-        Binding {
-            target: root.search
-            property: "pattern"
-            value: searchField.text
-        }
-
-        Connections {
-            target: MainCtx.search
-            function onAskShow() {
-                if (searchField.visible)
-                    searchField.forceActiveFocus(Qt.ShortcutFocusReason)
-            }
-        }
+        visible: root.search.available && !root.compact
+        searchCtx: root.search
 
         Navigation.parentItem: root
+        onEscaped: root.escaped()
+    }
 
-        Keys.onEscapePressed: (event) => {
-            searchField.clear()
-            root.escaped()
-            event.accepted = true
-        }
-        Keys.priority: Keys.AfterItem
-        Keys.onPressed: (event) => Navigation.defaultKeyAction(event)
+    IconToolButton {
+        id: searchBtn
+
+        anchors.verticalCenter: parent.verticalCenter
+        visible: root.compact && root.search.available
+        enabled: visible
+        width: VLCStyle.icon_normal
+        height: VLCStyle.icon_normal
+        font.pixelSize: VLCStyle.icon_normal
+        text: VLCIcons.search
+        description: qsTr("Search")
+        checked: root.searchOpen
+
+        onClicked: root.searchRequested()
     }
 
     IconToolButton {
         id: moreBtn
 
         anchors.verticalCenter: parent.verticalCenter
+        visible: !root.compact
+        enabled: visible
         width: VLCStyle.icon_normal
         height: VLCStyle.icon_normal
         font.pixelSize: VLCStyle.icon_normal
@@ -195,5 +160,86 @@ NavigableRow {
                   ] : [])
                   .concat(root.menuExtraRows)
         }
+    }
+
+    // Figma 1040:2876 field body; PageExt reuses it in the compact header
+    component SearchField: T.TextField {
+        id: searchField
+
+        property SearchCtx searchCtx
+        signal escaped()
+
+        readonly property ColorContext colorContext: ColorContext {
+            id: theme
+            colorSet: ColorContext.View
+        }
+        readonly property bool _dark: theme.palette?.isDark ?? false
+
+        enabled: visible
+        width: VLCStyle.dp(325, VLCStyle.scale)
+        height: VLCStyle.dp(34, VLCStyle.scale)
+        leftPadding: VLCStyle.dp(8 + 24 + 10, VLCStyle.scale)
+        rightPadding: VLCStyle.dp(8, VLCStyle.scale)
+        verticalAlignment: TextInput.AlignVCenter
+        font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
+        color: theme.fg.primary
+        selectionColor: theme.bg.highlight
+        selectedTextColor: theme.fg.highlight
+        placeholderText: qsTr("Search")
+        placeholderTextColor: searchField._dark ? "#404040" : theme.fg.secondary
+        selectByMouse: true
+
+        Accessible.name: qsTr("Search")
+
+        background: Rectangle {
+            color: searchField._dark ? "#151515" : theme.bg.secondary
+            radius: VLCStyle.dp(6, VLCStyle.scale)
+            border.width: searchField.activeFocus ? VLCStyle.dp(1, VLCStyle.scale) : 0
+            border.color: theme.visualFocus
+
+            IconLabel {
+                x: VLCStyle.dp(8, VLCStyle.scale)
+                anchors.verticalCenter: parent.verticalCenter
+                text: VLCIcons.search
+                font.pixelSize: VLCStyle.icon_normal
+                color: searchField._dark ? "#8F8F8F" : theme.fg.secondary
+            }
+        }
+
+        // T.TextField draws no placeholder of its own
+        T.Label {
+            x: searchField.leftPadding
+            width: searchField.width - searchField.leftPadding - searchField.rightPadding
+            height: searchField.height
+            verticalAlignment: Text.AlignVCenter
+            elide: Text.ElideRight
+            visible: !searchField.length && !searchField.preeditText
+            text: searchField.placeholderText
+            font: searchField.font
+            color: searchField.placeholderTextColor
+        }
+
+        Binding {
+            target: searchField.searchCtx
+            property: "pattern"
+            when: searchField.visible
+            value: searchField.text
+        }
+
+        Connections {
+            target: MainCtx.search
+            function onAskShow() {
+                if (searchField.visible)
+                    searchField.forceActiveFocus(Qt.ShortcutFocusReason)
+            }
+        }
+
+        Keys.onEscapePressed: (event) => {
+            searchField.clear()
+            searchField.escaped()
+            event.accepted = true
+        }
+        Keys.priority: Keys.AfterItem
+        Keys.onPressed: (event) => Navigation.defaultKeyAction(event)
     }
 }
