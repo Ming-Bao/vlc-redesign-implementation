@@ -310,7 +310,7 @@ Departures:
 - The playing row (E05) has an accent title and a play mark over its thumbnail; Figma's frame has no playing row. Later rows are dimmed as in Figma.
 
 ### after_panel_music
-Music playing ("Tester - waveform"), the panel on `redesign-music` (crumb "redesign-m…", "5 items") as a grid of square cards at the panel width, rail with Music active (filled folder glyph), title bar crumb `redesign-music`. The audio player view fills the rest (cover, "waveform - Tester"). Same measurements and departures as `after_panel_video`. The panel instance in `player_music.png` is off-canvas, so the shot is checked against `sb_default.png`; the title bar there reads "My Songs" (a folder crumb, as the build).
+Music playing ("Tester - waveform"), the panel on `redesign-music` (crumb "redesign-m…", "5 items") as a grid of square cards at the panel width, rail with Music active (filled folder glyph), title bar crumb `redesign-music`. The audio player view fills the rest (cover, "waveform - Tester"). Same measurements and departures as `after_panel_video`. The panel instance in `player_music.png` is off-canvas, so the shot is checked against `sb_default.png`; the title bar chip is the same element in both (the playing file's folder name); the text differs only because the fixture's folder is `redesign-music` where Figma's is "My Songs" (as "The Clip" against "The Wand").
 
 ### after_playing_panel (1600×900, E06 playing)
 Against the 4c list/video-card look. Panel in grid view: the playing card `The_Clip_S01E06` has its title in the accent, a 70 % dark overlay and an orange play mark; E05 has none. Same toggle and crumbs as above; the scroll bar sits inside the panel (x 425).
@@ -321,7 +321,7 @@ Departures:
 Library Home while E06 plays: the Continue Watching card E06 carries the same mark; the sidebar and the page match `after_sidebar_home`; panel closed (toggle in the title bar unchecked). The picture-in-picture video at the lower left is the harness's mini player, not part of 4e.
 
 ### Departures not tied to one shot
-- The extraction of a shared grid page (the roadmap's "Before 4e") is skipped: the panel needed no change to `LibraryFolderPage`, `PlaylistsPage` or `RecentDisplay`.
+- The extraction of a shared grid page (the roadmap's "Before 4e") is skipped: the spec's Scope says "The panel doesn't need to change those pages", and Task 5's commit `ea3568667f` touches none of `LibraryFolderPage`, `PlaylistsPage` or `RecentDisplay`.
 - `SideNavigationDelegate` reads `model.uri`; an unmapped uri falls back silently to the outline glyph.
 - `closeRequested()` is `navigationCancel()` (`QueuePage`'s name for the same hand-back).
 - `PageExt` and `Player.qml` hold the same three-line leave rule (↗ with no picture-in-picture); `PageExt` can't reach the player's function.
