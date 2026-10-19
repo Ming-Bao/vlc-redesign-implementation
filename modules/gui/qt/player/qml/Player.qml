@@ -58,6 +58,9 @@ FocusScope {
 
     property bool _keyPressed: false
 
+    // the library side panel; closed each time the player opens, not saved
+    property bool libraryPanelOpen: false
+
     // Settings
 
     Accessible.role: Accessible.Client
@@ -96,6 +99,13 @@ FocusScope {
 
     on_ControlsUnderVideoChanged: {
         lockUnlockAutoHide(_controlsUnderVideo)
+    }
+
+    // the controls stay while the panel is open, as with the queue card
+    onLibraryPanelOpenChanged: {
+        lockUnlockAutoHide(libraryPanelOpen)
+        if (!libraryPanelOpen && libraryPanel.activeFocus)
+            topBar.navigationButton.forceActiveFocus(Qt.BacktabFocusReason)
     }
 
     // Functions
@@ -185,7 +195,7 @@ FocusScope {
         objectName: "playerSpecializationLoader"
 
         anchors {
-            left: parent.left
+            left: libraryPanel.right // the video narrows beside the library panel
             right: parent.right
             top: (MainCtx.hasEmbededVideo && rootPlayer._controlsUnderVideo) ? topBar.bottom : parent.top
             bottom: (MainCtx.hasEmbededVideo && rootPlayer._controlsUnderVideo) ? controlBar.top : parent.bottom
@@ -656,7 +666,9 @@ FocusScope {
 
         focus: true
 
-        showNavigationToggle: false // the library side panel comes with the library redesign
+        showNavigationToggle: true
+        navigationVisible: rootPlayer.libraryPanelOpen
+        onToggleNavigationVisibility: rootPlayer.libraryPanelOpen = !rootPlayer.libraryPanelOpen
 
         // the chip is also the way back to the library, so media without a folder
         // (streams, discs) get a generic label instead of no chip
@@ -675,6 +687,8 @@ FocusScope {
 
         Navigation.parentItem: rootPlayer
         Navigation.downItem: {
+            if (rootPlayer.libraryPanelOpen)
+                return libraryPanel
             if (playlistVisibility.isPlaylistVisible)
                 return playlistpopup.currentList
             if (MainCtx.hasEmbededVideo)
@@ -723,6 +737,34 @@ FocusScope {
         // like the previous player top bar, start with the focus here (not on a control
         // that may be rebuilt when the video output appears), without a keyboard reason
         Component.onCompleted: Qt.callLater(() => topBar.forceActiveFocus(Qt.OtherFocusReason))
+    }
+
+    // Figma Sidebar 848:1995, between the title bar and the control bar
+    // (in fullscreen too); slides in from the left
+    LibraryPanel {
+        id: libraryPanel
+
+        open: rootPlayer.libraryPanelOpen
+
+        anchors.top: topBar.bottom
+        anchors.bottom: controlBar.top
+
+        width: Math.min(VLCStyle.dp(427, VLCStyle.scale), rootPlayer.width / 2)
+        x: open ? 0 : -width
+        visible: x > -width
+
+        Behavior on x {
+            NumberAnimation {
+                duration: VLCStyle.duration_long
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Navigation.parentItem: rootPlayer
+        Navigation.upItem: topBar
+        Navigation.rightItem: MainCtx.hasEmbededVideo ? playerSpecializationLoader : controlBar
+
+        onNavigationCancel: topBar.navigationButton.forceActiveFocus(Qt.BacktabFocusReason)
     }
 
     // Figma "continue" toast: resume prompt above the control bar

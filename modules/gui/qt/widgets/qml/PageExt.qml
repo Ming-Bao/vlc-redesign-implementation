@@ -443,7 +443,9 @@ T.Page {
                     visible: defaultPageHeader.compact
                     enabled: visible
                     Layout.row: 0
-                    Layout.column: openBtn.visible ? 2 : 3     // right-aligned without the ↗
+                    // right-aligned without the ↗ (not openBtn.visible: that reads false while
+                    // the hidden side panel builds the page, and both would claim column 3)
+                    Layout.column: MainCtx.playerView ? 2 : 3
                     implicitWidth: VLCStyle.icon_normal
                     implicitHeight: VLCStyle.icon_normal
                     font.pixelSize: VLCStyle.icon_normal
