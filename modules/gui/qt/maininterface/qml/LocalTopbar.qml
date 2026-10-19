@@ -131,6 +131,8 @@ T.ToolBar {
                 Widgets.IconToolButton {
                     id: menuBtn
 
+                    anchors.verticalCenter: parent.verticalCenter
+
                     // initial focus when the navigation toggle is hidden (player)
                     focus: !root.showNavigationToggle
 
@@ -161,6 +163,8 @@ T.ToolBar {
 
                 Widgets.IconToolButton {
                     id: navigationVisibilty
+
+                    anchors.verticalCenter: parent.verticalCenter
 
                     visible: root.showNavigationToggle
                     focus: root.showNavigationToggle
