@@ -132,7 +132,7 @@ User call 2026-10-19, from the video at 11:48: the panel shows what's playing.
 ## Verification
 
 In the Xvfb harness (`vlc-xvfb.sh`, `DISPLAY=:77`, silent):
-- Play S01E05 from Videos ▸ Shows ▸ The Wand ▸ S01, open the panel, and compare with `sb_default.png`.
+- Play S01E05 from Videos ▸ Shows ▸ The Clip ▸ S01 (the fixture for the Figma's The Wand), open the panel, and compare with `sb_default.png`.
 - Use every rail entry; go back and forward; search; switch the view.
 - ↗ lands on the same page in the library.
 - The music player with the panel open, compared with `player_music.png`.
