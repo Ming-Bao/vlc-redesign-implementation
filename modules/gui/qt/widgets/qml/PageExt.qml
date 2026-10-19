@@ -134,7 +134,6 @@ T.Page {
 
     header: DefaultPageHeader {
         breadcrumbs: root.breadcrumbs
-        compact: root.compact
         itemCount: root.itemCount
 
         leftPadding: VLCStyle.dynamicAppMargins(width) + VLCStyle.layout_left_margin + root.leftPadding
@@ -198,7 +197,7 @@ T.Page {
         FontMetrics { id: lastCrumbFont; font.pixelSize: VLCStyle.dp(16, VLCStyle.scale); font.weight: Font.DemiBold }
 
         property int itemCount: -1
-        property bool compact: false
+        readonly property bool compact: width < VLCStyle.dp(600, VLCStyle.scale)
         property bool _searchOpen: false
 
         property alias sortExtraRows: gridSortFilter.sortExtraRows
@@ -215,7 +214,7 @@ T.Page {
         function _closeSearch() {
             compactSearch.clear()
             _searchOpen = false
-            gridSortFilter.forceActiveFocus(Qt.BacktabFocusReason)
+            gridSortFilter.focusSearchButton()
         }
 
         Connections {
@@ -417,7 +416,7 @@ T.Page {
                     Layout.column: 0
                     Layout.fillWidth: true
                     height: VLCStyle.dp(24, VLCStyle.scale)
-                    searchCtx: _searchCtx
+                    searchCtx: gridSortFilter.search
 
                     Navigation.parentItem: defaultPageHeader
                     Navigation.rightItem: gridSortFilter
@@ -475,7 +474,7 @@ T.Page {
                     Navigation.parentItem: defaultPageHeader
                     Navigation.leftItem: defaultPageHeader.compact && compactSearch.visible ? compactSearch : crumbRow
                     Navigation.rightItem: openBtn.visible ? openBtn : null
-                    Navigation.upItem: crumbRow
+                    Navigation.upItem: defaultPageHeader.compact ? crumbRow : null
 
                     onSearchRequested: defaultPageHeader._openSearch()
                     onEscaped: defaultPageHeader.Navigation.defaultNavigationDown()

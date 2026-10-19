@@ -21,6 +21,10 @@ NavigableRow {
     property bool searchOpen: false
     signal searchRequested()
 
+    function focusSearchButton() {
+        searchBtn.forceActiveFocus(Qt.BacktabFocusReason)
+    }
+
     function openMore(button : Item) {
         _popup(moreMenu, button)
     }
@@ -222,7 +226,8 @@ NavigableRow {
         Binding {
             target: searchField.searchCtx
             property: "pattern"
-            when: searchField.visible
+            // stays bound while it holds text, so hiding the page (player panel closed) keeps the filter
+            when: searchField.visible || searchField.length > 0
             value: searchField.text
         }
 
