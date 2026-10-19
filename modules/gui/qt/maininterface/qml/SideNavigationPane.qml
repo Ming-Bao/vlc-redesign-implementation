@@ -206,6 +206,8 @@ T.Pane {
                             heightBehavior.enabled = true // At this point, it can keep being enabled for good.
                     }
 
+                    entryState: Helpers.sidebarEntryState(History.viewPath, uri)
+
                     Binding on highlighted {
                         when: !!uri && History.match(History.viewPath, uri)
                         value: true

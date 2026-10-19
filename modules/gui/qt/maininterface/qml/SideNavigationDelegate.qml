@@ -35,6 +35,18 @@ T.ItemDelegate {
 
     property bool showText: true
 
+    // Helpers.sidebarEntryState: 0 other section, 1 deeper in this section, 2 at its root
+    property int entryState: 0
+
+    readonly property var _filledGlyphs: ({
+        "home": VLCIcons.home_filled,
+        "video": VLCIcons.videos_filled,
+        "music": VLCIcons.music_filled,
+        "network": VLCIcons.network_filled,
+        "playlists": VLCIcons.playlists_filled,
+        "recent": VLCIcons.recent_filled
+    })
+
     property real radius: VLCStyle.button_radius
 
     // Settings
@@ -122,12 +134,12 @@ T.ItemDelegate {
 
                 anchors.centerIn: parent
 
-                text: control.iconTxt
+                text: (control.entryState >= 1 && model.uri && control._filledGlyphs[model.uri[0]]) || control.iconTxt
 
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
 
-                color: (control.highlighted || control.checked) ? theme.accent : theme.fg.primary
+                color: control.entryState === 2 ? theme.accent : theme.fg.primary
 
                 font.pixelSize: VLCStyle.icon_normal
             }
@@ -143,7 +155,7 @@ T.ItemDelegate {
 
             verticalAlignment: Text.AlignVCenter
 
-            color: control.checked ? theme.fg.secondary : theme.fg.primary
+            color: theme.fg.primary
 
             elide: Text.ElideRight
 

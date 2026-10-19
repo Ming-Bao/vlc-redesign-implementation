@@ -284,6 +284,17 @@ QtObject {
 
     /// </flickable-extents>
 
+    // 0: another section, 1: deeper in the entry's section, 2: at the section's root ("base" is PageLoader's default)
+    function sidebarEntryState(viewPath : var, uri : var) : int {
+        if (!uri || uri.length === 0 || viewPath.length < uri.length)
+            return 0
+        for (let i = 0; i < uri.length; i++)
+            if (viewPath[i] !== uri[i])
+                return 0
+        const rest = viewPath.slice(uri.length)
+        return (rest.length === 0 || (rest.length === 1 && rest[0] === "base")) ? 2 : 1
+    }
+
     // Label of one row of the redesign's sort menu (Figma "Sorting Options" 856:2215).
     // `text` is the page's own sortModel label, used for criteria the table does not know.
     function sortRowLabel(criteria : string, text : string, order : int) : string {

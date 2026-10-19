@@ -45,6 +45,23 @@ TestCase {
         compare(Helpers.sortRowLabel(data.criteria, "ignored", Qt.DescendingOrder), data.desc)
     }
 
+    function test_sidebarEntryState_data() {
+        return [
+            { tag: "home root", path: ["home"], uri: ["home"], state: 2 },
+            { tag: "videos root", path: ["video"], uri: ["video"], state: 2 },
+            { tag: "default subpage", path: ["video", "base"], uri: ["video"], state: 2 },
+            { tag: "folder level", path: ["video", "folder"], uri: ["video"], state: 1 },
+            { tag: "songs", path: ["music", "songs", "folder"], uri: ["music"], state: 1 },
+            { tag: "other section", path: ["network"], uri: ["video"], state: 0 },
+            { tag: "add item", path: ["home"], uri: ["additem"], state: 0 },
+            { tag: "empty history", path: [], uri: ["home"], state: 0 },
+        ]
+    }
+
+    function test_sidebarEntryState(data) {
+        compare(Helpers.sidebarEntryState(data.path, data.uri), data.state)
+    }
+
     function test_sortRowLabelFallback() {
         compare(Helpers.sortRowLabel("fileSizeRaw64", "File size", Qt.AscendingOrder), "File size Ascending")
         compare(Helpers.sortRowLabel("fileSizeRaw64", "File size", Qt.DescendingOrder), "File size Descending")
