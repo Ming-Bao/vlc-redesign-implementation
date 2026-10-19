@@ -661,6 +661,8 @@ qml_modules += {
     'outdir' : 'VLC/MainInterface',
     'sources': files(
         'maininterface/qml/LocalTopbar.qml',
+        'maininterface/qml/LibraryPageLoader.qml',
+        'maininterface/qml/LibraryAddMenu.qml',
         'maininterface/qml/MenuTopbar.qml',
         'maininterface/qml/MainInterface.qml',
         'maininterface/qml/MainViewLoader.qml',

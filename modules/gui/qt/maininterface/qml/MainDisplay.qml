@@ -63,17 +63,7 @@ FocusScope {
 
     //MainDisplay behave as a PageLoader
     function loadView(path, properties, focusReason) {
-        const found = stackView.loadView(path, properties, focusReason)
-        if (!found)
-            return
-
-        if (Player.hasVideoOutput && MainCtx.hasEmbededVideo)
-            _showMiniPlayer = true
-    }
-
-    function loadCurrentHistoryView(focusReason) {
-        loadView(History.viewPath, History.viewProp, focusReason)
-        contextSaver.restore(History.viewPath)
+        return stackView.loadView(path, properties, focusReason)
     }
 
     Component.onCompleted: {
@@ -84,10 +74,6 @@ FocusScope {
                 MainPlaylistController.stop()
         }
 
-        if (History.previousEmpty) {
-            History.update(["home"])
-        }
-        loadCurrentHistoryView(Qt.OtherFocusReason)
     }
 
     Navigation.cancelAction: function() {
@@ -103,36 +89,6 @@ FocusScope {
         if (!event.accepted)
             MainCtx.sendHotkey(event.key, event.modifiers);
     }
-
-    readonly property var pageModel: [
-        {
-            name: "home",
-            url: MainCtx.mediaLibraryAvailable ?
-                 "qrc:///qt/qml/VLC/MediaLibrary/HomeDisplay.qml" :
-                 "qrc:///qt/qml/VLC/MainInterface/NoMedialibHome.qml"
-        }, {
-            name: "video",
-            url: "qrc:///qt/qml/VLC/MediaLibrary/VideoDisplay.qml"
-        }, {
-            name: "music",
-            url: "qrc:///qt/qml/VLC/MediaLibrary/MusicDisplay.qml"
-        }, {
-            name: "network",
-            url: "qrc:///qt/qml/VLC/Network/BrowseDisplay.qml"
-        }, {
-            name: "playlists",
-            url: "qrc:///qt/qml/VLC/MediaLibrary/PlaylistsDisplay.qml"
-        }, {
-            name: "recent",
-            url: "qrc:///qt/qml/VLC/MediaLibrary/RecentDisplay.qml"
-        }, {
-            name: "discover",
-            url: "qrc:///qt/qml/VLC/Network/DiscoverDisplay.qml"
-        }, {
-            name: "mlsettings",
-            url: "qrc:///qt/qml/VLC/MediaLibrary/MLFoldersSettings.qml"
-        }
-    ]
 
     PinchHandler {
         id: interfaceScalePinchHandler
@@ -181,29 +137,6 @@ FocusScope {
             if (!active) {
                 accumulatedDelta = 0.0
             }
-        }
-    }
-
-    ModelSortSettingHandler {
-        id: contextSaver
-    }
-
-    Connections {
-        target: MainCtx.sort
-
-        function onCriteriaChanged(criteria) {
-            contextSaver.save(History.viewPath)
-        }
-
-        function onOrderChanged(order) {
-            contextSaver.save(History.viewPath)
-        }
-    }
-
-    Connections {
-        target: History
-        function onNavigate(focusReason) {
-            loadCurrentHistoryView(focusReason)
         }
     }
 
@@ -451,7 +384,7 @@ FocusScope {
                 }
             }
 
-            Widgets.PageLoader {
+            LibraryPageLoader {
                 id: stackView
 
                 focus: true
@@ -469,7 +402,10 @@ FocusScope {
                     value: 0.0
                 }
 
-                pageModel: g_mainDisplay.pageModel
+                onViewLoaded: {
+                    if (Player.hasVideoOutput && MainCtx.hasEmbededVideo)
+                        g_mainDisplay._showMiniPlayer = true
+                }
 
                 leftPadding: sidebar.visible  ? 0 : VLCStyle.applicationHorizontalMargin
 
@@ -601,31 +537,13 @@ FocusScope {
                 model: sidebar.model
 
                 onPageRequested: (uri) => {
-                    if (stackView.isDefaulLoadedForPath([...uri]) ||
-                        History.exactMatch(History.viewPath, uri)) {
-                        stackView.positionContentAtBeginning()
-                        return
-                    }
-
-                    History.push(uri)
+                    stackView.openSection(uri)
                 }
             }
 
-            // Figma sidebar "Add item": VLC's own add actions
-            Widgets.FigmaMenu {
-                id: addItemMenu
-
-                rows: (MainCtx.mediaLibraryAvailable ? [
-                          { text: qsTr("Add folder to library"), run: () => DialogsProvider.addFolderToLibrary() }
-                      ] : [])
-                      .concat([{ text: qsTr("Open network stream"), run: () => DialogsProvider.openNetDialog() }])
-                      .concat(MainCtx.mediaLibraryAvailable ? [
-                          { text: qsTr("New playlist"), run: () => {
-                              if (DialogsProvider.newPlaylist() &&
-                                  !stackView.isDefaulLoadedForPath(["playlists"]))
-                                  History.push(["playlists"])
-                          } }
-                      ] : [])
+            LibraryAddMenu {
+                id: addMenu
+                loader: stackView
             }
 
             onItemClicked: (modelUri, item) => {
@@ -633,7 +551,7 @@ FocusScope {
 
                 console.assert(item)
                 if (modelUri[0] === "additem") {
-                    addItemMenu.popup(item, item.width, 0)
+                    addMenu.popup(item, item.width, 0)
                     return
                 }
 
@@ -646,13 +564,7 @@ FocusScope {
                     return
                 }
 
-                if (stackView.isDefaulLoadedForPath([...modelUri]) ||
-                    !!modelUri.length && History.exactMatch(History.viewPath, modelUri)) {
-                    stackView.positionContentAtBeginning()
-                    return
-                }
-
-                History.push(modelUri)
+                stackView.openSection(modelUri)
             }
 
             implicitWidth: Math.round(Helpers.clamp(MainCtx.navigationPanel.width, minimumWidth, maximumWidth))

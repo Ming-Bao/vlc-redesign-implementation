@@ -747,6 +747,8 @@ modules/gui/qt/maininterface/mainctx_win32.cpp
 modules/gui/qt/maininterface/mainctx_win32.hpp
 modules/gui/qt/maininterface/qml/MenuTopbar.qml
 modules/gui/qt/maininterface/qml/LocalTopbar.qml
+modules/gui/qt/maininterface/qml/LibraryPageLoader.qml
+modules/gui/qt/maininterface/qml/LibraryAddMenu.qml
 modules/gui/qt/maininterface/qml/MainDisplay.qml
 modules/gui/qt/maininterface/qml/MainInterface.qml
 modules/gui/qt/maininterface/qml/NoMedialibHome.qml
