@@ -40,7 +40,7 @@
   "chevron-left.svg": ["ic_fluent_chevron_left_24"],
   "chevron-right.svg": ["ic_fluent_chevron_right_24"],
   "info.svg": ["info"],
-  "recent.svg": ["history"],
+  "recent.svg": ["history", "recent_filled"],
   "disc.svg": ["eject"],
   "tv.svg": ["tv"],
   "profile.svg": ["profile_new"],
@@ -57,5 +57,11 @@
   "playlists.svg": ["playlists"],
   "checkmark.svg": ["checkmark"],
   "artist.svg": ["artist"],
-  "genre.svg": ["genre"]
+  "genre.svg": ["genre"],
+  "home-filled.svg": ["home_filled"],
+  "videos-filled.svg": ["videos_filled"],
+  "music-filled.svg": ["music_filled"],
+  "streaming-filled.svg": ["network_filled"],
+  "playlists-filled.svg": ["playlists_filled"],
+  "open-in-library.svg": ["open_in_library"]
 }

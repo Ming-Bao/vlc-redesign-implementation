@@ -120,6 +120,13 @@ class VLCIcons : public QObject {
     Q_PROPERTY(QChar checkmark MEMBER checkmark CONSTANT FINAL)
     Q_PROPERTY(QChar artist MEMBER artist CONSTANT FINAL)
     Q_PROPERTY(QChar genre MEMBER genre CONSTANT FINAL)
+    Q_PROPERTY(QChar home_filled MEMBER home_filled CONSTANT FINAL)
+    Q_PROPERTY(QChar videos_filled MEMBER videos_filled CONSTANT FINAL)
+    Q_PROPERTY(QChar music_filled MEMBER music_filled CONSTANT FINAL)
+    Q_PROPERTY(QChar network_filled MEMBER network_filled CONSTANT FINAL)
+    Q_PROPERTY(QChar playlists_filled MEMBER playlists_filled CONSTANT FINAL)
+    Q_PROPERTY(QChar recent_filled MEMBER recent_filled CONSTANT FINAL)
+    Q_PROPERTY(QChar open_in_library MEMBER open_in_library CONSTANT FINAL)
 
 
 public:
@@ -236,6 +243,13 @@ public:
     static constexpr inline QChar checkmark{ u'\ue067' };
     static constexpr inline QChar artist{ u'\ue068' };
     static constexpr inline QChar genre{ u'\ue069' };
+    static constexpr inline QChar home_filled{ u'\ue06a' };
+    static constexpr inline QChar videos_filled{ u'\ue06b' };
+    static constexpr inline QChar music_filled{ u'\ue06c' };
+    static constexpr inline QChar network_filled{ u'\ue06d' };
+    static constexpr inline QChar playlists_filled{ u'\ue06e' };
+    static constexpr inline QChar recent_filled{ u'\ue06f' };
+    static constexpr inline QChar open_in_library{ u'\ue070' };
 
 };
 
