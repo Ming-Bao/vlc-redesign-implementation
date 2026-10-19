@@ -63,5 +63,6 @@
   "music-filled.svg": ["music_filled"],
   "streaming-filled.svg": ["network_filled"],
   "playlists-filled.svg": ["playlists_filled"],
-  "open-in-library.svg": ["open_in_library"]
+  "open-in-library.svg": ["open_in_library"],
+  "music-folder.svg": ["music_folder"]
 }

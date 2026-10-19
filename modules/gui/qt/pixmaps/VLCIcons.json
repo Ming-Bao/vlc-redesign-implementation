@@ -117,6 +117,7 @@
         {"key":"network_filled", "path": "./redesign/streaming-filled.svg"},
         {"key":"playlists_filled", "path": "./redesign/playlists-filled.svg"},
         {"key":"recent_filled", "path": "./redesign/recent.svg"},
-        {"key":"open_in_library", "path": "./redesign/open-in-library.svg"}
+        {"key":"open_in_library", "path": "./redesign/open-in-library.svg"},
+        {"key":"music_folder", "path": "./redesign/music-folder.svg"}
     ]
 }

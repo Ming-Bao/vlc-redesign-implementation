@@ -270,7 +270,7 @@ public:
         if (m_hasMedialib)
         {
             m_model.children.emplace_back(qtr("Videos"), "video", VLCIcons::topbar_video, QStringLiteral(":/icons/ic_fluent_filmstrip.svg"));
-            m_model.children.emplace_back(qtr("Music"), "music", VLCIcons::topbar_music, QStringLiteral(":/icons/ic_fluent_music_note_2.svg"));
+            m_model.children.emplace_back(qtr("Music"), "music", VLCIcons::music_folder, QStringLiteral(":/icons/ic_fluent_music_note_2.svg"));
         }
 
         m_model.children.emplace_back(qtr("Network"), "network", VLCIcons::topbar_network, QStringLiteral(":/icons/ic_fluent_wifi_1.svg"));

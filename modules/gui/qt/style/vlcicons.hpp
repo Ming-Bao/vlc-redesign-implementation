@@ -127,6 +127,7 @@ class VLCIcons : public QObject {
     Q_PROPERTY(QChar playlists_filled MEMBER playlists_filled CONSTANT FINAL)
     Q_PROPERTY(QChar recent_filled MEMBER recent_filled CONSTANT FINAL)
     Q_PROPERTY(QChar open_in_library MEMBER open_in_library CONSTANT FINAL)
+    Q_PROPERTY(QChar music_folder MEMBER music_folder CONSTANT FINAL)
 
 
 public:
@@ -250,6 +251,7 @@ public:
     static constexpr inline QChar playlists_filled{ u'\ue06e' };
     static constexpr inline QChar recent_filled{ u'\ue06f' };
     static constexpr inline QChar open_in_library{ u'\ue070' };
+    static constexpr inline QChar music_folder{ u'\ue071' };
 
 };
 

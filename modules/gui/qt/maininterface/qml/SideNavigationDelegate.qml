@@ -38,6 +38,9 @@ T.ItemDelegate {
     // Helpers.sidebarEntryState: 0 other section, 1 deeper in this section, 2 at its root
     property int entryState: 0
 
+    // first element of the entry's uri ("home", "video", ...)
+    property string entryKey: ""
+
     readonly property var _filledGlyphs: ({
         "home": VLCIcons.home_filled,
         "video": VLCIcons.videos_filled,
@@ -134,7 +137,7 @@ T.ItemDelegate {
 
                 anchors.centerIn: parent
 
-                text: (control.entryState >= 1 && model.uri && control._filledGlyphs[model.uri[0]]) || control.iconTxt
+                text: (control.entryState >= 1 && control._filledGlyphs[control.entryKey]) || control.iconTxt
 
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
@@ -155,7 +158,8 @@ T.ItemDelegate {
 
             verticalAlignment: Text.AlignVCenter
 
-            color: theme.fg.primary
+            // Figma: the active root's label is brighter (#C6C6C6) than the others
+            color: (control.entryState === 2 && theme.palette?.isDark) ? "#C6C6C6" : theme.fg.primary
 
             elide: Text.ElideRight
 
