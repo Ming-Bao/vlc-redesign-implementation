@@ -10,7 +10,7 @@ import VLC.Dialogs
 NavigableRow {
     id: root
 
-    spacing: VLCStyle.dp(20, VLCStyle.scale)
+    spacing: compact ? VLCStyle.dp(12, VLCStyle.scale) : VLCStyle.dp(20, VLCStyle.scale)
 
     // Escape pressed in the search field, after it was cleared
     signal escaped()
