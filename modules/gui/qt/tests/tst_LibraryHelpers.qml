@@ -62,6 +62,22 @@ TestCase {
         compare(Helpers.sidebarEntryState(data.path, data.uri), data.state)
     }
 
+    function test_sameMedia_data() {
+        return [
+            { tag: "same", mrl: "file:///m/a.mp4", url: "file:///m/a.mp4", same: true },
+            { tag: "space encoded", mrl: "file:///m/a%20b.mp4", url: "file:///m/a b.mp4", same: true },
+            { tag: "non-ASCII", mrl: "file:///m/%C3%A9t%C3%A9.mp4", url: "file:///m/\u00e9t\u00e9.mp4", same: true },
+            { tag: "different", mrl: "file:///m/a.mp4", url: "file:///m/b.mp4", same: false },
+            { tag: "empty mrl", mrl: "", url: "file:///m/a.mp4", same: false },
+            { tag: "empty url", mrl: "file:///m/a.mp4", url: "", same: false },
+            { tag: "malformed %", mrl: "file:///m/a%E0%A4%A.mp4", url: "file:///m/a%E0%A4%A.mp4", same: true },
+        ]
+    }
+
+    function test_sameMedia(data) {
+        compare(Helpers.sameMedia(data.mrl, data.url), data.same)
+    }
+
     function test_sortRowLabelFallback() {
         compare(Helpers.sortRowLabel("fileSizeRaw64", "File size", Qt.AscendingOrder), "File size Ascending")
         compare(Helpers.sortRowLabel("fileSizeRaw64", "File size", Qt.DescendingOrder), "File size Descending")

@@ -41,6 +41,8 @@ T.AbstractButton {
     property bool selected: false
     // a drag hovers the item and it takes the drop
     property bool dropTarget: false
+    // the current input: accent title and a play mark over the art
+    property bool playing: false
     property int _pressModifiers: Qt.NoModifier
 
     // mouse -> Qt.MouseFocusReason, Enter/Return -> Qt.OtherFocusReason
@@ -108,6 +110,21 @@ T.AbstractButton {
                 radius: parent.radius
                 color: Qt.alpha(root._dark ? "#D37918" : theme.accent, 0.15)
             }
+
+            // the current input, like HomeListRow's mark scaled up
+            Rectangle {
+                anchors.fill: parent
+                visible: root.playing
+                radius: parent.radius
+                color: Qt.rgba(0, 0, 0, 0.7)
+
+                Widgets.IconLabel {
+                    anchors.centerIn: parent
+                    text: VLCIcons.play
+                    font.pixelSize: VLCStyle.icon_large
+                    color: root._dark ? "#D37918" : theme.accent
+                }
+            }
         }
 
         Column {
@@ -119,7 +136,8 @@ T.AbstractButton {
                 elide: Text.ElideRight
                 text: root.title
                 font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
-                color: root._dark ? "#969696" : theme.fg.primary
+                color: root.playing ? (root._dark ? "#D37918" : theme.accent)
+                                    : root._dark ? "#969696" : theme.fg.primary
             }
 
             T.Label {

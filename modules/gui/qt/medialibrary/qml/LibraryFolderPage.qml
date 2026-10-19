@@ -310,6 +310,7 @@ Widgets.PageExt {
                         width: cell.width
                         contextModel: browseModel
                         dimmed: cell.model?.isNew === false
+                        playing: Helpers.sameMedia(cell.model?.mrl, Player.url.toString())
 
                         Navigation.parentItem: cell
                     }
@@ -325,6 +326,7 @@ Widgets.PageExt {
                         glyph: VLCIcons.album_cover
                         title: cell.model.title ?? ""
                         subtitle: cell.model.main_artist ?? ""
+                        playing: Helpers.sameMedia(cell.model?.mrl, Player.url.toString())
 
                         Navigation.parentItem: cell
 
@@ -412,8 +414,7 @@ Widgets.PageExt {
                 glyph: _folder ? VLCIcons.folder : VLCIcons.album_cover
                 progress: !_folder && model?.progress > 0 ? model.progress : -1
                 dimmed: !root.audio && model?.isNew === false
-                // through a url both ways: Player.url prints decoded ("The Clip"), the mrl encoded ("The%20Clip")
-                playing: !_folder && !!model?.mrl && Qt.resolvedUrl(model.mrl).toString() === Player.url.toString()
+                playing: !_folder && Helpers.sameMedia(model?.mrl, Player.url.toString())
                 text: (!_folder && root.audio && model?.main_artist) ? model.title + " - " + model.main_artist
                                                                      : (model?.title ?? "")
 

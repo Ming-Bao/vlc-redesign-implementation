@@ -22,6 +22,7 @@ import QtQuick.Window
 import QtQuick.Templates as T
 
 import VLC.MediaLibrary
+import VLC.Player
 
 import VLC.MainInterface
 import VLC.Widgets as Widgets
@@ -257,6 +258,7 @@ Widgets.PageExt {
                 cardDelegate: Component {
                     HomeVideoCard {
                         contextModel: continueWatchingModel
+                        playing: Helpers.sameMedia(model.mrl, Player.url.toString())
                     }
                 }
 
@@ -269,6 +271,7 @@ Widgets.PageExt {
                         glyph: VLCIcons.album_cover
                         progress: model.progress ?? -1
                         text: model.title ?? ""
+                        playing: Helpers.sameMedia(model.mrl, Player.url.toString())
 
                         onActivated: MediaLib.addAndPlay(model.id)
                         onMenuRequested: (globalPos) => continueWatchingMenu.popup([continueWatchingModel.index(index, 0)], globalPos)
@@ -317,6 +320,7 @@ Widgets.PageExt {
                         glyph: VLCIcons.album_cover
                         title: model.title ?? ""
                         subtitle: model.main_artist ?? ""
+                        playing: Helpers.sameMedia(model.mrl, Player.url.toString())
 
                         onActivated: MediaLib.addAndPlay(model.id)
                         onMenuRequested: (globalPos) => listenAgainMenu.popup([listenAgainModel.index(index, 0)], globalPos)
@@ -331,6 +335,7 @@ Widgets.PageExt {
                         image: model.cover ?? ""
                         glyph: VLCIcons.album_cover
                         text: model.main_artist ? model.title + " - " + model.main_artist : (model.title ?? "")
+                        playing: Helpers.sameMedia(model.mrl, Player.url.toString())
 
                         onActivated: MediaLib.addAndPlay(model.id)
                         onMenuRequested: (globalPos) => listenAgainMenu.popup([listenAgainModel.index(index, 0)], globalPos)

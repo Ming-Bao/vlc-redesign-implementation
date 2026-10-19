@@ -36,6 +36,8 @@ T.AbstractButton {
     property var contextModel
     // a watched video: the title greys out
     property bool dimmed: false
+    // the current input: accent title and a play mark over the art
+    property bool playing: false
     // VLCIcons glyph shown on the backing when there is no thumbnail
     property string glyph
 
@@ -120,6 +122,21 @@ T.AbstractButton {
                 }
             }
 
+            // the current input, like HomeListRow's mark scaled up
+            Rectangle {
+                anchors.fill: parent
+                visible: root.playing
+                radius: parent.radius
+                color: Qt.rgba(0, 0, 0, 0.7)
+
+                Widgets.IconLabel {
+                    anchors.centerIn: parent
+                    text: VLCIcons.play
+                    font.pixelSize: VLCStyle.icon_large
+                    color: root._dark ? "#D37918" : theme.accent
+                }
+            }
+
             // the library grid card's play button
             Widgets.PlayCover {
                 anchors.centerIn: parent
@@ -133,8 +150,9 @@ T.AbstractButton {
             elide: Text.ElideRight
             text: root.text
             font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
-            color: root.dimmed ? (root._dark ? "#6B6B6B" : theme.fg.secondary)
-                               : (root._dark ? "#969696" : theme.fg.primary)
+            color: root.playing ? (root._dark ? "#D37918" : theme.accent)
+                 : root.dimmed ? (root._dark ? "#6B6B6B" : theme.fg.secondary)
+                 : (root._dark ? "#969696" : theme.fg.primary)
         }
     }
 

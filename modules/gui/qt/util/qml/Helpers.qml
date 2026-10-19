@@ -295,6 +295,14 @@ QtObject {
         return (rest.length === 0 || (rest.length === 1 && rest[0] === "base")) ? 2 : 1
     }
 
+    // Whether a model's mrl (percent-encoded) is the playing url (Player.url prints it decoded)
+    function sameMedia(mrl : string, url : string) : bool {
+        if (!mrl || !url)
+            return false
+        const dec = (s) => { try { return decodeURIComponent(s) } catch (e) { return s } }
+        return dec(mrl) === dec(url)
+    }
+
     // Label of one row of the redesign's sort menu (Figma "Sorting Options" 856:2215).
     // `text` is the page's own sortModel label, used for criteria the table does not know.
     function sortRowLabel(criteria : string, text : string, order : int) : string {

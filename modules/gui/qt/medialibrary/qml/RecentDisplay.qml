@@ -188,6 +188,7 @@ Widgets.PageExt {
                     index: cell.index
                     width: cell.width
                     contextModel: recentModel
+                    playing: Helpers.sameMedia(cell.model?.mrl, Player.url.toString())
                     dimmed: !!cell.model?.isVideo && !cell.model?.isNew
                     glyph: cell.model?.isVideo ? VLCIcons.topbar_video : VLCIcons.topbar_music
 
@@ -238,8 +239,7 @@ Widgets.PageExt {
                 glyph: _video ? VLCIcons.topbar_video : VLCIcons.topbar_music
                 progress: model?.progress > 0 ? model.progress : -1
                 dimmed: _video && !model?.isNew
-                // through a url both ways: Player.url prints decoded ("The Clip"), the mrl encoded ("The%20Clip")
-                playing: !!model?.mrl && Qt.resolvedUrl(model.mrl).toString() === Player.url.toString()
+                playing: Helpers.sameMedia(model?.mrl, Player.url.toString())
                 text: (!_video && model?.main_artist) ? model.title + " - " + model.main_artist
                                                       : (model?.title ?? "")
 
