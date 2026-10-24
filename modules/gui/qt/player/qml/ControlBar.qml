@@ -249,8 +249,11 @@ T.Pane {
                 Loader {
                     id: waveformLoader
                     // only once the tracks are known and are audio only: Player.url changes before the
-                    // demuxer lists any track, so a video would otherwise be decoded for a moment
+                    // demuxer lists any track, so a video would otherwise be decoded for a moment.
+                    // Not while stopping either: the video tracks go before the audio ones then.
                     active: trackPositionSlider.waveform && Player.audioTracks.count > 0 && Player.videoTracks.count === 0
+                            && (Player.playingState === Player.PLAYING_STATE_PLAYING
+                                || Player.playingState === Player.PLAYING_STATE_PAUSED)
                     sourceComponent: Waveform {
                         ctx: MainCtx
                         uri: Player.url
