@@ -2688,5 +2688,9 @@ vlc_module_begin()
     set_subcategory(SUBCAT_ADVANCED_MISC)
     set_capability("medialibrary", 100)
     set_callbacks(Open, Close)
+    /* libmedialibrary keeps our Logger in a static shared_ptr that is only
+     * released by its global destructors: unloading us first leaves it with
+     * a dangling vtable and crashes at exit. */
+    cannot_unload_broken_library()
     add_bool( "ml-verbose", false, ML_VERBOSE, nullptr )
 vlc_module_end()
