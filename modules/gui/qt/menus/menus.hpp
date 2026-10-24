@@ -86,9 +86,9 @@ public:
     static void InterfacesMenu( qt_intf_t *p_intf, QMenu * );
     static void ExtensionsMenu( qt_intf_t *p_intf, QMenu * );
 
-    static void NavigMenu( qt_intf_t *, QMenu * );
+    static void NavigMenu( qt_intf_t *, QMenu *, bool b_popup = false );
 
-    static void RebuildNavigMenu(qt_intf_t *, QMenu *);
+    static void RebuildNavigMenu(qt_intf_t *, QMenu *, bool b_transport = true);
 
     static void VideoMenu( qt_intf_t *, QMenu * );
 

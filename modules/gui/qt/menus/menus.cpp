@@ -110,6 +110,19 @@ QAction *addDPStaticEntry( QMenu *menu,
 }
 
 /**
+ * @brief DP entry with one of the redesign's icons: already two-tone, so a plain QIcon
+ **/
+template<typename Functor>
+static QAction *addDPIconEntry( QMenu *menu, const QString& text, const char *icon,
+                                const Functor member, const char *shortcut = nullptr,
+                                QAction::MenuRole role = QAction::NoRole )
+{
+    QAction *a = addDPStaticEntry( menu, text, "", member, shortcut, role );
+    a->setIcon( QIcon( icon ) );
+    return a;
+}
+
+/**
  * @brief Add static entries to MIM in menus
  **/
 template<typename Fun>
@@ -130,28 +143,6 @@ static QAction* addMIMStaticEntry( qt_intf_t *p_intf,
 #endif
     {
         action = menu->addAction( text, THEMIM, member );
-    }
-    return action;
-}
-
-template<typename Fun>
-static QAction* addMPLStaticEntry( qt_intf_t *p_intf,
-                            QMenu *menu,
-                            const QString& text,
-                            const char *icon,
-                            Fun member )
-{
-    QAction *action;
-#ifndef __APPLE__ /* We don't set icons in menus in MacOS X */
-    if( !EMPTY_STR( icon ) )
-    {
-        action = menu->addAction( text, THEMPL,  member );
-        action->setIcon( ColorizedSvgIcon::colorizedIconForWidget( icon, menu ) );
-    }
-    else
-#endif
-    {
-        action = menu->addAction( text, THEMPL, member );
     }
     return action;
 }
@@ -244,14 +235,11 @@ void VLCMenuBar::MainMenu( qt_intf_t *p_intf, QMenu *menu, std::function<void()>
 {
     auto mi = p_intf->p_mi;
 
-    /* The redesign's icons are already two-tone: a plain QIcon, not recoloured */
     auto entry = [menu]( const QString &text, const char *icon, auto member,
                          const char *shortcut = nullptr,
                          QAction::MenuRole role = QAction::NoRole )
     {
-        QAction *a = addDPStaticEntry( menu, text, "", member, shortcut, role );
-        a->setIcon( QIcon( icon ) );
-        return a;
+        return addDPIconEntry( menu, text, icon, member, shortcut, role );
     };
 
     entry( qtr( "Open File(s)" ), ":/redesign/menu/open-file.svg",
@@ -384,7 +372,7 @@ void VLCMenuBar::ToolsMenu( qt_intf_t *p_intf, QMenu *menu )
 /**
  * View Menu
  * Interface modification, load other interfaces, activate Extensions
- * \param current, set to NULL for menu creation, else for menu update
+ * \param menu, a fresh menu
  **/
 void VLCMenuBar::ViewMenu(qt_intf_t *p_intf, QMenu *menu)
 {
@@ -393,17 +381,6 @@ void VLCMenuBar::ViewMenu(qt_intf_t *p_intf, QMenu *menu)
     MainCtx *mi = p_intf->p_mi;
     assert( mi );
     assert(menu);
-
-    //menu->clear();
-    //HACK menu->clear() does not delete submenus
-    QList<QAction*> actions = menu->actions();
-    foreach( QAction *a, actions )
-    {
-        QMenu *m = a->menu();
-        if( a->parent() == menu ) delete a;
-        else menu->removeAction( a );
-        if( m && m->parent() == menu ) delete m;
-    }
 
     action = menu->addAction(
 #ifndef __APPLE__
@@ -593,7 +570,7 @@ void VLCMenuBar::VideoMenu( qt_intf_t *p_intf, QMenu *current )
  * Navigation Menu
  * For DVD, MP4, MOV and other chapter based format
  **/
-void VLCMenuBar::NavigMenu( qt_intf_t *p_intf, QMenu *menu )
+void VLCMenuBar::NavigMenu( qt_intf_t *p_intf, QMenu *menu, bool b_popup )
 {
     QAction *action;
     QMenu *submenu;
@@ -630,10 +607,10 @@ void VLCMenuBar::NavigMenu( qt_intf_t *p_intf, QMenu *menu )
 
     PopupMenuControlEntries( menu, p_intf );
 
-    RebuildNavigMenu( p_intf, menu );
+    RebuildNavigMenu( p_intf, menu, !b_popup );
 }
 
-void VLCMenuBar::RebuildNavigMenu( qt_intf_t *p_intf, QMenu *menu )
+void VLCMenuBar::RebuildNavigMenu( qt_intf_t *p_intf, QMenu *menu, bool b_transport )
 {
     QAction* action;
 
@@ -650,7 +627,9 @@ void VLCMenuBar::RebuildNavigMenu( qt_intf_t *p_intf, QMenu *menu )
 
 #undef ADD_ACTION
 
-    PopupMenuPlaylistEntries( menu, p_intf );
+    /* the right-click menu has these at its top level */
+    if( b_transport )
+        PopupMenuPlaylistEntries( menu, p_intf );
 }
 
 /**
@@ -680,6 +659,14 @@ void VLCMenuBar::HelpMenu(qt_intf_t *p_intf, QMenu *menu )
  * Popup menus - Right Click menus                                           *
  *****************************************************************************/
 
+/* The shortcut column only shows the key; VLC's own hotkey does the work */
+static QAction *showKey( QAction *a, const char *key )
+{
+    a->setShortcut( QKeySequence( key ) );
+    a->setShortcutContext( Qt::WidgetShortcut );
+    return a;
+}
+
 void VLCMenuBar::PopupMenuPlaylistEntries( QMenu *menu, qt_intf_t *p_intf )
 {
     QAction *action;
@@ -688,42 +675,45 @@ void VLCMenuBar::PopupMenuPlaylistEntries( QMenu *menu, qt_intf_t *p_intf )
     /* Play or Pause action and icon */
     if( !hasInput || THEMIM->getPlayingState() != PlayerController::PLAYING_STATE_PLAYING )
     {
-        action = menu->addAction( qtr( "&Play" ), [p_intf]() {
+        action = menu->addAction( qtr( "Play" ), [p_intf]() {
             if ( THEMPL->isEmpty() )
                 THEDP->openFileDialog();
             else
                 THEMPL->togglePlayPause();
         });
-#ifndef __APPLE__ /* No icons in menus in Mac */
-        action->setIcon( ColorizedSvgIcon::colorizedIconForWidget( QStringLiteral(":/menu/ic_fluent_play_filled.svg"), menu ) );
-#endif
+        action->setIcon( QIcon( ":/redesign/menu/play.svg" ) );
     }
     else
     {
-        action = addMPLStaticEntry( p_intf, menu, qtr( "Pause" ),
-                ":/menu/ic_pause_filled.svg", &PlaylistController::togglePlayPause );
+        action = menu->addAction( qtr( "Pause" ), THEMPL, &PlaylistController::togglePlayPause );
+        action->setIcon( QIcon( ":/redesign/menu/pause.svg" ) );
     }
+    showKey( action, "Space" );
 
     /* Stop */
-    action = addMPLStaticEntry( p_intf, menu, qtr( "&Stop" ),
-            ":/menu/ic_fluent_stop.svg", &PlaylistController::stop );
+    action = menu->addAction( QIcon( ":/redesign/menu/stop.svg" ), qtr( "Stop" ),
+                              THEMPL, &PlaylistController::stop );
+    showKey( action, "S" );
     if( !hasInput )
         action->setEnabled( false );
 
     /* Next / Previous */
     bool bPlaylistEmpty = THEMPL->isEmpty();
-    QAction* previousAction = addMPLStaticEntry( p_intf, menu, qtr( "Pre&vious" ),
-            ":/menu/ic_fluent_previous.svg", &PlaylistController::prev );
+    QAction* previousAction = menu->addAction( QIcon( ":/redesign/menu/previous.svg" ),
+                                  qtr( "Previous Item" ), THEMPL, &PlaylistController::prev );
+    showKey( previousAction, "P" );
     previousAction->setEnabled( !bPlaylistEmpty );
     connect( THEMPL, &PlaylistController::isEmptyChanged, previousAction, &QAction::setDisabled);
 
-    QAction* nextAction = addMPLStaticEntry( p_intf, menu, qtr( "Ne&xt" ),
-            ":/menu/ic_fluent_next.svg", &PlaylistController::next );
+    QAction* nextAction = menu->addAction( QIcon( ":/redesign/menu/next.svg" ),
+                              qtr( "Next Item" ), THEMPL, &PlaylistController::next );
+    showKey( nextAction, "N" );
     nextAction->setEnabled( !bPlaylistEmpty );
     connect( THEMPL, &PlaylistController::isEmptyChanged, nextAction, &QAction::setDisabled);
 
-    action = menu->addAction( qtr( "Record" ), THEMIM, &PlayerController::toggleRecord );
-    action->setIcon( QIcon( ":/menu/ic_fluent_record.svg" ) );
+    action = menu->addAction( QIcon( ":/redesign/menu/record.svg" ), qtr( "Record" ),
+                              THEMIM, &PlayerController::toggleRecord );
+    showKey( action, "Shift+R" );
     if( !hasInput )
         action->setEnabled( false );
     menu->addSeparator();
@@ -790,23 +780,20 @@ void VLCMenuBar::PopupMenuControlEntries( QMenu *menu, qt_intf_t *p_intf,
 
 void VLCMenuBar::PopupMenuStaticEntries( QMenu *menu )
 {
-    QMenu *openmenu = new QMenu( qtr( "Open Media" ), menu );
-    addDPStaticEntry( openmenu, qfut( I_OP_OPF ),
-        ":/menu/file.svg", &DialogsProvider::openFileDialog);
-    addDPStaticEntry( openmenu, qfut( I_OP_OPDIR ),
-        ":/menu/folder.svg", &DialogsProvider::PLOpenDir);
-    addDPStaticEntry( openmenu, qtr( "Open &Disc..." ),
-        ":/menu/disc.svg", &DialogsProvider::openDiscDialog);
-    addDPStaticEntry( openmenu, qtr( "Open &Network..." ),
-        ":/menu/network.svg", &DialogsProvider::openNetDialog);
-    addDPStaticEntry( openmenu, qtr( "Open &Capture Device..." ),
-        ":/menu/capture-card.svg", &DialogsProvider::openCaptureDialog);
-    menu->addMenu( openmenu );
+    QMenu *openmenu = menu->addMenu( QIcon( ":/redesign/menu/open-media.svg" ), qtr( "Open Media" ) );
+    addDPIconEntry( openmenu, qtr( "Open File(s)" ), ":/redesign/menu/open-file.svg",
+                    &DialogsProvider::openFileDialog );
+    addDPIconEntry( openmenu, qtr( "Open Folder" ), ":/redesign/menu/open-folder.svg",
+                    &DialogsProvider::PLOpenDir );
+    addDPIconEntry( openmenu, qtr( "Open Network Stream" ), ":/redesign/menu/open-network.svg",
+                    &DialogsProvider::openNetDialog );
+    addDPIconEntry( openmenu, qtr( "Open Disc" ), ":/redesign/menu/open-disc.svg",
+                    &DialogsProvider::openDiscDialog );
+    addDPIconEntry( openmenu, qtr( "Open Capture Device" ), ":/redesign/menu/open-capture.svg",
+                    &DialogsProvider::openCaptureDialog );
 
-    menu->addSeparator();
-
-    addDPStaticEntry( menu, qtr( "Quit" ), ":/menu/exit.svg",
-                      &DialogsProvider::quit, "Ctrl+Q", QAction::QuitRole );
+    addDPIconEntry( menu, qtr( "Quit VLC" ), ":/redesign/menu/quit.svg",
+                    &DialogsProvider::quit, "Ctrl+Q", QAction::QuitRole );
 }
 
 /* Video Tracks and Subtitles tracks */
@@ -854,112 +841,124 @@ QMenu* VLCMenuBar::PopupMenu( qt_intf_t *p_intf, bool show )
     /* */
     QMenu* menu = new VLCMenu(p_intf);
     input_item_t* p_input = THEMIM->getInput();
-    QAction *action;
-    bool b_isFullscreen = false;
+    MainCtx *mi = p_intf->p_mi;
 
     PopupMenuPlaylistEntries( menu, p_intf );
-    menu->addSeparator();
 
-    if( p_input )
+    if( !p_intf->b_isDialogProvider )
     {
-        QMenu *submenu;
-        SharedVOutThread p_vout = THEMIM->getVout();
-
-        /* Add a fullscreen switch button, since it is the most used function */
-        if( p_vout )
-        {
-            menu->addAction(new BooleanPropertyAction(qtr( "&Fullscreen" ), THEMIM, "fullscreen", menu) );
-            menu->addSeparator();
-        }
-
-        /* Input menu */
-
-        /* Audio menu */
-        submenu = new QMenu( menu );
-        AudioMenu( p_intf, submenu );
-        action = menu->addMenu( submenu );
-        action->setText( qtr( "&Audio" ) );
-        if( action->menu()->isEmpty() )
-            action->setEnabled( false );
-
-        /* Video menu */
-        submenu = new QMenu( menu );
-        VideoMenu( p_intf, submenu );
-        action = menu->addMenu( submenu );
-        action->setText( qtr( "&Video" ) );
-        if( action->menu()->isEmpty() )
-            action->setEnabled( false );
-
-        /* Subtitles menu */
-        submenu = new QMenu( menu );
-        SubtitleMenu( p_intf, submenu, true );
-        action = menu->addMenu( submenu );
-        action->setText( qtr( "Subti&tle") );
-
-        /* Playback menu for chapters */
-        submenu = new QMenu( menu );
-        NavigMenu( p_intf, submenu );
-        action = menu->addMenu( submenu );
-        action->setText( qtr( "&Playback" ) );
-        if( action->menu()->isEmpty() )
-            action->setEnabled( false );
+        QAction *action = menu->addAction( QIcon( ":/redesign/menu/hide-ui.svg" ), qtr( "Hide UI" ) );
+        showKey( action, "Ctrl+H" );
+        action->setCheckable( true );
+        action->setChecked( mi->isMinimalView() );
+        connect( action, &QAction::triggered, mi, &MainCtx::setMinimalView );
+        menu->addSeparator();
     }
 
+    /* The track menus show without an input too, but empty and disabled */
+    auto trackMenu = [menu, p_input]( const QString &title, const char *icon, auto fill ) {
+        QMenu *submenu = menu->addMenu( QIcon( icon ), title );
+        if( p_input )
+            fill( submenu );
+        submenu->menuAction()->setEnabled( !submenu->isEmpty() );
+    };
+
+    trackMenu( qtr( "Playback" ), ":/redesign/menu/playback.svg", [p_intf]( QMenu *m ) {
+        NavigMenu( p_intf, m, true );
+    } );
+    trackMenu( qtr( "Video" ), ":/redesign/menu/video.svg", [p_intf]( QMenu *m ) {
+        VideoMenu( p_intf, m );
+        /* the fullscreen toggle goes first, it is the most used function */
+        const auto actions = m->actions();
+        for( QAction *a : actions )
+            if( qobject_cast<BooleanPropertyAction*>( a ) )
+            {
+                m->insertAction( actions.first(), a );
+                m->insertSeparator( actions.first() );
+                break;
+            }
+    } );
+    trackMenu( qtr( "Audio" ), ":/redesign/menu/audio.svg", [p_intf]( QMenu *m ) {
+        AudioMenu( p_intf, m );
+    } );
+    trackMenu( qtr( "Subtitle" ), ":/redesign/menu/subtitles.svg", [p_intf]( QMenu *m ) {
+        SubtitleMenu( p_intf, m, true );
+    } );
     menu->addSeparator();
 
     /* Add some special entries for windowed mode: Interface Menu */
-    if( !b_isFullscreen )
+    if( p_intf->b_isDialogProvider )
     {
-        if( p_intf->b_isDialogProvider )
+        // same as Tool menu but with extra entries
+        QMenu* submenu = new QMenu( qtr( "Interface" ), menu );
+        ToolsMenu( p_intf, submenu );
+        submenu->addSeparator();
+
+        vlc_object_t* p_object = vlc_object_parent(p_intf->intf);
+
+        /* Open skin dialog box */
+        if (var_Type(p_object, "intf-skins-interactive") & VLC_VAR_ISCOMMAND)
         {
-            // same as Tool menu but with extra entries
-            QMenu* submenu = new QMenu( qtr( "Interface" ), menu );
-            ToolsMenu( p_intf, submenu );
-            submenu->addSeparator();
-
-            vlc_object_t* p_object = vlc_object_parent(p_intf->intf);
-
-            /* Open skin dialog box */
-            if (var_Type(p_object, "intf-skins-interactive") & VLC_VAR_ISCOMMAND)
-            {
-                QAction* openSkinAction = new QAction(qtr("Open skin..."), menu);
-                openSkinAction->setShortcut( QKeySequence( "Ctrl+Shift+S" ));
-                connect(openSkinAction, &QAction::triggered, [=]() {
-                    var_TriggerCallback(p_object, "intf-skins-interactive");
-                });
-                submenu->addAction(openSkinAction);
-            }
-
-            VLCVarChoiceModel* skinmodel = new VLCVarChoiceModel(p_object, "intf-skins", submenu);
-            CheckableListMenu* skinsubmenu = new CheckableListMenu(qtr("Interface"), skinmodel, QActionGroup::ExclusionPolicy::ExclusiveOptional, submenu);
-            submenu->addMenu(skinsubmenu);
-
-            submenu->addSeparator();
-
-            /* list of extensions */
-            ExtensionsMenu( p_intf, submenu );
-
-            menu->addMenu( submenu );
+            QAction* openSkinAction = new QAction(qtr("Open skin..."), menu);
+            openSkinAction->setShortcut( QKeySequence( "Ctrl+Shift+S" ));
+            connect(openSkinAction, &QAction::triggered, [=]() {
+                var_TriggerCallback(p_object, "intf-skins-interactive");
+            });
+            submenu->addAction(openSkinAction);
         }
-        else
-        {
-            QMenu* toolsMenu = new QMenu( qtr( "Tool&s" ), menu );
-            ToolsMenu( p_intf, toolsMenu );
-            menu->addMenu( toolsMenu );
 
-            QMenu* viewMenu = new QMenu( qtr( "V&iew" ), menu );
-            ViewMenu( p_intf, viewMenu );
-            menu->addMenu( viewMenu );
-        }
+        VLCVarChoiceModel* skinmodel = new VLCVarChoiceModel(p_object, "intf-skins", submenu);
+        CheckableListMenu* skinsubmenu = new CheckableListMenu(qtr("Interface"), skinmodel, QActionGroup::ExclusionPolicy::ExclusiveOptional, submenu);
+        submenu->addMenu(skinsubmenu);
+
+        submenu->addSeparator();
+
+        /* list of extensions */
+        ExtensionsMenu( p_intf, submenu );
+
+        menu->addMenu( submenu );
+    }
+    else
+    {
+        QMenu* more = menu->addMenu( QIcon( ":/redesign/menu/more-settings.svg" ), qtr( "More Settings" ) );
+        ToolsMenu( p_intf, more );
+        more->addSeparator();
+        ViewMenu( p_intf, more );
+
+        /* whatever of Show/Shuffle/Repeat/Save/Clear the player already has */
+        QMenu* queue = menu->addMenu( QIcon( ":/redesign/menu/playlist.svg" ), qtr( "Playlist" ) );
+        QAction *action = queue->addAction( qtr( "Play Queue" ) );
+        showKey( action, "Ctrl+L" );
+        action->setCheckable( true );
+        action->setChecked( mi->getPlayqueuePanel()->isVisible() );
+        connect( action, &QAction::triggered, mi->getPlayqueuePanel(), &SidePanelCtx::setVisible );
+
+        action = queue->addAction( QIcon( ":/redesign/menu/shuffle.svg" ), qtr( "Shuffle" ) );
+        action->setCheckable( true );
+        action->setChecked( THEMPL->isRandom() );
+        connect( action, &QAction::triggered, THEMPL, &PlaylistController::setRandom );
+
+        /* ponytail: on/off for all, the cycle through repeat-one lives on the control bar button */
+        action = queue->addAction( qtr( "Repeat" ) );
+        action->setCheckable( true );
+        action->setChecked( THEMPL->getRepeatMode() != PlaylistController::PLAYBACK_REPEAT_NONE );
+        connect( action, &QAction::triggered, THEMPL, [playlist = THEMPL](bool on) {
+            playlist->setRepeatMode( on ? PlaylistController::PLAYBACK_REPEAT_ALL
+                                      : PlaylistController::PLAYBACK_REPEAT_NONE );
+        } );
+
+        queue->addSeparator();
+        addDPIconEntry( queue, qtr( "Save Play Queue to File" ), ":/redesign/menu/export.svg",
+                        &DialogsProvider::savePlayingToPlaylist, "Ctrl+Y" );
+        queue->addAction( qtr( "Clear" ), THEMPL, &PlaylistController::clear );
     }
 
     /* Static entries for ending, like open */
     if( p_intf->b_isDialogProvider )
     {
 
-        QMenu* openmenu = new QMenu( qtr( "Open Media" ), menu );
+        QMenu* openmenu = menu->addMenu( QIcon( ":/redesign/menu/open-media.svg" ), qtr( "Open Media" ) );
         FileMenu( p_intf, openmenu );
-        menu->addMenu( openmenu );
 
         menu->addSeparator();
 
@@ -967,8 +966,8 @@ QMenu* VLCMenuBar::PopupMenu( qt_intf_t *p_intf, bool show )
         HelpMenu( p_intf, helpmenu );
         menu->addMenu( helpmenu );
 
-        addDPStaticEntry( menu, qtr( "Quit" ), ":/menu/exit.svg",
-                          &DialogsProvider::quit, "Ctrl+Q", QAction::QuitRole );
+        addDPIconEntry( menu, qtr( "Quit VLC" ), ":/redesign/menu/quit.svg",
+                        &DialogsProvider::quit, "Ctrl+Q", QAction::QuitRole );
     }
     else
         PopupMenuStaticEntries( menu );
