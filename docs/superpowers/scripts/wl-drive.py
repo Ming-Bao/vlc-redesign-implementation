@@ -12,6 +12,7 @@ Steps (executed in order):
     shot:NAME         save OUTDIR/NAME.png from a Mutter ScreenCast stream
     move:X,Y          move the pointer to monitor coordinates
     click:X,Y         left click at monitor coordinates
+    rclick:X,Y        right click at monitor coordinates
     key:KEYSYM        press+release a keysym (e.g. space, Escape); KEY+KEY for a chord (Alt_L+F4)
     exit:SECONDS      wait for VLC to exit; if it doesn't, save its stacks to OUTDIR/hang.txt
 Writes OUTDIR/vlc.log and OUTDIR/shell.log.
@@ -29,6 +30,7 @@ REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
 BUILD = os.path.join(REPO, "build")
 WL = "vlc-wl"
 BTN_LEFT = 0x110
+BTN_RIGHT = 0x111
 KEYSYMS = {"F11": 0xffc8, "space": 0x20, "Escape": 0xff1b, "Return": 0xff0d, "Super_L": 0xffeb, "Up": 0xff52,
            "Alt_L": 0xffe9, "Control_L": 0xffe3, "F4": 0xffc1, "q": 0x71}
 
@@ -130,12 +132,13 @@ def main():
             x, y = (float(v) for v in arg.split(","))
             rd.call_sync("NotifyPointerMotionAbsolute", GLib.Variant("(sdd)", (stream_path, x, y)), 0, 5000, None)
             pump(0.3)
-        elif verb == "click":
+        elif verb in ("click", "rclick"):
             x, y = (float(v) for v in arg.split(","))
+            btn = BTN_LEFT if verb == "click" else BTN_RIGHT
             rd.call_sync("NotifyPointerMotionAbsolute", GLib.Variant("(sdd)", (stream_path, x, y)), 0, 5000, None)
             pump(0.3)
-            rd.call_sync("NotifyPointerButton", GLib.Variant("(ib)", (BTN_LEFT, True)), 0, 5000, None)
-            rd.call_sync("NotifyPointerButton", GLib.Variant("(ib)", (BTN_LEFT, False)), 0, 5000, None)
+            rd.call_sync("NotifyPointerButton", GLib.Variant("(ib)", (btn, True)), 0, 5000, None)
+            rd.call_sync("NotifyPointerButton", GLib.Variant("(ib)", (btn, False)), 0, 5000, None)
             pump(0.3)
         elif verb == "key":
             syms = [KEYSYMS.get(k) or int(k, 0) for k in arg.split("+")]

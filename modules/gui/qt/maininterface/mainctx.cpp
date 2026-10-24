@@ -59,6 +59,7 @@
 #include "dialogs/toolbar/controlbar_profile_model.hpp"
 #include "dialogs/help/help.hpp"
 #include "network/networktreeitem.hpp"
+#include "style/menustyle.hpp"
 
 #include <QKeyEvent>
 
@@ -571,6 +572,7 @@ void MainCtx::updateIntfScaleFactor()
          == static_cast<int>(newValue * FACTOR_RESOLUTION) ) return;
 
     m_intfScaleFactor = newValue;
+    MenuStyle::setScale(newValue);
     emit intfScaleFactorChanged();
 }
 

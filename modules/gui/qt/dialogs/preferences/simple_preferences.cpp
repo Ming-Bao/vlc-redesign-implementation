@@ -34,6 +34,7 @@
 #include "util/color_scheme_model.hpp"
 #include "util/proxycolumnmodel.hpp"
 #include "medialibrary/mlrecentmediamodel.hpp"
+#include "style/menustyle.hpp"
 
 #include <vlc_config_cat.h>
 #include <vlc_configuration.h>
@@ -1354,6 +1355,7 @@ void SPrefsPanel::changeStyle()
         // updating the preferences dialog when
         // it is rejected:
         QApplication::setStyle( style );
+        MenuStyle::install();
     }, Qt::QueuedConnection );
 }
 

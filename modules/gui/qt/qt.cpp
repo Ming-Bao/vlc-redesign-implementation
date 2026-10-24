@@ -85,6 +85,7 @@ extern "C" char **environ;
 
 #include "qt.hpp"
 #include "util/ui_font.hpp"
+#include "style/menustyle.hpp"
 
 #include "player/player_controller.hpp"    /* THEMIM destruction */
 #include "playlist/playlist_controller.hpp" /* THEMPL creation */
@@ -1482,6 +1483,7 @@ static void *Thread( void *obj )
         }
     }
 #undef QTSTYLE_KEY
+    MenuStyle::install();
 
     /* Launch */
     app.exec();

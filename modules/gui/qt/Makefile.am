@@ -291,6 +291,7 @@ libqt_plugin_la_SOURCES = \
 	style/systempalette.cpp \
 	style/systempalette.hpp \
 	style/vlcicons.cpp 	style/vlcicons.hpp \
+	style/menustyle.cpp style/menustyle.hpp \
 	style/defaultthemeproviders.hpp \
 	style/systempalettethemeprovider.cpp \
 	player/input_models.cpp player/input_models.hpp \
@@ -1925,6 +1926,20 @@ test_waveform_util_LDADD = $(QT_QTEST_COMMON_ldadd)
 test_waveform_util_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
 check_PROGRAMS += test_waveform_util
 TESTS += test_waveform_util
+
+# test_menu_style
+test_menu_style_SOURCES = \
+	tests/test_menu_style.cpp \
+	style/menustyle.hpp style/menustyle.cpp
+nodist_test_menu_style_SOURCES = tests/test_menu_style.moc
+BUILT_SOURCES += tests/test_menu_style.moc
+CLEANFILES += tests/test_menu_style.moc
+test_menu_style_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)
+test_menu_style_CXXFLAGS = $(QT_QTEST_COMMON_cxxflags)
+test_menu_style_LDADD = $(QT_QTEST_COMMON_ldadd)
+test_menu_style_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
+check_PROGRAMS += test_menu_style
+TESTS += test_menu_style
 
 # test_thread_runner
 

@@ -422,6 +422,8 @@ qt_plugin_sources = files(
     'style/systempalette.hpp',
     'style/vlcicons.cpp',
     'style/vlcicons.hpp',
+    'style/menustyle.cpp',
+    'style/menustyle.hpp',
     'style/defaultthemeproviders.hpp',
     'style/systempalettethemeprovider.cpp',
     'player/input_models.cpp',
@@ -1494,6 +1496,20 @@ if qt6_dep.found()
                 'player/waveform_util.cpp'
             ),
             'moc_sources': files('tests/test_waveform_util.cpp'),
+            'suite': ['qt'],
+            'include_directories' : qt_include_dir,
+            'link_args': qt_link_args,
+            'dependencies': [qt6_dep, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
+            'name': 'test_qt_menu_style',
+            'sources': files(
+                'tests/test_menu_style.cpp',
+                'style/menustyle.hpp',
+                'style/menustyle.cpp'
+            ),
+            'moc_sources': files('tests/test_menu_style.cpp'),
             'suite': ['qt'],
             'include_directories' : qt_include_dir,
             'link_args': qt_link_args,
