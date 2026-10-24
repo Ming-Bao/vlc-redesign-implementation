@@ -285,15 +285,20 @@ void VLCMenuBar::MainMenu( qt_intf_t *p_intf, QMenu *menu, std::function<void()>
     if( ControlbarProfileModel *profiles = mi ? mi->controlbarProfileModel() : nullptr )
     {
         const int selected = profiles->selectedProfile();
-        QMenu *profileMenu = menu->addMenu( qtr( "Profile (%1)" ).arg(
-            profiles->data( profiles->index( selected ), Qt::DisplayRole ).toString() ) );
+        /* a lone '&' is a mnemonic marker, so it is doubled to show */
+        auto profileName = [profiles]( int row ) {
+            return profiles->data( profiles->index( row ), Qt::DisplayRole )
+                       .toString().replace( '&', QStringLiteral( "&&" ) );
+        };
+        const QString current = profileName( selected );
+        QMenu *profileMenu = menu->addMenu( current.isEmpty()
+            ? qtr( "Profile" ) : qtr( "Profile (%1)" ).arg( current ) );
         profileMenu->menuAction()->setIcon( QIcon( ":/redesign/menu/profile.svg" ) );
         auto *group = new QActionGroup( profileMenu );
         group->setExclusive( true );
         for( int row = 0; row < profiles->rowCount(); ++row )
         {
-            QAction *a = profileMenu->addAction(
-                profiles->data( profiles->index( row ), Qt::DisplayRole ).toString() );
+            QAction *a = profileMenu->addAction( profileName( row ) );
             a->setCheckable( true );
             a->setChecked( row == selected );
             group->addAction( a );
@@ -308,10 +313,10 @@ void VLCMenuBar::MainMenu( qt_intf_t *p_intf, QMenu *menu, std::function<void()>
     }
 
     entry( qtr( "Keyboard Shortcuts" ), ":/redesign/menu/keyboard.svg",
-           []() { THEDP->prefsDialog( SPrefsHotkeys ); } )->setProperty( "vlc-chevron", true );
+           []() { THEDP->prefsDialog( SPrefsHotkeys ); } );
     if( !p_intf->b_isDialogProvider )
         entry( qtr( "Customize Player" ), ":/redesign/menu/customize.svg",
-               &DialogsProvider::showToolbarEditorDialog )->setProperty( "vlc-chevron", true );
+               &DialogsProvider::showToolbarEditorDialog );
     entry( qtr( "Settings" ), ":/redesign/menu/settings.svg",
            QOverload<>::of(&DialogsProvider::prefsDialog), "Ctrl+P", QAction::PreferencesRole );
     entry( qtr( "About VLC" ), ":/redesign/menu/about.svg",
