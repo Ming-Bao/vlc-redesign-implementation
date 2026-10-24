@@ -327,13 +327,79 @@
 
 ## Ledger
 
-Known before the build (spec *(my call)*s):
-- The native menu style is dark only; light comes with slice 10.
-- The "…" menu keeps More ▸ (Discover and the full VLC menus) and drops Quit.
-- Keyboard Shortcuts opens Preferences ▸ Hotkeys; Customize Player opens today's editor. Both keep the Figma's chevron.
-- Profile = VLC's control-bar profiles; Movies/Shows/Music/Work are read as placeholders. "New" opens Customize Player.
-- Shortcut labels show VLC's real bindings: Record `Shift + R` (Figma R), Hide UI `Ctrl + H` (Figma Ctrl + \).
-- Right-click Playback/Video/Audio/Subtitle show disabled with no input.
-- File menu: Mark as Watched/Favorite flip their labels; VLC's extra entries stay below a divider; Go to Source = the item's library folder page.
-- Folder menu: Edit Subtitle Tracks, Edit Audio Tracks and Info are not shown (no backend); Add File / Add Folder enqueue (VLC 3's playlist meaning); Resync = rescan; 4d's Play all / Add all stay on top; Home's folder menu becomes native.
-- Playlist menu: Add Subtitle/Audio Tracks and Properties & Metadata are not shown; Export writes M3U8 only; Rename/Delete stay below a divider.
+Shots (1600×900, Wayland, dark, `chapters.mkv` playing, library on `redesign-media`) in `docs/superpowers/figma/5/`: `after_main.png`, `after_profiles.png`, `after_right_click.png`, `after_file_ctx.png`, `after_folder_ctx.png`, `after_playlist_ctx.png`, `after_sort_vs_native.png`. References beside them: `main_menu.png` (6062:13354), `profiles.png` (6648:20666), `right_click.png` (6065:13616), `file_ctx.png` (2404:13340), `folder_ctx.png` (2139:8935), `playlist_ctx.png` (2459:9389). The menus are translucent (`rgba(25,25,25,0.95)` as in Figma), so the video or page shows faintly through them in every shot.
+
+### after_main / `main_menu.png`
+Twelve entries in the frame's order: Open File(s), Open Folder, Open Network Stream, Open Disc, Open Capture Device, Convert, Open Recent ▸, divider, Profile (…) ▸, Keyboard Shortcuts, Customize Player, Settings, About VLC. Two-tone icons (grey line, orange accent), shortcut column right-aligned in `#6B6B6B` (Ctrl + O … Shift + F1), 48 px rows, 10 px radius, the same chevron on Open Recent and Profile.
+Departures:
+- More ▸ sits below a second divider (Discover and the full VLC menus). Figma has no such row; dropping it would remove the only way to those menus. Quit is gone from this menu, as in the frame.
+- Profile row reads "Profile (Default Style)": the fork's control-bar profiles (Default, Minimalist, One-liner, Simplest, Classic). Figma's Movies/Shows/Music/Work are placeholder names.
+- No chevron on Keyboard Shortcuts or Customize Player (ruling R4). The metadata lists a right-side icon there, but the frame's render (`main_menu.png`, `profiles.png`) draws none; the spec's "draw it anyway" misread the metadata.
+- Keyboard Shortcuts opens Preferences ▸ Hotkeys; Customize Player opens today's toolbar editor.
+- Icons whose Figma instance is flipped or rotated (chevron-right, open-folder, show-in-explorer, open-network, stream, open-recent, customize, go-to-source, add-folder, resync, convert) have the transform added on the first `<g>` of the SVG (ruling R3). Saved raw, the master points the wrong way (chevron left, folder tab top-right). `shuffle.svg` and `pause.svg` are hand-authored (the exported shuffle asset was only the inner vector, not the 24×24 frame).
+
+### after_profiles / `profiles.png`
+Profile ▸ opened: the submenu opens to the right, level with the Profile row, with the row highlighted `#1F1F1F`. The selected profile has the orange check, the others a blank slot, then a divider and "+ New". Same card, rows and type as the main menu. The shot has five profiles to Figma's four.
+Departures:
+- Names are VLC's control-bar profiles (above). "New" opens Customize Player. Profile names with an `&` show it without an underline (the label doubles it).
+
+### after_right_click / `right_click.png`
+Entries in the frame's order: Pause/Play, Stop, Previous Item, Next Item, Record, divider, Hide UI, divider, Playback ▸, Video ▸, Audio ▸, Subtitle ▸, divider, More Settings ▸, Playlist ▸, Open Media ▸, Quit VLC. The frame's tall list is clipped by the window, so Qt slides the card up to fit (top at y 42 for a click at y 300).
+Departures:
+- First row says "Pause" while a file plays and "Play" otherwise; Figma shows only the paused state.
+- Shortcut column shows the key VLC binds: Record `Shift + R` (Figma R), Hide UI `Ctrl + H` (Figma `Ctrl + \`). Those keys don't exist in VLC; showing them would lie.
+- Playback / Video / Audio / Subtitle are live submenus while a video plays; with nothing playing they show disabled (not shot).
+- The shortcut keys on these rows are display only (a Qt shortcut would double the player's own hotkeys). Save Play Queue and Quit keep their window shortcuts.
+- The old "&Play" / "Pre&vious" / "&Stop" strings are replaced, so translations of them are lost.
+
+### after_file_ctx / `file_ctx.png`
+Right-click on a video file in the Videos folder page: Play, Mark as Unwatched, Favorite, Stream, Convert, Add to Queue, Add to Playlist, Show in File Explorer, Go to Source, Add Subtitle Tracks, Add Audio Tracks, Properties & Metadata, in the frame's order with its icons. VLC's own entries follow a divider with no icons: Play as audio, Add to a video-only playlist, Delete File From System.
+Departures:
+- Mark as Watched / Favorite flip to "Mark as Unwatched" / "Remove from Favorites" (the shot's file is already watched). Figma shows only the first state.
+- VLC's extra entries stay below a divider; Figma has no frame for them. Two items selected shows only Play, Add to Queue and Add to Playlist.
+- Go to Source opens the item's library folder page; it does nothing if the folder isn't indexed.
+- Add Subtitle / Audio Tracks attach the file to the media in the library (`vlc_ml_media_add_external_mrl`) and the player picks it up. This needs a core change (ruling R7): `input_item_Update` keeps `SLAVE_PRIORITY_USER` slaves, otherwise the preparser's update drops the attached subtitle on about three plays in four. Test-covered; upstream may object.
+- `DialogsProvider::pickFile(title, bool subtitle, QUrl near)` replaces the planned `(title, filter)` signature (ruling R8): QML can't reach the `EXTENSIONS_*` filters.
+- The tall card is slid up by the compositor (top at y 42) because it doesn't fit under the cursor.
+
+### after_folder_ctx / `folder_ctx.png`
+Right-click on the "Films" folder of the Videos page: Play all videos, Add all videos to the queue, Add File, Add Folder, Resync, with the frame's icons (plus, folder-plus, the two-arrow resync). Card and rows match.
+Departures:
+- Edit Subtitle Tracks, Edit Audio Tracks and Info are not shown (no backend).
+- Add File / Add Folder open a picker in the folder and add the result to the queue (VLC 3's playlist meaning); Resync rescans the folder.
+- 4d's "Play all videos" and "Add all videos to the queue" stay on top and are greyed when the folder holds no videos.
+- The menu fetches its own `videoIds` (ruling R9; R2 had the caller pass them): neither host has them synchronously. It still wraps the NativeMenu and answers `setData` synchronously.
+- Home's folder menu is native too (it was a QML `FigmaMenu`).
+
+### after_playlist_ctx / `playlist_ctx.png`
+Right-click on the playlist "abc" of the Playlists page: Play, Favorite, Shuffle, Export Playlist, Add to Queue, divider, Rename, Delete. Icons (heart, shuffle, save glyph, queue) as in the frame.
+Departures:
+- Add Subtitle / Audio Tracks and Properties & Metadata are not shown (a playlist has no such backend).
+- Favorite flips to "Remove from Favorites"; it writes the playlist's favourite flag in the library.
+- Export writes M3U8 only (`#EXTM3U` and one MRL per line, as UTF-8), `.m3u8` appended when left off.
+- Shuffle shuffles the playlist's own media list, then appends it and plays it; the existing queue keeps its order (ruling R10). The spec's "play the playlist, then shuffle the queue" assumed a queue that held only the playlist.
+- Rename and Delete stay below a divider, without icons (Figma has no frame for them). Home's Frequently Visited Playlists now use this menu instead of the file one.
+- Playlist contents (right-click on a track in a playlist): Play, Add to Queue, Add to Playlist, Properties & Metadata above a divider; Play as audio and Remove Selected below. "Properties & Metadata" is the old dead "Information" entry, now wired to the file menu's dialog.
+
+### after_sort_vs_native
+The QML `FigmaMenu` (Videos page sort) next to the native folder menu, cropped from the two shots. Same card colour, 10 px radius, shadow, 48 px row pitch, `#8F8F8F` label type and left padding; the sort menu has no icon slot because it has no icons. The two renderers match.
+
+### Departures not tied to one shot
+- The native style is dark only; light comes with slice 10.
+- A tray menu (`systray.cpp`) and the misc popup now take the redesign look; a light tray theme may show low contrast. Not shot.
+- Menus are drawn left-to-right only (RTL is not mirrored). `CE_MenuScroller` / `CE_MenuTearoff` fall to the base style.
+- Margins are read when a menu is first shown, so a scale change in the same run doesn't re-measure open menus. Menus flipped by Qt land the shadow margin short of the cursor.
+- Menu icons are set on macOS too (the old code skipped them under `__APPLE__`); this fork targets Linux.
+- The code lives where it was easiest to test: `addMenuRows` is in `style/menustyle.{hpp,cpp}`, not `qml_menu_wrapper.hpp` (ruling R6); `FolderContextMenu` wraps `NativeMenu` instead of subclassing it (R2).
+
+### Known minors (not fixed)
+- `drawIcon` builds a `QIcon` per paint; make the icons static locals if it shows in a profile. `addDPIconEntry` (menus.cpp) still builds its own icon paths instead of using `menuIcon()`.
+- `SPrefsCatList::selectCategory` relies on button creation order.
+- Playback ▸ Play Queue repeats View's Play Queue inside More Settings.
+- `MLContextMenu`'s divider relies on QMenu collapsing separators next to an always-visible entry; `NativeMenu._row` copies `enabled` / `checked` raw (a function value would count as true); `addMenuRows`'s `shortcut` key sets a live QAction shortcut, not a display-only one.
+- Songs pages grey out "Play all videos" unless the folder holds videos (4d's rule).
+- `include/vlc_input_item.h` still says `input_item_Update` replaces the slave lists (stale after R7). The attached and auto-detected copy of one subtitle may show twice (URI encoding differs: `QUrl` fully encoded against `vlc_path2uri`). The result of `vlc_ml_media_add_external_mrl` is ignored, with no warning on failure. `pickFile` doesn't update the dialog's last folder. Items restored from the saved queue at startup carry no slaves; Add Audio Tracks was not played end to end.
+- A doc comment above `addExternalTrack` (medialib.hpp) may still sit on the wrong declaration.
+- The above-anchored menu path (`SortMenu`, `QmlMenuPositioner`) is covered by an offscreen test only; no default-UI path reaches it.
+- Tests: the menu style's minimum-width assertion can't fail; show-time repositioning is untested; `rowHeightScales` doesn't reset the scale on failure; the dedupe branch of `input_item_Update` is untested.
+- Pre-existing: `ExpandGridView.qml` TypeError when playing from a grid (not seen in these runs); Escape sent through `wl-drive.py` does not close an open menu, so each menu shot is its own run.
