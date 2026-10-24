@@ -22,6 +22,8 @@
 #include "util/shared_input_item.hpp"
 #include "util/folder_tree.hpp"
 
+#include <algorithm>
+#include <random>
 #include <utility>
 
 #include <QQmlEngine>
@@ -268,12 +270,11 @@ void MediaLib::shuffleAndPlay(const QVariantList& itemIdList)
     {
         convertQVariantListToPlaylistMedias(ml, itemIdList, {}, ctx.medias);
     },
-    //UI thread: the queue holds the items once append returns
+    //UI thread
     [this](quint64, Context& ctx){
-        if (ctx.medias.empty())
-            return;
-        m_playlistController->append(ctx.medias, true);
-        m_playlistController->shuffle();
+        std::shuffle(ctx.medias.begin(), ctx.medias.end(), std::mt19937{std::random_device{}()});
+        if (!ctx.medias.empty())
+            m_playlistController->append(ctx.medias, true);
     });
 }
 

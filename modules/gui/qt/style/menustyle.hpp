@@ -18,6 +18,7 @@
 #ifndef VLC_QT_MENUSTYLE_HPP
 #define VLC_QT_MENUSTYLE_HPP
 
+#include <QIcon>
 #include <QProxyStyle>
 #include <QKeySequence>
 #include <QVariantList>
@@ -29,6 +30,9 @@ class QMenu;
 QString menuShortcutText(const QKeySequence& seq);
 /// drops the mnemonic markers: "Open &File" -> "Open File", "Tom && Jerry" -> "Tom & Jerry"
 QString menuLabelText(const QString& text);
+
+/// the redesign's menu icon ":/redesign/menu/<name>.svg"
+QIcon menuIcon(const QString& name);
 
 /// Adds one action per row: a row is a string or a map { text, icon (a ":/redesign/menu/" name),
 /// separator, checked, enabled, shortcut, chevron }. onSelected gets the row's index in rows

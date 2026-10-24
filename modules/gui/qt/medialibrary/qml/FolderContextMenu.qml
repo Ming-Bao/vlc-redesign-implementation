@@ -27,6 +27,7 @@ QtObject {
 
     // the menu acts on the videos directly in the folder (not its subfolders), as the library has them
     function popup(folderMrl, globalPos) {
+        ++_request // an earlier popup's fetch no longer shows
         _mrl = folderMrl
         _pos = globalPos
         _pending = true
@@ -46,7 +47,7 @@ QtObject {
         if (!_pending)
             return
         _pending = false
-        const request = ++_request
+        const request = _request
         const show = (ids) => {
             if (request !== _request) // another popup meanwhile
                 return

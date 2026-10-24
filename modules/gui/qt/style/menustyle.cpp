@@ -95,7 +95,7 @@ bool anyChevron(const QMenu* menu)
 // the redesign's own SVGs already carry their colours (check #D37918, chevron #8F8F8F)
 void drawIcon(QPainter* p, const QRect& r, const QString& name)
 {
-    QIcon(QStringLiteral(":/redesign/menu/%1.svg").arg(name)).paint(p, r);
+    menuIcon(name).paint(p, r);
 }
 
 } // namespace
@@ -356,6 +356,11 @@ bool MenuStyle::eventFilter(QObject* obj, QEvent* ev)
     return QProxyStyle::eventFilter(obj, ev);
 }
 
+QIcon menuIcon(const QString& name)
+{
+    return QIcon(QStringLiteral(":/redesign/menu/%1.svg").arg(name));
+}
+
 void addMenuRows(QMenu* menu, const QVariantList& rows, std::function<void(int)> onSelected)
 {
     for (int i = 0; i < rows.size(); ++i)
@@ -375,7 +380,7 @@ void addMenuRows(QMenu* menu, const QVariantList& rows, std::function<void(int)>
         QAction* a = menu->addAction(row.value("text").toString(), menu, fire);
         const QString icon = row.value("icon").toString();
         if (!icon.isEmpty())
-            a->setIcon(QIcon(":/redesign/menu/" + icon + ".svg"));
+            a->setIcon(menuIcon(icon));
         if (row.contains("checked"))
         {
             a->setCheckable(true);

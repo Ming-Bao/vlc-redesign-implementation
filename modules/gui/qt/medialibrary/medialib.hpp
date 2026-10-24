@@ -66,7 +66,7 @@ public:
     // rescan one library folder
     Q_INVOKABLE void reloadFolder(const QString& mrl);
 
-    // plays the items, then shuffles the whole queue
+    // plays the items in a random order, after the queue's own
     void shuffleAndPlay(const QVariantList& itemIdList);
 
     // attach a subtitle (true) or an audio (false) file to a library media, so that

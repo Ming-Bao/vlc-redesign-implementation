@@ -40,6 +40,7 @@
 #include <QAbstractProxyModel>
 #include <QDir>
 #include <QFileDialog>
+#include <QMessageBox>
 #include <QSaveFile>
 
 namespace
@@ -766,7 +767,7 @@ namespace
 {
     QAction * addRow(QMenu * menu, const QString & icon, const QString & text)
     {
-        return menu->addAction(QIcon(":/redesign/menu/" + icon + ".svg"), text);
+        return menu->addAction(menuIcon(icon), text);
     }
 
     // a playlist's tracks written to a .m3u8 file the user picks
@@ -800,11 +801,10 @@ namespace
         [path](quint64, Context & ctx)
         {
             QSaveFile file(path);
-            if (file.open(QIODevice::WriteOnly))
-            {
-                file.write(toM3u8(ctx.mrls));
-                file.commit();
-            }
+            const QByteArray data = toM3u8(ctx.mrls);
+            if (!file.open(QIODevice::WriteOnly) || file.write(data) != data.size() || !file.commit())
+                QMessageBox::warning(nullptr, qtr("Export Playlist"),
+                                     qtr("Cannot write to file %1:\n%2.").arg(path, file.errorString()));
         });
     }
 }
