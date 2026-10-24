@@ -349,8 +349,8 @@ Departures:
 - First row says "Pause" while a file plays and "Play" otherwise; Figma shows only the paused state.
 - Shortcut column shows the key VLC binds: Record `Shift + R` (Figma R), Hide UI `Ctrl + H` (Figma `Ctrl + \`). Those keys don't exist in VLC; showing them would lie.
 - Playback / Video / Audio / Subtitle are live submenus while a video plays; with nothing playing they show disabled (not shot).
-- The shortcut keys on these rows are display only (a Qt shortcut would double the player's own hotkeys). Save Play Queue and Quit keep their window shortcuts.
-- The old "&Play" / "Pre&vious" / "&Stop" strings are replaced, so translations of them are lost.
+- The shortcut keys on these rows are display only: the key is the label's text after `\t`, the action has no `shortcut()` (a Qt shortcut would double the player's own hotkeys, and skins2's `DialogsProvider::sendKey` triggers any popup action whose shortcut matches, ahead of VLC's hotkeys). Save Play Queue and Quit keep their window shortcuts.
+- The rows of this menu, its Open Media ▸ and Playlist ▸, and the "…" menu carry `&` accelerators again, one letter per menu (the style hides the underline). "&Play" / "&Pause" / "&Stop" keep their old translations; "Pre&vious" became "Previo&us Item", so that one is lost.
 
 ### after_file_ctx / `file_ctx.png`
 Right-click on a video file in the Videos folder page: Play, Mark as Unwatched, Favorite, Stream, Convert, Add to Queue, Add to Playlist, Show in File Explorer, Go to Source, Add Subtitle Tracks, Add Audio Tracks, Properties & Metadata, in the frame's order with its icons. VLC's own entries follow a divider with no icons: Play as audio, Add to a video-only playlist, Delete File From System.
@@ -388,6 +388,9 @@ The QML `FigmaMenu` (Videos page sort) next to the native folder menu, cropped f
 - The native style is dark only; light comes with slice 10.
 - A tray menu (`systray.cpp`) and the misc popup now take the redesign look; a light tray theme may show low contrast. Not shot.
 - Menus are drawn left-to-right only (RTL is not mirrored). `CE_MenuScroller` / `CE_MenuTearoff` fall to the base style.
+- `QMenu::addSection` headers (the bookmark menu's Titles / Chapters / Bookmarks, the program menu's Programs) draw as a 48 px row of `#6B6B6B` text (fixed after the final review; they had collapsed to a 1 px line).
+- Torn-off menus (Speed, Chapter, the custom menus) keep their window frame and get a plain square card; only `Qt::Popup` menus get the frameless, shadowed treatment (fixed after the final review).
+- On non-composited X11 (a bare window manager without a compositor) the translucent shadow margin and rounded corners render black around every menu (ruling R11: not fixed).
 - Margins are read when a menu is first shown, so a scale change in the same run doesn't re-measure open menus. Menus flipped by Qt land the shadow margin short of the cursor.
 - Menu icons are set on macOS too (the old code skipped them under `__APPLE__`); this fork targets Linux.
 - The code lives where it was easiest to test: `addMenuRows` is in `style/menustyle.{hpp,cpp}`, not `qml_menu_wrapper.hpp` (ruling R6); `FolderContextMenu` wraps `NativeMenu` instead of subclassing it (R2).
@@ -396,10 +399,10 @@ The QML `FigmaMenu` (Videos page sort) next to the native folder menu, cropped f
 - `drawIcon` builds a `QIcon` per paint; make the icons static locals if it shows in a profile. `addDPIconEntry` (menus.cpp) still builds its own icon paths instead of using `menuIcon()`.
 - `SPrefsCatList::selectCategory` relies on button creation order.
 - Playback ▸ Play Queue repeats View's Play Queue inside More Settings.
-- `MLContextMenu`'s divider relies on QMenu collapsing separators next to an always-visible entry; `NativeMenu._row` copies `enabled` / `checked` raw (a function value would count as true); `addMenuRows`'s `shortcut` key sets a live QAction shortcut, not a display-only one.
+- `MLContextMenu`'s divider relies on QMenu collapsing separators next to an always-visible entry; `NativeMenu._row` copies `enabled` / `checked` raw (a function value would count as true). (`addMenuRows`'s unused `shortcut` and `chevron` keys are gone, fixed after the final review.)
 - Songs pages grey out "Play all videos" unless the folder holds videos (4d's rule).
-- `include/vlc_input_item.h` still says `input_item_Update` replaces the slave lists (stale after R7). The attached and auto-detected copy of one subtitle may show twice (URI encoding differs: `QUrl` fully encoded against `vlc_path2uri`). The result of `vlc_ml_media_add_external_mrl` is ignored, with no warning on failure. `pickFile` doesn't update the dialog's last folder. Items restored from the saved queue at startup carry no slaves; Add Audio Tracks was not played end to end.
+- Fixed after the final review: `include/vlc_input_item.h` documents that `input_item_Update` keeps the user slaves; a local attached file is stored as `vlc_path2uri` writes it, so it no longer shows twice beside its auto-detected copy. The result of `vlc_ml_media_add_external_mrl` is ignored, with no warning on failure. `pickFile` doesn't update the dialog's last folder. Items restored from the saved queue at startup carry no slaves; Add Audio Tracks was not played end to end.
 - A doc comment above `addExternalTrack` (medialib.hpp) may still sit on the wrong declaration.
 - The above-anchored menu path (`SortMenu`, `QmlMenuPositioner`) is covered by an offscreen test only; no default-UI path reaches it.
-- Tests: the menu style's minimum-width assertion can't fail; show-time repositioning is untested; `rowHeightScales` doesn't reset the scale on failure; the dedupe branch of `input_item_Update` is untested.
+- Tests: the menu style's minimum-width assertion can't fail; show-time repositioning is untested; the dedupe branch of `input_item_Update` is untested.
 - Pre-existing: `ExpandGridView.qml` TypeError when playing from a grid (not seen in these runs); Escape sent through `wl-drive.py` does not close an open menu, so each menu shot is its own run.
