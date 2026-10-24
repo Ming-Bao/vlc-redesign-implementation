@@ -65,6 +65,9 @@ public:
 
     // callback([{ name, mrl }]): the library folder levels from the entry point down to folder,
     // [] when no entry point holds it (see folder_tree::trail)
+    // attach a subtitle (true) or an audio (false) file to a library media, so that
+    // it plays with it
+    Q_INVOKABLE void addExternalTrack(const MLItemId& media, const QUrl& file, bool subtitle);
     Q_INVOKABLE void folderTrail(const QString& folder, QJSValue callback);
 
     inline bool idle() const { return m_idle; }

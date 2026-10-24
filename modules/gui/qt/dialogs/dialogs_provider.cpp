@@ -1052,6 +1052,24 @@ void  DialogsProvider::loadMediaFile( const es_format_category_e category, const
     }
 }
 
+QUrl DialogsProvider::pickFile( const QString& title, bool subtitle, const QUrl& near )
+{
+    QString filter;
+    if( subtitle ) {
+        ADD_EXT_FILTER( filter, EXTENSIONS_SUBTITLE );
+    } else {
+        ADD_EXT_FILTER( filter, EXTENSIONS_AUDIO );
+    }
+    ADD_EXT_FILTER( filter, EXTENSIONS_ALL );
+    filter.replace( ";*", " *");
+    filter.chop(2); //remove trailing ";;"
+
+    return QFileDialog::getOpenFileUrl( nullptr, title,
+                                        near.isValid() ? near.adjusted( QUrl::RemoveFilename )
+                                                       : p_intf->p_mi->getDialogFilePath(),
+                                        filter );
+}
+
 void DialogsProvider::loadSubtitlesFile()
 {
     loadMediaFile( SPU_ES, EXT_FILTER_SUBTITLE, qtr( "Open subtitles..." ) );

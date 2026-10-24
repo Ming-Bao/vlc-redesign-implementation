@@ -107,8 +107,17 @@ NativeMenu {
             "action": goToSource,
             "visible": _openContainingFolder
         },
-        // Task 6
         {
+            "text": qsTr("Add Subtitle Tracks"),
+            "icon": "subtitles",
+            "action": (dataList) => addExternalTrack(dataList[0], true),
+            "visible": _openContainingFolder
+        }, {
+            "text": qsTr("Add Audio Tracks"),
+            "icon": "audio",
+            "action": (dataList) => addExternalTrack(dataList[0], false),
+            "visible": _openContainingFolder
+        }, {
             // &&: a QAction label, where & alone marks a mnemonic
             "text": qsTr("Properties && Metadata"),
             "icon": "info",
@@ -236,6 +245,13 @@ NativeMenu {
                     History.push(["network", "browse"], { tree: tree })
             }
         })
+    }
+
+    // a track file for a library media, picked from the media's folder
+    function addExternalTrack(media, subtitle) {
+        const file = DialogsProvider.pickFile(subtitle ? qsTr("Add Subtitle Tracks") : qsTr("Add Audio Tracks"),
+                                              subtitle, media.mrl)
+        MediaLib.addExternalTrack(media[idDataRole], file, subtitle)
     }
 
     function deleteStream(dataList, options, indexes) {

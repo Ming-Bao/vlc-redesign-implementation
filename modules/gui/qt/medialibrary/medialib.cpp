@@ -248,6 +248,19 @@ void MediaLib::reload()
     });
 }
 
+void MediaLib::addExternalTrack(const MLItemId& media, const QUrl& file, bool subtitle)
+{
+    if (!file.isValid() || file.isEmpty())
+        return;
+    runOnMLThread(this,
+    //ML thread
+    [id = media.id, mrl = file.toString(QUrl::FullyEncoded).toUtf8(), subtitle]
+    (vlc_medialibrary_t* ml){
+        vlc_ml_media_add_external_mrl(ml, id, mrl.constData(),
+                subtitle ? VLC_ML_FILE_TYPE_SUBTITLE : VLC_ML_FILE_TYPE_SOUNDTRACK);
+    });
+}
+
 void MediaLib::folderTrail(const QString& folder, QJSValue callback)
 {
     struct Context {
