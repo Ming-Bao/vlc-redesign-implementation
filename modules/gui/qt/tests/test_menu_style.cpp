@@ -17,6 +17,7 @@
  *****************************************************************************/
 #include <QTest>
 #include <QMenu>
+#include <QScopeGuard>
 #include "style/menustyle.hpp"
 
 class TestMenuStyle : public QObject
@@ -53,13 +54,29 @@ private slots:
     void rowHeightScales()
     {
         MenuStyle::setScale(1.5);
+        const auto reset = qScopeGuard([] { MenuStyle::setScale(1.0); });
         MenuStyle style;
         QMenu menu;
         menu.setStyle(&style);
         QAction* a = menu.addAction("A");
         menu.adjustSize();
         QCOMPARE(menu.actionGeometry(a).height(), 72);
-        MenuStyle::setScale(1.0);
+    }
+    // SortMenu / QmlMenuPositioner pop a menu up above a point: the card, not the window, ends on it
+    void popupAboveLandsOnAnchor()
+    {
+        MenuStyle::install(); // the app's way: menus get polished by the application style
+        QMenu menu;
+        menu.addAction("A");
+        menu.addAction("B");
+        const QPoint anchor(200, 400);
+        menu.popup(QPoint(anchor.x(), anchor.y() - MenuStyle::cardHeight(&menu, menu.sizeHint().height())));
+        const QMargins m = menu.contentsMargins();
+        QVERIFY(!m.isNull());
+        const QRect card = menu.geometry().marginsRemoved(m);
+        QCOMPARE(card.left(), anchor.x());
+        QCOMPARE(card.bottom() + 1, anchor.y());
+        menu.hide();
     }
 };
 

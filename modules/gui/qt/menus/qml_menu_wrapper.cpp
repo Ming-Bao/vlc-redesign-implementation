@@ -29,6 +29,7 @@
 #include "dialogs/dialogs_provider.hpp"
 #include "util/colorizedsvgicon.hpp"
 #include "maininterface/navigationmodel.hpp"
+#include "style/menustyle.hpp"
 
 // Qt includes
 #include <QPainter>
@@ -154,7 +155,7 @@ void SortMenu::popup(const QPoint &point, const bool popupAbovePoint, const QVar
     onPopup(m_menu.get());
 
     if (popupAbovePoint)
-        m_menu->popup(QPoint(point.x(), point.y() - m_menu->sizeHint().height()));
+        m_menu->popup(QPoint(point.x(), point.y() - MenuStyle::cardHeight(m_menu.get(), m_menu->sizeHint().height())));
     else
         m_menu->popup(point);
 }
@@ -493,7 +494,7 @@ bool QmlMenuPositioner::eventFilter(QObject * object, QEvent * event)
 
         x = qBound(x, m_position.x(), x + geometry.width() - width);
 
-        y = qBound(y, m_position.y() - height, y + geometry.height() - height);
+        y = qBound(y, m_position.y() - MenuStyle::cardHeight(menu, height), y + geometry.height() - height);
 
         menu->move(QPoint(x, y));
     }

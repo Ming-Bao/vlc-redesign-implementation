@@ -146,6 +146,12 @@ void MenuStyle::setScale(qreal scale) { s_scale = scale; }
 
 int MenuStyle::shadowMargin() { return dp(shadowBlur); }
 
+int MenuStyle::cardHeight(const QWidget* menu, int windowHeight)
+{
+    const QMargins m = menu->contentsMargins();
+    return windowHeight - m.top() - m.bottom();
+}
+
 void MenuStyle::polish(QWidget* w)
 {
     QProxyStyle::polish(w);

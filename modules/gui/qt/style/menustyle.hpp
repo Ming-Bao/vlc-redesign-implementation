@@ -39,6 +39,9 @@ public:
     static void setScale(qreal scale);
     /// transparent margin around the card that holds its shadow, scaled
     static int shadowMargin();
+    /// height of the card in a menu window of the given height, i.e. without the shadow margins.
+    /// A menu popped up above a point subtracts this, so the card (not the window) ends on the point.
+    static int cardHeight(const QWidget* menu, int windowHeight);
 
     void polish(QWidget* widget) override;
     void unpolish(QWidget* widget) override;
