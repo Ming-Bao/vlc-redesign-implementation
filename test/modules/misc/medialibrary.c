@@ -40,6 +40,7 @@
 #include <vlc_codec.h>
 #include <vlc_filter.h>
 
+#include <vlc_input_item.h>
 #include <vlc_media_library.h>
 #include <ftw.h>
 
@@ -84,6 +85,44 @@ static int OpenIntf(vlc_object_t *root)
     vlc_ml_event_unregister_callback(ml, listener);
 
     vlc_ml_media_release(media);
+
+    /* Attached subtitle and audio files come back as slaves of the media's
+     * input item, whichever way the media is played. */
+    static const struct {
+        const char *mrl;
+        int ml_type;
+        enum slave_type slave_type;
+    } attached[] = {
+        { "file:///tmp/vlc-test.srt", VLC_ML_FILE_TYPE_SUBTITLE, SLAVE_TYPE_SPU },
+        { "file:///tmp/vlc-test.mka", VLC_ML_FILE_TYPE_SOUNDTRACK, SLAVE_TYPE_GENERIC },
+    };
+    for (size_t i = 0; i < ARRAY_SIZE(attached); ++i)
+    {
+        /* a media per case: the URL must differ for the library to accept it */
+        char url[128];
+        snprintf(url, sizeof url, "mock://video_track_count=1;length=%zu", 1000000 + i);
+        media = vlc_ml_new_external_media(ml, url);
+        assert(media != NULL);
+        assert(vlc_ml_media_add_external_mrl(ml, media->i_id, attached[i].mrl,
+                                             attached[i].ml_type) == VLC_SUCCESS);
+        input_item_t *item = vlc_ml_get_input_item(ml, media->i_id);
+        assert(item != NULL);
+        assert(item->i_slaves == 1);
+        assert(item->pp_slaves[0]->i_type == attached[i].slave_type);
+        assert(strcmp(item->pp_slaves[0]->psz_uri, attached[i].mrl) == 0);
+
+        /* The parsing of the item must not drop the slave: it has no knowledge
+         * of the attached file. */
+        input_item_t *parsed = input_item_New(item->psz_uri, NULL);
+        assert(parsed != NULL);
+        assert(input_item_Update(item, parsed) == VLC_SUCCESS);
+        assert(item->i_slaves == 1);
+        assert(strcmp(item->pp_slaves[0]->psz_uri, attached[i].mrl) == 0);
+        input_item_Release(parsed);
+
+        input_item_Release(item);
+        vlc_ml_media_release(media);
+    }
 
     return VLC_SUCCESS;
 }

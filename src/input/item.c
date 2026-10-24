@@ -1150,13 +1150,26 @@ int input_item_Update(input_item_t *dst, input_item_t *src)
         }
     }
 
-    for( int i = 0; i < dst->i_slaves; i++ )
-        input_item_slave_Delete( dst->pp_slaves[i] );
-    TAB_CLEAN(dst->i_slaves, dst->pp_slaves );
+    input_item_slave_t **old_slaves = dst->pp_slaves;
+    int i_old_slaves = dst->i_slaves;
     dst->i_slaves = tmp->i_slaves;
     tmp->i_slaves = 0;
     dst->pp_slaves = tmp->pp_slaves;
     tmp->pp_slaves = NULL;
+    /* The parsing finds the slaves next to the file, not the ones that were
+     * attached to the item on purpose (e.g. by the media library): keep those */
+    for( int i = 0; i < i_old_slaves; i++ )
+    {
+        input_item_slave_t *p_old = old_slaves[i];
+        bool b_keep = p_old->i_priority == SLAVE_PRIORITY_USER;
+        for( int j = 0; b_keep && j < dst->i_slaves; j++ )
+            b_keep = strcmp( p_old->psz_uri, dst->pp_slaves[j]->psz_uri ) != 0;
+        if( b_keep )
+            TAB_APPEND( dst->i_slaves, dst->pp_slaves, p_old );
+        else
+            input_item_slave_Delete( p_old );
+    }
+    TAB_CLEAN( i_old_slaves, old_slaves );
     vlc_mutex_unlock(&dst->lock);
 
     input_item_Release(tmp);

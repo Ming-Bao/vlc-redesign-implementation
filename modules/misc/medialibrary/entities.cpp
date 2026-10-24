@@ -566,6 +566,32 @@ input_item_t* MediaToInputItem( const medialibrary::IMedia* media )
                                    VLC_TICK_FROM_MS( media->duration() ),
                                    ITEM_TYPE_FILE, ITEM_NET_UNKNOWN ),
                 &input_item_Release );
+    for ( const auto& f : files )
+    {
+        slave_type slaveType;
+        switch ( f->type() )
+        {
+            case medialibrary::IFile::Type::Subtitles:
+                slaveType = SLAVE_TYPE_SPU;
+                break;
+            case medialibrary::IFile::Type::Soundtrack:
+                slaveType = SLAVE_TYPE_GENERIC;
+                break;
+            default:
+                continue;
+        }
+        try
+        {
+            auto slave = input_item_slave_New( f->mrl().c_str(), slaveType,
+                                               SLAVE_PRIORITY_USER );
+            if ( slave != nullptr && input_item_AddSlave( inputItem.get(), slave ) != VLC_SUCCESS )
+                input_item_slave_Delete( slave );
+        }
+        catch ( const medialibrary::fs::errors::DeviceRemoved& )
+        {
+            // the attached file's device is gone: play without it
+        }
+    }
     auto thumbnailStatus = media->thumbnailStatus( medialibrary::ThumbnailSizeType::Thumbnail );
     if ( thumbnailStatus == medialibrary::ThumbnailStatus::Missing )
     {
