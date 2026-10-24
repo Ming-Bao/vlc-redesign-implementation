@@ -118,7 +118,7 @@ NativeMenu {
             "action": (dataList) => addExternalTrack(dataList[0], false),
             "visible": _openContainingFolder
         }, {
-            // &&: a QAction label, where & alone marks a mnemonic
+            // xgettext: keep the "&&" (it shows as one "&"); a lone "&" marks a menu mnemonic
             "text": qsTr("Properties && Metadata"),
             "icon": "info",
             "action": function(dataList, options, indexes) {

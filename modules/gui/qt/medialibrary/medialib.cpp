@@ -28,6 +28,8 @@
 
 #include <QQmlEngine>
 
+#include <vlc_url.h>
+
 MediaLib::MediaLib(qt_intf_t *_intf, vlc::playlist::PlaylistController* playlistController, QObject *_parent)
     : QObject( _parent )
     , m_intf( _intf )
@@ -280,11 +282,19 @@ void MediaLib::shuffleAndPlay(const QVariantList& itemIdList)
 
 void MediaLib::addExternalTrack(const MLItemId& media, const QUrl& file, bool subtitle)
 {
-    if (!file.isValid() || file.isEmpty())
+    // a local file gets the URI subtitle autodetection gives it, so the player lists it once
+    QByteArray mrl = file.toString(QUrl::FullyEncoded).toUtf8();
+    if (file.isLocalFile())
+    {
+        char* uri = vlc_path2uri(qtu(file.toLocalFile()), nullptr);
+        mrl = uri;
+        free(uri);
+    }
+    if (!file.isValid() || mrl.isEmpty())
         return;
     runOnMLThread(this,
     //ML thread
-    [id = media.id, mrl = file.toString(QUrl::FullyEncoded).toUtf8(), subtitle]
+    [id = media.id, mrl, subtitle]
     (vlc_medialibrary_t* ml){
         vlc_ml_media_add_external_mrl(ml, id, mrl.constData(),
                 subtitle ? VLC_ML_FILE_TYPE_SUBTITLE : VLC_ML_FILE_TYPE_SOUNDTRACK);

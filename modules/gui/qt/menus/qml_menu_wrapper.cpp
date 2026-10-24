@@ -919,7 +919,7 @@ void PlaylistMediaContextMenu::popup(const QModelIndexList & selected, QPoint po
 
     if (ids.count() == 1)
     {
-        // &&: & alone marks a mnemonic
+        /* xgettext: keep the "&&" (it shows as one "&"); a lone "&" marks a menu mnemonic */
         QAction * action = addRow(menu, "info", qtr("Properties && Metadata"));
         connect(action, &QAction::triggered, [id = ids.first().value<MLItemId>()]() {
             DialogsProvider::getInstance()->mediaInfoDialog(id);

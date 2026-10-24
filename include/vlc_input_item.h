@@ -393,7 +393,9 @@ VLC_API input_item_t * input_item_Copy(input_item_t * ) VLC_USED;
  * Copies metadata and associated fields from @p src to @p dst. The function
  * creates a temporary copy of the source item and transfers ownership of
  * relevant data fields (such as name, URI, duration, meta, ES and slave lists)
- * to the destination item, replacing any existing values.
+ * to the destination item, replacing any existing values. One exception: the
+ * destination's slaves of priority SLAVE_PRIORITY_USER that @p src lacks (same
+ * URI) are kept, appended after the slaves of @p src.
  *
  * @param[in,out] dst   Destination input item to be updated.
  * @param[in]     src   Source input item containing new values.
