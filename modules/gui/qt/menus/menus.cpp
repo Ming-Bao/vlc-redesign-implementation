@@ -46,6 +46,8 @@
 #include "dialogs/extensions/extensions_manager.hpp"                 /* Extensions menu */
 #include "dialogs/extended/extended_panels.hpp"
 #include "dialogs/systray/systray.hpp"
+#include "dialogs/toolbar/controlbar_profile_model.hpp"
+#include "dialogs/preferences/simple_preferences.hpp"
 #include "util/varchoicemodel.hpp"
 #include "util/color_scheme_model.hpp"
 #include "util/colorizedsvgicon.hpp"
@@ -242,18 +244,28 @@ void VLCMenuBar::MainMenu( qt_intf_t *p_intf, QMenu *menu, std::function<void()>
 {
     auto mi = p_intf->p_mi;
 
-    addDPStaticEntry( menu, qtr( "Open &File(s)..." ),
-        ":/menu/file.svg", []() { THEDP->simpleOpenDialog(); }, "Ctrl+O" );
-    addDPStaticEntry( menu, qtr( "Open F&older..." ),
-        ":/menu/folder.svg", &DialogsProvider::PLOpenDir, "Ctrl+F" );
-    addDPStaticEntry( menu, qtr( "Open &Network Stream..." ),
-        ":/menu/network.svg", &DialogsProvider::openNetDialog, "Ctrl+N" );
-    addDPStaticEntry( menu, qtr( "Open &Disc..." ),
-        ":/menu/disc.svg", &DialogsProvider::openDiscDialog, "Ctrl+D" );
-    addDPStaticEntry( menu, qtr( "Open &Capture Device..." ),
-        ":/menu/capture-card.svg", &DialogsProvider::openCaptureDialog, "Ctrl+C" );
-    addDPStaticEntry( menu, qtr( "Conve&rt..." ), "",
-        &DialogsProvider::openAndTranscodingDialogs, "Ctrl+R" );
+    /* The redesign's icons are already two-tone: a plain QIcon, not recoloured */
+    auto entry = [menu]( const QString &text, const char *icon, auto member,
+                         const char *shortcut = nullptr,
+                         QAction::MenuRole role = QAction::NoRole )
+    {
+        QAction *a = addDPStaticEntry( menu, text, "", member, shortcut, role );
+        a->setIcon( QIcon( icon ) );
+        return a;
+    };
+
+    entry( qtr( "Open File(s)" ), ":/redesign/menu/open-file.svg",
+           []() { THEDP->simpleOpenDialog(); }, "Ctrl+O" );
+    entry( qtr( "Open Folder" ), ":/redesign/menu/open-folder.svg",
+           &DialogsProvider::PLOpenDir, "Ctrl+F" );
+    entry( qtr( "Open Network Stream" ), ":/redesign/menu/open-network.svg",
+           &DialogsProvider::openNetDialog, "Ctrl+N" );
+    entry( qtr( "Open Disc" ), ":/redesign/menu/open-disc.svg",
+           &DialogsProvider::openDiscDialog, "Ctrl+D" );
+    entry( qtr( "Open Capture Device" ), ":/redesign/menu/open-capture.svg",
+           &DialogsProvider::openCaptureDialog, "Ctrl+C" );
+    entry( qtr( "Convert" ), ":/redesign/menu/convert.svg",
+           &DialogsProvider::openAndTranscodingDialogs, "Ctrl+R" );
 
     if( mi && var_InheritBool( p_intf, "save-recentplay" ) && mi->hasMediaLibrary() )
     {
@@ -261,20 +273,49 @@ void VLCMenuBar::MainMenu( qt_intf_t *p_intf, QMenu *menu, std::function<void()>
         recentModel->setMl(mi->getMediaLibrary());
         recentModel->setLimit(10);
         QMenu* recentsMenu = new RecentMenu(recentModel, mi->getMediaLibrary(), menu);
-        recentsMenu->setTitle(qtr( "Open &Recent" ) );
+        recentsMenu->setTitle(qtr( "Open Recent" ) );
+        recentsMenu->menuAction()->setIcon( QIcon( ":/redesign/menu/open-recent.svg" ) );
         recentModel->setParent(recentsMenu);
         menu->addMenu( recentsMenu );
     }
 
     menu->addSeparator();
 
+    /* Profiles are the control bar layouts of Customize Player */
+    if( ControlbarProfileModel *profiles = mi ? mi->controlbarProfileModel() : nullptr )
+    {
+        const int selected = profiles->selectedProfile();
+        QMenu *profileMenu = menu->addMenu( qtr( "Profile (%1)" ).arg(
+            profiles->data( profiles->index( selected ), Qt::DisplayRole ).toString() ) );
+        profileMenu->menuAction()->setIcon( QIcon( ":/redesign/menu/profile.svg" ) );
+        auto *group = new QActionGroup( profileMenu );
+        group->setExclusive( true );
+        for( int row = 0; row < profiles->rowCount(); ++row )
+        {
+            QAction *a = profileMenu->addAction(
+                profiles->data( profiles->index( row ), Qt::DisplayRole ).toString() );
+            a->setCheckable( true );
+            a->setChecked( row == selected );
+            group->addAction( a );
+            connect( a, &QAction::triggered, profiles, [profiles, row]() {
+                profiles->setSelectedProfile( row );
+            } );
+        }
+        profileMenu->addSeparator();
+        QAction *add = addDPStaticEntry( profileMenu, qtr( "New" ), "",
+                                         &DialogsProvider::showToolbarEditorDialog );
+        add->setIcon( QIcon( ":/redesign/menu/add.svg" ) );
+    }
+
+    entry( qtr( "Keyboard Shortcuts" ), ":/redesign/menu/keyboard.svg",
+           []() { THEDP->prefsDialog( SPrefsHotkeys ); } )->setProperty( "vlc-chevron", true );
     if( !p_intf->b_isDialogProvider )
-        addDPStaticEntry( menu, qtr( "Customi&ze Player..." ),
-            ":/menu/preferences.svg", &DialogsProvider::showToolbarEditorDialog );
-    addDPStaticEntry( menu, qtr( "&Settings" ),
-        ":/menu/preferences.svg", &DialogsProvider::prefsDialog, "Ctrl+P", QAction::PreferencesRole );
-    addDPStaticEntry( menu, qfut( I_MENU_ABOUT ), ":/menu/info.svg",
-        &DialogsProvider::aboutDialog, "Shift+F1", QAction::AboutRole );
+        entry( qtr( "Customize Player" ), ":/redesign/menu/customize.svg",
+               &DialogsProvider::showToolbarEditorDialog )->setProperty( "vlc-chevron", true );
+    entry( qtr( "Settings" ), ":/redesign/menu/settings.svg",
+           QOverload<>::of(&DialogsProvider::prefsDialog), "Ctrl+P", QAction::PreferencesRole );
+    entry( qtr( "About VLC" ), ":/redesign/menu/about.svg",
+           &DialogsProvider::aboutDialog, "Shift+F1", QAction::AboutRole );
 
     /* Everything the redesign does not list stays reachable */
     menu->addSeparator();
@@ -293,7 +334,6 @@ void VLCMenuBar::MainMenu( qt_intf_t *p_intf, QMenu *menu, std::function<void()>
     ToolsMenu( p_intf, more->addMenu( qtr( "Tool&s" ) ) );
     ViewMenu( p_intf, more->addMenu( qtr( "V&iew" ) ) );
     HelpMenu( p_intf, more->addMenu( qtr( "&Help" ) ) );
-    addDPStaticEntry( menu, qtr( "&Quit" ), ":/menu/exit.svg", &DialogsProvider::quit, "Ctrl+Q" );
 }
 
 /**
@@ -333,7 +373,7 @@ void VLCMenuBar::ToolsMenu( qt_intf_t *p_intf, QMenu *menu )
             ":/menu/preferences.svg", &DialogsProvider::showToolbarEditorDialog);
 
     addDPStaticEntry( menu, qtr( "&Preferences" ),
-        ":/menu/preferences.svg", &DialogsProvider::prefsDialog, "Ctrl+P", QAction::PreferencesRole );
+        ":/menu/preferences.svg", QOverload<>::of(&DialogsProvider::prefsDialog), "Ctrl+P", QAction::PreferencesRole );
 }
 
 /**

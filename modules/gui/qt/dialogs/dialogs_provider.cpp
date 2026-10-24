@@ -304,6 +304,20 @@ void DialogsProvider::prefsDialog()
     }
 }
 
+void DialogsProvider::prefsDialog(int simplePanel)
+{
+    if (!m_prefsDialog)
+    {
+        m_prefsDialog = new PrefsDialog( nullptr, p_intf );
+        m_prefsDialog->setAttribute(Qt::WA_DeleteOnClose);
+        m_prefsDialog->installEventFilter(this);
+        m_prefsDialog->open();
+    }
+    m_prefsDialog->showSimplePanel(simplePanel);
+    m_prefsDialog->raise();
+    m_prefsDialog->activateWindow();
+}
+
 void DialogsProvider::firstRunDialog()
 {
     ensureDialog(m_firstRunDialog);

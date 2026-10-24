@@ -220,6 +220,8 @@ public slots:
                                               const QMessageBox::StandardButton defaultButton = QMessageBox::NoButton,
                                               const QMessageBox::Icon icon = QMessageBox::NoIcon);
     void prefsDialog();
+    /* opens (or switches the open dialog to) a simple-preferences panel, an SPrefs* value */
+    void prefsDialog(int simplePanel);
     void firstRunDialog();
     void extendedDialog();
     void synchroDialog();

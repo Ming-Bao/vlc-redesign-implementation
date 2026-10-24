@@ -273,6 +273,14 @@ SPrefsCatList::SPrefsCatList( qt_intf_t *_p_intf, QWidget *_parent ) :
     setLayout( layout );
 }
 
+void SPrefsCatList::selectCategory( int i )
+{
+    /* the buttons are created in SPrefs* order */
+    const auto buttons = findChildren<QToolButton *>();
+    if( i >= 0 && i < buttons.size() )
+        buttons[i]->click();
+}
+
 void SPrefsCatList::switchPanel( int i )
 {
     emit currentItemChanged( i );

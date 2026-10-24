@@ -291,6 +291,12 @@ void PrefsDialog::setSimple()
     setWindowTitle( qtr( "Simple Preferences" ) );
 }
 
+void PrefsDialog::showSimplePanel( int sprefsIndex )
+{
+    setSimple();
+    simple_tree->selectCategory( sprefsIndex );
+}
+
 /* Switching from on simple panel to another */
 void PrefsDialog::changeSimplePanel( int number )
 {

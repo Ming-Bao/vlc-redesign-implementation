@@ -89,6 +89,8 @@ signals:
     void currentItemChanged( int );
 public slots:
     void switchPanel( int );
+    /* Checks that category button, as a click on it does */
+    void selectCategory( int );
 };
 
 class SPrefsPanel : public QWidget
