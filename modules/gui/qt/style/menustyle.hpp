@@ -20,11 +20,20 @@
 
 #include <QProxyStyle>
 #include <QKeySequence>
+#include <QVariantList>
+#include <functional>
+
+class QMenu;
 
 /// "Ctrl+Shift+O" -> "Ctrl + Shift + O" (Figma's shortcut column)
 QString menuShortcutText(const QKeySequence& seq);
 /// drops the mnemonic markers: "Open &File" -> "Open File", "Tom && Jerry" -> "Tom & Jerry"
 QString menuLabelText(const QString& text);
+
+/// Adds one action per row: a row is a string or a map { text, icon (a ":/redesign/menu/" name),
+/// separator, checked, enabled, shortcut, chevron }. onSelected gets the row's index in rows
+/// (separators count, they never fire). Lives here so the menu style test can link it.
+void addMenuRows(QMenu* menu, const QVariantList& rows, std::function<void(int)> onSelected);
 
 /// Draws every QMenu the redesign way (Figma menu frames), on top of whatever style is chosen.
 /// An action with the bool property "vlc-chevron" gets a chevron without being a submenu.

@@ -53,9 +53,75 @@ NativeMenu {
 
     // Settings
 
+    // Figma 2404:13340, then VLC's own entries below a divider
     actions: [{
             "text": qsTr("Play"),
+            "icon": "play",
             "action": addAndPlay
+        }, {
+            "text": qsTr("Mark as Watched"),
+            "icon": "mark-watched",
+            "action": markSeen,
+            "visible": _showSeen
+        }, {
+            "text": qsTr("Mark as Unwatched"),
+            "icon": "mark-watched",
+            "action": markUnseen,
+            "visible": _showUnseen
+        }, {
+            "text": qsTr("Favorite"),
+            "icon": "favorite",
+            "action": addFavorite,
+            "visible": _showAddFavorite
+        }, {
+            "text": qsTr("Remove from Favorites"),
+            "icon": "favorite",
+            "action": removeFavorite,
+            "visible": _showRemoveFavorite
+        }, {
+            "text": qsTr("Stream"),
+            "icon": "stream",
+            "action": (dataList) => DialogsProvider.streamMedia(dataList[0].mrl, true),
+            "visible": _singleMedia
+        }, {
+            "text": qsTr("Convert"),
+            "icon": "convert",
+            "action": (dataList) => DialogsProvider.streamMedia(dataList[0].mrl, false),
+            "visible": _singleMedia
+        }, {
+            "text": qsTr("Add to Queue"),
+            "icon": "add-to-queue",
+            "action": enqueue
+        }, {
+            "text": qsTr("Add to Playlist"),
+            "icon": "add-to-playlist",
+            "action": addToAPlaylist
+        }, {
+            "text": qsTr("Show in File Explorer"),
+            "icon": "show-in-explorer",
+            "action": openContainingFolder,
+            "visible": _openContainingFolder
+        }, {
+            "text": qsTr("Go to Source"),
+            "icon": "go-to-source",
+            "action": goToSource,
+            "visible": _openContainingFolder
+        },
+        // Task 6
+        {
+            // &&: a QAction label, where & alone marks a mnemonic
+            "text": qsTr("Properties && Metadata"),
+            "icon": "info",
+            "action": function(dataList, options, indexes) {
+                DialogsProvider.mediaInfoDialog(dataList[0][idDataRole])
+            },
+            "visible": function(dataList, options, indexes) {
+                return (dataList.length === 1)
+                        && !(dataList[0][idDataRole].hasParent())
+            }
+        }, {
+            // QMenu collapses a divider with nothing below it
+            "separator": true
         }, {
             "text": qsTr("Play as audio"),
             "action": playAsAudio,
@@ -66,60 +132,25 @@ NativeMenu {
             "visible": root.showPlayAsAlbumAction &&
                        (root.model instanceof MLAudioModel)
         }, {
-            "text": qsTr("Enqueue"),
-            "action": enqueue
-        }, {
             "text": qsTr("Enqueue as album"),
             "action": enqueueAsAlbum,
             "visible": root.showPlayAsAlbumAction &&
                        (root.model instanceof MLAudioModel)
         }, {
-            "text": qsTr("Add to favorites"),
-            "action": addFavorite,
-            "visible": _showAddFavorite
-        }, {
-            "text": qsTr("Remove from favorites"),
-            "action": removeFavorite,
-            "visible": _showRemoveFavorite
-        }, {
             "text": (root.showPlayAsAudioAction ? qsTr("Add to a video-only playlist") : qsTr("Add to an audio-only playlist")),
             "action": (root.showPlayAsAudioAction ? root.addToVideoOnlyPlaylist : root.addToAudioOnlyPlaylist)
         }, {
-            "text": qsTr("Add to a playlist"),
-            "action": addToAPlaylist
-        }, {
-            "text": qsTr("Mark as seen"),
-            "action": markSeen,
-            "visible": _showSeen
-        }, {
-            "text": qsTr("Mark as unseen"),
-            "action": markUnseen,
-            "visible": _showUnseen
-        }, {
-            "text": qsTr("Open Containing Folder"),
-            "action": openContainingFolder,
-            "visible": _openContainingFolder
+            "text": qsTr("Information"),
+            "action": _signalShowInformation,
+            "visible": showInformationAvailable
         }, {
             "text": qsTr("Delete"),
             "action": deleteStream,
             "visible": _deleteStream
         }, {
-            "text": qsTr("Information"),
-            "action": _signalShowInformation,
-            "visible": showInformationAvailable
-        },{
             "text": qsTr("Delete File From System"),
             "action": deleteFileFromSource,
             "visible": _deleteFileFromSource
-        },{
-            "text": qsTr("Media Information"),
-            "action": function(dataList, options, indexes) {
-                DialogsProvider.mediaInfoDialog(dataList[0][idDataRole])
-            },
-            "visible": function(dataList, options, indexes) {
-                return (dataList.length === 1)
-                        && !(dataList[0][idDataRole].hasParent())
-            }
         }
     ]
 
@@ -190,6 +221,23 @@ NativeMenu {
         Qt.openUrlExternally(parentDir)
     }
 
+    // the library folder page that lists the file, or the file browser on its folder
+    // when no library folder holds it
+    function goToSource(dataList, options, indexes) {
+        const mrl = dataList[0].mrl
+        const folder = mrl.slice(0, mrl.lastIndexOf("/"))
+        const path = dataList[0].isVideo ? ["video", "folder"] : ["music", "songs", "folder"]
+        MediaLib.folderTrail(folder, (trail) => {
+            if (trail.length > 0) {
+                History.push(path, { mrl: folder, trail: trail })
+            } else {
+                const tree = MainCtx.folderTree(folder)
+                if (tree)
+                    History.push(["network", "browse"], { tree: tree })
+            }
+        })
+    }
+
     function deleteStream(dataList, options, indexes) {
         model.deleteStream(dataList[0][idDataRole])
     }
@@ -238,6 +286,10 @@ NativeMenu {
 
     function _openContainingFolder(dataList, options, indexes) {
         return _checkRole(dataList, "isLocal", true)
+    }
+
+    function _singleMedia(dataList, options, indexes) {
+        return dataList.length === 1 && !!dataList[0].mrl
     }
 
     function _deleteStream(dataList,options, indexes) {

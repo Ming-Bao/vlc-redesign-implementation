@@ -18,6 +18,7 @@
 #include <QTest>
 #include <QMenu>
 #include <QScopeGuard>
+#include <QVariantMap>
 #include "style/menustyle.hpp"
 
 class TestMenuStyle : public QObject
@@ -77,6 +78,25 @@ private slots:
         QCOMPARE(card.left(), anchor.x());
         QCOMPARE(card.bottom() + 1, anchor.y());
         menu.hide();
+    }
+    // native menus from QML: strings and { text, icon, separator, checked, enabled, shortcut, chevron }
+    void menuRows()
+    {
+        QMenu menu;
+        QList<int> fired;
+        addMenuRows(&menu, { "A", QVariantMap{{"separator", true}},
+                             QVariantMap{{"text", "B"}, {"icon", "play"}, {"enabled", false}},
+                             QVariantMap{{"text", "Tom && Jerry"}} },
+                    [&](int i) { fired << i; });
+        const QList<QAction*> actions = menu.actions();
+        QCOMPARE(actions.size(), 4);
+        QVERIFY(actions[1]->isSeparator());
+        QVERIFY(!actions[2]->isEnabled());
+        QVERIFY(!actions[2]->icon().isNull());
+        QCOMPARE(actions[3]->text(), QString("Tom && Jerry"));
+        actions[3]->trigger();
+        actions[0]->trigger();
+        QCOMPARE(fired, QList<int>({3, 0}));
     }
 };
 

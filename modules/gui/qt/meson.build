@@ -1508,7 +1508,7 @@ if qt6_dep.found()
                 'tests/test_menu_style.cpp',
                 'style/menustyle.hpp',
                 'style/menustyle.cpp'
-            ),
+            ) + qt6pre_qrc,
             'moc_sources': files('tests/test_menu_style.cpp'),
             'suite': ['qt'],
             'include_directories' : qt_include_dir,

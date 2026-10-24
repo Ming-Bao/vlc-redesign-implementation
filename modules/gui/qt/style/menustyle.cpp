@@ -355,3 +355,35 @@ bool MenuStyle::eventFilter(QObject* obj, QEvent* ev)
     }
     return QProxyStyle::eventFilter(obj, ev);
 }
+
+void addMenuRows(QMenu* menu, const QVariantList& rows, std::function<void(int)> onSelected)
+{
+    for (int i = 0; i < rows.size(); ++i)
+    {
+        const auto fire = [onSelected, i]() { onSelected(i); };
+        if (rows[i].typeId() != QMetaType::QVariantMap)
+        {
+            menu->addAction(rows[i].toString(), menu, fire);
+            continue;
+        }
+        const QVariantMap row = rows[i].toMap();
+        if (row.value("separator").toBool())
+        {
+            menu->addSeparator();
+            continue;
+        }
+        QAction* a = menu->addAction(row.value("text").toString(), menu, fire);
+        const QString icon = row.value("icon").toString();
+        if (!icon.isEmpty())
+            a->setIcon(QIcon(":/redesign/menu/" + icon + ".svg"));
+        if (row.contains("checked"))
+        {
+            a->setCheckable(true);
+            a->setChecked(row.value("checked").toBool());
+        }
+        a->setEnabled(row.value("enabled", true).toBool());
+        if (row.contains("shortcut"))
+            a->setShortcut(QKeySequence(row.value("shortcut").toString()));
+        a->setProperty("vlc-chevron", row.value("chevron").toBool());
+    }
+}

@@ -120,6 +120,17 @@ private slots:
         QCOMPARE(r.mediaOffset, size_t(0));
         QCOMPARE(r.mediaLimit, size_t(0));
     }
+    // Go to Source: the levels from the entry point down to a media's folder
+    void trail()
+    {
+        auto res = folder_tree::trail({"file:///lib/Other/", R + "/"}, R + "/My%20Shows/S01/");
+        QCOMPARE(names(res), QStringList({"Videos", "My Shows", "S01"}));
+        QCOMPARE(res[0].mrl, R);
+        QCOMPARE(res[2].mrl, R + "/My%20Shows/S01");
+        QCOMPARE(folder_tree::trail({R + "/"}, R).size(), size_t(1));
+        QVERIFY(folder_tree::trail({R + "/"}, R + "2/a").empty());
+        QVERIFY(folder_tree::trail({R + "/"}, "file:///elsewhere").empty());
+    }
 };
 
 QTEST_GUILESS_MAIN(TestFolderTree)

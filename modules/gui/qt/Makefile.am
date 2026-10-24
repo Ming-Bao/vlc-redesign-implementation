@@ -1973,7 +1973,7 @@ TESTS += test_waveform_util
 test_menu_style_SOURCES = \
 	tests/test_menu_style.cpp \
 	style/menustyle.hpp style/menustyle.cpp
-nodist_test_menu_style_SOURCES = tests/test_menu_style.moc
+nodist_test_menu_style_SOURCES = tests/test_menu_style.moc assets.cpp
 BUILT_SOURCES += tests/test_menu_style.moc
 CLEANFILES += tests/test_menu_style.moc
 test_menu_style_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)

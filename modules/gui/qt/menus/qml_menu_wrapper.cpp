@@ -76,14 +76,12 @@ void StringListMenu::popup(const QPoint &point, const QVariantList &stringList)
     assert(m_ctx);
     QMenu *m = newMenu();
 
-    for (int i = 0; i != stringList.size(); ++i)
+    addMenuRows(m, stringList, [this, stringList](int i)
     {
-        const auto str = stringList[i].toString();
-        m->addAction(str, this, [this, i, str]()
-        {
-            emit selected(i, str);
-        });
-    }
+        const QVariant& row = stringList[i];
+        emit selected(i, row.typeId() == QMetaType::QVariantMap ? row.toMap().value("text").toString()
+                                                                : row.toString());
+    });
 
     m->popup(point);
 }

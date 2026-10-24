@@ -63,6 +63,10 @@ public:
 
     Q_INVOKABLE void mlInputItem(const QVector<MLItemId>& itemIdVector, QJSValue callback);
 
+    // callback([{ name, mrl }]): the library folder levels from the entry point down to folder,
+    // [] when no entry point holds it (see folder_tree::trail)
+    Q_INVOKABLE void folderTrail(const QString& folder, QJSValue callback);
+
     inline bool idle() const { return m_idle; }
     inline int discoveryPending() const { return m_discoveryPending; }
     inline QString discoveryEntryPoint() const { return m_discoveryEntryPoint; }

@@ -256,9 +256,11 @@ public slots:
     void PLOpenDir();
     void PLAppendDir();
 
-    void streamingDialog( QWindow *parent, const QStringList& mrls, bool b_stream = true,
+    void streamingDialog( QWindow *parent, const QStringList& mrls, bool b_transcode_only = true,
                           QStringList options = QStringList("") );
-    void streamingDialog( const QList<QUrl>& urls, bool b_stream = true );
+    void streamingDialog( const QList<QUrl>& urls, bool b_transcode_only = true );
+    // the library file menu's Stream (true) and Convert (false)
+    void streamMedia( const QUrl& url, bool stream ) { streamingDialog( { url }, !stream ); }
     void openAndStreamingDialogs();
     void openAndTranscodingDialogs();
 

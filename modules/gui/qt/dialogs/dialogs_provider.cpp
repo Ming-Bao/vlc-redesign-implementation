@@ -998,7 +998,7 @@ void DialogsProvider::streamingDialog( QWindow *parent,
         THEMPL->append(outputMedias, true);
 }
 
-void DialogsProvider::streamingDialog(const QList<QUrl> &urls, bool b_stream )
+void DialogsProvider::streamingDialog(const QList<QUrl> &urls, bool b_transcode_only )
 {
     if(urls.isEmpty())
         return;
@@ -1009,7 +1009,7 @@ void DialogsProvider::streamingDialog(const QList<QUrl> &urls, bool b_stream )
                    std::back_inserter(_urls),
                    [](const QUrl& url){ return url.toString(); });
 
-    streamingDialog(nullptr, _urls, b_stream);
+    streamingDialog(nullptr, _urls, b_transcode_only);
 }
 
 void DialogsProvider::openAndStreamingDialogs()

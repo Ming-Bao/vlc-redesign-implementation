@@ -92,6 +92,7 @@ class StringListMenu : public BasicMenuContainer
 public:
     using BasicMenuContainer::BasicMenuContainer;
 
+    // rows: see addMenuRows (style/menustyle.hpp); plain strings still work
     Q_INVOKABLE void popup(const QPoint &point, const QVariantList &stringList);
 
 signals:

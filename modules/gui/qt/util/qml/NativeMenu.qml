@@ -38,6 +38,12 @@ QtObject {
         "visible" - (Boolean or function(dataList,options, indexes) -> Boolean) (optional) a boolean value or function which
                     controls whether the action is shown in the menu following 'popup' call
 
+        "icon" - (string) (optional) a menu icon name, ":/redesign/menu/<icon>.svg"
+
+        "separator" - (Boolean) (optional) true: a divider row, without "text" or "action"
+
+        "checked", "enabled" - (Boolean) (optional) a check mark / a greyed out row
+
        e.g see MLContextMenu.qml
     **/
 
@@ -82,7 +88,8 @@ QtObject {
 
         _dataList = data
 
-        const textStrings = []
+        // one row per effective action, so a row's index is its action's (see addMenuRows)
+        const rows = []
         _effectiveActions = []
         for (let i in actions) {
             const action = actions[i]
@@ -91,11 +98,23 @@ QtObject {
                     || (typeof action.visible === "boolean" && action.visible)
                     || (typeof action.visible === "function" && action.visible(_dataList, _options, _indexes))) {
                 _effectiveActions.push(action)
-                textStrings.push(action.text)
+                rows.push(_row(action))
             }
         }
 
-        menu.popup(_popupPoint, textStrings)
+        menu.popup(_popupPoint, rows)
+    }
+
+    // a plain string unless the action has a row key (the action itself holds functions)
+    function _row(action) {
+        const keys = ["icon", "separator", "checked", "enabled"].filter(k => action.hasOwnProperty(k))
+        if (keys.length === 0)
+            return action.text
+
+        const row = { text: action.text ?? "" }
+        for (const k of keys)
+            row[k] = action[k]
+        return row
     }
 
     function _executeAction(index) {

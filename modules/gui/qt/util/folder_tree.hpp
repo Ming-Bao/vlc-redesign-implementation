@@ -88,6 +88,28 @@ inline std::vector<Child> children(const QStringList& roots, const QStringList& 
     return res;
 }
 
+// The levels from the entry point that holds folder down to folder itself
+// (what LibraryFolderPage's trail holds), empty when no entry point holds it.
+inline std::vector<Child> trail(const QStringList& roots, const QString& folder)
+{
+    const QString f = normalized(folder);
+    for (const QString& root : roots)
+    {
+        const QString r = normalized(root);
+        if (f != r && !f.startsWith(r + '/'))
+            continue;
+        std::vector<Child> res{{displayName(r.mid(r.lastIndexOf('/') + 1)), r}};
+        QString mrl = r;
+        for (const QString& segment : f.mid(r.size() + 1).split('/', Qt::SkipEmptyParts))
+        {
+            mrl += '/' + segment;
+            res.push_back({displayName(segment), mrl});
+        }
+        return res;
+    }
+    return {};
+}
+
 // One page [offset, offset+limit) over "nFolders folders then files";
 // limit 0 = unlimited. media false: no files requested. media true with
 // mediaLimit 0: all remaining files.

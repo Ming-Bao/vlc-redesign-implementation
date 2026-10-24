@@ -20,6 +20,7 @@
 #include "mlhelper.hpp"
 #include "playlist/playlist_controller.hpp"
 #include "util/shared_input_item.hpp"
+#include "util/folder_tree.hpp"
 
 #include <utility>
 
@@ -244,6 +245,31 @@ void MediaLib::reload()
     //ML thread
     [](vlc_medialibrary_t* ml){
         vlc_ml_reload_folder(ml, nullptr);
+    });
+}
+
+void MediaLib::folderTrail(const QString& folder, QJSValue callback)
+{
+    struct Context {
+        QStringList roots;
+    };
+    runOnMLThread<Context>(this,
+    //ML thread
+    [](vlc_medialibrary_t* ml, Context& ctx){
+        ml_unique_ptr<vlc_ml_folder_list_t> entryPoints(vlc_ml_list_entry_points(ml, nullptr));
+        if (entryPoints)
+            for (const vlc_ml_folder_t & entryPoint : ml_range_iterate<vlc_ml_folder_t>(entryPoints))
+                ctx.roots << qfu(entryPoint.psz_mrl);
+    },
+    //UI thread
+    [this, folder, callback](quint64, Context& ctx) mutable {
+        QJSEngine* engine = qjsEngine(this);
+        if (!engine || !callback.isCallable())
+            return;
+        QVariantList trail;
+        for (const folder_tree::Child& level : folder_tree::trail(ctx.roots, folder))
+            trail << QVariantMap{{"name", level.name}, {"mrl", level.mrl}};
+        callback.call({engine->toScriptValue(trail)});
     });
 }
 
