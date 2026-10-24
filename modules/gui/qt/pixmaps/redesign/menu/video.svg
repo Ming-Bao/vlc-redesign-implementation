@@ -1,0 +1,9 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Frame">
+<path id="Subtract" d="M15.2734 4L14.1807 6.79199H9.04102L9.99609 4H15.2734ZM19 4C20.1046 4 21 4.89543 21 6C21 6.2815 20.9409 6.54902 20.8359 6.79199H15.9707L17.0635 4H19ZM8.23438 4L7.2793 6.79199H3.16406C3.05911 6.54902 3 6.2815 3 6C3 4.89543 3.89543 4 5 4H8.23438Z" fill="#D37918"/>
+<mask id="stroke0_0_99" fill="white">
+<path d="M21 15.5V17C21 18.6569 19.6569 20 18 20H14.25H8.625H6C4.34315 20 3 18.6569 3 17V15.5V9.5C3 8.94772 3.44772 8.5 4 8.5H8.625H14.25H20C20.5523 8.5 21 8.94772 21 9.5V15.5Z"/>
+</mask>
+<path id="Rectangle 16" d="M21 17V15.5V9.5C21 8.94772 20.5523 8.5 20 8.5H14.25H8.625H4C3.44772 8.5 3 8.94772 3 9.5V15.5V17C3 18.6569 4.34315 20 6 20H8.625H14.25H18C19.6569 20 21 18.6569 21 17Z" stroke-width="3" stroke="#8F8F8F" mask="url(#stroke0_0_99)"/>
+</g>
+</svg>

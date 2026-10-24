@@ -957,6 +957,48 @@ libqt_plugin_la_RES = \
 	pixmaps/menu/volume-high.svg \
 	pixmaps/menu/volume-low.svg \
 	pixmaps/menu/volume-muted.svg \
+	pixmaps/redesign/menu/about.svg \
+	pixmaps/redesign/menu/add-folder.svg \
+	pixmaps/redesign/menu/add-to-playlist.svg \
+	pixmaps/redesign/menu/add-to-queue.svg \
+	pixmaps/redesign/menu/add.svg \
+	pixmaps/redesign/menu/audio.svg \
+	pixmaps/redesign/menu/checkmark.svg \
+	pixmaps/redesign/menu/chevron-right.svg \
+	pixmaps/redesign/menu/convert.svg \
+	pixmaps/redesign/menu/customize.svg \
+	pixmaps/redesign/menu/export.svg \
+	pixmaps/redesign/menu/favorite.svg \
+	pixmaps/redesign/menu/go-to-source.svg \
+	pixmaps/redesign/menu/hide-ui.svg \
+	pixmaps/redesign/menu/info.svg \
+	pixmaps/redesign/menu/keyboard.svg \
+	pixmaps/redesign/menu/mark-watched.svg \
+	pixmaps/redesign/menu/more-settings.svg \
+	pixmaps/redesign/menu/next.svg \
+	pixmaps/redesign/menu/open-capture.svg \
+	pixmaps/redesign/menu/open-disc.svg \
+	pixmaps/redesign/menu/open-file.svg \
+	pixmaps/redesign/menu/open-folder.svg \
+	pixmaps/redesign/menu/open-media.svg \
+	pixmaps/redesign/menu/open-network.svg \
+	pixmaps/redesign/menu/open-recent.svg \
+	pixmaps/redesign/menu/pause.svg \
+	pixmaps/redesign/menu/play.svg \
+	pixmaps/redesign/menu/playback.svg \
+	pixmaps/redesign/menu/playlist.svg \
+	pixmaps/redesign/menu/previous.svg \
+	pixmaps/redesign/menu/profile.svg \
+	pixmaps/redesign/menu/quit.svg \
+	pixmaps/redesign/menu/record.svg \
+	pixmaps/redesign/menu/resync.svg \
+	pixmaps/redesign/menu/settings.svg \
+	pixmaps/redesign/menu/show-in-explorer.svg \
+	pixmaps/redesign/menu/shuffle.svg \
+	pixmaps/redesign/menu/stop.svg \
+	pixmaps/redesign/menu/stream.svg \
+	pixmaps/redesign/menu/subtitles.svg \
+	pixmaps/redesign/menu/video.svg \
 	pixmaps/misc/cone.svg \
 	pixmaps/misc/new_indicator.svg \
 	pixmaps/misc/theme_dark.svg \

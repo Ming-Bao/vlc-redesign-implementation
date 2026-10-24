@@ -16,9 +16,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 #include "menustyle.hpp"
-#include "vlcicons.hpp"
 
 #include <QApplication>
+#include <QIcon>
 #include <QMenu>
 #include <QPainter>
 #include <QPainterPath>
@@ -40,8 +40,6 @@ const QColor highlightColor(0x1F, 0x1F, 0x1F);
 const QColor labelColor(0x8F, 0x8F, 0x8F);
 const QColor shortcutColor(0x6B, 0x6B, 0x6B);
 const QColor dividerColor(0x22, 0x22, 0x22);
-const QColor checkColor(0xD3, 0x79, 0x18);
-const QColor chevronColor(0x8F, 0x8F, 0x8F);
 constexpr qreal shadowBlur = 15, shadowYOffset = 8, shadowAlpha = 0.46;
 constexpr qreal cardRadius = 10, cardPadding = 4;
 constexpr qreal rowHeight = 48, rowHPadding = 14, rowVPadding = 2, rowSpacing = 10, rowRadius = 6;
@@ -94,13 +92,10 @@ bool anyChevron(const QMenu* menu)
                        [](const QAction* a) { return a->isVisible() && hasChevron(a); });
 }
 
-void drawGlyph(QPainter* p, const QRect& r, QChar glyph, const QColor& color)
+// the redesign's own SVGs already carry their colours (check #D37918, chevron #8F8F8F)
+void drawIcon(QPainter* p, const QRect& r, const QString& name)
 {
-    QFont f(VLCIcons::fontFamily);
-    f.setPixelSize(r.height());
-    p->setFont(f);
-    p->setPen(color);
-    p->drawText(r, Qt::AlignCenter, QString(glyph));
+    QIcon(QStringLiteral(":/redesign/menu/%1.svg").arg(name)).paint(p, r);
 }
 
 } // namespace
@@ -250,7 +245,7 @@ void MenuStyle::drawControl(ControlElement ce, const QStyleOption* opt, QPainter
     {
         const QRect slot(left, c.top() + (c.height() - icon) / 2, icon, icon);
         if (mi->checkType != QStyleOptionMenuItem::NotCheckable && mi->checked)
-            drawGlyph(p, slot, VLCIcons::checkmark, checkColor);
+            drawIcon(p, slot, QStringLiteral("checkmark"));
         else if (!mi->icon.isNull())
             mi->icon.paint(p, slot);
         left += icon + gap;
@@ -259,8 +254,8 @@ void MenuStyle::drawControl(ControlElement ce, const QStyleOption* opt, QPainter
     if (mi->menuItemType == QStyleOptionMenuItem::SubMenu || hasChevron(menu->actionAt(r.center())))
     {
         right -= icon;
-        drawGlyph(p, QRect(right, c.top() + (c.height() - icon) / 2, icon, icon),
-                  VLCIcons::ic_fluent_chevron_right_24, chevronColor);
+        drawIcon(p, QRect(right, c.top() + (c.height() - icon) / 2, icon, icon),
+                 QStringLiteral("chevron-right"));
         right -= gap;
     }
 
