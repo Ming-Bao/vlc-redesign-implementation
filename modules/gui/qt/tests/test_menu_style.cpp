@@ -16,6 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 #include <QTest>
+#include <QApplication>
 #include <QMenu>
 #include <QScopeGuard>
 #include <QVariantMap>
@@ -79,7 +80,49 @@ private slots:
         QCOMPARE(card.bottom() + 1, anchor.y());
         menu.hide();
     }
-    // native menus from QML: strings and { text, icon, separator, checked, enabled, shortcut, chevron }
+    // QMenu::addSection (the bookmark and program menus): a 48 px header row, not a 1 px line
+    void sectionHeader()
+    {
+        MenuStyle style;
+        QMenu menu;
+        menu.setStyle(&style);
+        QAction* section = menu.addSection("Chapters");
+        menu.addAction("A");
+        menu.adjustSize();
+        QCOMPARE(menu.actionGeometry(section).height(), 48);
+    }
+    // a torn-off menu is a QMenu in a normal window: it keeps its frame
+    void tornOffKeepsFrame()
+    {
+        MenuStyle::install();
+        QMenu menu;
+        menu.setTearOffEnabled(true);
+        menu.addAction("A");
+        menu.showTearOffMenu(QPoint(10, 10));
+        QMenu* torn = nullptr;
+        for (QWidget* w : QApplication::topLevelWidgets())
+            if (auto m = qobject_cast<QMenu*>(w); m && m != &menu && m->isVisible())
+                torn = m;
+        QVERIFY(torn);
+        QVERIFY(!(torn->windowFlags() & Qt::FramelessWindowHint));
+        QVERIFY(torn->contentsMargins().isNull());
+        menu.hideTearOffMenu();
+    }
+    // the key only shows: skins2's sendKey triggers any popup action whose shortcut() matches
+    void showKeyIsDisplayOnly()
+    {
+        QMenu menu;
+        QAction* a = menu.addAction("&Record");
+        menuShowKey(a, QKeySequence("Shift+R"));
+        QVERIFY(a->shortcut().isEmpty());
+        const QStringList parts = a->text().split(u'\t');
+        QCOMPARE(parts.size(), 2);
+        QCOMPARE(parts[0], QString("&Record"));
+        // what the style draws in the shortcut column
+        QCOMPARE(menuShortcutText(QKeySequence::fromString(parts[1], QKeySequence::NativeText)),
+                 QString("Shift + R"));
+    }
+    // native menus from QML: strings and { text, icon, separator, checked, enabled }
     void menuRows()
     {
         QMenu menu;

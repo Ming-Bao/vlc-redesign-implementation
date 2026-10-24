@@ -80,16 +80,17 @@ bool hasIconSlot(const QStyleOptionMenuItem* mi)
     return mi->maxIconWidth > 0 || mi->menuHasCheckableItems;
 }
 
-bool hasChevron(const QAction* a)
-{
-    return a && (a->menu() || a->property("vlc-chevron").toBool());
-}
-
 bool anyChevron(const QMenu* menu)
 {
     const auto actions = menu->actions();
     return std::any_of(actions.begin(), actions.end(),
-                       [](const QAction* a) { return a->isVisible() && hasChevron(a); });
+                       [](const QAction* a) { return a->isVisible() && a->menu(); });
+}
+
+// a torn-off menu is a QMenu too, but a normal window: it keeps its frame and the base style
+bool isPopup(const QWidget* w)
+{
+    return w->windowType() == Qt::Popup;
 }
 
 // the redesign's own SVGs already carry their colours (check #D37918, chevron #8F8F8F)
@@ -151,7 +152,7 @@ void MenuStyle::polish(QWidget* w)
 {
     QProxyStyle::polish(w);
     auto menu = qobject_cast<QMenu*>(w);
-    if (!menu)
+    if (!menu || !isPopup(menu))
         return;
     menu->setAttribute(Qt::WA_TranslucentBackground);
     menu->setWindowFlags(menu->windowFlags() | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
@@ -163,7 +164,8 @@ void MenuStyle::polish(QWidget* w)
 
 void MenuStyle::unpolish(QWidget* w)
 {
-    if (auto menu = qobject_cast<QMenu*>(w))
+    auto menu = qobject_cast<QMenu*>(w);
+    if (menu && isPopup(menu))
     {
         menu->removeEventFilter(this);
         menu->setMinimumWidth(0);
@@ -187,6 +189,12 @@ void MenuStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption* opt, QPai
     p->save();
     p->setRenderHint(QPainter::Antialiasing);
     p->setPen(Qt::NoPen);
+    if (!isPopup(menu))
+    {
+        p->fillRect(card, cardColor);
+        p->restore();
+        return;
+    }
 
     // Figma: shadow 0 8 15 rgba(0,0,0,0.46). A stack of growing translucent rounded rects
     // ramps it from full under the card to nothing outside it.
@@ -220,6 +228,16 @@ void MenuStyle::drawControl(ControlElement ce, const QStyleOption* opt, QPainter
     // ponytail: left-to-right only; mirror the slots with QStyle::visualRect if RTL menus need it
     const QRect r = mi->rect;
     p->save();
+    // a QMenu::addSection header: a row of grey text
+    if (mi->menuItemType == QStyleOptionMenuItem::Separator && !mi->text.isEmpty())
+    {
+        p->setFont(menuFont(menu));
+        p->setPen(shortcutColor);
+        p->drawText(r.adjusted(dp(rowHPadding), 0, -dp(rowHPadding), 0), Qt::AlignLeft | Qt::AlignVCenter,
+                    menuLabelText(mi->text));
+        p->restore();
+        return;
+    }
     if (mi->menuItemType == QStyleOptionMenuItem::Separator)
     {
         p->fillRect(QRect(r.left(), r.top() + r.height() / 2, r.width(), 1), dividerColor);
@@ -251,7 +269,7 @@ void MenuStyle::drawControl(ControlElement ce, const QStyleOption* opt, QPainter
         left += icon + gap;
     }
 
-    if (mi->menuItemType == QStyleOptionMenuItem::SubMenu || hasChevron(menu->actionAt(r.center())))
+    if (mi->menuItemType == QStyleOptionMenuItem::SubMenu)
     {
         right -= icon;
         drawIcon(p, QRect(right, c.top() + (c.height() - icon) / 2, icon, icon),
@@ -285,10 +303,12 @@ QSize MenuStyle::sizeFromContents(ContentsType ct, const QStyleOption* opt, cons
     if (!menu || !mi || ct != CT_MenuItem)
         return QProxyStyle::sizeFromContents(ct, opt, size, w);
 
-    if (mi->menuItemType == QStyleOptionMenuItem::Separator)
-        return { 1, 1 };
-
     const QFontMetrics fm(menuFont(menu));
+    if (mi->menuItemType == QStyleOptionMenuItem::Separator)
+        return mi->text.isEmpty()
+            ? QSize(1, 1)
+            : QSize(2 * dp(rowHPadding) + fm.horizontalAdvance(menuLabelText(mi->text)), dp(rowHeight));
+
     const auto [label, native] = splitText(mi->text);
     int width = 2 * dp(rowHPadding) + fm.horizontalAdvance(menuLabelText(label));
     if (hasIconSlot(mi))
@@ -338,7 +358,8 @@ bool MenuStyle::eventFilter(QObject* obj, QEvent* ev)
     // QMenu placed the window at the requested point; put the card there instead
     if (ev->type() == QEvent::Show)
     {
-        if (auto menu = qobject_cast<QMenu*>(obj))
+        auto menu = qobject_cast<QMenu*>(obj);
+        if (menu && isPopup(menu))
         {
             const QMargins m = menu->contentsMargins();
             QPoint to = menu->pos() - QPoint(m.left(), m.top());
@@ -387,8 +408,10 @@ void addMenuRows(QMenu* menu, const QVariantList& rows, std::function<void(int)>
             a->setChecked(row.value("checked").toBool());
         }
         a->setEnabled(row.value("enabled", true).toBool());
-        if (row.contains("shortcut"))
-            a->setShortcut(QKeySequence(row.value("shortcut").toString()));
-        a->setProperty("vlc-chevron", row.value("chevron").toBool());
     }
+}
+
+void menuShowKey(QAction* action, const QKeySequence& key)
+{
+    action->setText(action->text() + u'\t' + key.toString(QKeySequence::NativeText));
 }
