@@ -181,6 +181,10 @@ Widgets.PageExt {
         showPlayAsAudioAction: !root.audio
     }
 
+    FolderContextMenu {
+        id: folderMenu
+    }
+
     MainViewLoader {
         id: loader
 
@@ -297,6 +301,7 @@ Widgets.PageExt {
                         Navigation.parentItem: cell
 
                         onActivated: (reason) => root._open(cell.model, cell.index, reason)
+                        onMenuRequested: (globalPos) => folderMenu.popup(cell.model.mrl, globalPos)
                     }
                 }
 
@@ -433,7 +438,9 @@ Widgets.PageExt {
                         MediaLib.addAndPlay(model.id)
                 }
                 onMenuRequested: (globalPos) => {
-                    if (!_folder)
+                    if (_folder)
+                        folderMenu.popup(model.mrl, globalPos)
+                    else
                         contextMenu.popup([browseModel.index(index, 0)], globalPos)
                 }
             }

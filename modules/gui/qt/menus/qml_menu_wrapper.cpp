@@ -30,13 +30,17 @@
 #include "util/colorizedsvgicon.hpp"
 #include "maininterface/navigationmodel.hpp"
 #include "style/menustyle.hpp"
+#include "medialibrary/m3u8.hpp"
+#include "medialibrary/mlhelper.hpp"
 
 // Qt includes
 #include <QPainter>
-#include <QSignalMapper>
 #include <QScreen>
 #include <QActionGroup>
 #include <QAbstractProxyModel>
+#include <QDir>
+#include <QFileDialog>
+#include <QSaveFile>
 
 namespace
 {
@@ -758,6 +762,54 @@ PlaylistListContextMenu::PlaylistListContextMenu(QObject * parent)
 {}
 
 
+namespace
+{
+    QAction * addRow(QMenu * menu, const QString & icon, const QString & text)
+    {
+        return menu->addAction(QIcon(":/redesign/menu/" + icon + ".svg"), text);
+    }
+
+    // a playlist's tracks written to a .m3u8 file the user picks
+    void exportPlaylist(MainCtx * ctx, MediaLib * ml, MLItemId id, QString name)
+    {
+        const QUrl dir = ctx->getDialogFilePath();
+        QString path = QFileDialog::getSaveFileName(nullptr, qtr("Export Playlist"),
+                QDir(dir.toLocalFile()).filePath(name.replace('/', '_') + ".m3u8"),
+                qtr("M3U8 playlist") + " (*.m3u8)");
+        if (path.isEmpty())
+            return;
+        if (!path.endsWith(".m3u8", Qt::CaseInsensitive))
+            path += ".m3u8";
+
+        struct Context {
+            QStringList mrls;
+        };
+        ml->runOnMLThread<Context>(ml,
+        //ML thread
+        [id](vlc_medialibrary_t * p_ml, Context & ctx)
+        {
+            ml_unique_ptr<vlc_ml_media_list_t> list(vlc_ml_list_media_of(p_ml, nullptr, id.type, id.id));
+            if (!list)
+                return;
+            for (const vlc_ml_media_t & media : ml_range_iterate<vlc_ml_media_t>(list))
+                for (const vlc_ml_file_t & file : ml_range_iterate<vlc_ml_file_t>(media.p_files))
+                    if (file.i_type == VLC_ML_FILE_TYPE_MAIN)
+                        ctx.mrls << qfu(file.psz_mrl);
+        },
+        //UI thread
+        [path](quint64, Context & ctx)
+        {
+            QSaveFile file(path);
+            if (file.open(QIODevice::WriteOnly))
+            {
+                file.write(toM3u8(ctx.mrls));
+                file.commit();
+            }
+        });
+    }
+}
+
+// Figma 2459:9389, then VLC's own entries below a divider
 void PlaylistListContextMenu::popup(const QModelIndexList & selected, QPoint pos, QVariantMap)
 {
     assert(m_ctx);
@@ -774,21 +826,45 @@ void PlaylistListContextMenu::popup(const QModelIndexList & selected, QPoint pos
 
     MediaLib * ml = m_model->ml();
 
-    QAction * action = menu->addAction(qtr("Add and play"));
+    const bool single = (ids.count() == 1);
 
-    connect(action, &QAction::triggered, [ml, ids]() {
+    connect(addRow(menu, "play", qtr("Play")), &QAction::triggered, [ml, ids]() {
         ml->addAndPlay(ids);
     });
 
-    action = menu->addAction(qtr("Enqueue"));
+    if (single)
+    {
+        const QModelIndex index = selected.first();
+        const bool favorite = m_model->data(index, MLPlaylistListModel::PLAYLIST_IS_FAVORITE).toBool();
+        QAction * action = addRow(menu, "favorite", favorite ? qtr("Remove from Favorites") : qtr("Favorite"));
+        connect(action, &QAction::triggered, [this, index, favorite]() {
+            m_model->setFavorite(index, !favorite);
+        });
+    }
 
-    connect(action, &QAction::triggered, [ml, ids]() {
+    connect(addRow(menu, "shuffle", qtr("Shuffle")), &QAction::triggered, [ml, ids]() {
+        ml->shuffleAndPlay(ids);
+    });
+
+    if (single)
+    {
+        QAction * action = addRow(menu, "export", qtr("Export Playlist"));
+        const MLItemId id = ids.first().value<MLItemId>();
+        const QString name = m_model->data(selected.first(), MLPlaylistListModel::PLAYLIST_NAME).toString();
+        connect(action, &QAction::triggered, [ctx = m_ctx, ml, id, name]() {
+            exportPlaylist(ctx, ml, id, name);
+        });
+    }
+
+    connect(addRow(menu, "add-to-queue", qtr("Add to Queue")), &QAction::triggered, [ml, ids]() {
         ml->addToPlaylist(ids);
     });
 
-    if (ids.count() == 1)
+    menu->addSeparator();
+
+    if (single)
     {
-        action = menu->addAction(qtr("Rename"));
+        QAction * action = menu->addAction(qtr("Rename"));
 
         QModelIndex index = selected.first();
 
@@ -797,9 +873,11 @@ void PlaylistListContextMenu::popup(const QModelIndexList & selected, QPoint pos
         });
     }
 
-    action = menu->addAction(qtr("Delete"));
+    QAction * action = menu->addAction(qtr("Delete"));
 
-    connect(action, &QAction::triggered, this, &PlaylistListContextMenu::requestDeleteSelectedPlaylists);
+    connect(action, &QAction::triggered, this, [this, ids]() {
+        emit requestDeleteSelectedPlaylists(ids);
+    });
 
     menu->popup(pos);
 }
@@ -809,8 +887,9 @@ void PlaylistListContextMenu::popup(const QModelIndexList & selected, QPoint pos
 //=================================================================================================
 
 
+// the file menu's entries (Figma 2404:13340) that apply, then the playlist's own below a divider
 void PlaylistMediaContextMenu::popup(const QModelIndexList & selected, QPoint pos,
-                                     QVariantMap options)
+                                     QVariantMap)
 {
     assert(m_ctx);
 
@@ -826,47 +905,36 @@ void PlaylistMediaContextMenu::popup(const QModelIndexList & selected, QPoint po
 
     MediaLib * ml = m_model->ml();
 
-    QAction * action = menu->addAction(qtr("Add and play"));
-
-    connect(action, &QAction::triggered, [ml, ids]() {
+    connect(addRow(menu, "play", qtr("Play")), &QAction::triggered, [ml, ids]() {
         ml->addAndPlay(ids);
     });
 
-    action = menu->addAction(qtr("Enqueue"));
-
-    connect(action, &QAction::triggered, [ml, ids]() {
+    connect(addRow(menu, "add-to-queue", qtr("Add to Queue")), &QAction::triggered, [ml, ids]() {
         ml->addToPlaylist(ids);
     });
 
-    action = menu->addAction(qtr("Add to playlist"));
-
-    connect(action, &QAction::triggered, [ids]() {
+    connect(addRow(menu, "add-to-playlist", qtr("Add to Playlist")), &QAction::triggered, [ids]() {
         DialogsProvider::getInstance()->playlistsDialog(ids);
     });
 
-    action = menu->addAction(qtr("Play as audio"));
+    if (ids.count() == 1)
+    {
+        // &&: & alone marks a mnemonic
+        QAction * action = addRow(menu, "info", qtr("Properties && Metadata"));
+        connect(action, &QAction::triggered, [id = ids.first().value<MLItemId>()]() {
+            DialogsProvider::getInstance()->mediaInfoDialog(id);
+        });
+    }
+
+    menu->addSeparator();
+
+    QAction * action = menu->addAction(qtr("Play as audio"));
 
     connect(action, &QAction::triggered, [ml, ids]() {
         ml->addAndPlay(ids, {":no-video"});
     });
 
-    if (options.contains("information") && options["information"].typeId() == QMetaType::Int) {
-        action = menu->addAction(qtr("Information"));
-
-        QSignalMapper * mapper = new QSignalMapper(menu);
-
-        connect(action, &QAction::triggered, mapper, QOverload<>::of(&QSignalMapper::map));
-
-        mapper->setMapping(action, options["information"].toInt());
-        connect(mapper, &QSignalMapper::mappedInt,
-                this, &PlaylistMediaContextMenu::showMediaInformation);
-    }
-
-    menu->addSeparator();
-
     action = menu->addAction(qtr("Remove Selected"));
-
-    action->setIcon(QIcon(":/menu/remove.svg"));
 
     connect(action, &QAction::triggered, [this, selected]() {
         m_model->remove(selected);

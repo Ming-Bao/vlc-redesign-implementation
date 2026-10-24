@@ -63,11 +63,17 @@ public:
 
     Q_INVOKABLE void mlInputItem(const QVector<MLItemId>& itemIdVector, QJSValue callback);
 
-    // callback([{ name, mrl }]): the library folder levels from the entry point down to folder,
-    // [] when no entry point holds it (see folder_tree::trail)
+    // rescan one library folder
+    Q_INVOKABLE void reloadFolder(const QString& mrl);
+
+    // plays the items, then shuffles the whole queue
+    void shuffleAndPlay(const QVariantList& itemIdList);
+
     // attach a subtitle (true) or an audio (false) file to a library media, so that
     // it plays with it
     Q_INVOKABLE void addExternalTrack(const MLItemId& media, const QUrl& file, bool subtitle);
+    // callback([{ name, mrl }]): the library folder levels from the entry point down to folder,
+    // [] when no entry point holds it (see folder_tree::trail)
     Q_INVOKABLE void folderTrail(const QString& folder, QJSValue callback);
 
     inline bool idle() const { return m_idle; }

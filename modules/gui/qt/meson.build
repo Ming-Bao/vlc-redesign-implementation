@@ -354,6 +354,7 @@ qt_plugin_sources = files(
     'medialibrary/mlgroup.cpp',
     'medialibrary/mlgroup.hpp',
     'medialibrary/mlhelper.cpp',
+    'medialibrary/m3u8.hpp',
     'medialibrary/mlhelper.hpp',
     'medialibrary/mlthreadpool.cpp',
     'medialibrary/mlthreadpool.hpp',
@@ -720,6 +721,7 @@ qml_modules += {
         'medialibrary/qml/MLGlobalShortcuts.qml',
         'medialibrary/qml/Bookmarks.qml',
         'medialibrary/qml/MLContextMenu.qml',
+        'medialibrary/qml/FolderContextMenu.qml',
         'medialibrary/qml/MLDragItem.qml',
         'medialibrary/qml/MLTableColumns.qml',
         'medialibrary/qml/ScanProgressBar.qml',
@@ -1523,6 +1525,19 @@ if qt6_dep.found()
                 'util/frequency_rank.hpp'
             ),
             'moc_sources': files('tests/test_frequency_rank.cpp'),
+            'suite': ['qt'],
+            'include_directories' : qt_include_dir,
+            'link_args': qt_link_args,
+            'dependencies': [qt6_dep, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
+            'name': 'test_qt_m3u8',
+            'sources': files(
+                'tests/test_m3u8.cpp',
+                'medialibrary/m3u8.hpp'
+            ),
+            'moc_sources': files('tests/test_m3u8.cpp'),
             'suite': ['qt'],
             'include_directories' : qt_include_dir,
             'link_args': qt_link_args,

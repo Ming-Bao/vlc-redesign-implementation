@@ -260,10 +260,15 @@ public slots:
                           QStringList options = QStringList("") );
     void streamingDialog( const QList<QUrl>& urls, bool b_transcode_only = true );
     // the library file menu's Stream (true) and Convert (false)
+    void streamMedia( const QUrl& url, bool stream ) { streamingDialog( { url }, !stream ); }
     // a file picker for the library file menu's Add Subtitle/Audio Tracks, opened in
     // the folder of `near`; an empty url when cancelled
     Q_INVOKABLE QUrl pickFile( const QString& title, bool subtitle, const QUrl& near );
-    void streamMedia( const QUrl& url, bool stream ) { streamingDialog( { url }, !stream ); }
+    // the library folder menu's Add File and Add Folder, opened in `folder`;
+    // nothing picked: [] and an empty url
+    Q_INVOKABLE QStringList pickMedia( const QString& title, const QUrl& folder )
+        { return showSimpleOpen( title, EXT_FILTER_MEDIA | EXT_FILTER_VIDEO | EXT_FILTER_AUDIO | EXT_FILTER_PLAYLIST, folder ); }
+    Q_INVOKABLE QUrl pickFolder( const QString& title, const QUrl& folder );
     void openAndStreamingDialogs();
     void openAndTranscodingDialogs();
 

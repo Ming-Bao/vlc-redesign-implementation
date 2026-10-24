@@ -1070,6 +1070,12 @@ QUrl DialogsProvider::pickFile( const QString& title, bool subtitle, const QUrl&
                                         filter );
 }
 
+QUrl DialogsProvider::pickFolder( const QString& title, const QUrl& folder )
+{
+    return QFileDialog::getExistingDirectoryUrl( nullptr, title, folder, QFileDialog::ShowDirsOnly,
+                                                 { QStringLiteral( "file" ) } );
+}
+
 void DialogsProvider::loadSubtitlesFile()
 {
     loadMediaFile( SPU_ES, EXT_FILTER_SUBTITLE, qtr( "Open subtitles..." ) );

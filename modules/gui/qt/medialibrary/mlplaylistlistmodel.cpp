@@ -252,6 +252,30 @@ void appendMediaIntoPlaylist(vlc_medialibrary_t* ml, int64_t playlistId, const s
 
 //-------------------------------------------------------------------------------------------------
 
+/* Q_INVOKABLE */ void MLPlaylistListModel::setFavorite(const QModelIndex & index, bool favorite)
+{
+    int row = index.row();
+
+    if (row < 0 || row >= rowCount())
+        return;
+
+    MLPlaylist * playlist = static_cast<MLPlaylist *> (item(row));
+
+    m_mediaLib->runOnMLThread(this,
+    // ML thread
+    [id = playlist->getId().id, favorite](vlc_medialibrary_t * ml)
+    {
+        vlc_ml_playlist_set_favorite(ml, id, favorite);
+    });
+
+    // NOTE: We want the change to be visible right away.
+    playlist->setIsFavorite(favorite);
+
+    emit dataChanged(index, index, { PLAYLIST_IS_FAVORITE });
+}
+
+//-------------------------------------------------------------------------------------------------
+
 /* Q_INVOKABLE */ MLItemId MLPlaylistListModel::getItemId(int index) const
 {
     if (index < 0 || index >= rowCount())
@@ -275,7 +299,8 @@ QHash<int, QByteArray> MLPlaylistListModel::roleNames() const /* override */
         { PLAYLIST_COUNT,     QByteArrayLiteral("count")      },
         { PLAYLIST_NB_AUDIO,  QByteArrayLiteral("nb_audio")   },
         { PLAYLIST_NB_VIDEO,  QByteArrayLiteral("nb_video")   },
-        { PLAYLIST_NB_UNKNOWN,QByteArrayLiteral("nb_unknown") }
+        { PLAYLIST_NB_UNKNOWN,QByteArrayLiteral("nb_unknown") },
+        { PLAYLIST_IS_FAVORITE, QByteArrayLiteral("isFavorite") }
     };
 }
 
@@ -307,6 +332,8 @@ QVariant MLPlaylistListModel::itemRoleData(const MLItem *item, int role) const /
             return QVariant::fromValue(playlist->getNbVideo());
         case PLAYLIST_NB_UNKNOWN:
             return QVariant::fromValue(playlist->getNbUnknown());
+        case PLAYLIST_IS_FAVORITE:
+            return playlist->isFavorite();
         default:
             return QVariant();
     }

@@ -225,6 +225,7 @@ libqt_plugin_la_SOURCES = \
 	medialibrary/mlgroup.cpp \
 	medialibrary/mlgroup.hpp \
 	medialibrary/mlhelper.cpp \
+	medialibrary/m3u8.hpp \
 	medialibrary/mlhelper.hpp \
 	medialibrary/mlthreadpool.cpp \
 	medialibrary/mlthreadpool.hpp \
@@ -1185,6 +1186,7 @@ libqml_module_medialibrary_a_QML = \
 	medialibrary/qml/MLGlobalShortcuts.qml \
 	medialibrary/qml/Bookmarks.qml \
 	medialibrary/qml/MLContextMenu.qml \
+	medialibrary/qml/FolderContextMenu.qml \
 	medialibrary/qml/MLDragItem.qml \
 	medialibrary/qml/MLTableColumns.qml \
 	medialibrary/qml/ScanProgressBar.qml
@@ -1939,6 +1941,20 @@ test_frequency_rank_LDADD = $(QT_QTEST_COMMON_ldadd)
 test_frequency_rank_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
 check_PROGRAMS += test_frequency_rank
 TESTS += test_frequency_rank
+
+# test_m3u8
+test_m3u8_SOURCES = \
+	tests/test_m3u8.cpp \
+	medialibrary/m3u8.hpp
+nodist_test_m3u8_SOURCES = tests/test_m3u8.moc
+BUILT_SOURCES += tests/test_m3u8.moc
+CLEANFILES += tests/test_m3u8.moc
+test_m3u8_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)
+test_m3u8_CXXFLAGS = $(QT_QTEST_COMMON_cxxflags)
+test_m3u8_LDADD = $(QT_QTEST_COMMON_ldadd)
+test_m3u8_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
+check_PROGRAMS += test_m3u8
+TESTS += test_m3u8
 
 # test_folder_tree
 test_folder_tree_SOURCES = \

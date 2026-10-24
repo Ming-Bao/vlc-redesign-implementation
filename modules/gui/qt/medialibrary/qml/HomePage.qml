@@ -28,6 +28,7 @@ import VLC.MainInterface
 import VLC.Widgets as Widgets
 import VLC.Util
 import VLC.Style
+import VLC.Dialogs
 
 Widgets.PageExt {
     id: root
@@ -374,47 +375,12 @@ Widgets.PageExt {
                         History.push(["network", "browse"], { tree: tree }, reason)
                 }
 
-                // the menu acts on the videos directly in the folder (not its subfolders), as the library has them
                 function popupMenu(entry, globalPos) {
-                    folderVideos.folderMrl = entry.mrl
-                    folderMenu.popup(folders.mapFromGlobal(globalPos.x, globalPos.y))
+                    folderMenu.popup(entry.mrl, globalPos)
                 }
 
-                MLFolderBrowseModel {
-                    id: folderVideos
-
-                    ml: MediaLib
-                    audio: false
-                    sortCriteria: "title"
-
-                    // the ids of the level's files, in name order (its folder rows come first and are skipped)
-                    property var videoIds: []
-                    property int _request: 0
-
-                    function update() {
-                        const request = ++_request
-                        videoIds = []
-                        if (count === 0)
-                            return
-                        getDataFlat(Array.from({ length: count }, (_, i) => i), (items) => {
-                            if (request === _request) // the folder changed meanwhile
-                                videoIds = items.filter(i => i && !i.isFolder).map(i => i.id)
-                        })
-                    }
-
-                    onCountChanged: update()
-                    onModelReset: update()
-                }
-
-                Widgets.FigmaMenu {
+                FolderContextMenu {
                     id: folderMenu
-
-                    rows: [
-                        { text: qsTr("Play all videos"), enabled: folderVideos.videoIds.length > 0,
-                          run: () => MediaLib.addAndPlay(folderVideos.videoIds) },
-                        { text: qsTr("Add all videos to the queue"), enabled: folderVideos.videoIds.length > 0,
-                          run: () => MediaLib.addToPlaylist(folderVideos.videoIds) }
-                    ]
                 }
 
                 cardDelegate: Component {
@@ -497,10 +463,17 @@ Widgets.PageExt {
                     }
                 }
 
-                MLContextMenu {
+                PlaylistListContextMenu {
                     id: playlistsMenu
 
                     model: playlistsModel
+                    ctx: MainCtx
+
+                    onRequestDeleteSelectedPlaylists: (ids) => {
+                        if (DialogsProvider.questionDialog(qsTr("Do you really want to delete the selected playlist?"),
+                                                           qsTr("Delete playlist")))
+                            playlistsModel.deletePlaylists(ids)
+                    }
                 }
 
                 onTitleClicked: (reason) => History.push(["playlists"], reason)

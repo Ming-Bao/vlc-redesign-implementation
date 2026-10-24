@@ -248,6 +248,35 @@ void MediaLib::reload()
     });
 }
 
+void MediaLib::reloadFolder(const QString& mrl)
+{
+    runOnMLThread(this,
+    //ML thread
+    [mrl = mrl.toUtf8()](vlc_medialibrary_t* ml){
+        vlc_ml_reload_folder(ml, mrl.constData());
+    });
+}
+
+void MediaLib::shuffleAndPlay(const QVariantList& itemIdList)
+{
+    struct Context {
+        QVector<vlc::playlist::Media> medias;
+    };
+    runOnMLThread<Context>(this,
+    //ML thread
+    [itemIdList](vlc_medialibrary_t* ml, Context& ctx)
+    {
+        convertQVariantListToPlaylistMedias(ml, itemIdList, {}, ctx.medias);
+    },
+    //UI thread: the queue holds the items once append returns
+    [this](quint64, Context& ctx){
+        if (ctx.medias.empty())
+            return;
+        m_playlistController->append(ctx.medias, true);
+        m_playlistController->shuffle();
+    });
+}
+
 void MediaLib::addExternalTrack(const MLItemId& media, const QUrl& file, bool subtitle)
 {
     if (!file.isValid() || file.isEmpty())

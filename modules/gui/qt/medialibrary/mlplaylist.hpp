@@ -44,6 +44,9 @@ public: // Interface
     unsigned int getNbVideo() const;
     unsigned int getNbUnknown() const;
 
+    bool isFavorite() const { return m_isFavorite; }
+    void setIsFavorite(bool favorite) { m_isFavorite = favorite; }
+
 private:
     QString m_name;
 
@@ -53,6 +56,8 @@ private:
     unsigned int m_nbAudio;
     unsigned int m_nbVideo;
     unsigned int m_nbUnknown;
+
+    bool m_isFavorite;
 };
 
 #endif

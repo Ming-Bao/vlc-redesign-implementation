@@ -387,7 +387,7 @@ public slots:
     void popup(const QModelIndexList & selected, QPoint pos, QVariantMap options = {});
 
 signals:
-    void requestDeleteSelectedPlaylists();
+    void requestDeleteSelectedPlaylists(const QVariantList & ids);
 };
 
 class QmlAudioContextMenu : public VLCMenuBar
@@ -413,8 +413,6 @@ public:
 
 public slots:
     void popup(const QModelIndexList & selected, QPoint pos, QVariantMap options = {});
-signals:
-    void showMediaInformation(int index);
 };
 
 class NetworkMediaContextMenu : public BasicMenuContainer {
