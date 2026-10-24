@@ -12,7 +12,8 @@ Steps (executed in order):
     shot:NAME         save OUTDIR/NAME.png from a Mutter ScreenCast stream
     move:X,Y          move the pointer to monitor coordinates
     click:X,Y         left click at monitor coordinates
-    key:KEYSYM        press+release a keysym (e.g. space, Escape)
+    key:KEYSYM        press+release a keysym (e.g. space, Escape); KEY+KEY for a chord (Alt_L+F4)
+    exit:SECONDS      wait for VLC to exit; if it doesn't, save its stacks to OUTDIR/hang.txt
 Writes OUTDIR/vlc.log and OUTDIR/shell.log.
 """
 import os
@@ -28,7 +29,8 @@ REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
 BUILD = os.path.join(REPO, "build")
 WL = "vlc-wl"
 BTN_LEFT = 0x110
-KEYSYMS = {"F11": 0xffc8, "space": 0x20, "Escape": 0xff1b, "Return": 0xff0d, "Super_L": 0xffeb, "Up": 0xff52}
+KEYSYMS = {"F11": 0xffc8, "space": 0x20, "Escape": 0xff1b, "Return": 0xff0d, "Super_L": 0xffeb, "Up": 0xff52,
+           "Alt_L": 0xffe9, "Control_L": 0xffe3, "F4": 0xffc1, "q": 0x71}
 
 
 def bus_call(bus, name, path, iface, method, args, reply="()"):
@@ -136,9 +138,22 @@ def main():
             rd.call_sync("NotifyPointerButton", GLib.Variant("(ib)", (BTN_LEFT, False)), 0, 5000, None)
             pump(0.3)
         elif verb == "key":
-            sym = KEYSYMS.get(arg) or int(arg, 0)
-            key(sym, True); key(sym, False)
+            syms = [KEYSYMS.get(k) or int(k, 0) for k in arg.split("+")]
+            for sym in syms:
+                key(sym, True)
+            for sym in reversed(syms):
+                key(sym, False)
             pump(0.3)
+        elif verb == "exit":
+            end = time.time() + float(arg)
+            while vlc.poll() is None and time.time() < end:
+                pump(0.2)
+            if vlc.poll() is None:
+                print(f"vlc still running after {arg}s")
+                subprocess.run(["gdb", "-q", "-batch", "-p", str(vlc.pid), "-ex", "thread apply all bt 20"],
+                               stdout=open(f"{out}/hang.txt", "w"), stderr=subprocess.STDOUT)
+            else:
+                print(f"vlc exited with {vlc.returncode}")
         else:
             sys.exit(f"unknown step {step}")
 
