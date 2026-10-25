@@ -1004,6 +1004,37 @@ libqt_plugin_la_RES = \
 	pixmaps/redesign/menu/stream.svg \
 	pixmaps/redesign/menu/subtitles.svg \
 	pixmaps/redesign/menu/video.svg \
+	pixmaps/redesign/settings/audio.svg \
+	pixmaps/redesign/settings/audio-active.svg \
+	pixmaps/redesign/settings/chevron-down.svg \
+	pixmaps/redesign/settings/chevron-right.svg \
+	pixmaps/redesign/settings/close.svg \
+	pixmaps/redesign/settings/controls.svg \
+	pixmaps/redesign/settings/controls-active.svg \
+	pixmaps/redesign/settings/extensions.svg \
+	pixmaps/redesign/settings/extensions-active.svg \
+	pixmaps/redesign/settings/general.svg \
+	pixmaps/redesign/settings/general-active.svg \
+	pixmaps/redesign/settings/info.svg \
+	pixmaps/redesign/settings/interface.svg \
+	pixmaps/redesign/settings/interface-active.svg \
+	pixmaps/redesign/settings/library.svg \
+	pixmaps/redesign/settings/library-active.svg \
+	pixmaps/redesign/settings/network.svg \
+	pixmaps/redesign/settings/network-active.svg \
+	pixmaps/redesign/settings/performance.svg \
+	pixmaps/redesign/settings/performance-active.svg \
+	pixmaps/redesign/settings/playback.svg \
+	pixmaps/redesign/settings/playback-active.svg \
+	pixmaps/redesign/settings/privacy.svg \
+	pixmaps/redesign/settings/privacy-active.svg \
+	pixmaps/redesign/settings/recording.svg \
+	pixmaps/redesign/settings/recording-active.svg \
+	pixmaps/redesign/settings/search.svg \
+	pixmaps/redesign/settings/subtitles.svg \
+	pixmaps/redesign/settings/subtitles-active.svg \
+	pixmaps/redesign/settings/video.svg \
+	pixmaps/redesign/settings/video-active.svg \
 	pixmaps/redesign/mini/artist.svg \
 	pixmaps/redesign/mini/close.svg \
 	pixmaps/redesign/mini/folder.svg \
@@ -1125,7 +1156,10 @@ libqml_module_dialogs_a_QML = \
 	dialogs/toolbar/qml/EditorTabButton.qml \
 	dialogs/toolbar/qml/ToolbarEditor.qml \
 	dialogs/toolbar/qml/ToolbarEditorDialog.qml \
-	dialogs/toolbar/qml/ToolbarEditorButtonList.qml
+	dialogs/toolbar/qml/ToolbarEditorButtonList.qml \
+	dialogs/settings/qml/SettingsData.js \
+	dialogs/settings/qml/SettingsSidebar.qml \
+	dialogs/settings/qml/SettingsWindow.qml
 libqml_module_dialogs_a_Singleton_QML =
 libqml_module_dialogs_a_SOURCES = $(QML_MODULE_dialogs_SRC)
 nodist_libqml_module_dialogs_a_SOURCES = dialogs/qmlassets.cpp $(QML_MODULE_dialogs_NODIST_EXTRA)

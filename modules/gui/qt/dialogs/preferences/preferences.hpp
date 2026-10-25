@@ -48,6 +48,8 @@ public:
 
     /* Shows the simple view on that panel (an SPrefs* value) */
     void showSimplePanel( int sprefsIndex );
+    /* Shows the All (advanced tree) view */
+    void setAdvanced();
 
 private:
     size_t count;
@@ -87,7 +89,6 @@ private:
 
 private slots:
     void setExpert();
-    void setAdvanced();
     void setSimple();
 
     void changeExpertDesc( const QModelIndex &, const QModelIndex & );

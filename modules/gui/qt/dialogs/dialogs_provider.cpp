@@ -291,17 +291,7 @@ const QEvent::Type DialogEvent::DialogEvent_Type =
 
 void DialogsProvider::prefsDialog()
 {
-    if (Q_LIKELY(!m_prefsDialog))
-    {
-        m_prefsDialog = new PrefsDialog( nullptr, p_intf );
-        m_prefsDialog->setAttribute(Qt::WA_DeleteOnClose);
-        m_prefsDialog->installEventFilter(this);
-        m_prefsDialog->open();
-    }
-    else
-    {
-        m_prefsDialog->reject();
-    }
+    emit showSettingsWindow();
 }
 
 void DialogsProvider::prefsDialog(int simplePanel)
@@ -314,6 +304,20 @@ void DialogsProvider::prefsDialog(int simplePanel)
         m_prefsDialog->open();
     }
     m_prefsDialog->showSimplePanel(simplePanel);
+    m_prefsDialog->raise();
+    m_prefsDialog->activateWindow();
+}
+
+void DialogsProvider::legacyPrefsDialog()
+{
+    if (!m_prefsDialog)
+    {
+        m_prefsDialog = new PrefsDialog( nullptr, p_intf );
+        m_prefsDialog->setAttribute(Qt::WA_DeleteOnClose);
+        m_prefsDialog->installEventFilter(this);
+        m_prefsDialog->open();
+    }
+    m_prefsDialog->setAdvanced();
     m_prefsDialog->raise();
     m_prefsDialog->activateWindow();
 }

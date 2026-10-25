@@ -652,7 +652,10 @@ qml_modules += {
         'dialogs/toolbar/qml/EditorTabButton.qml',
         'dialogs/toolbar/qml/ToolbarEditor.qml',
         'dialogs/toolbar/qml/ToolbarEditorDialog.qml',
-        'dialogs/toolbar/qml/ToolbarEditorButtonList.qml'
+        'dialogs/toolbar/qml/ToolbarEditorButtonList.qml',
+        'dialogs/settings/qml/SettingsData.js',
+        'dialogs/settings/qml/SettingsSidebar.qml',
+        'dialogs/settings/qml/SettingsWindow.qml'
     ),
 }
 

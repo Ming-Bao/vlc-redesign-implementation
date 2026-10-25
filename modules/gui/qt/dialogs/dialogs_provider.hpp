@@ -222,6 +222,8 @@ public slots:
     void prefsDialog();
     /* opens (or switches the open dialog to) a simple-preferences panel, an SPrefs* value */
     void prefsDialog(int simplePanel);
+    /* the legacy Preferences dialog on its All view (the settings window's "All settings") */
+    void legacyPrefsDialog();
     void firstRunDialog();
     void extendedDialog();
     void synchroDialog();
@@ -304,6 +306,7 @@ public:
 signals:
     void releaseMouseEvents();
     void showToolbarEditorDialog();
+    void showSettingsWindow();
 
     //visiblity signal
     void openDialogVisibleChanged();
