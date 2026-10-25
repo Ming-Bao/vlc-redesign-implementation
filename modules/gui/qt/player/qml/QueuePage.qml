@@ -44,6 +44,9 @@ ColumnLayout {
     property Item navigationDown: null
     signal navigationCancel()
 
+    // the mini player card's queue: a shorter count row, and only sort, remove and add
+    property bool compact: false
+
     spacing: 0
 
     PlaylistListModel {
@@ -53,10 +56,10 @@ ColumnLayout {
 
     RowLayout {
         Layout.fillWidth: true
-        Layout.preferredHeight: VLCStyle.dp(68, VLCStyle.scale)
+        Layout.preferredHeight: VLCStyle.dp(root.compact ? 64 : 68, VLCStyle.scale)
         Layout.leftMargin: VLCStyle.dp(28, VLCStyle.scale)
         Layout.rightMargin: VLCStyle.dp(20, VLCStyle.scale)
-        spacing: VLCStyle.dp(12, VLCStyle.scale)
+        spacing: VLCStyle.dp(root.compact ? 20 : 12, VLCStyle.scale)
 
         Widgets.LabelExt {
             Layout.fillWidth: true
@@ -84,9 +87,15 @@ ColumnLayout {
             }
         }
 
-        LoopButton { font.pixelSize: VLCStyle.icon_normal }
+        LoopButton {
+            visible: !root.compact
+            font.pixelSize: VLCStyle.icon_normal
+        }
 
-        RandomButton { font.pixelSize: VLCStyle.icon_normal }
+        RandomButton {
+            visible: !root.compact
+            font.pixelSize: VLCStyle.icon_normal
+        }
 
         Widgets.IconToolButton {
             text: VLCIcons.remove
@@ -100,6 +109,7 @@ ColumnLayout {
         Widgets.IconToolButton {
             text: VLCIcons.playlist_clear
             font.pixelSize: VLCStyle.icon_normal
+            visible: !root.compact
             description: qsTr("Clear the queue")
             enabled: queueModel.count > 0
             onClicked: MainPlaylistController.clear()

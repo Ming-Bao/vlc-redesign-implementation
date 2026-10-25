@@ -49,6 +49,9 @@ T.Control {
     // the card is off its anchors, being dragged or settling into its corner
     property bool dragged: false
 
+    // the room for the card, from the bottom of the top bar to its bottom edge, the queue list shrinks to fit
+    property real maxHeight: Infinity
+
     // where the card may be dragged to, in the parent's coordinates
     property real dragXMin: 0
     property real dragXMax: 0
@@ -60,32 +63,34 @@ T.Control {
 
     readonly property bool _mediaHovered: mediaHover.hovered || videoHover.hovered
 
-    readonly property bool _controlsShown: ended || root.activeFocus || contentItem.activeFocus
+    // the queue's list takes the focus of the card too, the video controls stay out of it
+    readonly property bool _controlsShown: ended || root.activeFocus
+                                           || (contentItem.activeFocus && !queueSection.activeFocus)
                                            || (!hideControls && _mediaHovered)
+
+    // 12 spacing, 2 rows
+    readonly property real _queueListMinimum: VLCStyle.dp(76, VLCStyle.scale)
+    readonly property real _queueListHeight: Math.max(_queueListMinimum,
+                                                      Math.min(VLCStyle.dp(215, VLCStyle.scale),
+                                                               maxHeight - bottomPadding - queueHeader.height
+                                                               - _queueCountHeight - 2 * column.spacing
+                                                               - media.implicitHeight - infoBlock.implicitHeight
+                                                               - infoBlock.Layout.topMargin - infoBlock.Layout.bottomMargin))
+    readonly property real _queueCountHeight: VLCStyle.dp(64, VLCStyle.scale)
 
     visible: shown
 
-    DragHandler {
-        id: dragHandler
+    // the card moves by drag from anywhere but the queue's list, which flicks and reorders by drag
+    Item {
+        id: dragBody
 
-        target: root
+        z: -1 // under the controls
 
-        cursorShape: Qt.DragMoveCursor
+        y: root.queueOpen ? root.contentItem.y + queueSection.y + queueSection.height : 0
+        width: root.width
+        height: root.height - y
 
-        xAxis.minimum: root.dragXMin
-        xAxis.maximum: root.dragXMax
-        yAxis.minimum: root.dragYMin
-        yAxis.maximum: root.dragYMax
-
-        onActiveChanged: {
-            if (active) {
-                settle.stop()
-                root.dragged = true // MainDisplay drops the anchors, the card keeps its place
-            } else {
-                root.atLeft = Helpers.snapToLeft(root.x, root.width, root.parent.width)
-                settle.restart()
-            }
-        }
+        CardDragHandler {}
     }
 
     ParallelAnimation {
@@ -146,6 +151,65 @@ T.Control {
             anchors.fill: parent
 
             spacing: VLCStyle.dp(20, VLCStyle.scale)
+
+            // above the media block, the header strip reaches the card's edges
+            FocusScope {
+                id: queueSection
+
+                Layout.fillWidth: true
+                Layout.topMargin: -root.topPadding
+                Layout.leftMargin: -root.leftPadding
+                Layout.rightMargin: -root.rightPadding
+                Layout.preferredHeight: queueHeader.height + root._queueCountHeight + root._queueListHeight
+
+                visible: root.queueOpen
+
+                Rectangle {
+                    id: queueHeader
+
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+
+                    height: VLCStyle.dp(58, VLCStyle.scale)
+                    color: "#151515"
+                    radius: VLCStyle.dp(14, VLCStyle.scale)
+
+                    Component.onCompleted: {
+                        if (queueHeader.bottomLeftRadius !== undefined) { // TODO: Directly set when minimum Qt is 6.7
+                            queueHeader.bottomLeftRadius = VLCStyle.dp(2, VLCStyle.scale)
+                            queueHeader.bottomRightRadius = VLCStyle.dp(2, VLCStyle.scale)
+                        }
+                    }
+
+                    CardDragHandler {}
+
+                    CardLabel {
+                        anchors.centerIn: parent
+
+                        color: "#8F8F8F"
+                        text: qsTr("Queue")
+                    }
+                }
+
+                QueuePage {
+                    anchors.top: queueHeader.bottom
+                    anchors.horizontalCenter: parent.horizontalCenter
+
+                    width: VLCStyle.dp(375, VLCStyle.scale)
+                    height: root._queueCountHeight + root._queueListHeight
+
+                    compact: true
+
+                    navigationParent: root
+                    navigationUp: root.Navigation.upItem
+                    navigationDown: root
+                    onNavigationCancel: {
+                        if (root.Navigation.cancelAction)
+                            root.Navigation.cancelAction()
+                    }
+                }
+            }
 
             ColumnLayout {
                 id: media
@@ -389,6 +453,8 @@ T.Control {
             }
 
             ColumnLayout {
+                id: infoBlock
+
                 Layout.leftMargin: VLCStyle.dp(8, VLCStyle.scale)
                 Layout.rightMargin: VLCStyle.dp(8, VLCStyle.scale)
                 Layout.topMargin: VLCStyle.dp(4, VLCStyle.scale)
@@ -436,6 +502,27 @@ T.Control {
                         Navigation.leftItem: nextButton
                                     }
                 }
+            }
+        }
+    }
+
+    component CardDragHandler: DragHandler {
+        target: root
+
+        cursorShape: Qt.DragMoveCursor
+
+        xAxis.minimum: root.dragXMin
+        xAxis.maximum: root.dragXMax
+        yAxis.minimum: root.dragYMin
+        yAxis.maximum: root.dragYMax
+
+        onActiveChanged: {
+            if (active) {
+                settle.stop()
+                root.dragged = true // MainDisplay drops the anchors, the card keeps its place
+            } else {
+                root.atLeft = Helpers.snapToLeft(root.x, root.width, root.parent.width)
+                settle.restart()
             }
         }
     }

@@ -940,9 +940,12 @@ FocusScope {
 
         z: 4
 
+        maxHeight: loaderUpdatePane.y - inset - (localTopbar.y + localTopbar.height)
+
         dragXMin: inset
         dragXMax: g_mainDisplay.width - width - inset
-        dragYMin: localTopbar.y + localTopbar.height
+        // a card taller than the room has no vertical range, it overflows upward
+        dragYMin: Math.min(localTopbar.y + localTopbar.height, dragYMax)
         dragYMax: loaderUpdatePane.y - height - inset
 
         Navigation.parentItem: g_mainDisplay
