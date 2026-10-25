@@ -92,6 +92,20 @@ void SettingsBridge::reset(const QString& name)
     setValue(name, defaultValue(name));
 }
 
+QVariantMap SettingsBridge::range(const QString& name) const
+{
+    const module_config_t* item = config_FindConfig(qtu(name));
+    if (!item)
+        return {};
+    switch (config_GetType(qtu(name)))
+    {
+    case VLC_VAR_FLOAT:   return {{"min", item->min.f}, {"max", item->max.f}};
+    case VLC_VAR_INTEGER: return {{"min", QVariant::fromValue<qlonglong>(item->min.i)},
+                                  {"max", QVariant::fromValue<qlonglong>(item->max.i)}};
+    }
+    return {};
+}
+
 QVariantList SettingsBridge::choices(const QString& name) const
 {
     QVariantList out;

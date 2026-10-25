@@ -660,6 +660,9 @@ qml_modules += {
         'dialogs/settings/qml/SettingsWindow.qml',
         'dialogs/settings/qml/SettingsWindowPage.qml',
         'dialogs/settings/qml/rows/AccentRow.qml',
+        'dialogs/settings/qml/rows/BufferingRows.qml',
+        'dialogs/settings/qml/rows/PictureRows.qml',
+        'dialogs/settings/qml/rows/RepeatRow.qml',
         'dialogs/settings/qml/rows/ThemeRow.qml'
     ),
 }
@@ -1023,6 +1026,7 @@ qml_modules += {
 qml_tests = {
     'tst_FSM': files('tests/tst_FSM.qml'),
     'tst_LibraryHelpers': files('tests/tst_LibraryHelpers.qml'),
+    'tst_SettingsData': files('tests/tst_SettingsData.qml'),
 }
 
 qmllibs = []

@@ -36,6 +36,7 @@ int main(int argc, char **argv)
     QTEST_SET_MAIN_SOURCE_PATH
 
     Q_INIT_RESOURCE( util_assets );
+    Q_INIT_RESOURCE( dialogs_assets );   // tst_SettingsData imports SettingsData.js by its qrc path
 #ifdef QT_USE_QMLCACHEGEN
     Q_INIT_RESOURCE( util_cachegen );
 #endif

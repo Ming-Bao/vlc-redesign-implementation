@@ -68,6 +68,14 @@ private slots:
         QVERIFY(!c[0].toMap()["label"].toString().isEmpty());
     }
 
+    void ranges() {
+        const auto h = m_bridge->range("hue");
+        QCOMPARE(h["min"].toDouble(), -180.0);
+        QCOMPARE(h["max"].toDouble(), 180.0);
+        QVERIFY(m_bridge->range("random").isEmpty());
+        QVERIFY(m_bridge->range("no-such-option").isEmpty());
+    }
+
     void noChoices() { QVERIFY(m_bridge->choices("long-jump-size").isEmpty()); }
 
     void listToggle() {

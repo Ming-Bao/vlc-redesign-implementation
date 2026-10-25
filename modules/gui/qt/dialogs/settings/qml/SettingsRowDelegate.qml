@@ -99,17 +99,34 @@ FocusScope {
             default: list = shown && row.option ? SettingsBridge.choices(row.option) : []
             }
         }
+        // `extra`: a comma separated list option whose entries join the list (custom aspect and crop ratios)
+        if (row.extra && SettingsBridge.exists(row.extra))
+            list = list.concat(String(SettingsBridge.value(row.extra)).split(",").map((r) => r.trim())
+                               .filter((r) => r.length).map((r) => ({ value: r, label: r })))
         // a value outside the list shows as itself
         if (row.kind === "dropdown" && value !== undefined && !list.some((c) => _same(c.value, value)))
             list = list.concat([{ value: value, label: String(value) }])
         return list
     }
 
+    // A choice may carry `sets: {option: value}`, written with it and part of what makes it the shown one
+    // (Zoom's Fit and 1:1 are both zoom = 1; they differ by autoscale).
     function _choiceIndex() {
-        for (let i = 0; i < choiceList.length; ++i)
-            if (_same(choiceList[i].value, value))
+        void(rev)
+        for (let i = 0; i < choiceList.length; ++i) {
+            const sets = choiceList[i].sets
+            if (_same(choiceList[i].value, value)
+                    && (!sets || Object.keys(sets).every((o) => _same(SettingsBridge.value(o), sets[o]))))
                 return i
+        }
         return -1
+    }
+
+    function _choose(i) {
+        const c = choiceList[i]
+        SettingsBridge.setValue(row.option, c.value)
+        for (const o in (c.sets ?? {}))
+            SettingsBridge.setValue(o, c.sets[o])
     }
 
     function _isOn() {
@@ -233,7 +250,7 @@ FocusScope {
             sourceComponent: {
                 switch (root.row.kind) {
                 case "toggle": return toggleC
-                case "dropdown": return dropdownC
+                case "dropdown": return root.row.editable ? editableC : dropdownC
                 case "field": case "password": case "number": return fieldC
                 case "browseFile": case "browseFolder": return browseC
                 case "button": case "wideButton": return buttonC
@@ -293,8 +310,37 @@ FocusScope {
             textRole: "label"
             model: root.choiceList
             currentIndex: root._choiceIndex()
-            onActivated: (i) => SettingsBridge.setValue(root.row.option, root.choiceList[i].value)
+            onActivated: (i) => root._choose(i)
             Accessible.name: root.row.label
+        }
+    }
+
+    // a dropdown whose text can also be typed (the optical drive): written on Enter and on focus loss
+    Component {
+        id: editableC
+
+        SettingCombo {
+            id: combo
+
+            focus: true
+            editable: true
+            implicitHeight: VLCStyle.dp(36, VLCStyle.scale)
+            textRole: "label"
+            model: root.choiceList
+            currentIndex: root._choiceIndex()
+            onActivated: (i) => root._choose(i)
+            Accessible.name: root.row.label
+            contentItem: T.TextField {
+                text: combo.editText
+                leftPadding: VLCStyle.dp(14, VLCStyle.scale)
+                rightPadding: combo.indicator.width + VLCStyle.dp(14, VLCStyle.scale)
+                verticalAlignment: TextInput.AlignVCenter
+                font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
+                color: root.style.value
+                selectByMouse: true
+                background: null
+                onEditingFinished: if (text !== root.value) SettingsBridge.setValue(root.row.option, text)
+            }
         }
     }
 
@@ -304,6 +350,8 @@ FocusScope {
         SettingField {
             focus: true
             suffix: root.row.suffix ?? ""
+            placeholderText: root.row.placeholder ?? ""
+            placeholderTextColor: root.style.placeholder
             echoMode: root.row.kind === "password" ? TextInput.Password : TextInput.Normal
             committedText: root.value === undefined ? ""
                            : root.row.kind === "number" ? String(root.value / (root.row.scale || 1)) : String(root.value)

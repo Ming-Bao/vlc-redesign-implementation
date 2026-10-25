@@ -13,9 +13,10 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 
-# options defined in a way the grep below can't see (none yet); platform-only options are found by the grep
+# options defined in a way the grep below can't see; platform-only options are found by the grep
 # whatever their #ifdef, and hide at run time through SettingsBridge.exists()
-ALLOW = set()
+# postproc-q is FILTER_PREFIX "q"; the conversion quality is a macro (renderer_common.hpp) used with sout-chromecast-
+ALLOW = {'postproc-q', 'sout-chromecast-conversion-quality'}
 
 # prefix macros, add_*(SOUT_CFG_PREFIX "name": the file's own #define, plus these
 NAMED_PREFIXES = ('sout-chromecast-', 'sout-x264-')

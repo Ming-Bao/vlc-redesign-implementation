@@ -41,6 +41,8 @@ public:
     Q_INVOKABLE void setValue(const QString& name, const QVariant& v);
     Q_INVOKABLE QVariant defaultValue(const QString& name) const;
     Q_INVOKABLE void reset(const QString& name);
+    // {min, max} of an integer or float option; empty for any other
+    Q_INVOKABLE QVariantMap range(const QString& name) const;
     // [{value, label}], empty when the option has no list of choices
     Q_INVOKABLE QVariantList choices(const QString& name) const;
     Q_INVOKABLE QString help(const QString& name) const;
