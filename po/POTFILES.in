@@ -726,9 +726,12 @@ modules/gui/qt/dialogs/preferences/preferences_widgets.cpp
 modules/gui/qt/dialogs/preferences/preferences_widgets.hpp
 modules/gui/qt/dialogs/preferences/simple_preferences.cpp
 modules/gui/qt/dialogs/preferences/simple_preferences.hpp
+modules/gui/qt/dialogs/settings/qml/AdvancedBar.qml
 modules/gui/qt/dialogs/settings/qml/SettingsData.js
+modules/gui/qt/dialogs/settings/qml/SettingsRowDelegate.qml
 modules/gui/qt/dialogs/settings/qml/SettingsSidebar.qml
 modules/gui/qt/dialogs/settings/qml/SettingsWindow.qml
+modules/gui/qt/dialogs/settings/qml/SettingsWindowPage.qml
 modules/gui/qt/dialogs/settings/settings_bridge.cpp
 modules/gui/qt/dialogs/settings/settings_bridge.hpp
 modules/gui/qt/dialogs/sout/convert.cpp

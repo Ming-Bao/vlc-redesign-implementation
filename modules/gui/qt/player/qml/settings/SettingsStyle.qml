@@ -48,4 +48,8 @@ QtObject {
     readonly property color sidebarSelected: dark ? "#222222" : theme.bg.primary
     readonly property color sidebarHover:    dark ? "#1E1E1E" : theme.bg.primary
     readonly property color labelActive:     dark ? "#EAEAEA" : theme.fg.primary
+    // the settings window's pages: section headers, row labels, the Advanced Options bar
+    readonly property color sectionTitle:    dark ? "#C6C6C6" : theme.fg.primary
+    readonly property color rowLabel:        dark ? "#8F8F8F" : theme.fg.primary
+    readonly property color advancedBg:      dark ? Qt.rgba(25 / 255, 25 / 255, 25 / 255, 0.95) : theme.bg.secondary
 }

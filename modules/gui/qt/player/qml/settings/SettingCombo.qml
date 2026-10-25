@@ -23,6 +23,8 @@ import VLC.Widgets as Widgets
 Widgets.ComboBoxExt {
     id: root
     property bool fullWidth: false
+    // the value's inset from the left edge (the settings window's dropdowns use 14)
+    property real textPadding: VLCStyle.dp(18, VLCStyle.scale)
     readonly property SettingsStyle _s: SettingsStyle { theme: root.colorContext }
 
     Layout.preferredWidth: fullWidth ? -1 : VLCStyle.dp(220, VLCStyle.scale)
@@ -44,7 +46,7 @@ Widgets.ComboBoxExt {
         }
     }
     contentItem: Widgets.LabelExt {
-        leftPadding: VLCStyle.dp(18, VLCStyle.scale)
+        leftPadding: root.textPadding
         rightPadding: root.indicator.width + VLCStyle.dp(14, VLCStyle.scale)
         text: root.displayText
         verticalAlignment: Text.AlignVCenter

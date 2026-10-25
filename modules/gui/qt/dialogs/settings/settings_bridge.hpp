@@ -53,6 +53,8 @@ public:
     Q_INVOKABLE void resetAll();
     Q_INVOKABLE void save();
     Q_INVOKABLE void openConfigFolder();
+    // a native file (or folder) picker starting at `current`; "" when cancelled
+    Q_INVOKABLE QString pickPath(const QString& current, bool folder, bool save) const;
 
     Q_INVOKABLE QVariantList languages() const;
     Q_INVOKABLE QStringList fontFamilies() const;

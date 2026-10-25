@@ -22,6 +22,7 @@
 
 #include <QDesktopServices>
 #include <QDir>
+#include <QFileDialog>
 #include <QFontDatabase>
 #include <QUrl>
 
@@ -184,6 +185,16 @@ void SettingsBridge::openConfigFolder()
         return;
     QDesktopServices::openUrl(QUrl::fromLocalFile(qfu(dir)));
     free(dir);
+}
+
+QString SettingsBridge::pickPath(const QString& current, bool folder, bool save) const
+{
+    const QString start = current.isEmpty() ? QDir::homePath() : current;
+    if (folder)
+        return QFileDialog::getExistingDirectory(nullptr, qtr("Select Directory"), start);
+    if (save)
+        return QFileDialog::getSaveFileName(nullptr, qtr("Save File"), start);
+    return QFileDialog::getOpenFileName(nullptr, qtr("Select File"), start);
 }
 
 QVariantList SettingsBridge::languages() const

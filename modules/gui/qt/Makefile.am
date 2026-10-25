@@ -1157,9 +1157,12 @@ libqml_module_dialogs_a_QML = \
 	dialogs/toolbar/qml/ToolbarEditor.qml \
 	dialogs/toolbar/qml/ToolbarEditorDialog.qml \
 	dialogs/toolbar/qml/ToolbarEditorButtonList.qml \
+	dialogs/settings/qml/AdvancedBar.qml \
 	dialogs/settings/qml/SettingsData.js \
+	dialogs/settings/qml/SettingsRowDelegate.qml \
 	dialogs/settings/qml/SettingsSidebar.qml \
-	dialogs/settings/qml/SettingsWindow.qml
+	dialogs/settings/qml/SettingsWindow.qml \
+	dialogs/settings/qml/SettingsWindowPage.qml
 libqml_module_dialogs_a_Singleton_QML =
 libqml_module_dialogs_a_SOURCES = $(QML_MODULE_dialogs_SRC)
 nodist_libqml_module_dialogs_a_SOURCES = dialogs/qmlassets.cpp $(QML_MODULE_dialogs_NODIST_EXTRA)

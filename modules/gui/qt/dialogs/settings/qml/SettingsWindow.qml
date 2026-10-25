@@ -35,7 +35,11 @@ Window {
     property int currentPage: 0
     property string searchText: ""
     // what the content area shows for the current page
-    property Component pageComponent
+    property Component pageComponent: Component {
+        SettingsWindowPage {
+            page: root.pages[root.currentPage]
+        }
+    }
 
     readonly property var pages: SettingsData.pages
 
@@ -100,7 +104,18 @@ Window {
         }
     }
 
-    onClosing: SettingsBridge.save()
+    // asks before a destructive action (Reset all settings, Reset all shortcuts); `accepted` runs on OK
+    function ask(text, accepted) {
+        askDialog.ask(text, accepted, null, { ok: qsTr("Reset"), cancel: qsTr("Cancel") })
+    }
+
+    onClosing: {
+        // a field being edited commits on focus loss: take the focus first, so that the save has its value
+        card.forceActiveFocus()
+        SettingsBridge.save()
+    }
+    // values may have changed while the window was closed
+    onVisibleChanged: if (visible) pageLoader.item?.reload?.()
 
     Component.onCompleted: {
         if (MainCtx.createWindowWithoutRedirectionSurface) { // Win32
@@ -288,7 +303,7 @@ Window {
             }
         }
 
-        // the page; Task 3's rows go in pageComponent
+        // the page
         FocusScope {
             id: content
 
@@ -299,10 +314,16 @@ Window {
             activeFocusOnTab: true
 
             Loader {
+                id: pageLoader
                 anchors.fill: parent
                 focus: true
                 sourceComponent: root.pageComponent
             }
+        }
+
+        CustomDialog {
+            id: askDialog
+            rootWindow: card
         }
 
         // 6 px resize edges and corners
