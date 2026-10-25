@@ -68,7 +68,9 @@ public:
     Q_INVOKABLE bool addExtension(const QUrl& luaFile);
     Q_INVOKABLE bool canRemoveExtension(int row);
     Q_INVOKABLE bool removeExtension(int row);
-    Q_INVOKABLE QString pickLuaFile() const;
+    Q_INVOKABLE QUrl pickLuaFile() const;   // empty when cancelled
+    // copies a .lua file into `dir` (replacing an older copy; the file already there is left alone)
+    static bool installExtensionFile(const QString& srcPath, const QString& dir);
 
     Q_INVOKABLE QVariantList languages() const;
     Q_INVOKABLE QStringList fontFamilies() const;

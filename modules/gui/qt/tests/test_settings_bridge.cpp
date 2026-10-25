@@ -16,6 +16,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 #include <QTest>
+#include <QTemporaryDir>
+#include <QFile>
 #include <QSignalSpy>
 
 #include "vlc_stub_modules.hpp"
@@ -85,6 +87,23 @@ private slots:
         QVERIFY(!m_bridge->canRemoveExtension(0));   // no list in this env
         QVERIFY(!m_bridge->removeExtension(0));
         QVERIFY(!m_bridge->addExtension(QUrl::fromLocalFile("/no/such/file.lua")));
+    }
+
+    void installExtension() {
+        QTemporaryDir src, dir;
+        QVERIFY(src.isValid() && dir.isValid());
+        const QString a = src.filePath("a#b%c.lua");
+        QFile f(a); QVERIFY(f.open(QIODevice::WriteOnly)); f.write("v1"); f.close();
+        const QString dst = dir.filePath("a#b%c.lua");
+        QVERIFY(SettingsBridge::installExtensionFile(a, dir.path()));
+        QVERIFY(QFile::exists(dst));
+        // picking the installed file itself (or a link to it) keeps it
+        QVERIFY(SettingsBridge::installExtensionFile(dst, dir.path()));
+        QCOMPARE(QFile(dst).size(), qint64(2));
+        QVERIFY(QFile::link(dst, src.filePath("link.lua")));
+        QVERIFY(SettingsBridge::installExtensionFile(src.filePath("link.lua"), dir.path()));
+        QVERIFY(QFile::exists(dst));
+        QVERIFY(!SettingsBridge::installExtensionFile(src.filePath("none.lua"), dir.path()));
     }
 
     void noChoices() { QVERIFY(m_bridge->choices("long-jump-size").isEmpty()); }

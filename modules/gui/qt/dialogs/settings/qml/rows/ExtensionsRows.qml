@@ -58,6 +58,7 @@ Column {
 
         // one tooltip for the list, not one per delegate: a delegate is not yet under the row when its tooltip takes its palette
         Widgets.ToolTipExt {
+            colorContext.palette: VLCStyle.palette
             x: VLCStyle.dp(10, VLCStyle.scale)
             y: root.hoverY + VLCStyle.dp(4, VLCStyle.scale)
             z: 1
@@ -209,9 +210,9 @@ Column {
                 width: VLCStyle.dp(100, VLCStyle.scale)
                 text: qsTr("Add")
                 onClicked: {
-                    const p = SettingsBridge.pickLuaFile()
-                    if (p.length)
-                        SettingsBridge.addExtension("file://" + p)
+                    const u = SettingsBridge.pickLuaFile()
+                    if (u.toString().length)
+                        SettingsBridge.addExtension(u)
                 }
             }
 

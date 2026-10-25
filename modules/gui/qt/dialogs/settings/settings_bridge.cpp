@@ -231,17 +231,33 @@ QString SettingsBridge::extensionFile(int row)
     return m->data(m->index(row, 0), m->roleNames().key("filename")).toString();
 }
 
-bool SettingsBridge::addExtension(const QUrl& luaFile)
+bool SettingsBridge::installExtensionFile(const QString& srcPath, const QString& dir)
 {
-    const QString dir = userExtensionsDir();
-    const QFileInfo src(luaFile.toLocalFile());
+    const QFileInfo src(srcPath);
     if (dir.isEmpty() || !src.isFile() || src.suffix().toLower() != "lua")
         return false;
     if (!QDir().mkpath(dir))
         return false;
     const QString dst = dir + "/" + src.fileName();
-    QFile::remove(dst);   // copying over an older version of the same script
-    if (!QFile::copy(src.absoluteFilePath(), dst))
+    // already the installed file (or a link to it): nothing to copy, and it must not be touched
+    if (QFileInfo(dst).exists() && QFileInfo(dst).canonicalFilePath() == src.canonicalFilePath())
+        return true;
+    // copy beside it, then rename over the old version: a failed copy keeps the old file
+    const QString tmp = dst + ".tmp";
+    QFile::remove(tmp);
+    if (!QFile::copy(src.absoluteFilePath(), tmp))
+        return false;
+    QFile::remove(dst);
+    if (!QFile::rename(tmp, dst)) {
+        QFile::remove(tmp);
+        return false;
+    }
+    return true;
+}
+
+bool SettingsBridge::addExtension(const QUrl& luaFile)
+{
+    if (!installExtensionFile(luaFile.toLocalFile(), userExtensionsDir()))
         return false;
     reloadExtensions();
     return true;
@@ -262,9 +278,10 @@ bool SettingsBridge::removeExtension(int row)
     return true;
 }
 
-QString SettingsBridge::pickLuaFile() const
+QUrl SettingsBridge::pickLuaFile() const
 {
-    return QFileDialog::getOpenFileName(nullptr, qtr("Select File"), QDir::homePath(), qtr("Lua scripts (*.lua)"));
+    const QString p = QFileDialog::getOpenFileName(nullptr, qtr("Select File"), QDir::homePath(), qtr("Lua scripts (*.lua)"));
+    return p.isEmpty() ? QUrl() : QUrl::fromLocalFile(p);
 }
 
 QVariantList SettingsBridge::languages() const

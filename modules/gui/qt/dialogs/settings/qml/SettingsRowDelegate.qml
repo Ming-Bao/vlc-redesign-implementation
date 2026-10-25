@@ -230,6 +230,7 @@ FocusScope {
             HoverHandler { id: infoHover }
 
             Widgets.ToolTipExt {
+                colorContext.palette: VLCStyle.palette
                 visible: infoHover.hovered || info.activeFocus
                 text: root._help
                 width: Math.min(implicitWidth, VLCStyle.dp(360, VLCStyle.scale))
