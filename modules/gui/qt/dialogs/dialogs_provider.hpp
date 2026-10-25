@@ -175,6 +175,7 @@ private:
     std::unique_ptr<QMenu> miscPopupMenu;
 
     QPointer<PrefsDialog> m_prefsDialog;
+    PrefsDialog* ensurePrefsDialog();
 
     std::unique_ptr<OpenDialog> m_openDialog;
     std::unique_ptr<FirstRunWizard> m_firstRunDialog;

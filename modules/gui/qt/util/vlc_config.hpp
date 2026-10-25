@@ -27,4 +27,11 @@ QVariant vlcConfigValue(const QString& name);
 bool vlcSetConfigValue(const QString& name, const QVariant& v);
 QString vlcConfigString(const char* name);
 
+struct qt_intf_t;
+// config_ResetAll + save, clear the Qt settings, flag the pending restart, reload prefs on MainCtx (preferences.cpp)
+void qtResetAllPreferences(qt_intf_t* p_intf);
+class QWidget;
+// "restart now?" after a reset: quits, or drops the pending flag (preferences.cpp)
+void qtPromptRestartAfterReset(QWidget* parent, qt_intf_t* p_intf);
+
 #endif

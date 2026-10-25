@@ -445,6 +445,9 @@ Departures from the frames (the spec's *(my call)* items, plus any found while b
   - SVG icons with orange baked in (active sidebar glyphs, menu icons) stay orange.
   - The GTK provider's default accent is now `#D37918`, like the system palette's.
 - **Player repeat fix.** `PlaylistController::toggleRepeatMode` wrote `config_PutInt("repeat", mode)`. It now writes `repeat` and `loop` as the bools they are. A vlcrc left by the old code with `repeat=2` still loads as One, as in core. The write was checked by reading and building only, since the default control bars have no repeat button to press here.
+- **Remove extension** names the extension in the confirmation and deletes by the file path captured at click time (`removeExtensionFile`, same under-user-folder check). A search that hides the selected row, or any list reload, clears the selection.
+- **Reset all settings** now matches the legacy Reset: clears the Qt settings, reloads prefs on MainCtx and asks "Restart now?" (shared `qtResetAllPreferences` / `qtPromptRestartAfterReset` in preferences.cpp). The row keeps its own confirmation first.
+- **Preferences without a Settings receiver** (no `showSettingsWindow` listener) falls back to the legacy dialog. Qt as skins2's dialogs provider still builds the full interface, so `-I skins2` opens the new window.
 - **Theme** Dark, Light and System map to the Night, Day and System colour schemes.
 - **Saving.** Options are written when the window closes, when you switch page and when you press Enter. A field you are still typing in is committed first. Options VLC reads only at start take effect on the next launch, with no restart banner.
 - **Search** is a plain case-insensitive substring match over label, keywords and section title, so "log" also finds "dialogs". Global shortcuts don't fire while typing in it.
@@ -454,7 +457,7 @@ Departures from the frames (the spec's *(my call)* items, plus any found while b
 - A number field with text that isn't a number reverts, silently.
 - Clear history runs without asking.
 - Dropdowns re-read their choices on every settings change, and sliders write on every move.
-- Remove on an extension doesn't name it in the confirmation, and installed `.vle` extensions can't be removed.
+- Installed `.vle` extensions can't be removed.
 - Adding a Lua file renames over the old one. A crash mid-copy can leave `Foo.lua.tmp`.
 - VLSub is listed twice in the dev tree (the build copy and the share copy), as in the legacy dialog.
 - A custom row whose file fails to compile hides without a warning.

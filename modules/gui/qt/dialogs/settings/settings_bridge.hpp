@@ -67,7 +67,8 @@ public:
     QAbstractItemModel* extensions();
     Q_INVOKABLE bool addExtension(const QUrl& luaFile);
     Q_INVOKABLE bool canRemoveExtension(int row);
-    Q_INVOKABLE bool removeExtension(int row);
+    Q_INVOKABLE QString extensionFile(int row);
+    Q_INVOKABLE bool removeExtensionFile(const QString& path);
     Q_INVOKABLE QUrl pickLuaFile() const;   // empty when cancelled
     // copies a .lua file into `dir` (replacing an older copy; the file already there is left alone)
     static bool installExtensionFile(const QString& srcPath, const QString& dir);
@@ -82,7 +83,6 @@ signals:
 private:
     void touch(const QString& name);
     void reloadExtensions();   // settings_extensions.cpp (needs the extensions manager, not linked into the test)
-    QString extensionFile(int row);
 
     qt_intf_t* m_intf;
     int m_revision = 0;

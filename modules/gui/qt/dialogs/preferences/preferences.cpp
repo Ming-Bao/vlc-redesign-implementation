@@ -35,6 +35,7 @@
 #include "widgets/native/searchlineedit.hpp"
 #include "widgets/native/qvlcframe.hpp"
 #include "maininterface/mainctx.hpp"
+#include "util/vlc_config.hpp"
 
 #include <QHBoxLayout>
 #include <QGroupBox>
@@ -383,26 +384,7 @@ void PrefsDialog::save()
         QVLCTools::saveWidgetPosition( p_intf, "Preferences", this );
 
     if( p_intf->preferencesResetPending )
-    {
-        int restart = QMessageBox::question(
-                          this,
-                          qtr( "Restart Required" ),
-                          qtr( "VLC needs to be restarted for the reset to take full effect.\n\nRestart now?" ),
-                          QMessageBox::Yes | QMessageBox::No,
-                          QMessageBox::Yes);
-        
-        if( restart == QMessageBox::Yes )
-        {
-            // Quit VLC
-            emit p_intf->p_mi->askToQuit();
-        }
-        else
-        {
-            // User chose not to restart - clear the flag
-            p_intf->preferencesResetPending = false;
-        }
-    }
-
+        qtPromptRestartAfterReset( this, p_intf );
 }
 
 /* Clean the preferences, dunno if it does something really */
@@ -418,6 +400,33 @@ void PrefsDialog::cancel()
     reject();
 }
 
+void qtPromptRestartAfterReset( QWidget *parent, qt_intf_t *p_intf )
+{
+    int restart = QMessageBox::question(
+                      parent,
+                      qtr( "Restart Required" ),
+                      qtr( "VLC needs to be restarted for the reset to take full effect.\n\nRestart now?" ),
+                      QMessageBox::Yes | QMessageBox::No,
+                      QMessageBox::Yes);
+    if( restart == QMessageBox::Yes )
+        emit p_intf->p_mi->askToQuit();
+    else
+        p_intf->preferencesResetPending = false;
+}
+
+void qtResetAllPreferences( qt_intf_t *p_intf )
+{
+    config_ResetAll();
+    config_SaveConfigFile( p_intf );
+    getSettings()->clear();
+    p_intf->preferencesResetPending = true;
+    if( p_intf->p_mi )
+    {
+        p_intf->p_mi->reloadPrefs();
+        p_intf->p_mi->reloadFromSettings();
+    }
+}
+
 /* Reset all the preferences, when you click the button */
 void PrefsDialog::reset()
 {
@@ -430,12 +439,7 @@ void PrefsDialog::reset()
 
     if( ret == QMessageBox::Ok )
     {
-        config_ResetAll();
-        config_SaveConfigFile( p_intf );
-        getSettings()->clear();
-        p_intf->preferencesResetPending = true;
-        p_intf->p_mi->reloadPrefs();
-        p_intf->p_mi->reloadFromSettings();
+        qtResetAllPreferences( p_intf );
 
 #ifdef _WIN32
         simple_panels[0]->cleanLang();

@@ -18,6 +18,7 @@
 #include <QTest>
 #include <QTemporaryDir>
 #include <QFile>
+#include <QDir>
 #include <QSignalSpy>
 
 #include "vlc_stub_modules.hpp"
@@ -29,6 +30,8 @@
 // the extensions manager is not linked into this test (settings_extensions.cpp)
 QAbstractItemModel* SettingsBridge::extensions() { return nullptr; }
 void SettingsBridge::reloadExtensions() {}
+void qtResetAllPreferences(qt_intf_t*) {}
+void qtPromptRestartAfterReset(QWidget*, qt_intf_t*) {}
 
 class TestClass : public QObject
 {
@@ -85,7 +88,24 @@ private slots:
     void extensionsGuards() {
         QVERIFY(!m_bridge->canRemoveExtension(-1));
         QVERIFY(!m_bridge->canRemoveExtension(0));   // no list in this env
-        QVERIFY(!m_bridge->removeExtension(0));
+        QVERIFY(!m_bridge->removeExtensionFile("/no/such/file.lua"));
+        // a real file outside the user folder is refused and kept
+        QTemporaryDir outside;
+        QFile f(outside.filePath("x.lua"));
+        QVERIFY(f.open(QIODevice::WriteOnly));
+        f.close();
+        QVERIFY(!m_bridge->removeExtensionFile(f.fileName()));
+        QVERIFY(QFile::exists(f.fileName()));
+        // inside the user folder (redirected to a temp dir, never the real one) it is removed
+        QTemporaryDir data;
+        qputenv("XDG_DATA_HOME", data.path().toUtf8());
+        QVERIFY(QDir().mkpath(data.filePath("vlc/lua/extensions")));
+        QFile g(data.filePath("vlc/lua/extensions/y.lua"));
+        QVERIFY(g.open(QIODevice::WriteOnly));
+        g.close();
+        QVERIFY(m_bridge->removeExtensionFile(g.fileName()));
+        QVERIFY(!QFile::exists(g.fileName()));
+        qunsetenv("XDG_DATA_HOME");
         QVERIFY(!m_bridge->addExtension(QUrl::fromLocalFile("/no/such/file.lua")));
     }
 

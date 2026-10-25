@@ -119,7 +119,7 @@ Flickable {
         }
 
         Widgets.LabelExt {
-            visible: root.results && !root._main.some(root._anyShown)
+            visible: !!root.results && !root._main.some(root._anyShown)
             text: qsTr("No results")
             font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
             color: root._s.placeholder

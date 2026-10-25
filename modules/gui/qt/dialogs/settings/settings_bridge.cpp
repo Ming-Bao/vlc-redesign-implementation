@@ -185,9 +185,9 @@ void SettingsBridge::resetPrefixes(const QStringList& prefixes)
 
 void SettingsBridge::resetAll()
 {
-    config_ResetAll();
-    config_SaveConfigFile(m_intf);
+    qtResetAllPreferences(m_intf);
     touch({});
+    qtPromptRestartAfterReset(nullptr, m_intf);
 }
 
 void SettingsBridge::save()
@@ -263,16 +263,21 @@ bool SettingsBridge::addExtension(const QUrl& luaFile)
     return true;
 }
 
-bool SettingsBridge::canRemoveExtension(int row)
+static bool underUserExtensions(const QString& path)
 {
     const QString dir = QDir(userExtensionsDir()).canonicalPath();
-    const QString file = QFileInfo(extensionFile(row)).canonicalFilePath();
+    const QString file = QFileInfo(path).canonicalFilePath();
     return !dir.isEmpty() && !file.isEmpty() && file.startsWith(dir + "/");
 }
 
-bool SettingsBridge::removeExtension(int row)
+bool SettingsBridge::canRemoveExtension(int row)
 {
-    if (!canRemoveExtension(row) || !QFile::remove(extensionFile(row)))
+    return underUserExtensions(extensionFile(row));
+}
+
+bool SettingsBridge::removeExtensionFile(const QString& path)
+{
+    if (!underUserExtensions(path) || !QFile::remove(path))
         return false;
     reloadExtensions();
     return true;

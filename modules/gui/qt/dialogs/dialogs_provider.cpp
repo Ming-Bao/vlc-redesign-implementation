@@ -32,6 +32,7 @@
 
 #include "qt.hpp"
 #include "dialogs_provider.hpp"
+#include <QMetaMethod>
 #include "player/player_controller.hpp" /* Load Subtitles */
 #include "playlist/playlist_controller.hpp"
 #include "menus/menus.hpp"
@@ -289,12 +290,7 @@ bool DialogsProvider::eventFilter(QObject *watched, QEvent *event) {
 const QEvent::Type DialogEvent::DialogEvent_Type =
         (QEvent::Type)QEvent::registerEventType();
 
-void DialogsProvider::prefsDialog()
-{
-    emit showSettingsWindow();
-}
-
-void DialogsProvider::prefsDialog(int simplePanel)
+PrefsDialog* DialogsProvider::ensurePrefsDialog()
 {
     if (!m_prefsDialog)
     {
@@ -303,21 +299,29 @@ void DialogsProvider::prefsDialog(int simplePanel)
         m_prefsDialog->installEventFilter(this);
         m_prefsDialog->open();
     }
-    m_prefsDialog->showSimplePanel(simplePanel);
+    return m_prefsDialog;
+}
+
+void DialogsProvider::prefsDialog()
+{
+    // as skins2's dialogs provider there is no Dialogs.qml to show the Settings window: use the legacy dialog
+    if (p_intf->b_isDialogProvider
+        || !isSignalConnected(QMetaMethod::fromSignal(&DialogsProvider::showSettingsWindow)))
+        prefsDialog(0);
+    else
+        emit showSettingsWindow();
+}
+
+void DialogsProvider::prefsDialog(int simplePanel)
+{
+    ensurePrefsDialog()->showSimplePanel(simplePanel);
     m_prefsDialog->raise();
     m_prefsDialog->activateWindow();
 }
 
 void DialogsProvider::legacyPrefsDialog()
 {
-    if (!m_prefsDialog)
-    {
-        m_prefsDialog = new PrefsDialog( nullptr, p_intf );
-        m_prefsDialog->setAttribute(Qt::WA_DeleteOnClose);
-        m_prefsDialog->installEventFilter(this);
-        m_prefsDialog->open();
-    }
-    m_prefsDialog->setAdvanced();
+    ensurePrefsDialog()->setAdvanced();
     m_prefsDialog->raise();
     m_prefsDialog->activateWindow();
 }

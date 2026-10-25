@@ -35,13 +35,18 @@ Column {
     readonly property var style: delegate ? delegate.style : null
 
     property int selected: -1
+    property string selectedFile: ""    // captured at click time: row numbers change on any reload
+    property string selectedTitle: ""
     property int hoverRow: -1
     property string hoverSummary: ""
     property real hoverY: 0
     property string query: ""
-    readonly property bool removable: selected >= 0 && SettingsBridge.canRemoveExtension(selected)
+    readonly property bool removable: selected >= 0 && selectedFile.length > 0 && SettingsBridge.canRemoveExtension(selected)
 
     spacing: VLCStyle.dp(8, VLCStyle.scale)
+
+    // a search that hides the selected row clears the selection
+    onQueryChanged: if (selected >= 0 && !_matches(selectedTitle)) selected = -1
 
     function _matches(title) {
         // plain substring, whatever characters the search has
@@ -74,8 +79,11 @@ Column {
             anchors.margins: VLCStyle.dp(4, VLCStyle.scale)
             clip: true
             model: SettingsBridge.extensions
-            // a reload (Add, Remove) renumbers the rows
-            onCountChanged: root.selected = -1
+            // any reload (Add, Remove) renumbers the rows
+            Connections {
+                target: list.model
+                function onModelReset() { root.selected = -1 }
+            }
             Accessible.role: Accessible.List
             Accessible.name: root.row.label
 
@@ -93,7 +101,11 @@ Column {
                 width: ListView.view.width
                 height: matches ? VLCStyle.dp(36, VLCStyle.scale) : 0
                 visible: matches
-                onClicked: root.selected = index
+                onClicked: {
+                    root.selected = index
+                    root.selectedFile = SettingsBridge.extensionFile(index)
+                    root.selectedTitle = title
+                }
                 Accessible.name: title
 
                 background: Rectangle {
@@ -221,8 +233,9 @@ Column {
                 text: qsTr("Remove")
                 enabled: root.removable
                 onClicked: {
-                    const row = root.selected
-                    root.Window.window.ask(qsTr("Remove this extension?"), () => SettingsBridge.removeExtension(row), qsTr("Remove"))
+                    const file = root.selectedFile
+                    root.Window.window.ask(qsTr("Remove the extension \"%1\"?").arg(root.selectedTitle),
+                                           () => SettingsBridge.removeExtensionFile(file), qsTr("Remove"))
                 }
             }
         }
