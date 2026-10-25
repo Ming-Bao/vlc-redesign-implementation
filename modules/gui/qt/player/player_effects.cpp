@@ -218,6 +218,15 @@ void PlayerEffects::applyEqualizerPreset(int index)
     setValue("equalizer-preset", QString::fromLatin1(preset_list[index]));
 }
 
+QVariantMap PlayerEffects::equalizerPresetValues(int index) const
+{
+    if (index < 0 || index >= NB_PRESETS)
+        return {};
+    const eqz_preset_t& p = eqz_preset_10b[index];
+    return {{"name", QString::fromLatin1(preset_list[index])}, {"preamp", p.f_preamp},
+            {"bands", effects::formatBands(QVector<float>(p.f_amp, p.f_amp + effects::EQZ_BANDS))}};
+}
+
 int PlayerEffects::transformFlip() const
 {
     return filterEnabled("transform") ? effects::parseTransform(vlcConfigString("transform-type")).first : 0;

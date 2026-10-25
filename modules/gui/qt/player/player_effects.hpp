@@ -58,6 +58,8 @@ public:
     Q_INVOKABLE void setEqualizerBand(int band, double db);
     Q_INVOKABLE int equalizerPresetIndex() const;
     Q_INVOKABLE void applyEqualizerPreset(int index);
+    // {name, preamp, bands} of a preset, for writing the config alone (the settings window)
+    Q_INVOKABLE QVariantMap equalizerPresetValues(int index) const;
 
     Q_INVOKABLE int transformFlip() const;
     Q_INVOKABLE int transformRotation() const;

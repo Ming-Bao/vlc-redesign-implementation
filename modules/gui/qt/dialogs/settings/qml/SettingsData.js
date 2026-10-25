@@ -45,7 +45,8 @@
 //                text after a field's value (number, field)
 //   invert       a toggle written inverted
 //   on, off      the values a toggle writes (default true / false); "on" is also how it reads checked
-//   list, module a toggle that adds or removes `module` in the ':' list option `list` (hides without `list`)
+//   list, module a toggle that adds or removes `module` in the ':' list option `list` (hides without `list`); on a
+//                number row, `module` is in the list while the value is not 0 (Pitch shift)
 //   save         browseFile picks a file to write (a save dialog)
 //   action       button id: openConfig | resetAll | legacyPrefs | editHotkeys | resetHotkeys | clearHistory
 //   buttonText   the button's text
@@ -243,8 +244,110 @@ var pages = [
             { label: qsTr("Monitor pixel aspect ratio"), kind: "field", adv: true, option: "monitor-par" }
         ] }
     ] },
-    { name: "audio", label: qsTr("Audio"), title: qsTr("Audio Defaults"), icon: "audio", group: "Media", sections: [] },
-    { name: "subtitles", label: qsTr("Subtitles"), title: qsTr("Subtitle Defaults"), icon: "subtitles", group: "Media", sections: [] },
+    { name: "audio", label: qsTr("Audio"), title: qsTr("Audio Defaults"), icon: "audio", group: "Media", sections: [
+        { title: qsTr("Output"), rows: [
+            { label: qsTr("Enable audio"), kind: "toggle", option: "audio" },
+            { label: qsTr("Output device"), kind: "dropdown", option: "aout" },
+            { label: qsTr("Speaker setup"), kind: "dropdown", option: "stereo-mode" }
+        ] },
+        { title: qsTr("Volume"), rows: [
+            { label: qsTr("Maximum volume"), kind: "slider", option: "qt-max-volume", min: 100, max: 300, step: 25,
+              ticks: [ qsTr("100%"), qsTr("200%"), qsTr("300%") ] },
+            { label: qsTr("Startup volume"), kind: "custom", component: "StartupVolumeRow.qml", option: "volume-save" },
+            { label: qsTr("Volume step"), kind: "number", option: "volume-step" }
+        ] },
+        { title: qsTr("Loudness"), rows: [
+            { label: qsTr("Normalize loudness"), kind: "toggle", list: "audio-filter", module: "normvol" },
+            { label: qsTr("Target level"), kind: "number", option: "norm-max-level" },
+            // "Night mode" is not built: no separate VLC filter (the Compressor below covers it)
+            { label: qsTr("Replay gain"), kind: "dropdown", option: "audio-replay-gain-mode" },
+            { label: qsTr("Replay gain preamp"), kind: "number", option: "audio-replay-gain-preamp" }
+        ] },
+        { title: qsTr("Effects"), rows: [
+            { label: qsTr("Equalizer"), kind: "custom", component: "EqualizerRows.qml", list: "audio-filter", requires: "equalizer-bands",
+              keywords: qsTr("Equalizer preset Preamp") },
+            { label: qsTr("Two-pass"), kind: "toggle", option: "equalizer-2pass" },
+            { label: qsTr("Spatial audio"), kind: "custom", component: "SpatialRows.qml", list: "audio-filter",
+              keywords: qsTr("Spatial audio mode Headphone virtualization Room") },
+            { label: qsTr("Stereo widening"), kind: "toggle", list: "audio-filter", module: "stereo_widen" },
+            { label: qsTr("Compressor"), kind: "toggle", list: "audio-filter", module: "compressor" },
+            // a pitch other than 0 also turns scaletempo_pitch on
+            { label: qsTr("Pitch shift"), kind: "number", option: "pitch-shift", list: "audio-filter", module: "scaletempo_pitch" },
+            { label: qsTr("Chorus/flanger"), kind: "toggle", list: "audio-filter", module: "chorus_flanger" },
+            { label: qsTr("Karaoke"), kind: "toggle", list: "audio-filter", module: "karaoke" }
+        ] },
+        { title: qsTr("Language and Sync"), rows: [
+            { label: qsTr("Preferred audio language"), kind: "dropdown", option: "audio-language", choicesFrom: "languages" },
+            { label: qsTr("Audio delay"), kind: "number", option: "audio-desync", scale: 1000, suffix: qsTr(" s") },
+            { label: qsTr("Visualizer"), kind: "dropdown", option: "audio-visual" }
+        ] },
+        { title: "", adv: true, rows: [
+            { label: qsTr("Pass compressed audio to the receiver"), kind: "toggle", adv: true, option: "spdif" },
+            { label: qsTr("Detect Dolby Surround"), kind: "dropdown", adv: true, option: "force-dolby-surround" },
+            { label: qsTr("Resampling quality"), kind: "dropdown", adv: true, option: "audio-resampler" },
+            { label: qsTr("Media role"), kind: "dropdown", adv: true, option: "role" },
+            // Match window is not possible here: three sizes (my call)
+            { label: qsTr("Visualization size"), kind: "dropdown", adv: true, option: "effect-width", requires: "effect-height",
+              choices: [ { value: 400, label: qsTr("400 × 300"), sets: { "effect-height": 300 } },
+                         { value: 800, label: qsTr("800 × 600"), sets: { "effect-height": 600 } },
+                         { value: 1280, label: qsTr("1280 × 720"), sets: { "effect-height": 720 } } ] }
+        ] }
+    ] },
+    { name: "subtitles", label: qsTr("Subtitles"), title: qsTr("Subtitle Defaults"), icon: "subtitles", group: "Media", sections: [
+        { title: qsTr("Tracks & Languages"), rows: [
+            { label: qsTr("Enable subtitles"), kind: "toggle", option: "spu" },
+            { label: qsTr("Preferred language"), kind: "dropdown", option: "sub-language", choicesFrom: "languages" },
+            { label: qsTr("Text encoding"), kind: "dropdown", option: "subsdec-encoding" }
+        ] },
+        { title: qsTr("Loading Subtitles"), rows: [
+            { label: qsTr("Load subtitle files automatically"), kind: "toggle", option: "sub-autodetect-file" },
+            { label: qsTr("File name matching"), kind: "dropdown", option: "sub-autodetect-fuzzy",
+              choices: [ { value: 4, label: qsTr("Exact title") }, { value: 3, label: qsTr("Title with extra characters") },
+                         { value: 2, label: qsTr("Title anywhere in the name") }, { value: 1, label: qsTr("Any subtitle file") } ] }
+        ] },
+        { title: qsTr("Appearance"), rows: [
+            { label: qsTr("Font"), kind: "dropdown", option: "freetype-font", choicesFrom: "fonts" },
+            // freetype-fontsize and -rel-fontsize are obsolete in VLC 4 (the check script rejects them), so FontSizeRows
+            // names them itself and hides while they are missing
+            { label: qsTr("Font size"), kind: "custom", component: "FontSizeRows.qml",
+              keywords: qsTr("Size values Relative Pixels") },
+            { label: qsTr("Bold"), kind: "toggle", option: "freetype-bold" },
+            { label: qsTr("Text color"), kind: "color", option: "freetype-color" },
+            { label: qsTr("Text opacity"), kind: "slider", option: "freetype-opacity", min: 0, max: 100, step: 10, scale: 2.55,
+              ticks: [ qsTr("0%"), qsTr("50%"), qsTr("100%") ] },
+            { label: qsTr("Outline thickness"), kind: "dropdown", option: "freetype-outline-thickness" },
+            { label: qsTr("Outline color"), kind: "color", option: "freetype-outline-color" },
+            { label: qsTr("Shadow"), kind: "toggle", option: "freetype-shadow-opacity", on: 128, off: 0 },
+            { label: qsTr("Shadow color"), kind: "color", option: "freetype-shadow-color" },
+            { label: qsTr("Shadow distance"), kind: "dropdown", option: "freetype-shadow-distance",
+              choices: [ { value: 0.03, label: qsTr("Small") }, { value: 0.06, label: qsTr("Medium") }, { value: 0.1, label: qsTr("Large") } ] },
+            { label: qsTr("Background"), kind: "dropdown", option: "freetype-background-opacity",
+              choices: [ { value: 0, label: qsTr("None") }, { value: 128, label: qsTr("Box") } ] },
+            { label: qsTr("Background color"), kind: "color", option: "freetype-background-color" },
+            { label: qsTr("Background opacity"), kind: "slider", option: "freetype-background-opacity", min: 0, max: 100, step: 10, scale: 2.55,
+              ticks: [ qsTr("0%"), qsTr("50%"), qsTr("100%") ] }
+        ] },
+        { title: qsTr("Position & Timing"), rows: [
+            { label: qsTr("Vertical position"), kind: "dropdown", option: "sub-margin",
+              choices: [ { value: 0, label: qsTr("Bottom") }, { value: 50, label: qsTr("Raised") }, { value: 150, label: qsTr("High") } ] },
+            { label: qsTr("Subtitle delay"), kind: "slider", option: "sub-delay", min: -5, max: 5, step: 0.5, scale: 10,
+              ticks: [ qsTr("-5 s"), qsTr("0 s"), qsTr("+5 s") ] }
+        ] },
+        { title: qsTr("On-screen Feedback"), rows: [
+            { label: qsTr("Show feedback for shortcuts"), kind: "toggle", option: "osd" },
+            // "Show feedback for" is not built: no VLC option
+            { label: qsTr("Show filename when a video starts"), kind: "toggle", option: "video-title-show" },
+            { label: qsTr("Show filename for"), kind: "slider", option: "video-title-timeout", min: 1, max: 10, step: 1, scale: 1000,
+              ticks: [ qsTr("1 s"), qsTr("5 s"), qsTr("10 s") ], enabledBy: "video-title-show" }
+        ] },
+        // "Ignore styling in ASS and SSA subtitles" and the second "Visualization size" are not built: no VLC option / a Figma copy-paste
+        { title: "", adv: true, rows: [
+            { label: qsTr("Load subtitles from these folders"), kind: "field", adv: true, option: "sub-autodetect-path" },
+            { label: qsTr("Shadow angle"), kind: "number", adv: true, option: "freetype-shadow-angle" },
+            { label: qsTr("Text direction"), kind: "dropdown", adv: true, option: "freetype-text-direction" },
+            { label: qsTr("Monospace font"), kind: "dropdown", adv: true, option: "freetype-monofont", choicesFrom: "fonts" }
+        ] }
+    ] },
     { name: "library", label: qsTr("Library"), title: qsTr("Playlists, Folders & Files"), icon: "library", group: "Media", sections: [
         { title: qsTr("Opening Files"), rows: [
             { label: qsTr("Only allow one VLC window"), kind: "toggle", option: "one-instance" },

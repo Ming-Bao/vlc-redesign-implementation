@@ -37,7 +37,7 @@ FocusScope {
     property int reloadTick: 0
 
     readonly property int rev: SettingsBridge.revision + reloadTick
-    readonly property bool shown: SettingsData.rowShown(row, SettingsBridge) && (row.kind !== "custom" || _custom !== null)
+    readonly property bool shown: SettingsData.rowShown(row, SettingsBridge) && (row.kind !== "custom" || (_custom !== null && (!_customItem || _customItem.available !== false)))
     // the option's current value (undefined for rows without one)
     readonly property var value: {
         void(rev)
@@ -71,14 +71,19 @@ FocusScope {
     // A custom row (`component: "ThemeRow.qml"`, a file in rows/, served flat next to this file) declares
     // `required property var row`; optionally `property Item delegate` (set to this delegate: rev, value, style,
     // choiceList) and `readonly property bool fullRow: true` (it draws the whole row, label included, instead of
-    // the 320 px control column). Its implicitHeight sets the row's. A missing file only means the custom row isn't
-    // written yet: the row hides, with no warning.
+    // the 320 px control column), and `available: false` to hide (its options are missing). Its implicitHeight sets
+    // the row's. A missing file only means the custom row isn't written yet: the row hides, with no warning.
     function _component(file) {
         const c = Qt.createComponent(file)
         return c.status === Component.Ready ? c : null
     }
 
-    function _same(a, b) { return String(a) === String(b) }
+    // numbers within float32 precision (a float option reads 0.06 back as 0.05999999865889549)
+    function _same(a, b) {
+        if (typeof a === "number" && typeof b === "number")
+            return Math.abs(a - b) <= 1e-6 * Math.max(1, Math.abs(a))
+        return String(a) === String(b)
+    }
 
     function _choices() {
         if (row.kind !== "dropdown" && row.kind !== "segments" && !(row.kind === "slider" && row.choices))
@@ -354,12 +359,16 @@ FocusScope {
             placeholderTextColor: root.style.placeholder
             echoMode: root.row.kind === "password" ? TextInput.Password : TextInput.Normal
             committedText: root.value === undefined ? ""
-                           : root.row.kind === "number" ? String(root.value / (root.row.scale || 1)) : String(root.value)
+                           : root.row.kind === "number" ? String(Number((root.value / (root.row.scale || 1)).toPrecision(7))) : String(root.value)
             onCommitted: (t) => {
                 if (root.row.kind !== "number")
                     SettingsBridge.setValue(root.row.option, t)
-                else if (t.length && !isNaN(Number(t)))
+                else if (t.length && !isNaN(Number(t))) {
                     root._write(Number(t))
+                    // Pitch shift: its filter is on while the pitch is not 0
+                    if (root.row.list)
+                        SettingsBridge.setListHas(root.row.list, root.row.module, Number(t) !== 0)
+                }
             }
             Accessible.name: root.row.label
         }
