@@ -68,6 +68,7 @@ moc_headers = files(
     'dialogs/sout/sout.hpp',
     'dialogs/sout/sout_widgets.hpp',
     'dialogs/systray/systray.hpp',
+    'dialogs/settings/settings_bridge.hpp',
     'dialogs/toolbar/controlbar_profile.hpp',
     'dialogs/toolbar/controlbar_profile_model.hpp',
     'dialogs/playlists/playlists.hpp',
@@ -275,6 +276,8 @@ qt_plugin_sources = files(
     'dialogs/preferences/preferences_widgets.hpp',
     'dialogs/preferences/simple_preferences.cpp',
     'dialogs/preferences/simple_preferences.hpp',
+    'dialogs/settings/settings_bridge.cpp',
+    'dialogs/settings/settings_bridge.hpp',
     'dialogs/sout/convert.cpp',
     'dialogs/sout/convert.hpp',
     'dialogs/sout/profile_selector.cpp',
@@ -513,6 +516,8 @@ qt_plugin_sources = files(
     'util/soutchain.hpp',
     'util/validators.cpp',
     'util/validators.hpp',
+    'util/vlc_config.cpp',
+    'util/vlc_config.hpp',
     'util/varcommon_p.hpp',
     'util/varchoicemodel.cpp',
     'util/varchoicemodel.hpp',
@@ -1467,6 +1472,29 @@ if qt6_dep.found()
             ),
             'moc_headers': files(
                 'util/renderer_manager.hpp'
+            ),
+            'suite': ['qt'],
+            'include_directories' : qt_include_dir,
+            'link_with': [libvlccore, libvlc],
+            'link_args': qt_link_args,
+            'dependencies': [qt6_dep, qt_extra_deps, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
+            'name': 'test_qt_settings_bridge',
+            'sources': files(
+                'tests/vlc_stub_modules.cpp',
+                'tests/test_settings_bridge.cpp',
+                'dialogs/settings/settings_bridge.cpp',
+                'dialogs/settings/settings_bridge.hpp',
+                'player/effects_util.cpp',
+                'util/vlc_config.cpp'
+            ),
+            'moc_sources': files(
+                'tests/test_settings_bridge.cpp'
+            ),
+            'moc_headers': files(
+                'dialogs/settings/settings_bridge.hpp'
             ),
             'suite': ['qt'],
             'include_directories' : qt_include_dir,

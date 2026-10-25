@@ -19,6 +19,7 @@
 
 #include "player/player_controller.hpp"
 #include "player/effects_util.hpp"
+#include "util/vlc_config.hpp"
 #include "../../../audio_filter/equalizer_presets.h"
 
 #include <vlc_aout.h>
@@ -77,14 +78,6 @@ PlayerEffects::Kind PlayerEffects::kindOf(const QString& module, const char** va
     return it->first;
 }
 
-static QString configString(const char* name)
-{
-    char* s = config_GetPsz(name);
-    QString out = qfu(s ? s : "");
-    free(s);
-    return out;
-}
-
 bool PlayerEffects::filterEnabled(const QString& module) const
 {
     const char* var = nullptr;
@@ -99,7 +92,7 @@ bool PlayerEffects::filterEnabled(const QString& module) const
         free(s);
     }
     else
-        list = configString(var);
+        list = vlcConfigString(var);
     return list.split(':', Qt::SkipEmptyParts).contains(module);
 }
 
@@ -118,7 +111,7 @@ void PlayerEffects::setFilterEnabled(const QString& module, bool on)
             free(s);
             var_SetString(vout.get(), var, qtu(list));
         }
-    config_PutPsz(var, qtu(effects::toggleModule(configString(var), module, on)));
+    config_PutPsz(var, qtu(effects::toggleModule(vlcConfigString(var), module, on)));
     touch();
 }
 
@@ -134,17 +127,7 @@ static QVariant readVar(vlc_object_t* obj, const char* name, int type)
     return {};
 }
 
-QVariant PlayerEffects::configValue(const QString& name) const
-{
-    switch (config_GetType(qtu(name)))
-    {
-    case VLC_VAR_FLOAT:   return config_GetFloat(qtu(name));
-    case VLC_VAR_INTEGER: return QVariant::fromValue<qlonglong>(config_GetInt(qtu(name)));
-    case VLC_VAR_BOOL:    return config_GetInt(qtu(name)) != 0;
-    case VLC_VAR_STRING:  return configString(qtu(name));
-    }
-    return {};
-}
+QVariant PlayerEffects::configValue(const QString& name) const { return vlcConfigValue(name); }
 
 QVariant PlayerEffects::value(const QString& name) const
 {
@@ -178,16 +161,10 @@ static vlc_value_t toVlcValue(const QVariant& v, int type, QByteArray& keep)
 
 void PlayerEffects::setConfigValue(const QString& name, const QVariant& v)
 {
-    const int type = config_GetType(qtu(name));
-    QByteArray keep;
-    const vlc_value_t val = toVlcValue(v, type, keep);
-    switch (type)
+    if (!vlcSetConfigValue(name, v))
     {
-    case VLC_VAR_FLOAT:   config_PutFloat(qtu(name), val.f_float); break;
-    case VLC_VAR_BOOL:    config_PutInt(qtu(name), val.b_bool); break;
-    case VLC_VAR_INTEGER: config_PutInt(qtu(name), val.i_int); break;
-    case VLC_VAR_STRING:  config_PutPsz(qtu(name), val.psz_string); break;
-    default: msg_Warn(m_intf, "no config option \"%s\"", qtu(name)); return;
+        msg_Warn(m_intf, "no config option \"%s\"", qtu(name));
+        return;
     }
     touch();
 }
@@ -219,14 +196,14 @@ void PlayerEffects::setEqualizerBand(int band, double db)
     setValue("equalizer-bands", effects::formatBands(bands));
     // clear the preset name in the config only: writing "" to the aout var makes the equalizer log
     // "preset '' not found" (and list every preset) on each band step
-    if (!configString("equalizer-preset").isEmpty())
+    if (!vlcConfigString("equalizer-preset").isEmpty())
         config_PutPsz("equalizer-preset", "");
 }
 
 int PlayerEffects::equalizerPresetIndex() const
 {
     // the config is authoritative: the aout var keeps the old name once the preset is cleared
-    const QString p = configString("equalizer-preset");
+    const QString p = vlcConfigString("equalizer-preset");
     for (int i = 0; i < NB_PRESETS; ++i)
         if (p == QLatin1String(preset_list[i])) return i;
     return -1;
@@ -243,12 +220,12 @@ void PlayerEffects::applyEqualizerPreset(int index)
 
 int PlayerEffects::transformFlip() const
 {
-    return filterEnabled("transform") ? effects::parseTransform(configString("transform-type")).first : 0;
+    return filterEnabled("transform") ? effects::parseTransform(vlcConfigString("transform-type")).first : 0;
 }
 
 int PlayerEffects::transformRotation() const
 {
-    return filterEnabled("transform") ? effects::parseTransform(configString("transform-type")).second : 0;
+    return filterEnabled("transform") ? effects::parseTransform(vlcConfigString("transform-type")).second : 0;
 }
 
 void PlayerEffects::setTransform(int flip, int rotation)

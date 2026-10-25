@@ -160,6 +160,8 @@ libqt_plugin_la_SOURCES = \
 	dialogs/sout/sout_widgets.hpp \
 	dialogs/systray/systray.cpp \
 	dialogs/systray/systray.hpp \
+	dialogs/settings/settings_bridge.cpp \
+	dialogs/settings/settings_bridge.hpp \
 	dialogs/toolbar/controlbar_profile.hpp \
 	dialogs/toolbar/controlbar_profile.cpp \
 	dialogs/toolbar/controlbar_profile_model.cpp \
@@ -353,6 +355,7 @@ libqt_plugin_la_SOURCES = \
 	util/singleton.hpp \
 	util/soutchain.cpp util/soutchain.hpp \
 	util/validators.cpp util/validators.hpp \
+	util/vlc_config.cpp util/vlc_config.hpp \
 	util/varcommon_p.hpp \
 	util/varchoicemodel.cpp  util/varchoicemodel.hpp \
 	util/variables.cpp util/variables.hpp \
@@ -456,6 +459,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	dialogs/sout/sout.moc.cpp \
 	dialogs/sout/sout_widgets.moc.cpp \
 	dialogs/systray/systray.moc.cpp \
+	dialogs/settings/settings_bridge.moc.cpp \
 	dialogs/toolbar/controlbar_profile.moc.cpp \
 	dialogs/toolbar/controlbar_profile_model.moc.cpp \
 	dialogs/playlists/playlists.moc.cpp \
@@ -1922,6 +1926,27 @@ test_renderer_manager_model_LDADD = $(QT_QTEST_COMMON_ldadd)
 test_renderer_manager_model_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
 check_PROGRAMS += test_renderer_manager_model
 TESTS += test_renderer_manager_model
+
+# test_settings_bridge
+test_settings_bridge_SOURCES = \
+	tests/vlc_stub_modules.cpp tests/vlc_stub_modules.hpp \
+	tests/test_settings_bridge.cpp \
+	dialogs/settings/settings_bridge.hpp dialogs/settings/settings_bridge.cpp \
+	player/effects_util.hpp player/effects_util.cpp \
+	util/vlc_config.hpp util/vlc_config.cpp
+
+nodist_test_settings_bridge_SOURCES = \
+	tests/test_settings_bridge.moc \
+	dialogs/settings/settings_bridge.moc.cpp
+
+BUILT_SOURCES += tests/test_settings_bridge.moc
+CLEANFILES += tests/test_settings_bridge.moc
+test_settings_bridge_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)
+test_settings_bridge_CXXFLAGS = $(QT_QTEST_COMMON_cxxflags)
+test_settings_bridge_LDADD = $(QT_QTEST_COMMON_ldadd)
+test_settings_bridge_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
+check_PROGRAMS += test_settings_bridge
+TESTS += test_settings_bridge
 
 # test_effects_util
 

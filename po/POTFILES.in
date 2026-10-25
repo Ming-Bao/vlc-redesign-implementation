@@ -726,6 +726,8 @@ modules/gui/qt/dialogs/preferences/preferences_widgets.cpp
 modules/gui/qt/dialogs/preferences/preferences_widgets.hpp
 modules/gui/qt/dialogs/preferences/simple_preferences.cpp
 modules/gui/qt/dialogs/preferences/simple_preferences.hpp
+modules/gui/qt/dialogs/settings/settings_bridge.cpp
+modules/gui/qt/dialogs/settings/settings_bridge.hpp
 modules/gui/qt/dialogs/sout/convert.cpp
 modules/gui/qt/dialogs/sout/convert.hpp
 modules/gui/qt/dialogs/sout/profile_selector.cpp
