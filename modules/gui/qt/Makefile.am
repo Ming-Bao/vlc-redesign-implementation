@@ -1162,7 +1162,9 @@ libqml_module_dialogs_a_QML = \
 	dialogs/settings/qml/SettingsRowDelegate.qml \
 	dialogs/settings/qml/SettingsSidebar.qml \
 	dialogs/settings/qml/SettingsWindow.qml \
-	dialogs/settings/qml/SettingsWindowPage.qml
+	dialogs/settings/qml/SettingsWindowPage.qml \
+	dialogs/settings/qml/rows/AccentRow.qml \
+	dialogs/settings/qml/rows/ThemeRow.qml
 libqml_module_dialogs_a_Singleton_QML =
 libqml_module_dialogs_a_SOURCES = $(QML_MODULE_dialogs_SRC)
 nodist_libqml_module_dialogs_a_SOURCES = dialogs/qmlassets.cpp $(QML_MODULE_dialogs_NODIST_EXTRA)

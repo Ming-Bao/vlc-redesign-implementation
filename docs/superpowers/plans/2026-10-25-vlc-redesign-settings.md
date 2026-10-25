@@ -187,7 +187,7 @@ git commit -m "qt: Figma settings window shell replaces Preferences as Settings"
 ### Task 3: Rows, Advanced Options, and the App pages
 
 **Files:**
-- Create: `dialogs/settings/qml/SettingsData.js` (`.pragma library`), `dialogs/settings/qml/SettingsPage.qml`, `dialogs/settings/qml/SettingsRowDelegate.qml`, `dialogs/settings/qml/AdvancedBar.qml`
+- Create: `dialogs/settings/qml/SettingsData.js` (`.pragma library`), `dialogs/settings/qml/SettingsWindowPage.qml` (not `SettingsPage`: `VLC.Player` has one and `PlaybackPanel` imports both modules), `dialogs/settings/qml/SettingsRowDelegate.qml`, `dialogs/settings/qml/AdvancedBar.qml`
 - Create: `docs/superpowers/scripts/check-settings-options.py`
 - Modify: `SettingsWindow.qml` (content), `player/qml/settings/*.qml` (only added properties, such as a label colour), build lists
 
@@ -209,7 +209,7 @@ git commit -m "qt: Figma settings window shell replaces Preferences as Settings"
   - `required property var row`;
   - `readonly property bool shown`: false when `row.option && !SettingsBridge.exists(row.option)`, or for a `list` row when `!SettingsBridge.exists(row.list)`;
   - it re-reads its value when `SettingsBridge.revision` changes.
-- Produces `SettingsPage.qml`: `required property var page`, `property bool advancedOpen`. A `Flickable` of sections, then the Advanced bar (only if the page has adv rows that are shown), then the adv rows. It hides a section whose rows are all hidden. `function reload()` re-reads every row; it is called when the page is shown.
+- Produces `SettingsWindowPage.qml`: `required property var page`, `property bool advancedOpen`. A `Flickable` of sections, then the Advanced bar (only if the page has adv rows that are shown), then the adv rows. It hides a section whose rows are all hidden. `function reload()` re-reads every row; it is called when the page is shown.
 - Produces `check-settings-options.py SettingsData.js`: extracts every `option:`/`list:` value and checks each against the `add_*("name"` set from `src/` and `modules/` (prefix macros: `SOUT_CFG_PREFIX "sout-chromecast-"`, `"sout-x264-"`). It exits 1 and lists unknown names. The allow-list for platform-only options lives in the script.
 
 - [ ] **Step 1: Write the option check script first** and run it on a `SettingsData.js` holding only General's rows, with one deliberate typo (`"file-loging"`).
@@ -233,8 +233,8 @@ git commit -m "qt: Figma settings window shell replaces Preferences as Settings"
   - Save the shots to `docs/superpowers/figma/7/after-<page>.png`.
 
 - [ ] **Step 6: Behaviour check (Review Focus 1, 2).**
-  - Toggle Interface ▸ "Keep window above other windows", type a new Never-remember filter on Privacy without pressing Enter, then close with ×.
-  - `grep -E '^(video-on-top|qt-recentplay-filter)=' build/redesign-profile/config/vlc/vlcrc` shows both new values.
+  - Toggle Interface ▸ "Keep window above other windows", type a new Last.fm username on Privacy without pressing Enter, then close with ×. (`qt-recentplay-filter` is obsolete in VLC 4, so its row is not built.)
+  - `grep -E '^(video-on-top|lastfm-username)=' build/redesign-profile/config/vlc/vlcrc` shows both new values.
   - The log grep is clean, including no warning from a hidden row.
 
 - [ ] **Step 7: Commit**
@@ -330,7 +330,7 @@ function test_presetFor() {
 ### Task 6: Extensions page, theme and accent colour
 
 **Files:**
-- Create: `rows/ExtensionsRows.qml`, `rows/ThemeRow.qml`, `rows/AccentRow.qml`
+- Create: `rows/ExtensionsRows.qml`. Fill in: `rows/ThemeRow.qml`, `rows/AccentRow.qml` (Task 3 placeholders, label only, `fullRow: true`)
 - Modify: `settings_bridge.hpp/.cpp` (extensions), `style/systempalettethemeprovider.cpp` (dark default accent), the eight accent-hardcoding files listed in the spec, `SettingsData.js`
 
 **Interfaces:**
@@ -364,7 +364,7 @@ function test_presetFor() {
 ### Task 7: Search
 
 **Files:**
-- Modify: `SettingsData.js` (`search(pages, text)`), `SettingsWindow.qml`, `SettingsPage.qml` (a results mode), `tests/tst_SettingsData.qml`
+- Modify: `SettingsData.js` (`search(pages, text)`), `SettingsWindow.qml`, `SettingsWindowPage.qml` (a results mode), `tests/tst_SettingsData.qml`
 
 **Interfaces:**
 - Produces `function search(pages, text) → [{page: index, title: pageTitle, rows: [row…]}]`.

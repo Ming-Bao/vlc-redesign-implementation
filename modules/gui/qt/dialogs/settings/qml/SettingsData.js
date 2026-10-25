@@ -21,8 +21,10 @@
 // base name of pixmaps/redesign/settings/<icon>[-active].svg, `group` a key ("App" | "Media" | "System") that the
 // sidebar translates.
 //
-// `sections`: [{ title, adv, rows }]. A section with `adv: true` sits under the Advanced Options bar, after the
-// page's other Advanced rows (with its title, if it has one); every row in it counts as `adv`.
+// `sections`: [{ title, adv, rows }]. Rows carry the Advanced flag: a row is Advanced iff it has `adv: true`
+// (search and the Advanced split read only that). A section's `adv: true` only places it under the Advanced Options
+// bar, as a block (with its title, if any) after the Advanced rows of the page's other sections; every row in such
+// a section must still say `adv: true`.
 //
 // A row (SettingsRowDelegate draws it):
 //   label        the row text
@@ -43,8 +45,10 @@
 //   save         browseFile picks a file to write (a save dialog)
 //   action       button id: openConfig | resetAll | legacyPrefs | editHotkeys | resetHotkeys | clearHistory
 //   buttonText   the button's text
-//   component    a custom row: a file name under dialogs/settings/qml/rows/ (served next to this file); it gets
-//                `row` and `style` and draws the whole row. Nothing is drawn until the file exists.
+//   component    a custom row: the file name (with .qml) of a file in dialogs/settings/qml/rows/, e.g. "ThemeRow.qml".
+//                The VLC.Dialogs module serves its files flat (qrc:/qt/qml/VLC/Dialogs/<name>), so the delegate
+//                loads it by that name. See SettingsRowDelegate for the component's properties. A name with no file
+//                draws nothing and logs nothing.
 //   keywords     extra search text, for custom rows
 var pages = [
     { name: "general", label: qsTr("General"), title: qsTr("Global Settings"), icon: "general", group: "App", sections: [
@@ -67,10 +71,10 @@ var pages = [
             { label: qsTr("All settings"), kind: "button", action: "legacyPrefs", buttonText: qsTr("Open"), adv: true }
         ] },
         { title: qsTr("Developer Options"), adv: true, rows: [
-            { label: qsTr("Write to the system log"), kind: "toggle", option: "syslog" },
-            { label: qsTr("Include debug messages in the system log"), kind: "toggle", option: "syslog-debug" },
-            { label: qsTr("System log identity"), kind: "field", option: "syslog-ident" },
-            { label: qsTr("System log facility"), kind: "dropdown", option: "syslog-facility" }
+            { label: qsTr("Write to the system log"), kind: "toggle", adv: true, option: "syslog" },
+            { label: qsTr("Include debug messages in the system log"), kind: "toggle", adv: true, option: "syslog-debug" },
+            { label: qsTr("System log identity"), kind: "field", adv: true, option: "syslog-ident" },
+            { label: qsTr("System log facility"), kind: "dropdown", adv: true, option: "syslog-facility" }
         ] }
     ] },
     { name: "interface", label: qsTr("Interface"), title: qsTr("Interface Settings"), icon: "interface", group: "App", sections: [
@@ -102,17 +106,17 @@ var pages = [
             { label: qsTr("Show the playlist as a tree"), kind: "toggle", option: "playlist-tree" }
         ] },
         { title: "", adv: true, rows: [
-            { label: qsTr("Window opacity"), kind: "slider", option: "qt-opacity", min: 10, max: 100, step: 10, scale: 0.01,
+            { label: qsTr("Window opacity"), kind: "slider", adv: true, option: "qt-opacity", min: 10, max: 100, step: 10, scale: 0.01,
               ticks: [ qsTr("10%"), qsTr("100%") ] },
-            { label: qsTr("Pause video when window is minimized"), kind: "toggle", option: "qt-pause-minimized" },
-            { label: qsTr("Bring VLC to the front when playback starts"), kind: "dropdown", option: "qt-auto-raise" },
-            { label: qsTr("Show cover art in the window when playing audio"), kind: "toggle", option: "qt-bgcone" },
-            { label: qsTr("Show the file browser inside the open dialog"), kind: "toggle", option: "qt-embedded-open" },
-            { label: qsTr("Allow the app icon to change"), kind: "toggle", option: "qt-icon-change" },
-            { label: qsTr("Fullscreen controls opacity"), kind: "slider", option: "qt-fs-opacity", min: 10, max: 100, step: 10, scale: 0.01,
+            { label: qsTr("Pause video when window is minimized"), kind: "toggle", adv: true, option: "qt-pause-minimized" },
+            { label: qsTr("Bring VLC to the front when playback starts"), kind: "dropdown", adv: true, option: "qt-auto-raise" },
+            { label: qsTr("Show cover art in the window when playing audio"), kind: "toggle", adv: true, option: "qt-bgcone" },
+            { label: qsTr("Show the file browser inside the open dialog"), kind: "toggle", adv: true, option: "qt-embedded-open" },
+            { label: qsTr("Allow the app icon to change"), kind: "toggle", adv: true, option: "qt-icon-change" },
+            { label: qsTr("Fullscreen controls opacity"), kind: "slider", adv: true, option: "qt-fs-opacity", min: 10, max: 100, step: 10, scale: 0.01,
               ticks: [ qsTr("10%"), qsTr("100%") ] },
             // three stops in px from the bottom edge (my call)
-            { label: qsTr("Fullscreen controls sensitivity"), kind: "slider", option: "qt-fs-sensitivity",
+            { label: qsTr("Fullscreen controls sensitivity"), kind: "slider", adv: true, option: "qt-fs-sensitivity",
               choices: [ { value: 30, label: qsTr("Low") }, { value: 90, label: qsTr("Medium") }, { value: 300, label: qsTr("High") } ] }
         ] }
     ] },
@@ -177,3 +181,12 @@ var pages = [
     { name: "recording", label: qsTr("Recording"), title: qsTr("Recording, Casting & Streaming Out"), icon: "recording", group: "System", sections: [] },
     { name: "extensions", label: qsTr("Extensions"), title: qsTr("Add-ons & Scripts"), icon: "extensions", group: "System", sections: [] }
 ]
+
+// Whether a row can show in this build: its option, list and required option all exist. `bridge` is the
+// SettingsBridge singleton (a .pragma library can't see it). A custom row also needs its component file, which
+// only the delegate can tell (its `shown`).
+function rowShown(row, bridge) {
+    return (!row.option || bridge.exists(row.option))
+        && (!row.list || bridge.exists(row.list))
+        && (!row.requires || bridge.exists(row.requires))
+}

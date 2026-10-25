@@ -732,6 +732,8 @@ modules/gui/qt/dialogs/settings/qml/SettingsRowDelegate.qml
 modules/gui/qt/dialogs/settings/qml/SettingsSidebar.qml
 modules/gui/qt/dialogs/settings/qml/SettingsWindow.qml
 modules/gui/qt/dialogs/settings/qml/SettingsWindowPage.qml
+modules/gui/qt/dialogs/settings/qml/rows/AccentRow.qml
+modules/gui/qt/dialogs/settings/qml/rows/ThemeRow.qml
 modules/gui/qt/dialogs/settings/settings_bridge.cpp
 modules/gui/qt/dialogs/settings/settings_bridge.hpp
 modules/gui/qt/dialogs/sout/convert.cpp

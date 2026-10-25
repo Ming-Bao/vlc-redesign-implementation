@@ -658,7 +658,9 @@ qml_modules += {
         'dialogs/settings/qml/SettingsRowDelegate.qml',
         'dialogs/settings/qml/SettingsSidebar.qml',
         'dialogs/settings/qml/SettingsWindow.qml',
-        'dialogs/settings/qml/SettingsWindowPage.qml'
+        'dialogs/settings/qml/SettingsWindowPage.qml',
+        'dialogs/settings/qml/rows/AccentRow.qml',
+        'dialogs/settings/qml/rows/ThemeRow.qml'
     ),
 }
 

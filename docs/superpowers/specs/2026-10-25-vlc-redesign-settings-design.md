@@ -164,7 +164,7 @@ Rows are listed in Figma order. **Adv** = under Advanced Options. "—" = not bu
 |---|---|---|---|
 | Save recently played items | toggle | `save-recentplay` | |
 | Remember the playback position | toggle | `restore-playback-states` | *(my call: the Playback page's "Continue where you left off" owns `restore-playback-pos`)* |
-| Never remember items matching | field | `qt-recentplay-filter` | |
+| Never remember items matching | — | — | `qt-recentplay-filter` is obsolete in VLC 4 (`add_obsolete_string`). Not built |
 | Clear history now | button Clear | `MLRecentMediaModel::clearHistory()` (the media library's history) | Disabled without a media library |
 | Fetch titles and cover art from the internet | toggle | `metadata-network-access` | Also on Library; same option |
 | Submit played tracks to last.fm | toggle | `audioscrobbler` in `extraintf` | |

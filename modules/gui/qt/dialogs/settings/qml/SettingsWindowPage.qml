@@ -23,6 +23,8 @@ import VLC.Widgets as Widgets
 import VLC.Player
 import VLC.Dialogs
 
+import "SettingsData.js" as SettingsData
+
 // One settings page from SettingsData.js (not SettingsPage: VLC.Player has one, and PlaybackPanel imports both modules): its sections, then the Advanced Options bar and the Advanced rows (the
 // page's `adv` rows as one untitled block, then its `adv` sections). The instance lives for the session and follows
 // `page`; the bar's state is kept per page.
@@ -35,12 +37,17 @@ Flickable {
     property int _tick: 0
     property var _openByPage: ({})
 
-    // [{title, rows}] for the main part and for the Advanced part
+    // [{title, rows}] for the main part and for the Advanced part. A row is Advanced iff `row.adv`; an `adv` section
+    // is a block under the bar.
     readonly property var _main: page.sections.filter((s) => !s.adv)
         .map((s) => ({ title: s.title, rows: s.rows.filter((r) => !r.adv) }))
     readonly property var _adv: [{ title: "", rows: [].concat(...page.sections.filter((s) => !s.adv)
                                                              .map((s) => s.rows.filter((r) => r.adv))) }]
-        .concat(page.sections.filter((s) => s.adv))
+        .concat(page.sections.filter((s) => s.adv).map((s) => ({ title: s.title, rows: s.rows.filter((r) => r.adv) })))
+    readonly property bool _hasAdv: _adv.some(_anyShown)
+
+    // from the data, not the delegates: right on every page, whatever was instantiated
+    function _anyShown(block) { return block.rows.some((r) => SettingsData.rowShown(r, SettingsBridge)) }
 
     readonly property ColorContext colorContext: ColorContext {
         id: theme
@@ -70,16 +77,8 @@ Flickable {
         id: block
 
         required property var modelData
-        readonly property bool anyShown: {
-            void(rows.count)
-            for (let i = 0; i < rows.count; ++i)
-                if (rows.itemAt(i)?.shown)
-                    return true
-            return false
-        }
-
         width: column.width
-        visible: anyShown
+        visible: root._anyShown(modelData)
 
         Widgets.LabelExt {
             visible: text.length > 0
@@ -120,13 +119,7 @@ Flickable {
             id: bar
 
             width: parent.width
-            visible: {
-                void(advRepeater.count)
-                for (let i = 0; i < advRepeater.count; ++i)
-                    if (advRepeater.itemAt(i)?.anyShown)
-                        return true
-                return false
-            }
+            visible: root._hasAdv
             open: root.advancedOpen
             onClicked: root.advancedOpen = !root.advancedOpen
         }
@@ -137,7 +130,6 @@ Flickable {
             spacing: VLCStyle.dp(20, VLCStyle.scale)
 
             Repeater {
-                id: advRepeater
                 model: root._adv
                 Block { }
             }

@@ -24,6 +24,8 @@ import VLC.Widgets as Widgets
 import VLC.Player
 import VLC.Dialogs
 
+import "SettingsData.js" as SettingsData
+
 // One settings row from SettingsData.js (see the schema there): the label and its info glyph on the left, the
 // control in a 320 px column on the right. Reads its option again whenever SettingsBridge.revision or reloadTick
 // changes; writes on every change (fields on editingFinished: Enter, focus loss, the window closing).
@@ -35,10 +37,7 @@ FocusScope {
     property int reloadTick: 0
 
     readonly property int rev: SettingsBridge.revision + reloadTick
-    readonly property bool shown: (!row.option || SettingsBridge.exists(row.option))
-                                  && (!row.list || SettingsBridge.exists(row.list))
-                                  && (!row.requires || SettingsBridge.exists(row.requires))
-                                  && (row.kind !== "custom" || _custom !== null)
+    readonly property bool shown: SettingsData.rowShown(row, SettingsBridge) && (row.kind !== "custom" || _custom !== null)
     // the option's current value (undefined for rows without one)
     readonly property var value: {
         void(rev)
@@ -69,7 +68,11 @@ FocusScope {
         return !!SettingsBridge.value(row.enabledBy)
     }
 
-    // a missing file only means the custom row isn't written yet: no warning
+    // A custom row (`component: "ThemeRow.qml"`, a file in rows/, served flat next to this file) declares
+    // `required property var row`; optionally `property Item delegate` (set to this delegate: rev, value, style,
+    // choiceList) and `readonly property bool fullRow: true` (it draws the whole row, label included, instead of
+    // the 320 px control column). Its implicitHeight sets the row's. A missing file only means the custom row isn't
+    // written yet: the row hides, with no warning.
     function _component(file) {
         const c = Qt.createComponent(file)
         return c.status === Component.Ready ? c : null
