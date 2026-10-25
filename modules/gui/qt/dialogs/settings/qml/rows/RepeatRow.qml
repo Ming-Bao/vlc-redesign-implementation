@@ -16,11 +16,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 import QtQuick
-import QtQuick.Templates as T
 
-import VLC.MainInterface
 import VLC.Style
-import VLC.Widgets as Widgets
 import VLC.Player
 import VLC.Dialogs
 
@@ -32,7 +29,8 @@ Item {
     // 0 Off, 1 One, 2 All
     readonly property int mode: {
         void(delegate ? delegate.rev : 0)
-        return SettingsBridge.value("loop") ? 2 : SettingsBridge.value("repeat") ? 1 : 0
+        // core starts with `repeat` (current) before `loop` (all); `repeat` is a bool, so an old player build's 2 reads as 1
+        return SettingsBridge.value("repeat") ? 1 : SettingsBridge.value("loop") ? 2 : 0
     }
 
     implicitHeight: VLCStyle.dp(36, VLCStyle.scale)

@@ -721,7 +721,9 @@ void PlaylistController::toggleRepeatMode()
         vlc_playlist_locker lock{ d->m_playlist };
         vlc_playlist_SetPlaybackRepeat( d->m_playlist, new_repeat );
     }
-    config_PutInt( "repeat", new_repeat );
+    // what core reads at startup: repeat = repeat current, loop = repeat all
+    config_PutInt( "repeat", new_repeat == VLC_PLAYLIST_PLAYBACK_REPEAT_CURRENT );
+    config_PutInt( "loop", new_repeat == VLC_PLAYLIST_PLAYBACK_REPEAT_ALL );
 }
 
 void PlaylistController::clear()

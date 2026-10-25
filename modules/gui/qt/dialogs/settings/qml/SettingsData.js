@@ -220,9 +220,9 @@ var pages = [
                   .map((c) => typeof c === "string" ? { value: c, label: c } : c) },
             { label: qsTr("Scale video to the window"), kind: "toggle", option: "autoscale" },
             { label: qsTr("Zoom"), kind: "dropdown", option: "zoom", requires: "autoscale",
-              choices: [ { value: 1, label: qsTr("Fit"), sets: { autoscale: true } }, { value: 0.25, label: qsTr("\u00BC") },
-                         { value: 0.5, label: qsTr("\u00BD") }, { value: 1, label: qsTr("1:1"), sets: { autoscale: false } },
-                         { value: 2, label: qsTr("2:1") } ] },
+              choices: [ { value: 1, label: qsTr("Fit"), sets: { autoscale: true } }, { value: 0.25, label: qsTr("\u00BC"), sets: { autoscale: false } },
+                         { value: 0.5, label: qsTr("\u00BD"), sets: { autoscale: false } }, { value: 1, label: qsTr("1:1"), sets: { autoscale: false } },
+                         { value: 2, label: qsTr("2:1"), sets: { autoscale: false } } ] },
             { label: qsTr("Position in the window"), kind: "dropdown", option: "align" }
         ] },
         { title: qsTr("Snapshots"), rows: [
@@ -277,7 +277,8 @@ var pages = [
     { name: "performance", label: qsTr("Performance"), title: qsTr("Performance Settings"), icon: "performance", group: "System", sections: [
         { title: qsTr("Decoding"), rows: [
             { label: qsTr("Hardware-accelerated decoding"), kind: "dropdown", option: "dec-dev" },
-            { label: qsTr("Video post-processing"), kind: "dropdown", option: "postproc-q" },
+            { label: qsTr("Video post-processing"), kind: "dropdown", option: "postproc-q",
+              choices: [ { value: 0, label: qsTr("Off") }, 1, 2, 3, 4, 5, 6 ].map((c) => typeof c === "number" ? { value: c, label: String(c) } : c) },
             { label: qsTr("Skip the H.264 loop filter"), kind: "dropdown", option: "avcodec-skiploopfilter" },
             { label: qsTr("Decoding threads"), kind: "number", option: "avcodec-threads" }
         ] },

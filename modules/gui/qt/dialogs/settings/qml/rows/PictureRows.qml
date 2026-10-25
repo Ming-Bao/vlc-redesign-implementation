@@ -18,7 +18,6 @@
 import QtQuick
 import QtQuick.Templates as T
 
-import VLC.MainInterface
 import VLC.Style
 import VLC.Widgets as Widgets
 import VLC.Player
@@ -84,7 +83,7 @@ Column {
                 label: line.modelData.label
                 from: line.range.min ?? 0
                 to: line.range.max ?? 1
-                stepSize: (to - from) / 100
+                stepSize: to - from >= 100 ? 1 : (to - from) / 100   // whole units on wide ranges (hue)
                 value: {
                     void(root.delegate ? root.delegate.rev : 0)
                     return Number(SettingsBridge.value(line.modelData.option) ?? from)
