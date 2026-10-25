@@ -103,6 +103,19 @@
         <file alias="subtitles.svg">pixmaps/redesign/menu/subtitles.svg</file>
         <file alias="video.svg">pixmaps/redesign/menu/video.svg</file>
     </qresource>
+    <qresource prefix="/redesign/mini">
+        <file alias="artist.svg">pixmaps/redesign/mini/artist.svg</file>
+        <file alias="close.svg">pixmaps/redesign/mini/close.svg</file>
+        <file alias="folder.svg">pixmaps/redesign/mini/folder.svg</file>
+        <file alias="next.svg">pixmaps/redesign/mini/next.svg</file>
+        <file alias="pause.svg">pixmaps/redesign/mini/pause.svg</file>
+        <file alias="play.svg">pixmaps/redesign/mini/play.svg</file>
+        <file alias="popout.svg">pixmaps/redesign/mini/popout.svg</file>
+        <file alias="previous.svg">pixmaps/redesign/mini/previous.svg</file>
+        <file alias="queue.svg">pixmaps/redesign/mini/queue.svg</file>
+        <file alias="queue_active.svg">pixmaps/redesign/mini/queue_active.svg</file>
+        <file alias="replay.svg">pixmaps/redesign/mini/replay.svg</file>
+    </qresource>
     <qresource prefix="/misc">
         <file alias="cone.svg">pixmaps/misc/cone.svg</file>
         <file alias="new_indicator.svg">pixmaps/misc/new_indicator.svg</file>

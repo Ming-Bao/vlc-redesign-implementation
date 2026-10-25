@@ -1000,6 +1000,17 @@ libqt_plugin_la_RES = \
 	pixmaps/redesign/menu/stream.svg \
 	pixmaps/redesign/menu/subtitles.svg \
 	pixmaps/redesign/menu/video.svg \
+	pixmaps/redesign/mini/artist.svg \
+	pixmaps/redesign/mini/close.svg \
+	pixmaps/redesign/mini/folder.svg \
+	pixmaps/redesign/mini/next.svg \
+	pixmaps/redesign/mini/pause.svg \
+	pixmaps/redesign/mini/play.svg \
+	pixmaps/redesign/mini/popout.svg \
+	pixmaps/redesign/mini/previous.svg \
+	pixmaps/redesign/mini/queue.svg \
+	pixmaps/redesign/mini/queue_active.svg \
+	pixmaps/redesign/mini/replay.svg \
 	pixmaps/misc/cone.svg \
 	pixmaps/misc/new_indicator.svg \
 	pixmaps/misc/theme_dark.svg \
@@ -1238,7 +1249,6 @@ libqml_module_player_a_QML = \
 	player/qml/LyricsFlickable.qml \
 	player/qml/MiniPlayer.qml \
 	player/qml/LibraryPanel.qml \
-	player/qml/PIPPlayer.qml \
 	player/qml/Player.qml \
 	player/qml/PlayerControlLayout.qml \
 	player/qml/PlayerPlaylistVisibilityFSM.qml \

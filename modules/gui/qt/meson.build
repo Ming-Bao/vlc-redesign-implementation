@@ -767,7 +767,6 @@ qml_modules += {
        'player/qml/LyricsFlickable.qml',
        'player/qml/MiniPlayer.qml',
        'player/qml/LibraryPanel.qml',
-       'player/qml/PIPPlayer.qml',
        'player/qml/Player.qml',
        'player/qml/PlayerControlLayout.qml',
        'player/qml/PlayerPlaylistVisibilityFSM.qml',

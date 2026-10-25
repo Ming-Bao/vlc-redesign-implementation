@@ -30,6 +30,8 @@ T.ProgressBar {
 
     // compact (mini player) look: tall rounded track, inset progress, small accent handle
     property bool blockStyle: false
+    // the mini player card shows the handle only while it is hovered
+    property bool handleShown: true
     readonly property real _blockInset: VLCStyle.dp(2, VLCStyle.scale)
 
     readonly property real _hoveredScalingFactor: blockStyle ? 1.0 : 1.8
@@ -651,6 +653,7 @@ T.ProgressBar {
         implicitHeight: control.blockStyle ? control.barHeight - control._blockInset * 2 : sliderHandle._size
         radius: control.blockStyle ? VLCStyle.dp(4, VLCStyle.scale) : VLCStyle.margin_small
         color: control.blockStyle ? theme.accent : theme.fg.primary
+        opacity: control.handleShown ? 1 : 0
 
         // We use dynamic mutability group because time interpolation
         // may induce rapid change:
