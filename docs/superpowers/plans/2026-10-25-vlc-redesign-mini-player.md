@@ -325,11 +325,12 @@ Departures from the frames (the spec's *(my call)* items, plus any found while b
 
 **Behaviour**
 - **Single click on the video does nothing.** A double click opens the player. So does pop-out, and so does replaying a video (a new video output opens the player view).
-- **A mouse drag on the video** that is released inside it may count as a tap, so a click soon after can open the player. Unverified and rare.
-- **Ended** is detected from the last position: within 1.5 s of the end, still stopped 500 ms later. A Stop in the last 1.5 s reads as ended. The length has 1 s resolution, so the window is about ±1 s.
+- **Ended** is detected from the last position: within 1.5 s of the end, still stopped 500 ms later. A Stop from outside the card in the last 1.5 s reads as ended; the card's × does not. The length has 1 s resolution, so the window is about ±1 s.
 - **Ended ignores the queue.** If the next item takes longer than 500 ms to open, the card flashes the ended state.
 - **Ended state** shows its controls without hover. It is kept when a video ends in the player view, but then its seek bar sits at 0, not at the end.
-- **Snap:** the card snaps to the nearer bottom corner, left or right. The side is kept for the session only. The queue open or closed state resets when the library view is rebuilt (player view and back).
-- **Dragging** works from every part of the card except the queue's count row and list, which keep their own flick and reorder, and the strips beside the queue. The guard is hover-based, so on a touch screen a drag on the list can still move the card. With the queue open in a short window the card takes an odd position while dragging.
+- **Snap:** the card snaps to the nearer bottom corner, left or right. The side and the queue open or closed state are kept for the session only; they live in `MainInterface`'s `miniPlayerState`, so they survive the library view being rebuilt (player view and back).
+- **Play queue panel:** with the docked panel (Ctrl+L) open, the card on the right sits beside it, not over it, and the drag range ends at the panel's edge.
+- **Dragging** works from every part of the card except the queue's count row and list, which keep their own flick and reorder. The guard is hover-based, so on a touch screen a drag on the list can still move the card. With the queue open in a short window the card takes an odd position while dragging.
 - **Keyboard:** Up from the card's buttons goes to the queue list even when the queue is empty.
+- **`controlbarcontrols/ExtendedSettingsButton.qml` and `LangButton.qml`** still fall back to `g_mainDisplay.positionSliderY`, which the card removed. Harmless: only the toolbar editor's `paintOnly` copies reach it. Left for slice 8.
 - **Customize Player's "Mini player" tab** stays and now edits nothing visible. Slice 8 redoes that dialog.
