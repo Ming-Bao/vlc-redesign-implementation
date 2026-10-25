@@ -37,7 +37,7 @@ FocusScope {
     property int reloadTick: 0
 
     readonly property int rev: SettingsBridge.revision + reloadTick
-    readonly property bool shown: SettingsData.rowShown(row, SettingsBridge) && (row.kind !== "custom" || (_custom !== null && (!_customItem || _customItem.available !== false)))
+    readonly property bool shown: SettingsData.rowShown(row, SettingsBridge) && (row.kind !== "custom" || _custom !== null)
     // the option's current value (undefined for rows without one)
     readonly property var value: {
         void(rev)
@@ -71,7 +71,7 @@ FocusScope {
     // A custom row (`component: "ThemeRow.qml"`, a file in rows/, served flat next to this file) declares
     // `required property var row`; optionally `property Item delegate` (set to this delegate: rev, value, style,
     // choiceList) and `readonly property bool fullRow: true` (it draws the whole row, label included, instead of
-    // the 320 px control column), and `available: false` to hide (its options are missing). Its implicitHeight sets
+    // the 320 px control column). Its implicitHeight sets
     // the row's. A missing file only means the custom row isn't written yet: the row hides, with no warning.
     function _component(file) {
         const c = Qt.createComponent(file)
@@ -446,8 +446,11 @@ FocusScope {
                     const v = root.value
                     if (v === undefined)
                         return from
-                    if (!parent.stops)
-                        return v / (root.row.scale || 1)
+                    if (!parent.stops) {
+                        const u = v / (root.row.scale || 1)
+                        // an int option stores the scaled value rounded (128 for 50 %): sit on the step
+                        return root.row.scale && step > 0 ? from + Math.round((u - from) / step) * step : u
+                    }
                     // the nearest stop
                     let best = 0
                     for (let i = 1; i < root.choiceList.length; ++i)

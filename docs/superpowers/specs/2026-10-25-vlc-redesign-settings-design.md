@@ -282,8 +282,8 @@ Rows are listed in Figma order. **Adv** = under Advanced Options. "—" = not bu
 | Load subtitle files automatically | toggle | `sub-autodetect-file` | |
 | File name matching | dropdown | `sub-autodetect-fuzzy` | |
 | Font | font-family dropdown | `freetype-font` | System families (`QFontDatabase`) |
-| Size values | segments Relative/Pixels | which of the next row's two options is used | Pixels when `freetype-fontsize` ≠ 0 |
-| Font size | dropdown (Relative) / field (Pixels) | `freetype-rel-fontsize` / `freetype-fontsize` | Switching to Relative writes `freetype-fontsize` = 0 |
+| Size values | — | — | VLC 4 has only a relative size. Not built |
+| Font size | dropdown Automatic/Small/Large/Larger/Largest | `sub-text-scale` 100 / 75 / 125 / 150 / 200 | Own list *(my call)* |
 | Bold | toggle | `freetype-bold` | |
 | Text color | colour field | `freetype-color` | 3c's `ColorField` |
 | Text opacity | slider 0–100 % | `freetype-opacity` (0–255) | |

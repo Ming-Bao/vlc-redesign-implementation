@@ -1166,7 +1166,6 @@ libqml_module_dialogs_a_QML = \
 	dialogs/settings/qml/rows/AccentRow.qml \
 	dialogs/settings/qml/rows/BufferingRows.qml \
 	dialogs/settings/qml/rows/EqualizerRows.qml \
-	dialogs/settings/qml/rows/FontSizeRows.qml \
 	dialogs/settings/qml/rows/PictureRows.qml \
 	dialogs/settings/qml/rows/RepeatRow.qml \
 	dialogs/settings/qml/rows/SpatialRows.qml \

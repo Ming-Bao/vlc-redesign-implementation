@@ -307,10 +307,10 @@ var pages = [
         ] },
         { title: qsTr("Appearance"), rows: [
             { label: qsTr("Font"), kind: "dropdown", option: "freetype-font", choicesFrom: "fonts" },
-            // freetype-fontsize and -rel-fontsize are obsolete in VLC 4 (the check script rejects them), so FontSizeRows
-            // names them itself and hides while they are missing
-            { label: qsTr("Font size"), kind: "custom", component: "FontSizeRows.qml",
-              keywords: qsTr("Size values Relative Pixels") },
+            // "Size values" is not built: VLC 4 has only a relative size (the freetype size options are obsolete)
+            { label: qsTr("Font size"), kind: "dropdown", option: "sub-text-scale",
+              choices: [ { value: 100, label: qsTr("Automatic") }, { value: 75, label: qsTr("Small") }, { value: 125, label: qsTr("Large") },
+                         { value: 150, label: qsTr("Larger") }, { value: 200, label: qsTr("Largest") } ] },
             { label: qsTr("Bold"), kind: "toggle", option: "freetype-bold" },
             { label: qsTr("Text color"), kind: "color", option: "freetype-color" },
             { label: qsTr("Text opacity"), kind: "slider", option: "freetype-opacity", min: 0, max: 100, step: 10, scale: 2.55,
