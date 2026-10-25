@@ -81,6 +81,16 @@ private slots:
         QVERIFY(b.listHas("audio-filter", "normvol"));
     }
 
+    void listOnBadOption() {
+        auto& b = *m_bridge;
+        const int r = b.revision();
+        for (const char* name : {"no-such-option", "random"}) {   // unknown, and not a string option
+            QVERIFY(!b.listHas(name, "x"));
+            b.setListHas(name, "x", true);
+            QCOMPARE(b.revision(), r);
+        }
+    }
+
     void resetOne() {
         auto& b = *m_bridge;
         b.setValue("long-jump-size", 5);

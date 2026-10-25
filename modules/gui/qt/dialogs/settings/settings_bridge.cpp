@@ -135,11 +135,15 @@ QString SettingsBridge::help(const QString& name) const
 
 bool SettingsBridge::listHas(const QString& name, const QString& module) const
 {
+    if (config_GetType(qtu(name)) != VLC_VAR_STRING)   // config_GetPsz asserts on anything else
+        return false;
     return vlcConfigString(qtu(name)).split(':', Qt::SkipEmptyParts).contains(module);
 }
 
 void SettingsBridge::setListHas(const QString& name, const QString& module, bool on)
 {
+    if (config_GetType(qtu(name)) != VLC_VAR_STRING)
+        return;
     setValue(name, effects::toggleModule(vlcConfigString(qtu(name)), module, on));
 }
 
