@@ -38,4 +38,14 @@ QtObject {
     // controls dim to this when !enabled (e.g. vout-backed controls without a video output)
     readonly property real disabledOpacity: 0.4
     readonly property color tick:      dark ? "#2A2A2A" : theme.separator
+
+    // the settings window's own frame (Figma "Settings - *"): card, top bar, search box and sidebar
+    readonly property color windowBg:        dark ? Qt.rgba(14 / 255, 14 / 255, 14 / 255, 0.95) : theme.bg.primary
+    readonly property color topBar:          dark ? "#090909" : theme.bg.secondary
+    readonly property color searchBg:        dark ? "#151515" : theme.bg.primary
+    readonly property color placeholder:     dark ? "#404040" : theme.fg.secondary
+    readonly property color sidebarBg:       dark ? Qt.rgba(25 / 255, 25 / 255, 25 / 255, 0.95) : theme.bg.secondary
+    readonly property color sidebarSelected: dark ? "#222222" : theme.bg.primary
+    readonly property color sidebarHover:    dark ? "#1E1E1E" : theme.bg.primary
+    readonly property color labelActive:     dark ? "#EAEAEA" : theme.fg.primary
 }

@@ -34,13 +34,8 @@ FocusScope {
     activeFocusOnTab: true
     implicitWidth: VLCStyle.dp(216, VLCStyle.scale)
 
-    readonly property ColorContext colorContext: ColorContext {
-        id: theme
-        palette: VLCStyle.palette
-        colorSet: ColorContext.Window
-    }
-    readonly property bool _dark: theme.palette?.isDark ?? true
-    readonly property SettingsStyle _s: SettingsStyle { theme: theme }
+    // the window's SettingsStyle, so every colour comes from its tokens
+    required property SettingsStyle style
 
     readonly property var _groupNames: ({
         "App": qsTr("App"),
@@ -85,7 +80,7 @@ FocusScope {
         anchors.margins: VLCStyle.dp(8, VLCStyle.scale)
 
         radius: VLCStyle.dp(6, VLCStyle.scale)
-        color: root._dark ? Qt.rgba(25 / 255, 25 / 255, 25 / 255, 0.95) : theme.bg.secondary
+        color: root.style.sidebarBg
 
         Flickable {
             id: flick
@@ -128,7 +123,7 @@ FocusScope {
                             verticalAlignment: Text.AlignVCenter
                             text: root._groupNames[entry.modelData.group] ?? entry.modelData.group
                             font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-                            color: root._dark ? "#6B6B6B" : theme.fg.secondary
+                            color: root.style.label
                             Accessible.ignored: true
                         }
 
@@ -138,12 +133,12 @@ FocusScope {
                             width: parent.width
                             height: VLCStyle.dp(40, VLCStyle.scale)
                             radius: VLCStyle.dp(2, VLCStyle.scale)
-                            color: entry.selected ? (root._dark ? "#222222" : theme.bg.primary)
-                                                  : (hover.hovered && root._dark ? "#1E1E1E" : "transparent")
+                            color: entry.selected ? root.style.sidebarSelected
+                                                  : (hover.hovered ? root.style.sidebarHover : "transparent")
 
                             // keyboard focus ring on the selected category
                             border.width: entry.selected && root.activeFocus && !root.quietFocus ? 1 : 0
-                            border.color: root._s.accentDim
+                            border.color: root.style.accentDim
 
                             Accessible.role: Accessible.RadioButton
                             Accessible.name: entry.modelData.label
@@ -185,8 +180,7 @@ FocusScope {
                                     text: entry.modelData.label
                                     elide: Text.ElideRight
                                     font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-                                    color: entry.selected ? (root._dark ? "#EAEAEA" : theme.fg.primary)
-                                                          : (root._dark ? "#8F8F8F" : theme.fg.secondary)
+                                    color: entry.selected ? root.style.labelActive : root.style.value
                                     Accessible.ignored: true
                                 }
                             }

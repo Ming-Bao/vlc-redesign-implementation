@@ -53,7 +53,6 @@ Window {
         palette: VLCStyle.palette
         colorSet: ColorContext.Window
     }
-    readonly property bool _dark: theme.palette?.isDark ?? true
     readonly property SettingsStyle _s: SettingsStyle { theme: theme }
 
     // Figma size, capped to 90 % of the screen and centred on the main window. Done once: later opens keep
@@ -122,7 +121,7 @@ Window {
         Keys.onEscapePressed: root.close()
 
         radius: VLCStyle.dp(14, VLCStyle.scale)
-        color: root._dark ? Qt.rgba(14 / 255, 14 / 255, 14 / 255, 0.95) : theme.bg.primary
+        color: root._s.windowBg
 
         // Figma: 0 8 15 #00000075
         Widgets.RoundedRectangleShadow {
@@ -141,6 +140,7 @@ Window {
             anchors.top: topBar.bottom
             anchors.bottom: parent.bottom
 
+            style: root._s
             pages: root.pages
             currentIndex: root.currentPage
             onPicked: (index) => root.currentPage = index
@@ -155,7 +155,7 @@ Window {
             height: VLCStyle.dp(50, VLCStyle.scale)
 
             radius: card.radius
-            color: root._dark ? "#090909" : theme.bg.secondary
+            color: root._s.topBar
 
             // square off the bottom corners
             Rectangle {
@@ -166,9 +166,17 @@ Window {
                 color: parent.color
             }
 
-            DragHandler {
-                target: null
-                onActiveChanged: if (active) root.startSystemMove()
+            // only the empty part of the bar (the title) moves the window, not the search box or the close button
+            Item {
+                anchors.left: searchBox.right
+                anchors.right: closeButton.left
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+
+                DragHandler {
+                    target: null
+                    onActiveChanged: if (active) root.startSystemMove()
+                }
             }
 
             Rectangle {
@@ -181,7 +189,7 @@ Window {
                 height: VLCStyle.dp(34, VLCStyle.scale)
 
                 radius: VLCStyle.dp(6, VLCStyle.scale)
-                color: root._dark ? "#151515" : theme.bg.primary
+                color: root._s.searchBg
 
                 Image {
                     id: searchIcon
@@ -211,9 +219,9 @@ Window {
                     onTextEdited: root.searchText = text
 
                     font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-                    color: root._dark ? "#EAEAEA" : theme.fg.primary
+                    color: root._s.labelActive
                     selectionColor: root._s.accentDim
-                    selectedTextColor: "#EAEAEA"
+                    selectedTextColor: root._s.labelActive
 
                     Accessible.role: Accessible.EditableText
                     Accessible.name: qsTr("Search")
@@ -224,7 +232,7 @@ Window {
                         visible: !searchField.text && !searchField.preeditText
                         text: qsTr("Search")
                         font: searchField.font
-                        color: root._dark ? "#404040" : theme.fg.secondary
+                        color: root._s.placeholder
                         Accessible.ignored: true
                     }
                 }
@@ -253,7 +261,7 @@ Window {
                 height: width
 
                 radius: VLCStyle.dp(6, VLCStyle.scale)
-                color: closeHover.hovered || activeFocus ? (root._dark ? "#191919" : theme.bg.primary) : "transparent"
+                color: closeHover.hovered || activeFocus ? root._s.face : "transparent"
                 activeFocusOnTab: true
 
                 Accessible.role: Accessible.Button
