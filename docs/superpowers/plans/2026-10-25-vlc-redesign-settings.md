@@ -401,23 +401,61 @@ function test_search() {
 ### Task 8: Ledger, roadmap, merge
 
 **Files:**
-- Modify: this plan (`## Ledger`), `docs/superpowers/specs/2026-10-13-vlc-redesign-roadmap.md` (row 7 → done, with the plan name and departures, in the style of rows 4a–6)
-
-- [ ] **Step 1: Check the window on Wayland.** Run `dbus-run-session -- docs/superpowers/scripts/wl-drive.py OUT vlc: sleep:3 key:ctrl+p sleep:2 shot`, or use the driver's own step names. The rounded corners and shadow draw, the top bar drags and an edge resizes.
-- [ ] **Step 2: Bring the Ledger up to date**, and mark roadmap row 7 done.
-- [ ] **Step 3: Commit**, then merge per superpowers:finishing-a-development-branch.
-
----
-
-## Ledger
+- Modify: this plan (`## Ledger
 
 Departures from the frames (the spec's *(my call)* items, plus any found while building), and known limits:
 
-- **Rows not built** (no VLC equivalent, or Figma copy-paste): see the "—" rows in the spec's tables.
-- **Rows hidden at run time** when the build lacks their option or plugin (the check script's allow-list names the platform-only ones).
-- **Added rows:** General ▸ All settings, Controls ▸ Password.
-- **Dropdown wording** is VLC's own choice labels where VLC has a list.
-- **Startup volume's "Always starts at" field** is read-only at 100 %.
+**Look**
+- **Dark only for the shell.** The window uses the Figma's fixed colours. Theme ▸ Light switches the app to VLC 4's light palette, which looks unfinished until slice 10. The selected swatch cell and a few sidebar states look the same in light mode.
+- **The dropdown chevron** is the icon font's glyph, not the 24 px `chevron-down.svg`. The difference is small.
+- **No info glyph on custom rows** (Picture sliders, Buffering, Equalizer, Spatial audio, Startup volume). Rows with no option have none either, even where the Figma draws one.
+- **Picture sliders have no tick marks.** The Figma shows faint ticks on Saturation and Gamma.
+- **The top bar title** keeps the current page's name while a search is showing.
+- **Section titles the frames clip** are my names: Playback ▸ Seeking, Discs and Files, Time-shift; Video ▸ Framing tail, Snapshots; Audio ▸ Loudness onward, Language and Sync; Subtitles ▸ Position & Timing, On-screen Feedback.
+- **The window's size** is 1048 × 865 × scale, capped to 90 % of the screen, with a minimum of about 760 × 480.
+
+**Content**
+- **Rows not built** (no VLC option, or Figma copy-paste): see the "—" rows in the spec's tables. They are Interface language, Developer mode, Show minor warnings, Additional command line options, Remember window size, Auto-hide the controls, Popup duration, Single and Double click on the video, Reverse scroll direction, the Remotes rows, Night mode, Show feedback for, Ignore ASS styling and the second Visualization size.
+- **Rows not built because the option is obsolete in VLC 4:**
+  - Privacy ▸ "Never remember items matching" (`qt-recentplay-filter`).
+  - Subtitles ▸ "Size values" (`freetype-fontsize`, `freetype-rel-fontsize`). "Font size" is a dropdown on `sub-text-scale` instead: Automatic 100 / Small 75 / Large 125 / Larger 150 / Largest 200.
+  - Video ▸ "Hardware-accelerated decoding": `avcodec-hw` is replaced by `dec-dev` ("Preferred decoder device").
+  - Video ▸ "Encoder" (`encoder`, no replacement).
+  - Audio ▸ "Pass compressed audio" (`spdif`).
+- **Rows hidden at run time** when the build lacks the option or plugin. A section header hides too when nothing in it shows. In this Linux build that hides:
+  - General: Check for updates.
+  - Library: Only allow one VLC window, Apply to files, Add to the playlist (D-Bus and Windows options).
+  - Network: HTTP proxy and its password (Windows-only; obsolete on Linux).
+  - Performance: Video post-processing (`postproc` is not built), Give VLC real-time priority (Windows only).
+  - Recording: Encoding preset and Tuning (x264 is not built).
+  - Interface: the skin rows hide when skins2 is not built (it is here, so they show).
+
+  The check script's allow-list names the platform-only options. Some hidden rows can't be seen or tested here: Post-processing's list, and the dimming of Library's Apply and Add rows.
+- **Added rows:** General ▸ All settings (opens the legacy dialog's full tree, so the 1,600 options stay reachable), Controls ▸ Password (VLC's web interface won't start without one).
+- **Own lists** where VLC has none: Zoom, Time-shift size, Spatial audio mode, Visualization size, Font size, Shadow distance, Vertical position, Subtitle autodetect fuzziness, Fullscreen controls sensitivity.
+- **Dropdown wording** is VLC's own choice labels where VLC has a list. Output device reads "Automatic", not "System default".
+- **Startup volume's "Always starts at" field** is read-only at 100 %. VLC has no option for it.
+- **Buffering** shows the preset that matches all four values (Normal = the defaults, Low = half, High = double), else Custom.
 - **Keyboard shortcuts** open the legacy dialog's Hotkeys panel until slice 8.
-- **Accent:** the SVG icons with orange baked in stay orange. The accent may apply only after a restart.
-- **Theme Light** is VLC 4's light palette until slice 10.
+- **Background (subtitles)** shows the raw number if the opacity is neither 0 nor 128. The Shadow toggle reads only 128 as on.
+
+**Behaviour**
+- **Accent colour** is read once, so a new accent applies on the next launch. The swatch selection updates at once.
+  - The Windows theme provider ignores `qt-accent-color` and uses the system highlight, so the swatches do nothing there.
+  - SVG icons with orange baked in (active sidebar glyphs, menu icons) stay orange.
+  - The GTK provider's default accent is now `#D37918`, like the system palette's.
+- **Player repeat fix.** `PlaylistController::toggleRepeatMode` wrote `config_PutInt("repeat", mode)`. It now writes `repeat` and `loop` as the bools they are. A vlcrc left by the old code with `repeat=2` still loads as One, as in core. The write was checked by reading and building only, since the default control bars have no repeat button to press here.
+- **Theme** Dark, Light and System map to the Night, Day and System colour schemes.
+- **Saving.** Options are written when the window closes, when you switch page and when you press Enter. A field you are still typing in is committed first. Options VLC reads only at start take effect on the next launch, with no restart banner.
+- **Search** is a plain case-insensitive substring match over label, keywords and section title, so "log" also finds "dialogs". Global shortcuts don't fire while typing in it.
+- **Wayland** (headless GNOME Shell): the window opens from "…" ▸ Settings and draws its rounded corners and shadow. Ctrl+P, a title-bar drag and an edge resize were not exercised; see `docs/superpowers/figma/7/after-wayland.png`.
+
+**Known limits**
+- A number field with text that isn't a number reverts, silently.
+- Clear history runs without asking.
+- Dropdowns re-read their choices on every settings change, and sliders write on every move.
+- Remove on an extension doesn't name it in the confirmation, and installed `.vle` extensions can't be removed.
+- Adding a Lua file renames over the old one. A crash mid-copy can leave `Foo.lua.tmp`.
+- VLSub is listed twice in the dev tree (the build copy and the share copy), as in the legacy dialog.
+- A custom row whose file fails to compile hides without a warning.
+- The legacy `PrefsDialog` stays for All settings and Keyboard shortcuts.
