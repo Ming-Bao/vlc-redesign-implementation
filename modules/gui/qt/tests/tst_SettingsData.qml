@@ -30,4 +30,15 @@ TestCase {
         compare(Data.presetFor([2000, 600, 2000, 600], d), "high")
         compare(Data.presetFor([2000, 300, 1000, 300], d), "custom")
     }
+
+    function test_search() {
+        compare(Data.search(Data.pages, "").length, 0)
+        compare(Data.search(Data.pages, "   ").length, 0)
+        const r = Data.search(Data.pages, "DEVELOPER OPTIONS") // case, and an Advanced section title
+        compare(r.length, 1); compare(r[0].title, "Global Settings")
+        verify(Data.search(Data.pages, "(").length >= 0)      // no throw on regex characters
+        compare(Data.search(Data.pages, "zzqq").length, 0)
+        const p = Data.search(Data.pages, "proxy")
+        compare(p[0].title, "Network Connections & Security")
+    }
 }

@@ -32,6 +32,8 @@ Flickable {
     id: root
 
     required property var page
+    // SettingsData.search() output while searching, else null: the matches replace the page, grouped by page title
+    property var results: null
     property bool advancedOpen: false
 
     property int _tick: 0
@@ -39,9 +41,9 @@ Flickable {
 
     // [{title, rows}] for the main part and for the Advanced part. A row is Advanced iff `row.adv`; an `adv` section
     // is a block under the bar.
-    readonly property var _main: page.sections.filter((s) => !s.adv)
+    readonly property var _main: results ? results : page.sections.filter((s) => !s.adv)
         .map((s) => ({ title: s.title, rows: s.rows.filter((r) => !r.adv) }))
-    readonly property var _adv: [{ title: "", rows: [].concat(...page.sections.filter((s) => !s.adv)
+    readonly property var _adv: results ? [] : [{ title: "", rows: [].concat(...page.sections.filter((s) => !s.adv)
                                                              .map((s) => s.rows.filter((r) => r.adv))) }]
         .concat(page.sections.filter((s) => s.adv).map((s) => ({ title: s.title, rows: s.rows.filter((r) => r.adv) })))
     readonly property bool _hasAdv: _adv.some(_anyShown)
@@ -64,6 +66,7 @@ Flickable {
         contentY = 0
         reload()
     }
+    onResultsChanged: contentY = 0
     onAdvancedOpenChanged: _openByPage[page.name] = advancedOpen
 
     clip: true
@@ -113,6 +116,14 @@ Flickable {
         Repeater {
             model: root._main
             Block { }
+        }
+
+        Widgets.LabelExt {
+            visible: root.results && !root._main.some(root._anyShown)
+            text: qsTr("No results")
+            font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
+            color: root._s.placeholder
+            Accessible.role: Accessible.StaticText
         }
 
         AdvancedBar {

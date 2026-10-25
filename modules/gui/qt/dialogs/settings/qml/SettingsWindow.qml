@@ -38,6 +38,7 @@ Window {
     property Component pageComponent: Component {
         SettingsWindowPage {
             page: root.pages[root.currentPage]
+            results: root.searchText.trim() ? SettingsData.search(root.pages, root.searchText) : null
         }
     }
 
@@ -158,8 +159,11 @@ Window {
 
             style: root._s
             pages: root.pages
-            currentIndex: root.currentPage
-            onPicked: (index) => root.currentPage = index
+            currentIndex: root.searchText.trim() ? -1 : root.currentPage
+            onPicked: (index) => {
+                root.searchText = ""
+                root.currentPage = index
+            }
         }
 
         Rectangle {

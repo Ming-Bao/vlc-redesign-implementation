@@ -438,3 +438,20 @@ function presetFor(values, defaults) {
             return name
     return "custom"
 }
+
+// Rows matching `text` (trimmed, case-insensitive, plain substring) in their label, keywords or section title, Advanced
+// rows included, grouped by page: [{page: index, title: pageTitle, rows}]. Pages without a match are left out.
+function search(pages, text) {
+    const q = text.trim().toLowerCase()
+    if (!q)
+        return []
+    const has = (s) => !!s && s.toLowerCase().includes(q)
+    const out = []
+    pages.forEach((p, page) => {
+        const rows = [].concat(...p.sections.map((s) =>
+            s.rows.filter((r) => has(r.label) || has(r.keywords) || has(s.title))))
+        if (rows.length)
+            out.push({ page: page, title: p.title, rows: rows })
+    })
+    return out
+}
