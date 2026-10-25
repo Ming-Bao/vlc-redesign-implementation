@@ -36,6 +36,9 @@ FocusScope {
 
     // Properties
 
+    // tells the mini player that playback ended, set by MainInterface as it outlives this view
+    property QtObject playbackEnd: null
+
     // NOTE: The main view must be above the update pane.
     property real displayMargin: (loaderUpdatePane.active ? loaderUpdatePane.height : 0)
 
@@ -924,6 +927,8 @@ FocusScope {
         id: miniPlayer
 
         readonly property real inset: VLCStyle.dp(6, VLCStyle.scale)
+
+        playbackEnd: g_mainDisplay.playbackEnd
 
         // dragging takes the card off its anchors, it returns to them when it has settled
         anchors.bottom: dragged ? undefined : loaderUpdatePane.top

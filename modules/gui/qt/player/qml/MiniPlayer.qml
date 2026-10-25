@@ -32,8 +32,11 @@ T.Control {
 
     property bool queueOpen: false
 
+    // tracks the end of the queue, it outlives the library view (see MainInterface)
+    property QtObject playbackEnd: null
+
     // playback reached the end of the queue on its own
-    property bool ended: false
+    readonly property bool ended: playbackEnd?.ended ?? false
 
     readonly property bool shown: Player.isStarted || ended
 
@@ -52,30 +55,6 @@ T.Control {
     property real dragYMin: 0
     property real dragYMax: 0
 
-    // the last position and length seen while playing, to tell an end from a stop
-    property real _lastPosition: 0
-    property real _lastLengthMs: 0
-
-    // the card keeps showing the media after the end, when the player has already dropped it
-    property string _title
-    property string _artist
-
-    Binding {
-        target: root
-        property: "_title"
-        value: Player.title || Player.name // files without a title tag have only a name
-        when: Player.isStarted
-        restoreMode: Binding.RestoreNone
-    }
-
-    Binding {
-        target: root
-        property: "_artist"
-        value: Player.artist
-        when: Player.isStarted
-        restoreMode: Binding.RestoreNone
-    }
-
     // `hideControls` being `false` does not necessarily mean that the controls are shown
     property bool hideControls: MainCtx.usingTouch // by default controls are hidden with touch
 
@@ -85,40 +64,6 @@ T.Control {
                                            || (!hideControls && _mediaHovered)
 
     visible: shown
-
-    Connections {
-        target: Player
-
-        // the length is read with the position: it is reset by the time the player stops
-        function onPositionChanged() {
-            if (Player.isStarted) {
-                root._lastPosition = Player.position
-                root._lastLengthMs = Player.length.toSeconds() * 1000 // toMilliseconds() is not invokable
-            }
-        }
-
-        function onPlayingStateChanged() {
-            if (Player.isStarted) {
-                root.ended = false
-                endTimer.stop()
-            } else {
-                endTimer.restart()
-            }
-        }
-    }
-
-    // The queue advancing to its next item stops the player for a moment, so wait before calling it an end.
-    // ponytail: a stop request in the last 1.5 s reads as ended; a core end-of-stream signal would remove the guess
-    Timer {
-        id: endTimer
-
-        interval: 500
-
-        onTriggered: {
-            if (!Player.isStarted && Helpers.playbackEnded(root._lastPosition, root._lastLengthMs))
-                root.ended = true
-        }
-    }
 
     DragHandler {
         id: dragHandler
@@ -304,7 +249,7 @@ T.Control {
                             description: qsTr("Stop")
 
                             onClicked: {
-                                root.ended = false
+                                root.playbackEnd?.dismiss()
                                 MainPlaylistController.stop()
                             }
 
@@ -454,7 +399,7 @@ T.Control {
                 CardLabel {
                     Layout.fillWidth: true
 
-                    text: root._title
+                    text: root.playbackEnd?.title ?? ""
                 }
 
                 RowLayout {
@@ -467,7 +412,7 @@ T.Control {
 
                     MetaGroup {
                         iconSource: "qrc:///redesign/mini/artist.svg"
-                        text: root._artist
+                        text: root.playbackEnd?.artist ?? ""
                     }
 
                     Item {

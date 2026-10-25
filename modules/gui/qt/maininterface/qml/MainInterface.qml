@@ -242,6 +242,79 @@ Item {
             source: "qrc:///qt/qml/VLC/Playlist/PlaylistDetachedWindow.qml"
         }
 
+        // Tells whether playback ran to the end of the queue. It lives here and not in the mini player,
+        // as the library view is destroyed while the player view plays, and the card shows the end
+        // when the library comes back.
+        Item {
+            id: playbackEnd
+
+            visible: false
+
+            property bool ended: false
+
+            // what the card keeps showing after the end, when the player has already dropped it
+            property string title
+            property string artist
+
+            // the last position and length seen while playing, to tell an end from a stop
+            property real _lastPosition: 0
+            property real _lastLengthMs: 0
+
+            function dismiss() {
+                ended = false
+            }
+
+            Connections {
+                target: Player
+
+                // the length is read with the position: it is reset by the time the player stops
+                function onPositionChanged() {
+                    if (Player.isStarted) {
+                        playbackEnd._lastPosition = Player.position
+                        playbackEnd._lastLengthMs = Player.length.toSeconds() * 1000 // toMilliseconds() is not invokable
+                    }
+                }
+
+                function onPlayingStateChanged() {
+                    if (Player.isStarted) {
+                        playbackEnd.ended = false
+                        endTimer.stop()
+                    } else {
+                        endTimer.restart()
+                    }
+                }
+            }
+
+            Binding {
+                target: playbackEnd
+                property: "title"
+                value: Player.title || Player.name // files without a title tag have only a name
+                when: Player.isStarted
+                restoreMode: Binding.RestoreNone
+            }
+
+            Binding {
+                target: playbackEnd
+                property: "artist"
+                value: Player.artist
+                when: Player.isStarted
+                restoreMode: Binding.RestoreNone
+            }
+
+            // The queue advancing to its next item stops the player for a moment, so wait before calling it an end.
+            // ponytail: a stop request in the last 1.5 s reads as ended; a core end-of-stream signal would remove the guess
+            Timer {
+                id: endTimer
+
+                interval: 500
+
+                onTriggered: {
+                    if (!Player.isStarted && Helpers.playbackEnded(playbackEnd._lastPosition, playbackEnd._lastLengthMs))
+                        playbackEnd.ended = true
+                }
+            }
+        }
+
         Connections {
             target: Player
             function onPlayingStateChanged() {
@@ -327,6 +400,12 @@ Item {
                 case MainCtx.MAININTERFACE_MODE_MAINDISPLAY:
                     return "qrc:///qt/qml/VLC/MainInterface/MainDisplay.qml"
                 }
+            }
+
+            onLoaded: {
+                // the main display shows the end of the playback in its mini player
+                if (item.playbackEnd !== undefined)
+                    item.playbackEnd = playbackEnd
             }
         }
 
