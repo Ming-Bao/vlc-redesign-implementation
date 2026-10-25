@@ -303,6 +303,31 @@ QtObject {
         return dec(mrl) === dec(url)
     }
 
+    // Decoded name of the folder holding a `file://` url (encoded or decoded), "" when there is none
+    function urlFolderName(url : string) : string {
+        const slash = url.lastIndexOf("/")
+        // same slash rule as folderEntries: "file:///" has its slash at the root
+        if (!url.startsWith("file://") || slash <= "file://".length)
+            return ""
+        const folder = url.substring(0, slash)
+        const segment = folder.substring(folder.lastIndexOf("/") + 1)
+        try {
+            return decodeURIComponent(segment)
+        } catch (e) {
+            return segment // malformed escape, e.g. a Latin-1 "%E9"
+        }
+    }
+
+    // Whether playback reached the end: the last 1.5 s, and the length is known
+    function playbackEnded(position : real, lengthMs : real) : bool {
+        return lengthMs > 0 && position > 0 && (1 - position) * lengthMs <= 1500
+    }
+
+    // Whether the card sits on the left half of an area `areaWidth` wide (its centre is left of the middle)
+    function snapToLeft(x : real, width : real, areaWidth : real) : bool {
+        return x + width / 2 < areaWidth / 2
+    }
+
     // Label of one row of the redesign's sort menu (Figma "Sorting Options" 856:2215).
     // `text` is the page's own sortModel label, used for criteria the table does not know.
     function sortRowLabel(criteria : string, text : string, order : int) : string {

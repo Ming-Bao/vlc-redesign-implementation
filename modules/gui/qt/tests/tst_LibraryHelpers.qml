@@ -179,4 +179,40 @@ TestCase {
         compare(r[3].share, 1)
         compare(fixed.length, 2) // input untouched
     }
+
+    function test_urlFolderName_data() {
+        return [
+            { tag: "encoded", url: "file:///home/u/The%20Wand/S01/The_Wand_S01E11.mp4", name: "S01" },
+            { tag: "decoded", url: "file:///home/u/My Show/a.mkv", name: "My Show" },
+            { tag: "utf8", url: "file:///m/S%C3%A9rie/a.mkv", name: "Série" },
+            { tag: "malformed", url: "file:///m/%E9t%E9/a.mp3", name: "%E9t%E9" },
+            { tag: "root", url: "file:///a.mkv", name: "" },
+            { tag: "http", url: "https://x/y/z.mp4", name: "" },
+            { tag: "empty", url: "", name: "" },
+        ]
+    }
+
+    function test_urlFolderName(data) {
+        compare(Helpers.urlFolderName(data.url), data.name)
+    }
+
+    function test_playbackEnded_data() {
+        return [
+            { tag: "last 0.6 s", position: 0.999, lengthMs: 600000, ended: true },
+            { tag: "6 s left", position: 0.99, lengthMs: 600000, ended: false },
+            { tag: "at the end", position: 1.0, lengthMs: 1000, ended: true },
+            { tag: "no length (stream)", position: 0.9999, lengthMs: 0, ended: false },
+            { tag: "never started", position: 0, lengthMs: 1000, ended: false },
+        ]
+    }
+
+    function test_playbackEnded(data) {
+        compare(Helpers.playbackEnded(data.position, data.lengthMs), data.ended)
+    }
+
+    function test_snapToLeft() {
+        verify(Helpers.snapToLeft(10, 391, 1600))
+        verify(!Helpers.snapToLeft(1200, 391, 1600))
+        verify(!Helpers.snapToLeft(604.5, 391, 1600)) // centred exactly: stays right
+    }
 }
