@@ -292,27 +292,34 @@ git commit -am "qt: mini player card opens the queue above the video"
 ### Task 5: Ledger, roadmap, merge
 
 **Files:**
-- Modify: this plan (`## Ledger`), `docs/superpowers/specs/2026-10-13-vlc-redesign-roadmap.md` (row 6 → done, with plan name and departures)
+- Modify: this plan (`## Ledger
 
-- [ ] **Step 1: Check the card's look on Wayland.** Run `dbus-run-session -- docs/superpowers/scripts/wl-drive.py OUT vlc:"$PWD/build/redesign-media/plain.mp4" sleep:3 key:Escape sleep:2 shot`, or use the driver's step names. The card's rounded corners and shadow draw.
-- [ ] **Step 2: Bring the Ledger up to date** with what was built, and mark roadmap row 6 done in the style of rows 4a–5.
-- [ ] **Step 3: Commit**, then merge per superpowers:finishing-a-development-branch.
+Departures from the frames (the spec's *(my call)* items, plus any found while building), and known limits:
 
----
+**Look**
+- **Dark only.** The card uses the Figma's fixed colours. Slice 10 adds a light variant.
+- **Glyph shadow not drawn.** The Figma's drop shadow under the previous, play and next glyphs is left out (Qt's SVG renderer has no filters). Over the dark veil the difference is slight.
+- **Video corners are not rounded** to radius 6. The 2 px border hides most of it.
+- **Media block is 231 high**, not 230, and the card with the queue open is 689, not 690. The sizes of the parts add up that way.
+- **Pause glyph** is drawn to match the Figma play glyph (the Figma has none).
+- **The card is a fixed size.** The queue list shrinks to two rows in short windows. Below that the card grows past the top bar.
+- **Pages get an end margin** of the card's height, so the last rows can scroll clear of it. The inset ignores the safe-area margins (`qt-safe-area`).
+- **Hover over the seek bar alone** also shows the veil and the buttons.
+- **The queue button's hover box** is 24×24, not the Figma's 30-wide box with radius 4.
 
-## Ledger
-
-Departures from the frames (the spec's *(my call)* items, plus any found while building):
-
-- **Customize Player's "Mini player" tab** stays and now edits nothing visible. Slice 8 redoes that dialog.
-- **Ended** is detected from the last position: within 1.5 s of the end, still stopped 500 ms later. A Stop in the last 1.5 s reads as ended.
-- **Ended state** shows its controls without hover.
-- **Snap:** the card snaps to the nearer bottom corner, left or right. The side is kept for the session only.
-- **The card is a fixed size.** The queue list shrinks to two rows in short windows.
-- **Pages get an end margin** of the card's height, so the last rows can scroll clear of it.
+**Content**
+- **Title** is `Player.title`, or `Player.name` when the file has no title tag.
+- **Folder group:** the playing file's folder name, hidden for non-file media. **Artist group:** `Player.artist`, hidden when empty.
 - **Audio:** the artwork is fitted on `#303030`; with no artwork, the plain `#303030`.
 - **No PIP** (`qt-pip-mode` off or no depth buffer): VLC's existing stop of embedded video stays, so the card shows audio only.
-- **Folder group:** the playing file's folder name, hidden for non-file media. **Artist group:** `Player.artist`, hidden when empty.
-- **Single click on the video does nothing.** A double-click opens the player.
-- **Pause glyph** is drawn to match the Figma play glyph (the Figma has none).
 - **The queue's compact mode** shows sort, remove and add only, as the Figma does. The player's queue panel keeps loop, shuffle and clear.
+
+**Behaviour**
+- **Single click on the video does nothing.** A double click opens the player. So does pop-out, and so does replaying a video (a new video output opens the player view).
+- **Ended** is detected from the last position: within 1.5 s of the end, still stopped 500 ms later. A Stop in the last 1.5 s reads as ended. The length has 1 s resolution, so the window is about ±1 s.
+- **Ended ignores the queue.** If the next item takes longer than 500 ms to open, the card flashes the ended state.
+- **Ended state** shows its controls without hover. It is kept when a video ends in the player view, but then its seek bar sits at 0, not at the end.
+- **Snap:** the card snaps to the nearer bottom corner, left or right. The side is kept for the session only. The queue open or closed state resets when the library view is rebuilt (player view and back).
+- **Dragging** works from every part of the card except the queue's count row and list, which keep their own flick and reorder. The guard is hover-based, so on a touch screen a drag on the list can still move the card. With the queue open in a short window the card has no vertical drag range.
+- **Keyboard:** Up from the card's buttons goes to the queue list even when the queue is empty.
+- **Customize Player's "Mini player" tab** stays and now edits nothing visible. Slice 8 redoes that dialog.
