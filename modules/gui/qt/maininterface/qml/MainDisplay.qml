@@ -925,14 +925,20 @@ FocusScope {
 
         readonly property real inset: VLCStyle.dp(6, VLCStyle.scale)
 
-        anchors.bottom: loaderUpdatePane.top
+        // dragging takes the card off its anchors, it returns to them when it has settled
+        anchors.bottom: dragged ? undefined : loaderUpdatePane.top
         anchors.bottomMargin: inset
-        anchors.left: atLeft ? parent.left : undefined
-        anchors.right: atLeft ? undefined : parent.right
+        anchors.left: (atLeft && !dragged) ? parent.left : undefined
+        anchors.right: (atLeft || dragged) ? undefined : parent.right
         anchors.leftMargin: inset
         anchors.rightMargin: inset
 
         z: 4
+
+        dragXMin: inset
+        dragXMax: g_mainDisplay.width - width - inset
+        dragYMin: localTopbar.y + localTopbar.height
+        dragYMax: loaderUpdatePane.y - height - inset
 
         Navigation.parentItem: g_mainDisplay
         Navigation.upItem: loaderUpdatePane

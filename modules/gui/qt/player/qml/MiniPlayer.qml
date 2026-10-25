@@ -32,7 +32,7 @@ T.Control {
 
     property bool queueOpen: false
 
-    // playback reached the end of the queue on its own; Task 3 drives it
+    // playback reached the end of the queue on its own
     property bool ended: false
 
     readonly property bool shown: Player.isStarted || ended
@@ -43,6 +43,39 @@ T.Control {
     // the card sits in the bottom-left corner instead of the bottom-right one
     property bool atLeft: false
 
+    // the card is off its anchors, being dragged or settling into its corner
+    property bool dragged: false
+
+    // where the card may be dragged to, in the parent's coordinates
+    property real dragXMin: 0
+    property real dragXMax: 0
+    property real dragYMin: 0
+    property real dragYMax: 0
+
+    // the last position and length seen while playing, to tell an end from a stop
+    property real _lastPosition: 0
+    property real _lastLengthMs: 0
+
+    // the card keeps showing the media after the end, when the player has already dropped it
+    property string _title
+    property string _artist
+
+    Binding {
+        target: root
+        property: "_title"
+        value: Player.title || Player.name // files without a title tag have only a name
+        when: Player.isStarted
+        restoreMode: Binding.RestoreNone
+    }
+
+    Binding {
+        target: root
+        property: "_artist"
+        value: Player.artist
+        when: Player.isStarted
+        restoreMode: Binding.RestoreNone
+    }
+
     // `hideControls` being `false` does not necessarily mean that the controls are shown
     property bool hideControls: MainCtx.usingTouch // by default controls are hidden with touch
 
@@ -52,6 +85,85 @@ T.Control {
                                            || (!hideControls && _mediaHovered)
 
     visible: shown
+
+    Connections {
+        target: Player
+
+        // the length is read with the position: it is reset by the time the player stops
+        function onPositionChanged() {
+            if (Player.isStarted) {
+                root._lastPosition = Player.position
+                root._lastLengthMs = Player.length.toSeconds() * 1000 // toMilliseconds() is not invokable
+            }
+        }
+
+        function onPlayingStateChanged() {
+            if (Player.isStarted) {
+                root.ended = false
+                endTimer.stop()
+            } else {
+                endTimer.restart()
+            }
+        }
+    }
+
+    // The queue advancing to its next item stops the player for a moment, so wait before calling it an end.
+    // ponytail: a stop request in the last 1.5 s reads as ended; a core end-of-stream signal would remove the guess
+    Timer {
+        id: endTimer
+
+        interval: 500
+
+        onTriggered: {
+            if (!Player.isStarted && Helpers.playbackEnded(root._lastPosition, root._lastLengthMs))
+                root.ended = true
+        }
+    }
+
+    DragHandler {
+        id: dragHandler
+
+        target: root
+
+        cursorShape: Qt.DragMoveCursor
+
+        xAxis.minimum: root.dragXMin
+        xAxis.maximum: root.dragXMax
+        yAxis.minimum: root.dragYMin
+        yAxis.maximum: root.dragYMax
+
+        onActiveChanged: {
+            if (active) {
+                settle.stop()
+                root.dragged = true // MainDisplay drops the anchors, the card keeps its place
+            } else {
+                root.atLeft = Helpers.snapToLeft(root.x, root.width, root.parent.width)
+                settle.restart()
+            }
+        }
+    }
+
+    ParallelAnimation {
+        id: settle
+
+        NumberAnimation {
+            target: root
+            property: "x"
+            to: root.atLeft ? root.dragXMin : root.dragXMax
+            duration: VLCStyle.duration_long
+            easing.type: Easing.OutCubic
+        }
+
+        NumberAnimation {
+            target: root
+            property: "y"
+            to: root.dragYMax
+            duration: VLCStyle.duration_long
+            easing.type: Easing.OutCubic
+        }
+
+        onFinished: root.dragged = false // back on the anchors
+    }
 
     // the hover controls only show once the card has the focus, so hand it to them then
     onActiveFocusChanged: {
@@ -191,7 +303,10 @@ T.Control {
                             imageSource: "qrc:///redesign/mini/close.svg"
                             description: qsTr("Stop")
 
-                            onClicked: MainPlaylistController.stop()
+                            onClicked: {
+                                root.ended = false
+                                MainPlaylistController.stop()
+                            }
 
                             Navigation.rightItem: popoutButton
                         }
@@ -225,9 +340,15 @@ T.Control {
                             imageSource: "qrc:///redesign/mini/previous.svg"
                             description: qsTr("Previous")
 
-                            enabled: MainPlaylistController.hasPrev
+                            enabled: root.ended ? MainPlaylistController.currentIndex > 0
+                                                : MainPlaylistController.hasPrev
 
-                            onClicked: MainPlaylistController.prev()
+                            onClicked: {
+                                if (root.ended)
+                                    MainPlaylistController.goTo(MainPlaylistController.currentIndex - 1, true)
+                                else
+                                    MainPlaylistController.prev()
+                            }
 
                             Navigation.leftItem: popoutButton
                             Navigation.rightItem: playButton
@@ -253,10 +374,13 @@ T.Control {
                                        : playing ? qsTr("Pause")
                                                  : qsTr("Play")
 
-                            // replay is wired by the ended state (Task 3)
                             onClicked: {
                                 if (!root.ended)
                                     MainPlaylistController.togglePlayPause()
+                                else if (MainPlaylistController.currentIndex < 0)
+                                    MainPlaylistController.play()
+                                else
+                                    MainPlaylistController.goTo(MainPlaylistController.currentIndex, true)
                             }
 
                             Navigation.leftItem: previousButton
@@ -275,9 +399,15 @@ T.Control {
                             imageSource: "qrc:///redesign/mini/next.svg"
                             description: qsTr("Next")
 
-                            enabled: MainPlaylistController.hasNext
+                            enabled: root.ended ? MainPlaylistController.currentIndex + 1 < MainPlaylistController.count
+                                                : MainPlaylistController.hasNext
 
-                            onClicked: MainPlaylistController.next()
+                            onClicked: {
+                                if (root.ended)
+                                    MainPlaylistController.goTo(MainPlaylistController.currentIndex + 1, true)
+                                else
+                                    MainPlaylistController.next()
+                            }
 
                             Navigation.leftItem: playButton
                             Navigation.rightItem: queueButton
@@ -324,8 +454,7 @@ T.Control {
                 CardLabel {
                     Layout.fillWidth: true
 
-                    // files without a title tag have only a name
-                    text: Player.title || Player.name
+                    text: root._title
                 }
 
                 RowLayout {
@@ -338,7 +467,7 @@ T.Control {
 
                     MetaGroup {
                         iconSource: "qrc:///redesign/mini/artist.svg"
-                        text: Player.artist
+                        text: root._artist
                     }
 
                     Item {
