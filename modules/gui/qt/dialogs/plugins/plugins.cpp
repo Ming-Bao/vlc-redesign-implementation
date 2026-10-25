@@ -676,6 +676,8 @@ void ExtensionListModel::updateList()
 {
     ExtensionCopy *ext;
 
+    beginResetModel();
+
     // Clear extensions list
     while( !extensions.isEmpty() )
     {
@@ -686,7 +688,10 @@ void ExtensionListModel::updateList()
     // Find new extensions
     extensions_manager_t *p_mgr = EM->getManager();
     if( !p_mgr )
+    {
+        endResetModel();
         return;
+    }
 
     vlc_mutex_lock( &p_mgr->lock );
     extension_t *p_ext;
@@ -697,7 +702,15 @@ void ExtensionListModel::updateList()
     }
     vlc_mutex_unlock( &p_mgr->lock );
 
-    emit dataChanged( index( 0 ), index( rowCount() - 1 ) );
+    endResetModel();
+}
+
+QHash<int, QByteArray> ExtensionListModel::roleNames() const
+{
+    return {
+        { Qt::DisplayRole, "title" }, { SummaryRole, "summary" }, { VersionRole, "version" },
+        { AuthorRole, "author" }, { LinkRole, "link" }, { FilenameRole, "filename" }
+    };
 }
 
 int ExtensionListModel::rowCount( const QModelIndex& ) const

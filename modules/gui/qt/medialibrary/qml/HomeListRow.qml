@@ -71,10 +71,10 @@ T.AbstractButton {
 
     background: Rectangle {
         // the tint shows under the focus ring too
-        color: root.selected ? Qt.alpha(root._dark ? "#D37918" : theme.accent, 0.15) : "transparent"
+        color: root.selected ? Qt.alpha(theme.accent, 0.15) : "transparent"
         radius: VLCStyle.dp(4, VLCStyle.scale)
         border.color: root.visualFocus ? theme.visualFocus
-                    : root.selected || root.dropTarget ? (root._dark ? "#D37918" : theme.accent) : "transparent"
+                    : root.selected || root.dropTarget ? theme.accent : "transparent"
     }
 
     contentItem: Row {
@@ -116,7 +116,7 @@ T.AbstractButton {
                 // compact: 3 px, ending 4 px before the thumbnail's right edge
                 width: (parent.width - (root.compact ? VLCStyle.dp(4, VLCStyle.scale) : 0)) * root.progress
                 height: VLCStyle.dp(root.compact ? 3 : 4, VLCStyle.scale)
-                color: root._dark ? "#D37918" : theme.accent
+                color: theme.accent
             }
 
             Rectangle {
@@ -129,7 +129,7 @@ T.AbstractButton {
                     anchors.centerIn: parent
                     text: VLCIcons.play
                     font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
-                    color: root._dark ? "#D37918" : theme.accent
+                    color: theme.accent
                 }
             }
         }
@@ -140,7 +140,7 @@ T.AbstractButton {
             elide: Text.ElideRight
             text: root.text
             font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-            color: root.playing ? (root._dark ? "#D37918" : theme.accent)
+            color: root.playing ? theme.accent
                  : root.dimmed ? (root._dark ? "#6B6B6B" : theme.fg.secondary)
                  : root.compact ? (root._dark ? (root.showMore && root.hovered ? "#C6C6C6" : "#969696") : theme.fg.primary)
                  : (root._dark ? "#8F8F8F" : theme.fg.secondary)

@@ -110,7 +110,7 @@ T.Menu {
                     visible: !!item.modelData.checked
                     text: VLCIcons.checkmark
                     font.pixelSize: VLCStyle.icon_normal
-                    color: root._dark ? "#D37918" : theme.accent
+                    color: theme.accent
                 }
             }
 

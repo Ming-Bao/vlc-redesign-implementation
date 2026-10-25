@@ -412,7 +412,12 @@ var pages = [
             { label: qsTr("Tuning"), kind: "dropdown", option: "sout-x264-tune" }
         ] }
     ] },
-    { name: "extensions", label: qsTr("Extensions"), title: qsTr("Add-ons & Scripts"), icon: "extensions", group: "System", sections: [] }
+    { name: "extensions", label: qsTr("Extensions"), title: qsTr("Add-ons & Scripts"), icon: "extensions", group: "System", sections: [
+        { title: qsTr("Add-ons"), rows: [
+            { label: qsTr("Add-ons"), kind: "custom", component: "ExtensionsRows.qml", keywords: qsTr("Extensions Lua scripts") },
+            { label: qsTr("Load add-ons on startup"), kind: "toggle", option: "qt-autoload-extensions" }
+        ] }
+    ] }
 ]
 
 // Whether a row can show in this build: its option, list and required option all exist. `bridge` is the

@@ -105,6 +105,13 @@ ColorSchemeModel::ColorScheme ColorSchemeModel::currentScheme() const
     return m_list[m_currentIndex].scheme;
 }
 
+void ColorSchemeModel::setScheme(const ColorScheme scheme)
+{
+    for (int i = 0; i < m_list.size(); ++i)
+        if (m_list[i].scheme == scheme)
+            return setCurrentIndex(i);
+}
+
 void ColorSchemeModel::indexChanged(const int i)
 {
     emit dataChanged(index(i), index(i));

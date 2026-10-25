@@ -17,14 +17,20 @@
  *****************************************************************************/
 import QtQuick
 
+import VLC.MainInterface
 import VLC.Style
 import VLC.Widgets as Widgets
+import VLC.Player
+import VLC.Dialogs
 
-// Placeholder for General's Theme row: the label only, until Task 6 builds its control.
+// General's Theme: Dark / Light / System on MainCtx.colorScheme. The segments map to the model's Night / Day / System
+// by scheme (the model's own order is System, Day, Night).
 Item {
     required property var row
     property Item delegate              // the SettingsRowDelegate (set by it): rev, value, style
     readonly property bool fullRow: true
+
+    readonly property var schemes: [ ColorSchemeModel.Night, ColorSchemeModel.Day, ColorSchemeModel.System ]
 
     implicitHeight: VLCStyle.dp(36, VLCStyle.scale)
 
@@ -33,5 +39,14 @@ Item {
         text: parent.row.label
         font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
         color: parent.delegate ? parent.delegate.style.rowLabel : "transparent"
+    }
+
+    SettingSegments {
+        anchors.right: parent.right
+        width: VLCStyle.dp(320, VLCStyle.scale)
+        height: parent.height
+        model: [ qsTr("Dark"), qsTr("Light"), qsTr("System") ]
+        currentIndex: parent.schemes.indexOf(MainCtx.colorScheme.scheme)
+        onActivated: (i) => MainCtx.colorScheme.setScheme(parent.schemes[i])
     }
 }

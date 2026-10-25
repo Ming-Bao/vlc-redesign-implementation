@@ -22,7 +22,10 @@
 
 #include <QDesktopServices>
 #include <QDir>
+#include <QFile>
 #include <QFileDialog>
+#include <QFileInfo>
+#include <QAbstractItemModel>
 #include <QFontDatabase>
 #include <QUrl>
 
@@ -209,6 +212,59 @@ QString SettingsBridge::pickPath(const QString& current, bool folder, bool save)
     if (save)
         return QFileDialog::getSaveFileName(nullptr, qtr("Save File"), start);
     return QFileDialog::getOpenFileName(nullptr, qtr("Select File"), start);
+}
+
+static QString userExtensionsDir()
+{
+    char* dir = config_GetUserDir(VLC_USERDATA_DIR);
+    const QString path = dir ? qfu(dir) + "/lua/extensions" : QString();
+    free(dir);
+    return path;
+}
+
+// the script file of an extension row ("" when out of range)
+QString SettingsBridge::extensionFile(int row)
+{
+    QAbstractItemModel* m = extensions();
+    if (!m || row < 0 || row >= m->rowCount())
+        return {};
+    return m->data(m->index(row, 0), m->roleNames().key("filename")).toString();
+}
+
+bool SettingsBridge::addExtension(const QUrl& luaFile)
+{
+    const QString dir = userExtensionsDir();
+    const QFileInfo src(luaFile.toLocalFile());
+    if (dir.isEmpty() || !src.isFile() || src.suffix().toLower() != "lua")
+        return false;
+    if (!QDir().mkpath(dir))
+        return false;
+    const QString dst = dir + "/" + src.fileName();
+    QFile::remove(dst);   // copying over an older version of the same script
+    if (!QFile::copy(src.absoluteFilePath(), dst))
+        return false;
+    reloadExtensions();
+    return true;
+}
+
+bool SettingsBridge::canRemoveExtension(int row)
+{
+    const QString dir = QDir(userExtensionsDir()).canonicalPath();
+    const QString file = QFileInfo(extensionFile(row)).canonicalFilePath();
+    return !dir.isEmpty() && !file.isEmpty() && file.startsWith(dir + "/");
+}
+
+bool SettingsBridge::removeExtension(int row)
+{
+    if (!canRemoveExtension(row) || !QFile::remove(extensionFile(row)))
+        return false;
+    reloadExtensions();
+    return true;
+}
+
+QString SettingsBridge::pickLuaFile() const
+{
+    return QFileDialog::getOpenFileName(nullptr, qtr("Select File"), QDir::homePath(), qtr("Lua scripts (*.lua)"));
 }
 
 QVariantList SettingsBridge::languages() const

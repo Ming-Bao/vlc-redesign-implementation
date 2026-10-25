@@ -29,9 +29,13 @@ QtObject {
     readonly property color title:     dark ? "#969696" : theme.fg.primary
     readonly property color field:     dark ? "#090909" : theme.bg.secondary
     readonly property color face:      dark ? "#191919" : theme.bg.primary
-    readonly property color accentBg:  dark ? "#371F06" : Qt.alpha(theme.accent, 0.25)
-    readonly property color accent:    dark ? "#D37918" : theme.accent
-    readonly property color accentDim: dark ? "#AB6314" : theme.accent
+    // the accent comes from the theme (qt-accent-color); dark: the background is it at 26 % over black (#371F06 for
+    // #D37918), the dim one is it darkened (~#AB6314)
+    // the accent is only defined in the View set (any window part may be built on another set)
+    readonly property ColorContext _view: ColorContext { palette: style.theme.palette; colorSet: ColorContext.View }
+    readonly property color accent:    _view.accent
+    readonly property color accentBg:  dark ? Qt.rgba(accent.r * 0.26, accent.g * 0.26, accent.b * 0.26, 1) : Qt.alpha(accent, 0.25)
+    readonly property color accentDim: dark ? Qt.darker(accent, 1.24) : accent
     readonly property color knobOff:   dark ? "#404040" : theme.fg.secondary
     readonly property color divider:   dark ? "#222222" : theme.separator
     readonly property color box:       dark ? "#1B1B1B" : theme.bg.secondary

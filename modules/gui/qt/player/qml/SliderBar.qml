@@ -513,7 +513,7 @@ T.ProgressBar {
                 width: waveUnplayed.width
                 height: waveUnplayed.height
                 onPaint: control._paintWave(getContext("2d"), width, height,
-                                            theme.palette.isDark ? "#AB6314" : theme.accent)
+                                            theme.palette.isDark ? Qt.darker(theme.accent, 1.24) : theme.accent)
                 onWidthChanged: requestPaint()
             }
         }

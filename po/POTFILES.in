@@ -735,6 +735,7 @@ modules/gui/qt/dialogs/settings/qml/SettingsWindowPage.qml
 modules/gui/qt/dialogs/settings/qml/rows/AccentRow.qml
 modules/gui/qt/dialogs/settings/qml/rows/BufferingRows.qml
 modules/gui/qt/dialogs/settings/qml/rows/EqualizerRows.qml
+modules/gui/qt/dialogs/settings/qml/rows/ExtensionsRows.qml
 modules/gui/qt/dialogs/settings/qml/rows/PictureRows.qml
 modules/gui/qt/dialogs/settings/qml/rows/RepeatRow.qml
 modules/gui/qt/dialogs/settings/qml/rows/SpatialRows.qml

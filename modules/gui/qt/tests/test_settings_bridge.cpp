@@ -24,6 +24,10 @@
 
 #include <vlc_configuration.h>
 
+// the extensions manager is not linked into this test (settings_extensions.cpp)
+QAbstractItemModel* SettingsBridge::extensions() { return nullptr; }
+void SettingsBridge::reloadExtensions() {}
+
 class TestClass : public QObject
 {
     Q_OBJECT
@@ -74,6 +78,13 @@ private slots:
         QCOMPARE(h["max"].toDouble(), 180.0);
         QVERIFY(m_bridge->range("random").isEmpty());
         QVERIFY(m_bridge->range("no-such-option").isEmpty());
+    }
+
+    void extensionsGuards() {
+        QVERIFY(!m_bridge->canRemoveExtension(-1));
+        QVERIFY(!m_bridge->canRemoveExtension(0));   // no list in this env
+        QVERIFY(!m_bridge->removeExtension(0));
+        QVERIFY(!m_bridge->addExtension(QUrl::fromLocalFile("/no/such/file.lua")));
     }
 
     void noChoices() { QVERIFY(m_bridge->choices("long-jump-size").isEmpty()); }

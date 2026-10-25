@@ -145,7 +145,7 @@ T.Pane {
                         orientation: Gradient.Horizontal
                         GradientStop { position: 0.0; color: "#95D318" }
                         GradientStop { position: 0.58; color: "#B2A918" }
-                        GradientStop { position: 0.79; color: "#D37918" }
+                        GradientStop { position: 0.79; color: volControl.colorContext.accent }
                         GradientStop { position: 1.0; color: "#FF3737" }
                     }
                 }

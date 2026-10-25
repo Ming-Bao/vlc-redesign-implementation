@@ -201,6 +201,7 @@ public:
     QModelIndex index( int row, int column = 0,
                        const QModelIndex& = QModelIndex() ) const override;
     int rowCount( const QModelIndex& = QModelIndex() ) const override;
+    QHash<int, QByteArray> roleNames() const override;   // for QML
 
 protected slots:
     void updateList();

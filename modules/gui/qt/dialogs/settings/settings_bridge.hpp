@@ -18,7 +18,9 @@
 #ifndef VLC_QT_SETTINGS_BRIDGE_HPP
 #define VLC_QT_SETTINGS_BRIDGE_HPP
 
+#include <QAbstractItemModel>
 #include <QObject>
+#include <QUrl>
 #include <QStringList>
 #include <QVariant>
 
@@ -29,6 +31,8 @@ class SettingsBridge : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(int revision READ revision NOTIFY changed FINAL)
+    // the installed Lua extensions (ExtensionListModel; roles title, summary, version, author, filename)
+    Q_PROPERTY(QAbstractItemModel* extensions READ extensions CONSTANT FINAL)
 
 public:
     explicit SettingsBridge(qt_intf_t* intf, QObject* parent = nullptr);
@@ -58,6 +62,14 @@ public:
     // a native file (or folder) picker starting at `current`; "" when cancelled
     Q_INVOKABLE QString pickPath(const QString& current, bool folder, bool save) const;
 
+    // Extensions: the user folder is <userdata>/lua/extensions. add copies a .lua file there, remove deletes a file
+    // from there (false for any other); both reload the list
+    QAbstractItemModel* extensions();
+    Q_INVOKABLE bool addExtension(const QUrl& luaFile);
+    Q_INVOKABLE bool canRemoveExtension(int row);
+    Q_INVOKABLE bool removeExtension(int row);
+    Q_INVOKABLE QString pickLuaFile() const;
+
     Q_INVOKABLE QVariantList languages() const;
     Q_INVOKABLE QStringList fontFamilies() const;
     Q_INVOKABLE QStringList opticalDrives() const;
@@ -67,9 +79,12 @@ signals:
 
 private:
     void touch(const QString& name);
+    void reloadExtensions();   // settings_extensions.cpp (needs the extensions manager, not linked into the test)
+    QString extensionFile(int row);
 
     qt_intf_t* m_intf;
     int m_revision = 0;
+    QAbstractItemModel* m_extensions = nullptr;
 };
 
 #endif

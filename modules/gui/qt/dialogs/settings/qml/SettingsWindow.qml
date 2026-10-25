@@ -104,9 +104,10 @@ Window {
         }
     }
 
-    // asks before a destructive action (Reset all settings, Reset all shortcuts); `accepted` runs on OK
-    function ask(text, accepted) {
-        askDialog.ask(text, accepted, null, { ok: qsTr("Reset"), cancel: qsTr("Cancel") })
+    // asks before a destructive action (Reset all settings, Remove an extension); `accepted` runs on OK, the button
+    // says okText (default Reset)
+    function ask(text, accepted, okText) {
+        askDialog.ask(text, accepted, null, { ok: okText ?? qsTr("Reset"), cancel: qsTr("Cancel") })
     }
 
     onClosing: {

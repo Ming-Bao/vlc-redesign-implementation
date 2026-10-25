@@ -118,7 +118,7 @@ T.AbstractButton {
                     width: thumb.width
                     height: thumb.radius * 2
                     radius: thumb.radius
-                    color: root._dark ? "#D37918" : theme.accent
+                    color: theme.accent
                 }
             }
 
@@ -133,7 +133,7 @@ T.AbstractButton {
                     anchors.centerIn: parent
                     text: VLCIcons.play
                     font.pixelSize: VLCStyle.icon_large
-                    color: root._dark ? "#D37918" : theme.accent
+                    color: theme.accent
                 }
             }
 
@@ -150,7 +150,7 @@ T.AbstractButton {
             elide: Text.ElideRight
             text: root.text
             font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
-            color: root.playing ? (root._dark ? "#D37918" : theme.accent)
+            color: root.playing ? theme.accent
                  : root.dimmed ? (root._dark ? "#6B6B6B" : theme.fg.secondary)
                  : (root._dark ? "#969696" : theme.fg.primary)
         }

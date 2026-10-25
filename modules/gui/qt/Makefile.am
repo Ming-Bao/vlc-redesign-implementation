@@ -162,6 +162,7 @@ libqt_plugin_la_SOURCES = \
 	dialogs/systray/systray.hpp \
 	dialogs/settings/settings_bridge.cpp \
 	dialogs/settings/settings_bridge.hpp \
+	dialogs/settings/settings_extensions.cpp \
 	dialogs/toolbar/controlbar_profile.hpp \
 	dialogs/toolbar/controlbar_profile.cpp \
 	dialogs/toolbar/controlbar_profile_model.cpp \
@@ -1166,6 +1167,7 @@ libqml_module_dialogs_a_QML = \
 	dialogs/settings/qml/rows/AccentRow.qml \
 	dialogs/settings/qml/rows/BufferingRows.qml \
 	dialogs/settings/qml/rows/EqualizerRows.qml \
+	dialogs/settings/qml/rows/ExtensionsRows.qml \
 	dialogs/settings/qml/rows/PictureRows.qml \
 	dialogs/settings/qml/rows/RepeatRow.qml \
 	dialogs/settings/qml/rows/SpatialRows.qml \

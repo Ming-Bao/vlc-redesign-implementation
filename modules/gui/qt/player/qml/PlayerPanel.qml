@@ -233,7 +233,7 @@ T.Popup {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 width: parent.width - VLCStyle.dp(16, VLCStyle.scale)
                                 height: VLCStyle.dp(2, VLCStyle.scale)
-                                color: root._dark ? "#D37918" : theme.accent
+                                color: theme.accent
                                 visible: tab.checked
                             }
                         }

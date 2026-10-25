@@ -466,7 +466,7 @@ T.Control {
                     handleShown: root._mediaHovered || root.ended
 
                     backgroundColor: "#090909"
-                    progressColor: "#371F06"
+                    progressColor: Qt.rgba(theme.accent.r * 0.26, theme.accent.g * 0.26, theme.accent.b * 0.26, 1)   // the accent at 26 % over black (#371F06 for #D37918)
 
                     enabled: Player.playingState === Player.PLAYING_STATE_PLAYING
                              || Player.playingState === Player.PLAYING_STATE_PAUSED

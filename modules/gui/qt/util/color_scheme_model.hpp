@@ -59,6 +59,8 @@ public:
     QVector<Item> getSchemes() const;
 
     ColorScheme currentScheme() const;
+    // selects the entry with that scheme (the settings window's Dark/Light/System)
+    Q_INVOKABLE void setScheme(ColorScheme scheme);
 
 signals:
     void currentChanged();
