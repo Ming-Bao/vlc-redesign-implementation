@@ -36,8 +36,8 @@ FocusScope {
 
     // Properties
 
-    // tells the mini player that playback ended, set by MainInterface as it outlives this view
-    property QtObject playbackEnd: null
+    // what the mini player card keeps (its end, side and queue), set by MainInterface as it outlives this view
+    property QtObject miniPlayerState: null
 
     // NOTE: The main view must be above the update pane.
     property real displayMargin: (loaderUpdatePane.active ? loaderUpdatePane.height : 0)
@@ -927,24 +927,28 @@ FocusScope {
         id: miniPlayer
 
         readonly property real inset: VLCStyle.dp(6, VLCStyle.scale)
+        readonly property real panelWidth: playlistLoader.shown ? playlistLoader.width : 0
 
-        playbackEnd: g_mainDisplay.playbackEnd
+        miniPlayerState: g_mainDisplay.miniPlayerState
         page: stackView
 
         // dragging takes the card off its anchors, it returns to them when it has settled
         anchors.bottom: dragged ? undefined : loaderUpdatePane.top
         anchors.bottomMargin: inset
         anchors.left: (atLeft && !dragged) ? parent.left : undefined
-        anchors.right: (atLeft || dragged) ? undefined : parent.right
+        // it has no side before it has its state, or it would be anchored on both sides for a moment
+        // and stay as wide as that
+        anchors.right: (atLeft || dragged || !miniPlayerState) ? undefined : parent.right
         anchors.leftMargin: inset
-        anchors.rightMargin: inset
+        // on the right the card sits beside the play queue panel, not over it
+        anchors.rightMargin: inset + panelWidth
 
         z: 4
 
         maxHeight: loaderUpdatePane.y - inset - (localTopbar.y + localTopbar.height)
 
         dragXMin: inset
-        dragXMax: g_mainDisplay.width - width - inset
+        dragXMax: g_mainDisplay.width - panelWidth - width - inset
         // a card taller than the room has no vertical range, it overflows upward
         dragYMin: Math.min(localTopbar.y + localTopbar.height, dragYMax)
         dragYMax: loaderUpdatePane.y - height - inset

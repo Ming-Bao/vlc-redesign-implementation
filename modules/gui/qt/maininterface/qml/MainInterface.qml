@@ -242,15 +242,19 @@ Item {
             source: "qrc:///qt/qml/VLC/Playlist/PlaylistDetachedWindow.qml"
         }
 
-        // Tells whether playback ran to the end of the queue. It lives here and not in the mini player,
-        // as the library view is destroyed while the player view plays, and the card shows the end
-        // when the library comes back.
+        // What the mini player card keeps: whether playback ran to the end of the queue, its side and
+        // its queue. It lives here and not in the card, as the library view is destroyed while the
+        // player view plays, and the card comes back to the same state with the library.
         Item {
-            id: playbackEnd
+            id: miniPlayerState
 
             visible: false
 
             property bool ended: false
+
+            // the card is in the bottom-left corner and has its queue open, for the session
+            property bool atLeft: false
+            property bool queueOpen: false
 
             // what the card keeps showing after the end, when the player has already dropped it
             property string title
@@ -260,8 +264,13 @@ Item {
             property real _lastPosition: 0
             property real _lastLengthMs: 0
 
+            // the card was closed by hand, the stop that follows is not an end
+            property bool _dismissed: false
+            property bool _wasStarted: false
+
             function dismiss() {
                 ended = false
+                _dismissed = true
             }
 
             Connections {
@@ -270,23 +279,30 @@ Item {
                 // the length is read with the position: it is reset by the time the player stops
                 function onPositionChanged() {
                     if (Player.isStarted) {
-                        playbackEnd._lastPosition = Player.position
-                        playbackEnd._lastLengthMs = Player.length.toSeconds() * 1000 // toMilliseconds() is not invokable
+                        miniPlayerState._lastPosition = Player.position
+                        miniPlayerState._lastLengthMs = Player.length.toSeconds() * 1000 // toMilliseconds() is not invokable
                     }
                 }
 
                 function onPlayingStateChanged() {
                     if (Player.isStarted) {
-                        playbackEnd.ended = false
+                        if (!miniPlayerState._wasStarted) {
+                            // an item stopped before its first position update must not read the last one's
+                            miniPlayerState._lastPosition = 0
+                            miniPlayerState._lastLengthMs = 0
+                            miniPlayerState._dismissed = false
+                        }
+                        miniPlayerState.ended = false
                         endTimer.stop()
                     } else {
                         endTimer.restart()
                     }
+                    miniPlayerState._wasStarted = Player.isStarted
                 }
             }
 
             Binding {
-                target: playbackEnd
+                target: miniPlayerState
                 property: "title"
                 value: Player.title || Player.name // files without a title tag have only a name
                 when: Player.isStarted
@@ -294,7 +310,7 @@ Item {
             }
 
             Binding {
-                target: playbackEnd
+                target: miniPlayerState
                 property: "artist"
                 value: Player.artist
                 when: Player.isStarted
@@ -309,8 +325,8 @@ Item {
                 interval: 500
 
                 onTriggered: {
-                    if (!Player.isStarted && Helpers.playbackEnded(playbackEnd._lastPosition, playbackEnd._lastLengthMs))
-                        playbackEnd.ended = true
+                    if (!Player.isStarted && !miniPlayerState._dismissed && Helpers.playbackEnded(miniPlayerState._lastPosition, miniPlayerState._lastLengthMs))
+                        miniPlayerState.ended = true
                 }
             }
         }
@@ -404,8 +420,8 @@ Item {
 
             onLoaded: {
                 // the main display shows the end of the playback in its mini player
-                if (item.playbackEnd !== undefined)
-                    item.playbackEnd = playbackEnd
+                if (item.miniPlayerState !== undefined)
+                    item.miniPlayerState = miniPlayerState
             }
         }
 

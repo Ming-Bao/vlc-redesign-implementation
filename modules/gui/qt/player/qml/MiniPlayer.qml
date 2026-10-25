@@ -30,13 +30,14 @@ import VLC.Widgets as Widgets
 T.Control {
     id: root
 
-    property bool queueOpen: false
+    // the queue is above the video
+    readonly property bool queueOpen: miniPlayerState?.queueOpen ?? false
 
-    // tracks the end of the queue, it outlives the library view (see MainInterface)
-    property QtObject playbackEnd: null
+    // the end of the queue, the side and the queue of the card, they outlive the library view (see MainInterface)
+    property QtObject miniPlayerState: null
 
     // playback reached the end of the queue on its own
-    readonly property bool ended: playbackEnd?.ended ?? false
+    readonly property bool ended: miniPlayerState?.ended ?? false
 
     readonly property bool shown: Player.isStarted || ended
 
@@ -44,7 +45,7 @@ T.Control {
     property Item mediaBlock: media
 
     // the card sits in the bottom-left corner instead of the bottom-right one
-    property bool atLeft: false
+    readonly property bool atLeft: miniPlayerState?.atLeft ?? false
 
     // the card is off its anchors, being dragged or settling into its corner
     property bool dragged: false
@@ -103,7 +104,7 @@ T.Control {
                 settle.stop()
                 root.dragged = true // MainDisplay drops the anchors, the card keeps its place
             } else {
-                root.atLeft = Helpers.snapToLeft(root.x, root.width, root.parent.width)
+                root.miniPlayerState.atLeft = Helpers.snapToLeft(root.x, root.width, root.parent.width)
                 settle.restart()
             }
         }
@@ -291,9 +292,6 @@ T.Control {
                         }
 
                         TapHandler {
-                            // no exclusive grab on press: it would keep a press here from dragging the card
-                            gesturePolicy: TapHandler.ReleaseWithinBounds
-
                             onDoubleTapped: (eventPoint, button) => {
                                 // Docs are lying, there is no `deviceType`: QTBUG-135104
                                 if (eventPoint.device.type !== PointerDevice.TouchScreen)
@@ -332,10 +330,10 @@ T.Control {
                             y: VLCStyle.dp(14, VLCStyle.scale)
 
                             imageSource: "qrc:///redesign/mini/close.svg"
-                            description: qsTr("Stop")
+                            description: root.ended ? qsTr("Close") : qsTr("Stop")
 
                             onClicked: {
-                                root.playbackEnd?.dismiss()
+                                root.miniPlayerState?.dismiss()
                                 MainPlaylistController.stop()
                             }
 
@@ -491,7 +489,7 @@ T.Control {
                 CardLabel {
                     Layout.fillWidth: true
 
-                    text: root.playbackEnd?.title ?? ""
+                    text: root.miniPlayerState?.title ?? ""
                 }
 
                 RowLayout {
@@ -504,7 +502,7 @@ T.Control {
 
                     MetaGroup {
                         iconSource: "qrc:///redesign/mini/artist.svg"
-                        text: root.playbackEnd?.artist ?? ""
+                        text: root.miniPlayerState?.artist ?? ""
                     }
 
                     Item {
@@ -524,10 +522,10 @@ T.Control {
                                                     : "qrc:///redesign/mini/queue.svg"
                         description: qsTr("Queue")
 
-                        onClicked: root.queueOpen = !root.queueOpen
+                        onClicked: root.miniPlayerState.queueOpen = !root.queueOpen
 
                         Navigation.leftItem: nextButton
-                                    }
+                    }
                 }
             }
         }
