@@ -929,6 +929,7 @@ FocusScope {
         readonly property real inset: VLCStyle.dp(6, VLCStyle.scale)
 
         playbackEnd: g_mainDisplay.playbackEnd
+        page: stackView
 
         // dragging takes the card off its anchors, it returns to them when it has settled
         anchors.bottom: dragged ? undefined : loaderUpdatePane.top

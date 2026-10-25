@@ -49,6 +49,9 @@ T.Control {
     // the card is off its anchors, being dragged or settling into its corner
     property bool dragged: false
 
+    // the library page above the card, where Up from the queue's list goes
+    property Item page: null
+
     // the room for the card, from the bottom of the top bar to its bottom edge, the queue list shrinks to fit
     property real maxHeight: Infinity
 
@@ -80,17 +83,30 @@ T.Control {
 
     visible: shown
 
-    // the card moves by drag from anywhere but the queue's list, which flicks and reorders by drag
-    Item {
-        id: dragBody
+    DragHandler {
+        id: dragHandler
 
-        z: -1 // under the controls
+        target: root
 
-        y: root.queueOpen ? root.contentItem.y + queueSection.y + queueSection.height : 0
-        width: root.width
-        height: root.height - y
+        // the queue's list flicks and its rows reorder by drag, the card leaves them alone
+        enabled: !queueHover.hovered
 
-        CardDragHandler {}
+        cursorShape: Qt.DragMoveCursor
+
+        xAxis.minimum: root.dragXMin
+        xAxis.maximum: root.dragXMax
+        yAxis.minimum: root.dragYMin
+        yAxis.maximum: root.dragYMax
+
+        onActiveChanged: {
+            if (active) {
+                settle.stop()
+                root.dragged = true // MainDisplay drops the anchors, the card keeps its place
+            } else {
+                root.atLeft = Helpers.snapToLeft(root.x, root.width, root.parent.width)
+                settle.restart()
+            }
+        }
     }
 
     ParallelAnimation {
@@ -182,8 +198,6 @@ T.Control {
                         }
                     }
 
-                    CardDragHandler {}
-
                     CardLabel {
                         anchors.centerIn: parent
 
@@ -193,6 +207,8 @@ T.Control {
                 }
 
                 QueuePage {
+                    id: queuePage
+
                     anchors.top: queueHeader.bottom
                     anchors.horizontalCenter: parent.horizontalCenter
 
@@ -201,8 +217,12 @@ T.Control {
 
                     compact: true
 
+                    HoverHandler {
+                        id: queueHover
+                    }
+
                     navigationParent: root
-                    navigationUp: root.Navigation.upItem
+                    navigationUp: root.page
                     navigationDown: root
                     onNavigationCancel: {
                         if (root.Navigation.cancelAction)
@@ -271,7 +291,8 @@ T.Control {
                         }
 
                         TapHandler {
-                            gesturePolicy: TapHandler.WithinBounds
+                            // no exclusive grab on press: it would keep a press here from dragging the card
+                            gesturePolicy: TapHandler.ReleaseWithinBounds
 
                             onDoubleTapped: (eventPoint, button) => {
                                 // Docs are lying, there is no `deviceType`: QTBUG-135104
@@ -282,7 +303,7 @@ T.Control {
                             // a single click does nothing, the controls on hover do the work
                             onTapped: (eventPoint, button) => {
                                 // Breaking the initial binding is intentional here:
-                                if (eventPoint.device.type === PointerDevice.TouchScreen)
+                                if (eventPoint.device.type === PointerDevice.TouchScreen && !root.dragged)
                                     root.hideControls = !root.hideControls
                             }
                         }
@@ -305,6 +326,7 @@ T.Control {
                             id: closeButton
 
                             Navigation.parentItem: root
+                            Navigation.upItem: root.queueOpen ? queuePage.list : null
 
                             x: VLCStyle.dp(14, VLCStyle.scale)
                             y: VLCStyle.dp(14, VLCStyle.scale)
@@ -324,6 +346,7 @@ T.Control {
                             id: popoutButton
 
                             Navigation.parentItem: root
+                            Navigation.upItem: root.queueOpen ? queuePage.list : null
 
                             x: parent.width - width - VLCStyle.dp(14, VLCStyle.scale)
                             y: VLCStyle.dp(14, VLCStyle.scale)
@@ -341,6 +364,7 @@ T.Control {
                             id: previousButton
 
                             Navigation.parentItem: root
+                            Navigation.upItem: root.queueOpen ? queuePage.list : null
 
                             x: VLCStyle.dp(83, VLCStyle.scale)
                             anchors.verticalCenter: parent.verticalCenter
@@ -367,6 +391,7 @@ T.Control {
                             id: playButton
 
                             Navigation.parentItem: root
+                            Navigation.upItem: root.queueOpen ? queuePage.list : null
 
                             x: VLCStyle.dp(165.6, VLCStyle.scale)
                             anchors.verticalCenter: parent.verticalCenter
@@ -400,6 +425,7 @@ T.Control {
                             id: nextButton
 
                             Navigation.parentItem: root
+                            Navigation.upItem: root.queueOpen ? queuePage.list : null
 
                             x: VLCStyle.dp(233, VLCStyle.scale)
                             anchors.verticalCenter: parent.verticalCenter
@@ -489,6 +515,7 @@ T.Control {
                         id: queueButton
 
                         Navigation.parentItem: root
+                        Navigation.upItem: root.queueOpen ? queuePage.list : null
 
                         implicitWidth: VLCStyle.dp(30, VLCStyle.scale)
                         implicitHeight: VLCStyle.dp(32, VLCStyle.scale)
@@ -502,27 +529,6 @@ T.Control {
                         Navigation.leftItem: nextButton
                                     }
                 }
-            }
-        }
-    }
-
-    component CardDragHandler: DragHandler {
-        target: root
-
-        cursorShape: Qt.DragMoveCursor
-
-        xAxis.minimum: root.dragXMin
-        xAxis.maximum: root.dragXMax
-        yAxis.minimum: root.dragYMin
-        yAxis.maximum: root.dragYMax
-
-        onActiveChanged: {
-            if (active) {
-                settle.stop()
-                root.dragged = true // MainDisplay drops the anchors, the card keeps its place
-            } else {
-                root.atLeft = Helpers.snapToLeft(root.x, root.width, root.parent.width)
-                settle.restart()
             }
         }
     }
