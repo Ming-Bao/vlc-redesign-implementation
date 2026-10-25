@@ -122,7 +122,7 @@ Rows are listed in Figma order. **Adv** = under Advanced Options. "—" = not bu
 | Additional command line options (Adv) | — | — | Not built |
 | Log format (Adv) | dropdown | `logmode` | |
 | Collect playback statistics (Adv) | toggle | `stats` | |
-| Open configurations folder (Adv) | button Open | opens `config_GetUserDir(VLC_USERDATA_DIR)`'s config dir via `QDesktopServices` | |
+| Open configurations folder (Adv) | button Open | opens `config_GetUserDir(VLC_CONFIG_DIR)` via `QDesktopServices` | |
 | Reset all settings (Adv) | button Reset | the legacy dialog's reset (`config_ResetAll` + save), after a confirmation | |
 | **All settings** (Adv) | button Open | legacy `PrefsDialog` in its All view | Not in the Figma *(my call)* |
 | Developer Options (Adv section): Write to the system log, Include debug messages…, System log identity, System log facility | toggle, toggle, field, dropdown | `syslog`, `syslog-debug`, `syslog-ident`, `syslog-facility` | |
@@ -296,7 +296,7 @@ Rows are listed in Figma order. **Adv** = under Advanced Options. "—" = not bu
 | Background color | colour field | `freetype-background-color` | |
 | Background opacity | slider 0–100 % | `freetype-background-opacity` | |
 | Vertical position | dropdown Bottom/Raised/High | `sub-margin` 0 / 50 / 150 px | Own list *(my call)* |
-| Subtitle delay | slider -5…+5 s | `sub-delay` | |
+| Subtitle delay | slider -5…+5 s | `sub-delay` (tenths of a second) | |
 | Show feedback for shortcuts | toggle | `osd` | |
 | Show feedback for | — | — | No VLC option. Not built |
 | Show filename when a video starts | toggle | `video-title-show` | |
