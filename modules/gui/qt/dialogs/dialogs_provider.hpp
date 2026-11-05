@@ -308,6 +308,7 @@ signals:
     void releaseMouseEvents();
     void showToolbarEditorDialog();
     void showSettingsWindow();
+    void showNetworkStreamDialog();
 
     //visiblity signal
     void openDialogVisibleChanged();

@@ -623,4 +623,19 @@ Item {
             }
         }
     }
+
+    Loader {
+        id: networkStreamDialogLoader
+        active: false
+        source: "qrc:///qt/qml/VLC/Dialogs/NetworkStreamDialog.qml"
+
+        Connections {
+            target: DialogsProvider
+
+            function onShowNetworkStreamDialog() {
+                networkStreamDialogLoader.active = true
+                networkStreamDialogLoader.item.open()
+            }
+        }
+    }
 }

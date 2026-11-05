@@ -35,6 +35,7 @@
 #include "player/player_effects.hpp"
 #include "player/player_waveform.hpp"
 
+#include "dialogs/network/saved_streams.hpp"
 #include "dialogs/toolbar/controlbar_profile_model.hpp"
 #include "dialogs/toolbar/controlbar_profile.hpp"
 
@@ -287,6 +288,12 @@ void MainUI::registerQMLTypes()
         assert(DialogErrorModel::getInstance<false>());
         qmlRegisterSingletonInstance<DialogErrorModel>(uri, versionMajor, versionMinor, "DialogErrorModel", DialogErrorModel::getInstance<false>());
         qmlRegisterSingletonInstance<SettingsBridge>(uri, versionMajor, versionMinor, "SettingsBridge", new SettingsBridge(m_intf, this));
+        {
+            char* userdata = config_GetUserDir(VLC_USERDATA_DIR);
+            qmlRegisterSingletonInstance<SavedStreams>(uri, versionMajor, versionMinor, "SavedStreams",
+                                                       new SavedStreams(qfu(userdata) + "/network-playlists", this));
+            free(userdata);
+        }
 
         qmlRegisterModule(uri, versionMajor, versionMinor);
         qmlProtectModule(uri, versionMajor);

@@ -680,13 +680,19 @@ QUrl MainCtx::folderMRL(const QUrl &fileMRL) const
     return {};
 }
 
-QVariant MainCtx::folderTree(const QUrl &folder) const
+QVariant MainCtx::folderTree(const QUrl &folder, const QString &title) const
 {
-    if (!folder.isLocalFile())
+    // a local folder is a directory node; anything else (a playlist file, a remote playlist URL) is an item the
+    // preparser expands into its entries
+    const bool dir = folder.isLocalFile() && !QFileInfo(folder.toLocalFile()).isFile();
+    if (!dir && !folder.isValid())
         return {};
 
-    const QString name = QFileInfo(folder.toLocalFile()).fileName();
-    input_item_t* item = input_item_NewDirectory(qtu(folder.toString()), qtu(name), ITEM_LOCAL);
+    const QString name = !title.isEmpty() ? title
+                       : folder.isLocalFile() ? QFileInfo(folder.toLocalFile()).fileName() : folder.fileName();
+    input_item_t* item = dir ? input_item_NewDirectory(qtu(folder.toString()), qtu(name), ITEM_LOCAL)
+                             : input_item_NewExt(qtu(folder.toString()), qtu(name), INPUT_DURATION_UNSET,
+                                                 ITEM_TYPE_UNKNOWN, folder.isLocalFile() ? ITEM_LOCAL : ITEM_NET);
     if (!item)
         return {};
 

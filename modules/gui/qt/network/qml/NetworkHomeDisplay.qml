@@ -20,6 +20,7 @@ import QtQuick
 import VLC.MainInterface
 import VLC.MediaLibrary
 import VLC.Style
+import VLC.Widgets as Widgets
 import VLC.Util
 import VLC.Network
 import VLC.Dialogs
@@ -39,10 +40,12 @@ LibraryRootPage {
     // the view toggle stays on Network (the Music root has none)
     hasGridListMode: true
 
+    // the saved streams come after Radio, before the shares
     tiles: Helpers.withShares([
         { glyph: VLCIcons.add, text: qsTr("Add Network Stream"), add: true },
         { glyph: VLCIcons.topbar_network, text: qsTr("Podcasts"), page: "podcasts" },
-        { glyph: VLCIcons.topbar_network, text: qsTr("Radio"), page: "radio" }
+        { glyph: VLCIcons.topbar_network, text: qsTr("Radio"), page: "radio" },
+        ...SavedStreams.entries.map(e => ({ glyph: VLCIcons.topbar_network, text: e.name, stream: e }))
     ], shares, VLCIcons.folder)
 
     function _rebuildShares() {
@@ -55,6 +58,10 @@ LibraryRootPage {
     onTileActivated: (tile, index, reason) => {
         if (tile.add) {
             DialogsProvider.openNetDialog()
+        } else if (tile.stream) {
+            const tree = MainCtx.folderTree(tile.stream.mrl, tile.stream.name)
+            if (tree)
+                History.push([..._networkPath, "browse"], { tree: tree }, reason)
         } else if (tile.page) {
             History.push([..._networkPath, tile.page], reason)
         } else {
@@ -69,8 +76,13 @@ LibraryRootPage {
     }
 
     onTileMenuRequested: (tile, index, globalPos) => {
-        if (tile.share !== undefined)
+        if (tile.share !== undefined) {
             contextMenu.popup([deviceModel.index(tile.share, 0)], globalPos)
+        } else if (tile.stream) {
+            streamMenu.rows = [{ text: qsTr("Delete"), run: () => SavedStreams.remove(tile.stream.path) }]
+            const p = streamMenu.parent.mapFromGlobal(globalPos.x, globalPos.y)
+            streamMenu.popup(p.x, p.y)
+        }
     }
 
     NetworkDeviceModel {
@@ -89,6 +101,8 @@ LibraryRootPage {
         onRowsRemoved: root._rebuildShares()
         onRowsMoved: root._rebuildShares()
     }
+
+    Widgets.FigmaMenu { id: streamMenu }
 
     NetworkDeviceContextMenu {
         id: contextMenu

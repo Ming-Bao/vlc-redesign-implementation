@@ -69,6 +69,7 @@ moc_headers = files(
     'dialogs/sout/sout_widgets.hpp',
     'dialogs/systray/systray.hpp',
     'dialogs/settings/settings_bridge.hpp',
+    'dialogs/network/saved_streams.hpp',
     'dialogs/toolbar/controlbar_profile.hpp',
     'dialogs/toolbar/controlbar_profile_model.hpp',
     'dialogs/playlists/playlists.hpp',
@@ -277,6 +278,8 @@ qt_plugin_sources = files(
     'dialogs/preferences/simple_preferences.cpp',
     'dialogs/preferences/simple_preferences.hpp',
     'dialogs/settings/settings_bridge.cpp',
+    'dialogs/network/saved_streams.cpp',
+    'dialogs/network/saved_streams.hpp',
     'dialogs/settings/settings_bridge.hpp',
     'dialogs/settings/settings_extensions.cpp',
     'dialogs/sout/convert.cpp',
@@ -645,6 +648,7 @@ qml_modules += {
     'sources': files(
         'dialogs/dialogs/qml/CustomDialog.qml',
         'dialogs/dialogs/qml/DialogCard.qml',
+        'dialogs/network/qml/NetworkStreamDialog.qml',
         'dialogs/dialogs/qml/Dialogs.qml',
         'dialogs/dialogs/qml/ModalDialog.qml',
         'dialogs/dialogs/qml/WindowDialog.qml',
@@ -1519,6 +1523,21 @@ if qt6_dep.found()
             'link_with': [libvlccore, libvlc],
             'link_args': qt_link_args,
             'dependencies': [qt6_dep, qt_extra_deps, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
+            'name': 'test_qt_saved_streams',
+            'sources': files(
+                'tests/test_saved_streams.cpp',
+                'dialogs/network/saved_streams.cpp',
+                'dialogs/network/saved_streams.hpp'
+            ),
+            'moc_sources': files('tests/test_saved_streams.cpp'),
+            'moc_headers': files('dialogs/network/saved_streams.hpp'),
+            'suite': ['qt'],
+            'include_directories' : qt_include_dir,
+            'link_args': qt_link_args,
+            'dependencies': [qt6_dep, qtest_qt6_dep]
         }
 
         vlc_tests += {

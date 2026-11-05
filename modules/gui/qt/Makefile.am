@@ -160,6 +160,8 @@ libqt_plugin_la_SOURCES = \
 	dialogs/sout/sout_widgets.hpp \
 	dialogs/systray/systray.cpp \
 	dialogs/systray/systray.hpp \
+	dialogs/network/saved_streams.cpp \
+	dialogs/network/saved_streams.hpp \
 	dialogs/settings/settings_bridge.cpp \
 	dialogs/settings/settings_bridge.hpp \
 	dialogs/settings/settings_extensions.cpp \
@@ -460,6 +462,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	dialogs/sout/sout.moc.cpp \
 	dialogs/sout/sout_widgets.moc.cpp \
 	dialogs/systray/systray.moc.cpp \
+	dialogs/network/saved_streams.moc.cpp \
 	dialogs/settings/settings_bridge.moc.cpp \
 	dialogs/toolbar/controlbar_profile.moc.cpp \
 	dialogs/toolbar/controlbar_profile_model.moc.cpp \
@@ -1149,6 +1152,7 @@ libqml_module_dialogs_a_CPPFLAGS = $(libqt_plugin_la_CPPFLAGS)
 libqml_module_dialogs_a_QML = \
 	dialogs/dialogs/qml/CustomDialog.qml \
 	dialogs/dialogs/qml/DialogCard.qml \
+	dialogs/network/qml/NetworkStreamDialog.qml \
 	dialogs/dialogs/qml/Dialogs.qml \
 	dialogs/dialogs/qml/ModalDialog.qml \
 	dialogs/dialogs/qml/WindowDialog.qml \
@@ -1995,6 +1999,22 @@ test_settings_bridge_LDADD = $(QT_QTEST_COMMON_ldadd)
 test_settings_bridge_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
 check_PROGRAMS += test_settings_bridge
 TESTS += test_settings_bridge
+
+# test_saved_streams
+test_saved_streams_SOURCES = \
+	tests/test_saved_streams.cpp \
+	dialogs/network/saved_streams.hpp dialogs/network/saved_streams.cpp
+nodist_test_saved_streams_SOURCES = \
+	tests/test_saved_streams.moc \
+	dialogs/network/saved_streams.moc.cpp
+BUILT_SOURCES += tests/test_saved_streams.moc
+CLEANFILES += tests/test_saved_streams.moc
+test_saved_streams_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)
+test_saved_streams_CXXFLAGS = $(QT_QTEST_COMMON_cxxflags)
+test_saved_streams_LDADD = $(QT_QTEST_COMMON_ldadd)
+test_saved_streams_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
+check_PROGRAMS += test_saved_streams
+TESTS += test_saved_streams
 
 # test_effects_util
 

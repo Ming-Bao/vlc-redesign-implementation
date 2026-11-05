@@ -671,7 +671,12 @@ void DialogsProvider::openDiscDialog()
 }
 void DialogsProvider::openNetDialog()
 {
-    openDialog( OpenDialog::OPEN_NETWORK_TAB );
+    // as prefsDialog(): without the QML dialog (skins2's provider) use the legacy one
+    if (p_intf->b_isDialogProvider
+        || !isSignalConnected(QMetaMethod::fromSignal(&DialogsProvider::showNetworkStreamDialog)))
+        openDialog( OpenDialog::OPEN_NETWORK_TAB );
+    else
+        emit showNetworkStreamDialog();
 }
 void DialogsProvider::openCaptureDialog()
 {
