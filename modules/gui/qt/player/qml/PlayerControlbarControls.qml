@@ -72,7 +72,7 @@ QtObject {
         { id: ControlListModel.PLAYBACK_SPEED_BUTTON, file: "PlaybackSpeedButton.qml", label: "1x", text: qsTr("Playback Speed") },
         { id: ControlListModel.HIGH_RESOLUTION_TIME_WIDGET, file: "HighResolutionTimeWidget.qml", label: VLCIcons.time, text: qsTr("High Resolution Time") },
 
-        // Customize Player palette (label = Figma's); props are set on the control once loaded
+        // Customize Player palette (label = Figma's); props are applied by applyProps() from the loader's onLoaded
         { id: ControlListModel.DIVIDER, file: "DividerWidget.qml", label: VLCIcons.space, text: qsTr("Divider") },
         { id: ControlListModel.JUMP_FW_10_BUTTON, file: "JumpButton.qml", props: { seconds: 10 }, label: VLCIcons.jump_fw_10, text: qsTr("Forward 10s") },
         { id: ControlListModel.JUMP_BACK_10_BUTTON, file: "JumpButton.qml", props: { seconds: -10 }, label: VLCIcons.jump_back_10, text: qsTr("Backward 10s") },
@@ -109,6 +109,12 @@ QtObject {
         if (MainCtx.hasEmbededVideo && !MainCtx.canShowVideoPIP)
             MainPlaylistController.stop()
         MainCtx.playerView = false
+    }
+
+    // sets the entry's own properties (jump seconds, text field, window button action) on a
+    // loaded control; every Loader of controls calls this from onLoaded
+    function applyProps(item, id) {
+        Object.assign(item, control(id).props)
     }
 
     function control(id) {

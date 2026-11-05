@@ -32,7 +32,10 @@ Widgets.IconToolButton {
     // the menu's Discover entry; leaves the player for the Discover page unless the surroundings handle it
     signal discoverRequested()
 
-    visible: !MainCtx.hasToolbarMenu
+    // true when the host (LocalTopbar) handles discoverRequested itself
+    property bool hostHandles: false
+
+    visible: paintOnly || !MainCtx.hasToolbarMenu
     font.pixelSize: VLCStyle.icon_banner
     text: VLCIcons.ellipsis
     description: qsTr("Menu")
@@ -45,6 +48,8 @@ Widgets.IconToolButton {
     onClicked: contextMenu.popup(this.mapToGlobal(0, height))
 
     onDiscoverRequested: {
+        if (hostHandles)
+            return
         PlayerControlbarControls.leavePlayer()
         History.push(["discover"])
     }

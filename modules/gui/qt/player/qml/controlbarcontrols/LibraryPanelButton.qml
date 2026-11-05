@@ -24,13 +24,19 @@ import VLC.Util
 
 // shows the library side panel over the player (closed each time the player opens)
 Widgets.IconToolButton {
+    // true when the host (LocalTopbar) handles the click itself
+    property bool hostHandles: false
+
     font.pixelSize: VLCStyle.icon_banner
     text: VLCIcons.panel_left
     description: qsTr("Show navigation menu")
     width: VLCStyle.bannerButton_width
     height: VLCStyle.bannerButton_height
     checked: PlayerControlbarControls.libraryPanelOpen
-    onClicked: PlayerControlbarControls.libraryPanelOpen = !PlayerControlbarControls.libraryPanelOpen
+    onClicked: {
+        if (!hostHandles)
+            PlayerControlbarControls.libraryPanelOpen = !PlayerControlbarControls.libraryPanelOpen
+    }
 
     AccessibleCompat.id: "sidebarToggleButton"
 }

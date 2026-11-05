@@ -18,6 +18,7 @@
 import QtQuick
 import QtQuick.Templates as T
 
+import VLC.MainInterface
 import VLC.Style
 import VLC.Player
 
@@ -29,6 +30,11 @@ Item {
     property bool paintOnly: false
 
     enabled: false
+
+    readonly property ColorContext colorContext: ColorContext {
+        id: theme
+        colorSet: ColorContext.Window
+    }
 
     // path pieces of a local file URL, [] for other media
     readonly property var _parts: {
@@ -57,7 +63,7 @@ Item {
         }
 
         elide: Text.ElideRight
-        color: "#8F8F8F"
+        color: theme.fg.secondary
         font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
         verticalAlignment: Text.AlignVCenter
 

@@ -164,6 +164,7 @@ T.Control {
             Drag.source: control
 
             onLoaded: {
+                PlayerControlbarControls.applyProps(item, model.id)
                 item.paintOnly = true
                 item.enabled = false
             }

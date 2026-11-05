@@ -138,6 +138,7 @@ T.ToolBar {
                     Navigation.parentItem: navigationButtons
                     Navigation.rightItem: navigationVisibilty
 
+                    hostHandles: true
                     onDiscoverRequested: root.discoverRequested()
                     onRequestLockUnlockAutoHide: (lock) => root.requestLockUnlockAutoHide(lock)
                 }
@@ -154,6 +155,7 @@ T.ToolBar {
                     Navigation.leftItem: menuBtn
                     Navigation.rightItem: folderChip
 
+                    hostHandles: true
                     onClicked: root.toggleNavigationVisibility()
                 }
 

@@ -100,7 +100,7 @@ Repeater {
 
         onLoaded: {
             // the entry's own properties (jump seconds, text field, window button action)
-            Object.assign(item, PlayerControlbarControls.control(model.id).props)
+            PlayerControlbarControls.applyProps(item, model.id)
 
             // control should not request focus if they are not enabled:
             item.focus = Qt.binding(function() { return item.enabled && item.visible })
