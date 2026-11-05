@@ -64,9 +64,11 @@ DialogCard {
     onVisibleChanged: {
         if (!visible)
             return
-        hk = DialogsProvider.loadHotkeyModel()
+        // reset the query before the model, so that items is not built twice
+        hk = null
         searchField.text = ""
         fieldIndex = 0
+        hk = DialogsProvider.loadHotkeyModel()
         list.positionViewAtBeginning()
         searchField.forceActiveFocus()
     }
@@ -190,6 +192,9 @@ DialogCard {
         anchors.top: top.bottom
         height: VLCStyle.dp(63, VLCStyle.scale)
 
+        // a click elsewhere ends a capture
+        TapHandler { onTapped: root.takeFocus() }
+
         component ColumnTitle: Widgets.LabelExt {
             anchors.verticalCenter: parent.verticalCenter
             font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
@@ -297,7 +302,7 @@ DialogCard {
 
             visible: cell.editable
             anchors.right: parent.right
-            anchors.rightMargin: VLCStyle.dp(10, VLCStyle.scale)
+            anchors.rightMargin: VLCStyle.dp(5, VLCStyle.scale)
             anchors.verticalCenter: parent.verticalCenter
             width: VLCStyle.dp(24, VLCStyle.scale)
             height: width
@@ -325,6 +330,18 @@ DialogCard {
         boundsBehavior: Flickable.StopAtBounds
         model: root.items
         T.ScrollBar.vertical: Widgets.ScrollBarExt { colorContext.palette: VLCStyle.palette }
+
+        // a click on anything but a cell (a label, a head, the background) ends a capture
+        TapHandler {
+            onTapped: (point) => {
+                const d = list.itemAt(point.position.x + list.contentX, point.position.y + list.contentY)
+                for (const c of d && !d.isHead ? [d.hotCell, d.globalCell] : []) {
+                    if (c.contains(c.mapFromItem(list, point.position)))
+                        return
+                }
+                root.takeFocus()
+            }
+        }
 
         delegate: Item {
             id: line
@@ -371,7 +388,11 @@ DialogCard {
                 color: root._s.sectionTitle
             }
 
+            readonly property Item hotCell: hotCell
+            readonly property Item globalCell: globalCell
+
             KeyCell {
+                id: hotCell
                 visible: !line.isHead
                 x: root._hotkeyX
                 row: line.idx
@@ -381,6 +402,7 @@ DialogCard {
 
             // a row without a global option has nothing to write the cell to
             KeyCell {
+                id: globalCell
                 visible: !line.isHead
                 x: line.width - root._margin - width
                 row: line.idx
