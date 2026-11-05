@@ -25,14 +25,14 @@ import VLC.Widgets as Widgets
 import VLC.Dialogs
 
 // Add Subtitles (Figma 1919:8707, 3336:11929): subtitle files from a folder or a link, attached to the file, the
-// folder's media or the playlist's. Single instance, opened by Dialogs.qml with a context (see openWith).
+// folder's media or the playlist's. Single instance, opened by MainInterface.qml with a context (see openWith).
 DialogCard {
     id: root
 
     readonly property AddSubtitlesController controller: AddSubtitlesController
     // what the opener gave: it says which targets this dialog can switch to
     property var context: ({})
-    // asks Dialogs.qml to open Settings on its Network page
+    // asks MainInterface.qml to open Settings on its Network page
     signal openNetworkSettings()
     // set once a save left some subtitles unattached: the dialog stays open to say so
     property int failedCount: 0
@@ -44,7 +44,7 @@ DialogCard {
     title: qsTr("Add Subtitles")
     figmaWidth: 1048
     figmaHeight: 800
-    cardColor: Qt.rgba(14 / 255, 14 / 255, 14 / 255, 0.95)
+    cardColor: _s.windowBg
     modal: true
     saveEnabled: controller.canSave && !controller.busy && failedCount === 0
     footerNote: failedCount > 0 ? qsTr("%n subtitle(s) could not be added.", "", failedCount) : ""
@@ -58,8 +58,13 @@ DialogCard {
     }
 
     onCancelled: close()
-    // back from Settings: a key typed there is picked up
-    onActiveChanged: if (active && _searchMode && !controller.hasKey) controller.searchOpenSubtitles()
+    // however it closed (Cancel, Escape, the x, the window manager): nothing goes on behind it
+    onVisibleChanged: {
+        if (!visible) {
+            searchDelay.stop()
+            controller.cancel()
+        }
+    }
     onSaved: {
         if (saveEnabled)
             controller.save()
@@ -417,6 +422,7 @@ DialogCard {
                 : !root._searchMode ? qsTr("No subtitle files found")
                 : root.controller.osError ? root.controller.osError
                 : root.controller.osSearching ? qsTr("Searching...")
+                : root.controller.osQuery.trim() ? qsTr("Press Enter to search OpenSubtitles")
                 : qsTr("Type a title to search OpenSubtitles")
             font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
             color: root._s.placeholder

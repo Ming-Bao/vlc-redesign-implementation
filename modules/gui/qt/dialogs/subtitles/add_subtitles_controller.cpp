@@ -109,8 +109,16 @@ void scan(vlc_medialibrary_t* ml, const ScanInput& in, ScanResult& out)
     if (in.reloadMedia) {
         switch (in.target) {
         case AddSubtitlesController::File:
-            if (!in.mrl.isEmpty())
-                out.media << mediaItem(QUrl(in.mrl).fileName(), in.mrl, in.mlId);
+            if (!in.mrl.isEmpty()) {
+                // the Tracks panel only knows the mrl: with the id, a library file keeps its subtitle after this session
+                qint64 id = in.mlId;
+                if (id < 0 && ml) {
+                    ml_unique_ptr<vlc_ml_media_t> media(vlc_ml_get_media_by_mrl(ml, qtu(in.mrl)));
+                    if (media)
+                        id = media->i_id;
+                }
+                out.media << mediaItem(QUrl(in.mrl).fileName(), in.mrl, id);
+            }
             break;
         case AddSubtitlesController::Folder: {
             // the library id is optional: the folder menus only know the folder's mrl
@@ -191,10 +199,10 @@ void AddSubtitlesController::setOrigin(Origin o)
             m_osQuery = q.replace(QRegularExpression(QStringLiteral("[._]+")), QStringLiteral(" ")).trimmed();
             emit osQueryChanged();
         }
+        // no search yet: the file name leaves this machine only when the user asks (Enter, or a pause in typing)
         applyCandidates();
-        searchOpenSubtitles();
     } else if (wasSearch) {
-        cancelOpenSubtitles();
+        cancel();
         setOsState({}, false);
         applyCandidates();
     }
@@ -282,7 +290,7 @@ void AddSubtitlesController::dropClient()
 }
 
 // stops a search or a save in flight; a save that was running no longer holds the dialog busy
-void AddSubtitlesController::cancelOpenSubtitles()
+void AddSubtitlesController::cancel()
 {
     dropClient();
     m_downloads.clear();
@@ -292,9 +300,15 @@ void AddSubtitlesController::cancelOpenSubtitles()
     }
 }
 
+void AddSubtitlesController::refreshKey()
+{
+    readKey();
+    updateCanSave();
+}
+
 void AddSubtitlesController::resetOpenSubtitles()
 {
-    cancelOpenSubtitles();
+    cancel();
     m_hits.clear();
     m_osQuery.clear();
     emit osQueryChanged();

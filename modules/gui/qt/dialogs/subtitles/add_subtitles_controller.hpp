@@ -98,6 +98,10 @@ public:
     Q_INVOKABLE void save();
     // reads the key again (Settings may have changed it) and searches for osQuery
     Q_INVOKABLE void searchOpenSubtitles();
+    // reads the key again, without sending anything
+    Q_INVOKABLE void refreshKey();
+    // stops a search or a save in flight: nothing more is written or attached
+    Q_INVOKABLE void cancel();
 
 signals:
     void targetChanged();
@@ -121,7 +125,6 @@ private:
     void setOsState(const QString& error, bool searching);
     bool readKey(QString* key = nullptr);
     void resetOpenSubtitles();
-    void cancelOpenSubtitles();
     void dropClient();
     void saveOpenSubtitles();
     void nextDownload();
