@@ -137,6 +137,7 @@ class VLCIcons : public QObject {
     Q_PROPERTY(QChar thumbnail MEMBER thumbnail CONSTANT FINAL)
     Q_PROPERTY(QChar jump_fw_10 MEMBER jump_fw_10 CONSTANT FINAL)
     Q_PROPERTY(QChar jump_back_10 MEMBER jump_back_10 CONSTANT FINAL)
+    Q_PROPERTY(QChar pip MEMBER pip CONSTANT FINAL)
 
 
 public:
@@ -270,6 +271,7 @@ public:
     static constexpr inline QChar thumbnail{ u'\ue078' };
     static constexpr inline QChar jump_fw_10{ u'\ue079' };
     static constexpr inline QChar jump_back_10{ u'\ue07a' };
+    static constexpr inline QChar pip{ u'\ue07b' };
 
 };
 

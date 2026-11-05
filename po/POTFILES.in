@@ -762,8 +762,8 @@ modules/gui/qt/dialogs/sout/sout_widgets.cpp
 modules/gui/qt/dialogs/sout/sout_widgets.hpp
 modules/gui/qt/dialogs/toolbar/controlbar_profile_model.cpp
 modules/gui/qt/dialogs/toolbar/controlbar_profile_model.hpp
-modules/gui/qt/dialogs/toolbar/qml/ToolbarEditor.qml
-modules/gui/qt/dialogs/toolbar/qml/ToolbarEditorDialog.qml
+modules/gui/qt/dialogs/toolbar/qml/CustomizePalette.js
+modules/gui/qt/dialogs/toolbar/qml/CustomizePlayerOverlay.qml
 modules/gui/qt/dialogs/vlm/vlm.cpp
 modules/gui/qt/dialogs/vlm/vlm.hpp
 modules/gui/qt/maininterface/mainctx.cpp

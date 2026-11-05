@@ -73,5 +73,6 @@
   "customize/bookmarks.svg": ["bookmarks"],
   "customize/thumbnail.svg": ["thumbnail"],
   "forward-10-sec.svg": ["jump_fw_10"],
-  "backward-10-sec.svg": ["jump_back_10"]
+  "backward-10-sec.svg": ["jump_back_10"],
+  "customize/pip.svg": ["pip"]
 }

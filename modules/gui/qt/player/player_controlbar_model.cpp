@@ -18,55 +18,7 @@
 
 #include "player_controlbar_model.hpp"
 
-#include <QMetaEnum>
-#include <QJSEngine>
-
-#include "qt.hpp"
 #include "control_list_model.hpp"
-
-decltype (PlayerControlbarModel::playerIdentifierDictionary)
-    PlayerControlbarModel::playerIdentifierDictionary {
-        {Videoplayer, N_("Video player")},
-        {Audioplayer, N_("Audio player")},
-        {Miniplayer,  N_("Mini player")}
-    };
-
-QJSValue PlayerControlbarModel::getPlaylistIdentifierListModel(QQmlEngine *engine, QJSEngine *scriptEngine)
-{
-    Q_UNUSED(engine)
-
-    static const QMetaEnum metaEnum = QMetaEnum::fromType<PlayerIdentifier>();
-
-    QJSValue array = scriptEngine->newArray();
-
-    // Topbar and SeekRow are not editable per tab; ponytail: drop this limit when the legacy editor goes (Task 11)
-    for (int i = 0; i < metaEnum.keyCount() && metaEnum.value(i) <= Miniplayer; ++i)
-    {
-       QJSValue obj = scriptEngine->newObject();
-
-       const int val = metaEnum.value(i);
-       obj.setProperty("identifier", val);
-
-       QString key;
-       if ( playerIdentifierDictionary.contains(static_cast<PlayerControlbarModel::PlayerIdentifier>(i)) )
-       {
-           key = qfut( playerIdentifierDictionary[static_cast<PlayerControlbarModel::PlayerIdentifier>(i)] );
-       }
-       else
-       {
-           key = metaEnum.key(i);
-       }
-
-       obj.setProperty("name", key);
-
-       array.setProperty(i, obj);
-    }
-
-    QJSValue value = scriptEngine->newObject();
-    value.setProperty("model", array);
-
-    return value;
-}
 
 PlayerControlbarModel::PlayerControlbarModel(QObject *parent) : QObject(parent)
 {

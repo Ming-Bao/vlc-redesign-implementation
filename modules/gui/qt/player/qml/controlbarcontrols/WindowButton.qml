@@ -48,7 +48,7 @@ Item {
     }
 
     function _updateRect() {
-        if (!_button)
+        if (!_button || paintOnly)
             return
         const point = mapToItem(null, 0, 0)
         _button.rect = Qt.rect(point.x, point.y, width, height)

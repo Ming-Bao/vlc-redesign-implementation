@@ -20,8 +20,7 @@
 #define PLAYERCONTROLBARMODEL_HPP
 
 #include <QObject>
-#include <QJSValue>
-#include <QMap>
+#include <QVector>
 
 #include <array>
 
@@ -45,30 +44,14 @@ public:
     // add its identifier in this enum and set QML buttons layout
     // identifier to it. Such as `property int identifier =
     // PlayerControlbarModel.Videoplayer`.
-    // To make it translatable, add a corresponding entry to
-    // the static member playerIdentifierDictionary which is
-    // initialized in the source file.
     enum PlayerIdentifier {
         Videoplayer = 0,
         Audioplayer,
         Miniplayer,
-        // Customize Player models, not listed by the legacy editor
         Topbar,
         SeekRow
     };
     Q_ENUM(PlayerIdentifier)
-    // This enum is iterated through QMetaEnum, and
-    // a model out of this enum is generated
-    // and used in the configuration editor.
-    // Thanks to MOC, adding an entry to this enum
-    // is enough for the editor to consider the
-    // added entry without any other modification.
-    // (except for the translation)
-
-    static const QMap<PlayerIdentifier, const char*> playerIdentifierDictionary;
-
-    static QJSValue getPlaylistIdentifierListModel(class QQmlEngine *engine,
-                                                   class QJSEngine *scriptEngine);
 
     explicit PlayerControlbarModel(QObject *parent = nullptr);
     ~PlayerControlbarModel();

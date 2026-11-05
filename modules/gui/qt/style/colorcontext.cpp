@@ -120,6 +120,11 @@ void ColorContext::onParentChanged()
     if (! contextParent)
         return;
 
+    // Taken out of the tree on its way to destruction (a Repeater's or a view's delegate): its bindings still run,
+    // so it keeps what it inherited.
+    if (! contextParent->parentItem())
+        return;
+
     for (
         //start looking on our parent's parent, our parent's ColorContext is self
         QQuickItem* parent = contextParent->parentItem();

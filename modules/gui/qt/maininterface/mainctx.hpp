@@ -152,6 +152,9 @@ class MainCtx : public QObject
     // NOTE: This is useful when we want to prioritize player hotkeys over QML keyboard navigation.
     Q_PROPERTY(bool preferHotkeys READ preferHotkeys WRITE setPreferHotkeys NOTIFY preferHotkeysChanged FINAL)
 
+    // Customize Player: the player's bars are being edited under the palette
+    Q_PROPERTY(bool customizingPlayer READ customizingPlayer WRITE setCustomizingPlayer NOTIFY customizingPlayerChanged FINAL)
+
     //Property for Activating bgCone in player view
     Q_PROPERTY(bool bgCone READ isbgCone WRITE setbgCone NOTIFY bgConeToggled FINAL)
     Q_PROPERTY(bool windowSuportExtendedFrame READ windowSuportExtendedFrame NOTIFY windowSuportExtendedFrameChanged)
@@ -386,6 +389,9 @@ public:
     bool preferHotkeys() const;
     void setPreferHotkeys(bool enable);
 
+    bool customizingPlayer() const { return m_customizingPlayer; }
+    void setCustomizingPlayer(bool enable);
+
     QWindow *intfMainWindow() const;
 
     Q_INVOKABLE QVariant settingValue(const QString &key, const QVariant &defaultValue) const;
@@ -482,6 +488,7 @@ protected:
     bool m_smoothScroll = true;
 
     bool m_preferHotkeys = false;
+    bool m_customizingPlayer = false;
 
     int m_maxVolume = 125;
 
@@ -600,6 +607,7 @@ signals:
     void smoothScrollChanged();
 
     void preferHotkeysChanged();
+    void customizingPlayerChanged();
 
     void useGlobalShortcutsChanged( bool );
 

@@ -127,6 +127,7 @@
         {"key":"bookmarks", "path": "./redesign/customize/bookmarks.svg"},
         {"key":"thumbnail", "path": "./redesign/customize/thumbnail.svg"},
         {"key":"jump_fw_10", "path": "./redesign/forward-10-sec.svg"},
-        {"key":"jump_back_10", "path": "./redesign/backward-10-sec.svg"}
+        {"key":"jump_back_10", "path": "./redesign/backward-10-sec.svg"},
+        {"key":"pip", "path": "./redesign/customize/pip.svg"}
     ]
 }

@@ -45,6 +45,10 @@ Repeater {
         // NOTE: We update the 'navigation chain' after removing the item.
         item.removeNavigation()
 
+        // this signal must not reach the control once it is gone
+        if (item.item?.forceUnlock)
+            repeater.forceUnlock.disconnect(item.item.forceUnlock)
+
         // only move the focus if the removed control had it; otherwise rebuilding
         // the bar would pull the focus from wherever it is
         if (item.activeFocus)
@@ -64,7 +68,9 @@ Repeater {
 
         Layout.fillWidth: (item && item.Layout.minimumWidth > 0)
         Layout.minimumWidth: Layout.fillWidth ? item.Layout.minimumWidth : (item ? item.implicitWidth : -1)
-        Layout.maximumWidth: Layout.fillWidth ? (item ? item.implicitWidth : -1) : -1
+        Layout.maximumWidth: Layout.fillWidth ? (item ? Math.ceil(item.implicitWidth) : -1) : -1
+        // whole pixels, and all of it before any filler beside it grows: else a title that fits elides
+        Layout.preferredWidth: Layout.fillWidth ? Layout.maximumWidth : -1
 
         Layout.minimumHeight: 0
         Layout.maximumHeight: Math.min((item && item.implicitHeight <= 0) ? Number.MAX_VALUE : item.implicitHeight, repeater.availableHeight)

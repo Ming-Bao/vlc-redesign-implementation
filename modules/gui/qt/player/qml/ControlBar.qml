@@ -27,6 +27,7 @@ import VLC.Style
 import VLC.Widgets as Widgets
 import VLC.Player
 import VLC.PlayerControls
+import VLC.Dialogs
 import VLC.Util
 
 T.Pane {
@@ -44,7 +45,7 @@ T.Pane {
     implicitHeight: Math.max(implicitBackgroundHeight + bottomInset,
                              implicitContentHeight + topPadding + bottomPadding)
 
-    topInset: (_textPosition === ControlBar.TimeTextPosition.Inline) ? 0 : sliderY
+    topInset: (_textPosition === ControlBar.TimeTextPosition.Inline || _twoRows) ? 0 : sliderY
 
     bottomPadding: VLCStyle.margin_xsmall
 
@@ -71,17 +72,26 @@ T.Pane {
 
     readonly property bool _seekRowUsed: !!seekRowModel && !seekRowModel.empty
 
+    // Customize Player: the controls row is drawn as dashed zones, with the seekbar one more item
+    property bool editing: false
+
+    readonly property PlayerControlbarModel _bottomModel: contentItem.playerControlLayout.model
+
     readonly property int _textPosition: {
         if (_seekRowUsed)
             return ControlBar.TimeTextPosition.LeftRightSlider
         // a filled centre section leaves no spacer to hold it inline
-        if (textPosition === ControlBar.TimeTextPosition.Inline && !contentItem.playerControlLayout.fillerItem)
+        if (textPosition === ControlBar.TimeTextPosition.Inline
+                && (editing ? (_bottomModel?.center.count ?? 0) > 0 : !contentItem.playerControlLayout.fillerItem))
             return inlineFallback
         return textPosition
     }
 
     // the compact look applies to the inline layout and to the seek row (Figma 2160:6137)
     readonly property bool _compact: compactStyle && (_textPosition === ControlBar.TimeTextPosition.Inline || _seekRowUsed)
+    // the compact bar's two rows: the seek row and the controls (Figma 2160:6137), which Customize Player keeps while
+    // the seekbar is inline, the seek row being a place to drop it
+    readonly property bool _twoRows: compactStyle && (_seekRowUsed || editing)
     readonly property bool _dark: theme.palette.isDark
     readonly property bool _sideTimes: (_textPosition === ControlBar.TimeTextPosition.LeftRightSlider
                                         || _textPosition === ControlBar.TimeTextPosition.Inline)
@@ -132,6 +142,14 @@ T.Pane {
         colorSet: ColorContext.Window
     }
 
+    // the seekbar dropped into the bottom centre: the zone's items make room, to the end of the left zone
+    function _moveSeekbarInline() {
+        for (const id of _bottomModel.center.getControls())
+            _bottomModel.left.insert(_bottomModel.left.count, {"id": id})
+        _bottomModel.center.clear()
+        seekRowModel.left.clear()
+    }
+
     TextMetrics {
         id: timeTextMetrics
         font.pixelSize: (root._textPosition === ControlBar.TimeTextPosition.Inline) ? VLCStyle.dp(15, VLCStyle.scale)
@@ -151,7 +169,7 @@ T.Pane {
     }
 
     contentItem: ColumnLayout {
-        spacing: VLCStyle.margin_xsmall
+        spacing: root._twoRows ? VLCStyle.dp(24, VLCStyle.scale) : VLCStyle.margin_xsmall
 
         readonly property real sliderY: row2.y
 
@@ -168,6 +186,8 @@ T.Pane {
                 Layout.preferredWidth: root._sideTimes ? timeTextMetrics.width : -1
 
                 text: {
+                    if (root.editing && !Player.isStarted)
+                        return "00:00"
                     const length = Player.length
                     return Player.time.formatHMS(length.isSubSecond() ? VLCTick.SubSecondFormattedAsMS : 0)
                 }
@@ -194,7 +214,8 @@ T.Pane {
 
                 readonly property bool showRemainingTime: (MainCtx.showRemainingTime && Player.remainingTime.valid())
 
-                text: showRemainingTime
+                text: (root.editing && !Player.isStarted) ? "00:00"
+                      : showRemainingTime
                       ? "-" + Player.remainingTime.formatHMS()
                       : Player.length.formatHMS()
                 color: mediaTime.color
@@ -217,6 +238,7 @@ T.Pane {
                 anchors.verticalCenter: (parent === pseudoRow) ? parent.verticalCenter : undefined
 
                 TapHandler {
+                    enabled: !root.editing
                     onTapped: (eventPoint, button) => {
                         MainCtx.showRemainingTime = !MainCtx.showRemainingTime
                     }
@@ -252,6 +274,7 @@ T.Pane {
                 id: trackPositionSlider
 
                 barHeight: root.sliderHeight
+                paintOnly: root.editing
 
                 blockStyle: root._compact
                 waveform: root.musicMode && root._compact
@@ -286,7 +309,7 @@ T.Pane {
                 Navigation.parentItem: root
                 Navigation.downItem: playerControlLayout
 
-                activeFocusOnTab: true
+                activeFocusOnTab: !root.editing
 
                 focus: true
 
@@ -298,7 +321,7 @@ T.Pane {
                 id: bookmarksLoader
 
                 parent: root
-                active: MainCtx.mediaLibraryAvailable && (root._textPosition !== ControlBar.TimeTextPosition.Inline)
+                active: MainCtx.mediaLibraryAvailable && (root._textPosition !== ControlBar.TimeTextPosition.Inline) && !root.editing
                 source: "qrc:///qt/qml/VLC/MediaLibrary/Bookmarks.qml"
 
                 x: root.leftPadding + trackPositionSlider.x + row2.Layout.leftMargin
@@ -309,6 +332,77 @@ T.Pane {
                    item.barHeight = Qt.binding(function() { return bookmarksHeight })
                    item.controlBarHovered = Qt.binding(function() { return root.hovered })
                    item.yShift = Qt.binding(function() { return row2.height + VLCStyle.margin_xxsmall })
+                }
+            },
+            // Customize Player: the seekbar as one item, over where it is drawn
+            Item {
+                id: seekItem
+
+                readonly property bool inline: root._textPosition === ControlBar.TimeTextPosition.Inline
+
+                parent: root
+                z: 1
+                visible: root.editing
+
+                // the row's dashes stand 4 px off the bar (Figma 2160:6137)
+                readonly property real _outset: inline ? 0 : VLCStyle.dp(4, VLCStyle.scale)
+
+                x: root.leftPadding + (inline ? editRow.x + (editZones.item?.seekSlot.x ?? 0) : row2.x) - _outset
+                y: root.topPadding + (inline ? editRow.y : row2.y) - _outset
+                width: (inline ? (editZones.item?.seekSlot.width ?? 0) : row2.width) + _outset * 2
+                height: (inline ? editRow.height : row2.height) + _outset * 2
+
+                DashedBox {
+                    anchors.fill: parent
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+
+                    acceptedButtons: Qt.LeftButton
+                    cursorShape: pressed ? Qt.DragMoveCursor : Qt.OpenHandCursor
+
+                    drag.target: seekDrag
+                    drag.smoothed: false
+
+                    drag.onActiveChanged: {
+                        if (drag.active) {
+                            PlayerControlbarControls.customizeDragging = true
+                            seekDrag.Drag.start()
+                        } else {
+                            // anywhere but the other place, it just stays
+                            seekDrag.Drag.drop()
+                            PlayerControlbarControls.customizeDragging = false
+                        }
+                    }
+
+                    onPressed: {
+                        const pos = mapToItem(seekDrag.parent, mouseX, mouseY)
+                        seekDrag.x = pos.x + VLCStyle.dragDelta
+                        seekDrag.y = pos.y + VLCStyle.dragDelta
+                    }
+                }
+
+                // what follows the pointer; the drag's source for the zones
+                Rectangle {
+                    id: seekDrag
+
+                    readonly property int controlId: ControlListModel.SEEKBAR
+
+                    parent: Drag.active ? seekItem.Window.contentItem : seekItem
+                    z: 1000
+                    visible: Drag.active
+
+                    width: VLCStyle.dp(240, VLCStyle.scale)
+                    height: VLCStyle.dp(28, VLCStyle.scale)
+                    color: "#090909"
+
+                    Drag.source: seekDrag
+                    Drag.hotSpot: Qt.point(-VLCStyle.dragDelta, -VLCStyle.dragDelta)
+
+                    DashedBox {
+                        anchors.fill: parent
+                    }
                 }
             }
         ]
@@ -365,20 +459,51 @@ T.Pane {
 
             Layout.fillWidth: true
             Layout.fillHeight: false
-            Layout.leftMargin: (root._textPosition === ControlBar.TimeTextPosition.LeftRightSlider) ? VLCStyle.margin_xsmall
+            Layout.leftMargin: root._twoRows ? VLCStyle.dp(24, VLCStyle.scale)
+                             : (root._textPosition === ControlBar.TimeTextPosition.LeftRightSlider) ? VLCStyle.margin_xsmall
                                                                                                    : 0
 
             Layout.rightMargin: Layout.leftMargin
+        }
+
+        // Customize Player: while the seekbar is inline its own row stays free as the place to drop it (Figma 2107:5604)
+        Item {
+            id: seekRowZone
+
+            visible: root.editing && (root._textPosition === ControlBar.TimeTextPosition.Inline)
+
+            Layout.fillWidth: true
+            Layout.preferredHeight: root.sliderHeight
+            Layout.leftMargin: VLCStyle.dp(24, VLCStyle.scale)
+            Layout.rightMargin: VLCStyle.dp(24, VLCStyle.scale)
+
+            DashedBox {
+                anchors.fill: parent
+                anchors.margins: -VLCStyle.dp(4, VLCStyle.scale)
+                visible: PlayerControlbarControls.customizeDragging
+            }
+
+            DropArea {
+                anchors.fill: parent
+
+                onEntered: (drag) => {
+                    drag.accepted = drag.source?.controlId === ControlListModel.SEEKBAR
+                }
+                onDropped: (drop) => {
+                    root.seekRowModel.left.insert(0, {"id": ControlListModel.SEEKBAR})
+                    drop.accept(Qt.MoveAction)
+                }
+            }
         }
 
         // Parented into the controls row's spacer (see PlayerControlLayout.fillerItem)
         RowLayout {
             id: inlineRow
 
-            parent: playerControlLayout.fillerItem
+            parent: root.editing ? (editZones.item?.seekSlot ?? null) : playerControlLayout.fillerItem
             anchors.fill: parent ?? undefined
-            anchors.leftMargin: VLCStyle.dp(20, VLCStyle.scale)
-            anchors.rightMargin: VLCStyle.dp(20, VLCStyle.scale)
+            anchors.leftMargin: root.editing ? VLCStyle.dp(8, VLCStyle.scale) : VLCStyle.dp(20, VLCStyle.scale)
+            anchors.rightMargin: anchors.leftMargin
 
             spacing: VLCStyle.margin_xsmall
 
@@ -404,7 +529,7 @@ T.Pane {
             implicitHeight: (root._compact || MainCtx.pinVideoControls) ? VLCStyle.controlLayoutHeightPinned
                                                                         : VLCStyle.controlLayoutHeight
 
-            visible: !model?.empty ?? false
+            visible: !root.editing && (!model?.empty ?? false)
 
             Navigation.upItem: trackPositionSlider.enabled ? trackPositionSlider : root.Navigation.upItem
 
@@ -414,6 +539,95 @@ T.Pane {
 
             Component.onCompleted: {
                 root.forceUnlock.connect(playerControlLayout.forceUnlock)
+            }
+        }
+
+        // Customize Player: the controls row's zones, in place of the controls
+        Item {
+            id: editRow
+
+            visible: root.editing
+
+            Layout.fillWidth: true
+            Layout.preferredHeight: playerControlLayout.implicitHeight
+            Layout.leftMargin: playerControlLayout.Layout.leftMargin
+            Layout.rightMargin: playerControlLayout.Layout.rightMargin
+
+            Loader {
+                id: editZones
+
+                anchors.fill: parent
+                active: root.editing
+
+                sourceComponent: Item {
+                    readonly property alias seekSlot: seekSlot
+                    readonly property bool seekInline: root._textPosition === ControlBar.TimeTextPosition.Inline
+                    // beside an empty centre zone the free space reads as one (Figma 2160:6137)
+                    readonly property bool centerEmpty: !seekInline && editCenter.count === 0
+
+                    EditorDNDView {
+                        id: editLeft
+
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.seekInline ? implicitWidth : editCenter.x
+
+                        model: root._bottomModel?.left ?? null
+                        compactStyle: root._compact
+                        dashFreeSpace: !parent.seekInline
+                        drawFreeSpace: !parent.centerEmpty
+                    }
+
+                    EditorDNDView {
+                        id: editCenter
+
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: Math.min(implicitWidth, parent.width)
+                        visible: !parent.seekInline
+
+                        model: root._bottomModel?.center ?? null
+                        alignment: Qt.AlignHCenter
+                        compactStyle: root._compact
+                        dashFreeSpace: false
+                        emptyWidth: VLCStyle.dp(120, VLCStyle.scale)
+
+                        acceptsSeekbar: true
+                        onSeekbarDropped: root._moveSeekbarInline()
+                    }
+
+                    EditorDNDView {
+                        id: editRight
+
+                        x: parent.seekInline ? parent.width - width : editCenter.x + editCenter.width
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.seekInline ? implicitWidth : parent.width - x
+
+                        model: root._bottomModel?.right ?? null
+                        alignment: Qt.AlignRight
+                        compactStyle: root._compact
+                        dashFreeSpace: !parent.seekInline
+                        drawFreeSpace: !parent.centerEmpty
+                    }
+
+                    DashedBox {
+                        visible: parent.centerEmpty
+                        anchors.verticalCenter: parent.verticalCenter
+                        x: editLeft.listEnd
+                        width: editRight.x + editRight.listStart - x
+                        height: editCenter.height
+                    }
+
+                    Item {
+                        id: seekSlot
+
+                        readonly property real _gap: VLCStyle.dp(16, VLCStyle.scale)
+
+                        visible: parent.seekInline
+                        x: editLeft.width + _gap
+                        width: editRight.x - _gap - x
+                        height: parent.height
+                    }
+                }
             }
         }
     }

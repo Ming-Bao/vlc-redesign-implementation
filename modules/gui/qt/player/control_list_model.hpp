@@ -132,7 +132,7 @@ public:
 
     QHash<int, QByteArray> roleNames() const override;
 
-    QVector<int> getControls() const;
+    Q_INVOKABLE QVector<int> getControls() const;
     void setControls(const QVector<int>& list);
 
     bool operator==(const ControlListModel& model) const

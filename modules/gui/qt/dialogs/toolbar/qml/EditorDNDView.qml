@@ -16,83 +16,61 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 import QtQuick
-import QtQuick.Templates as T
 import QtQml.Models
-
 
 import VLC.Style
 import VLC.Util
-import VLC.Widgets as Widgets
+import VLC.Player
+import VLC.PlayerControls
 
-ListView {
-    id: playerBtnDND
+// One zone of a player bar in Customize Player: its controls, and the free space beside them, dashed and droppable
+Item {
+    id: root
 
-    spacing: VLCStyle.margin_xsmall
-    orientation: Qt.Horizontal
-    clip: true
+    property alias model: view.model
+    property alias count: view.count
+    property alias spacing: view.spacing
 
-    currentIndex: -1
-    highlightFollowsCurrentItem: false
-    boundsBehavior: Flickable.StopAtBounds
+    // where the controls sit in the zone (the free space is the rest)
+    property int alignment: Qt.AlignLeft
+    property bool compactStyle: false
+    // the free space is drawn at rest (the bottom row's are, Figma 2160:6564; else only during a drag, Figma 2160:7437)
+    property bool dashFreeSpace: true
+    property bool drawFreeSpace: true
+    property real emptyWidth: VLCStyle.dp(40, VLCStyle.scale)
+    // the seekbar may be dropped here
+    property bool acceptsSeekbar: false
 
-    property bool containsDrag: footerItem.dropVisible
+    readonly property real listStart: view.x
+    readonly property real listEnd: view.x + view.width
 
-    property alias scrollBar: scrollBar
+    signal seekbarDropped()
 
-    property bool extraWidthAvailable: true
+    implicitWidth: view.count > 0 ? view.contentWidth : emptyWidth
+    implicitHeight: VLCStyle.dp(30, VLCStyle.scale)
 
-    T.ScrollBar.horizontal: Widgets.ScrollBarExt {
-        id: scrollBar
+    function accepts(source) {
+        return !!source && (source.controlId !== ControlListModel.SEEKBAR || acceptsSeekbar)
     }
-
-    remove: Transition {
-        OpacityAnimator {
-            from: 1.0
-            to: 0.0
-
-            duration: VLCStyle.duration_long
-        }
-    }
-
-    // FIXME: Animations are disabled because they are incompatible
-    // with the delegate loader which sets extra width after the
-    // control gets loaded.
-    /*
-    add: Transition {
-        NumberAnimation {
-            property: "opacity"; from: 0; to: 1.0
-
-            duration: VLCStyle.duration_long
-        }
-    }
-
-    displaced: Transition {
-        NumberAnimation {
-            properties: "x"
-
-            duration: VLCStyle.duration_long
-            easing.type: Easing.OutSine
-        }
-
-        NumberAnimation { property: "opacity"; to: 1.0 }
-    }
-    */
 
     function dropEvent(drag, destIndex) {
-        if (drag.source.dndView === playerBtnDND) {
-            // moving from same section
-            playerBtnDND.model.move(drag.source.DelegateModel.itemsIndex,
-                                    destIndex)
-            drag.source.visible = true
+        const source = drag.source
+        if (source.controlId === ControlListModel.SEEKBAR) {
+            root.seekbarDropped()
             drag.accept(Qt.MoveAction)
-        } else if (drag.source.objectName === "buttonsList") {
-            // moving from buttonsList
-            playerBtnDND.model.insert(destIndex, {"id" : drag.source.mIndex})
+        } else if (source.dndView === root) {
+            // moving from same section
+            root.model.move(source.DelegateModel.itemsIndex, destIndex)
+            source.visible = true
+            drag.accept(Qt.MoveAction)
+        } else if (!source.dndView) {
+            // moving from the palette
+            root.model.insert(destIndex, {"id" : source.controlId})
             drag.accept(Qt.CopyAction)
         } else {
-            // moving between sections or views
-            playerBtnDND.model.insert(destIndex, {"id" : drag.source.controlId})
-            drag.source.dndView.model.remove(drag.source.DelegateModel.itemsIndex)
+            // moving between sections
+            root.model.insert(destIndex, {"id" : source.controlId})
+            source.dndView.model.remove(source.DelegateModel.itemsIndex)
             drag.accept(Qt.MoveAction)
         }
     }
@@ -102,81 +80,98 @@ ListView {
         colorSet: ColorContext.View
     }
 
-    VLCFlickableScrollHandler {
-        fallbackScroll: true
-        enabled: true
+    DashedBox {
+        x: root.alignment === Qt.AlignRight ? 0 : view.x + view.width
+        y: 0
+        width: root.width - view.width
+        height: root.height
+
+        visible: root.drawFreeSpace && width > 0 && (root.dashFreeSpace || PlayerControlbarControls.customizeDragging)
     }
 
-    MouseArea {
+    // the free space and the gaps; the delegates take the drops over themselves
+    DropArea {
+        id: zoneDrop
+
         anchors.fill: parent
 
-        preventStealing: true
-
-        z: -1
-
-        cursorShape: root.dragActive ? Qt.DragMoveCursor : Qt.ArrowCursor
-    }
-
-    footer: Item {
-        implicitHeight: playerBtnDND.height
-        implicitWidth: Math.max(implicitHeight, playerBtnDND.width - x)
-
-        property alias dropVisible: footerDropArea.containsDrag
-
-        Rectangle {
-            id: footerDropIndicator
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-
-            z: 2
-
-            implicitWidth: VLCStyle.dp(2, VLCStyle.scale)
-            implicitHeight: VLCStyle.icon_medium
-
-            visible: dropVisible
-            color: theme.accent
+        function overItem(x) {
+            return view.indexAt(x - view.x + view.contentX, view.height / 2) >= 0
         }
 
-        DropArea {
-            id: footerDropArea
+        onEntered: (drag) => { drag.accepted = root.accepts(drag.source) }
 
-            anchors {
-                left: parent.left
-                right: parent.right
-                top: footerDropIndicator.top
-                bottom: footerDropIndicator.bottom
+        onDropped: (drop) => {
+            // a delegate only refuses a drop over itself: no move
+            if (overItem(drop.x))
+                return
+
+            const x = drop.x - view.x + view.contentX
+            let destIndex = 0
+            if (x >= 0) {
+                destIndex = view.indexAt(x + view.spacing, view.height / 2)
+                if (destIndex < 0)
+                    destIndex = view.count
             }
 
-            onEntered: (drag) => {
-                if (drag.source.dndView === playerBtnDND &&
-                        drag.source.DelegateModel.itemsIndex === playerBtnDND.count - 1) {
-                    drag.accepted = false
-                }
-            }
+            if ((drop.source.dndView === root) && (drop.source.DelegateModel.itemsIndex < destIndex))
+                --destIndex
 
-            onDropped: (drop) => {
-                let destIndex = playerBtnDND.count
-
-                if (drop.source.dndView === playerBtnDND)
-                    --destIndex
-
-                dropEvent(drop, destIndex)
-            }
+            root.dropEvent(drop, destIndex)
         }
     }
 
-    delegate: EditorDNDDelegate {
-        height: Math.min((contentItem.implicitHeight > 0) ? contentItem.implicitHeight : Number.MAX_VALUE, VLCStyle.controlLayoutHeight)
+    Rectangle {
+        x: view.count === 0 || root.alignment !== Qt.AlignRight ? view.x + view.width : view.x - width
+        anchors.verticalCenter: parent.verticalCenter
 
-        anchors.verticalCenter: parent ? parent.verticalCenter : undefined
-        dndView: playerBtnDND
+        z: 2
 
-        Binding {
-            when: dropArea.containsDrag
-            value: true
+        width: VLCStyle.dp(2, VLCStyle.scale)
+        height: VLCStyle.icon_medium
 
-            target: playerBtnDND
-            property: "containsDrag"
+        visible: zoneDrop.containsDrag && !zoneDrop.overItem(zoneDrop.drag.x)
+        color: theme.accent
+    }
+
+    ListView {
+        id: view
+
+        readonly property Item zone: root
+
+        x: {
+            switch (root.alignment) {
+            case Qt.AlignRight:
+                return root.width - width
+            case Qt.AlignHCenter:
+                return (root.width - width) / 2
+            default:
+                return 0
+            }
+        }
+        width: Math.min(contentWidth, root.width)
+        height: root.height
+
+        spacing: VLCStyle.margin_xsmall
+        orientation: Qt.Horizontal
+        clip: true
+        // the delegates drag; a zone that overflows scrolls with the wheel
+        interactive: false
+
+        currentIndex: -1
+        highlightFollowsCurrentItem: false
+        boundsBehavior: Flickable.StopAtBounds
+
+        VLCFlickableScrollHandler {
+            fallbackScroll: true
+            enabled: true
+        }
+
+        delegate: EditorDNDDelegate {
+            height: Math.min((contentItem.implicitHeight > 0) ? contentItem.implicitHeight : Number.MAX_VALUE, root.height)
+
+            anchors.verticalCenter: parent ? parent.verticalCenter : undefined
+            dndView: root
         }
     }
 }

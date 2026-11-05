@@ -24,7 +24,7 @@ import VLC.Util
 
 
 Widgets.IconToolButton {
-    text: VLCIcons.fullscreen
+    text: VLCIcons.pip
 
     onClicked: {
         MainCtx.playerView = !MainCtx.playerView

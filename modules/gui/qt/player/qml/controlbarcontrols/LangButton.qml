@@ -29,12 +29,7 @@ Widgets.IconToolButton {
 
     // Proprerties
 
-    readonly property var _parentItem: {
-        if ((typeof rootPlayer !== 'undefined') && (rootPlayer !== null))
-            return rootPlayer
-        else
-            return g_mainDisplay
-    }
+    readonly property var _parentItem: rootPlayer
 
     // Signals
 

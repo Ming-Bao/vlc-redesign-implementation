@@ -18,18 +18,16 @@
 
 import QtQuick
 import QtQuick.Templates as T
-import QtQuick.Layouts
 import QtQml.Models
 
 
 import VLC.Player
-import VLC.Widgets as Widgets
 import VLC.Style
 
 T.Control {
     id: control
 
-    padding: background.border.width
+    padding: VLCStyle.dp(1, VLCStyle.scale)
 
     implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
                             implicitContentWidth + leftPadding + rightPadding)
@@ -37,16 +35,15 @@ T.Control {
                              implicitContentHeight + topPadding + bottomPadding)
 
     readonly property int controlId: model.id
-    property ListView dndView: null
+    property Item dndView: null
 
     readonly property bool dragActive: contentItem.target.Drag.active
-    property alias dropArea: dropArea
 
     property alias containsMouse: mouseArea.containsMouse
     property alias pressed: mouseArea.pressed
 
     ListView.delayRemove: dragActive
-    
+
     readonly property ColorContext colorContext: ColorContext {
         id: theme
         colorSet: ColorContext.Item
@@ -57,77 +54,59 @@ T.Control {
 
         anchors.fill: parent
 
-        cursorShape: (pressed || root.dragActive) ? Qt.DragMoveCursor
-                                                  : Qt.OpenHandCursor
+        cursorShape: pressed ? Qt.DragMoveCursor : Qt.OpenHandCursor
 
-        drag.target: loader
+        drag.target: dragItem
 
         drag.smoothed: false
 
         hoverEnabled: true
 
+        property point grabPoint
+
+        onPressed: (mouse) => { grabPoint = Qt.point(mouse.x, mouse.y) }
+
         drag.onActiveChanged: {
             if (drag.active) {
-                dragAutoScrollHandler.dragItem = loader
-                root.dragStarted(controlId)
-                removeInfoRectVisible = true
+                PlayerControlbarControls.customizeDragging = true
                 drag.target.Drag.start()
-
             } else {
-                dragAutoScrollHandler.dragItem = null
                 control.visible = false
                 const action = drag.target.Drag.drop()
                 if (action === Qt.IgnoreAction)
                     control.visible = true
-                removeInfoRectVisible = false
-                root.dragStopped(controlId)
+                PlayerControlbarControls.customizeDragging = false
             }
         }
 
-        onPressed: (mouse) => {
-            const pos = mapToItem(control.contentItem.target.parent, mouseX, mouseY)
-            control.contentItem.target.y = pos.y + VLCStyle.dragDelta
-            control.contentItem.target.x = pos.x + VLCStyle.dragDelta
-        }
     }
 
     DropArea {
         id: dropArea
+
         anchors.fill: parent
 
+        // a drop lands on the nearer side of this control
+        readonly property bool after: drag.x > width / 2
+
         onEntered: (drag) => {
-            if ((drag.source === null ||
-                 (drag.source.dndView === dndView &&
-                  (parent.DelegateModel.itemsIndex === drag.source.DelegateModel.itemsIndex + 1))) ||
-                    pressed)
-                drag.accepted = false
+            drag.accepted = !control.pressed && dndView.accepts(drag.source)
         }
 
         onDropped: (drop) => {
-            let destIndex = parent.DelegateModel.itemsIndex
+            let destIndex = parent.DelegateModel.itemsIndex + (after ? 1 : 0)
 
-            if((drop.source.dndView === dndView)
+            if ((drop.source.dndView === dndView)
                     && (drop.source.DelegateModel.itemsIndex < destIndex))
                 --destIndex
 
-            dropEvent(drop, destIndex)
+            dndView.dropEvent(drop, destIndex)
         }
-    }
-
-    Binding {
-        when: dragActive
-        value: true
-
-        target: root
-        property: "dragActive"
     }
 
     Rectangle {
-        anchors {
-            left: parent.left
-            verticalCenter: parent.verticalCenter
-            leftMargin: index === 0 ? 0 : -width
-        }
+        x: dropArea.after ? parent.width - width : 0
+        anchors.verticalCenter: parent.verticalCenter
 
         z: 1
 
@@ -138,35 +117,47 @@ T.Control {
         color: theme.accent
     }
 
-    background: Rectangle {
-        color: "transparent"
-
-        border.width: VLCStyle.dp(1, VLCStyle.scale)
-        border.color: theme.border
-        border.pixelAligned: (radius < Number.EPSILON)
-    }
+    background: DashedBox { }
 
     contentItem: Item {
         implicitHeight: loader.implicitHeight
         implicitWidth: loader.implicitWidth
 
-        readonly property Item target: loader
+        readonly property Item target: dragItem
 
-        Loader {
-            id: loader
+        // what the pointer moves
+        Item {
+            id: dragItem
 
-            parent: Drag.active ? root : control.contentItem
+            // over everything in the window, the bars and the palette included
+            parent: Drag.active ? control.Window.contentItem : control.contentItem
+            z: Drag.active ? 1000 : 0
 
             anchors.fill: (parent === control.contentItem) ? parent : undefined
-
-            source: PlayerControlbarControls.control(model.id).source
+            width: control.contentItem.width
+            height: control.contentItem.height
 
             Drag.source: control
+            // the pointer picks the zone, not the corner of the control dragged under it
+            Drag.hotSpot: mouseArea.grabPoint
 
-            onLoaded: {
-                PlayerControlbarControls.applyProps(item, model.id)
-                item.paintOnly = true
-                item.enabled = false
+            Loader {
+                id: loader
+
+                anchors.fill: parent
+
+                source: PlayerControlbarControls.control(model.id).source
+
+                onLoaded: {
+                    PlayerControlbarControls.applyProps(item, model.id)
+                    if (typeof item.compactStyle === "boolean")
+                        item.compactStyle = dndView.compactStyle
+                    item.paintOnly = true
+                    item.enabled = false
+                    // a label's implicit width follows the width it was first given, 0 here, while it elides
+                    if (item.elide !== undefined)
+                        item.elide = Text.ElideNone
+                }
             }
         }
     }

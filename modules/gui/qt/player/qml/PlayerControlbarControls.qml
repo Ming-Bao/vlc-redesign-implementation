@@ -49,10 +49,10 @@ QtObject {
         { id: ControlListModel.REVERSE_BUTTON, file: "ReverseButton.qml", label: VLCIcons.play_reverse, text: qsTr("Trickplay Reverse") },
         { id: ControlListModel.SKIP_BACK_BUTTON, file: "SkipBackButton.qml", label: VLCIcons.skip_back, text: qsTr("Back 15 seconds") },
         { id: ControlListModel.SKIP_FW_BUTTON, file: "SkipForwardButton.qml", label: VLCIcons.skip_for, text: qsTr("Forward 15 seconds") },
-        { id: ControlListModel.QUIT_BUTTON, file: "QuitButton.qml", label: VLCIcons.clear, text: qsTr("Quit") },
+        { id: ControlListModel.QUIT_BUTTON, file: "QuitButton.qml", label: VLCIcons.quit_app, text: qsTr("Quit") },
         { id: ControlListModel.RANDOM_BUTTON, file: "RandomButton.qml", label: VLCIcons.shuffle, text: qsTr("Random") },
         { id: ControlListModel.LOOP_BUTTON, file: "LoopButton.qml", label: VLCIcons.repeat_all, text: qsTr("Loop") },
-        { id: ControlListModel.INFO_BUTTON, file: "InfoButton.qml", label: VLCIcons.info, text: qsTr("Information") },
+        { id: ControlListModel.INFO_BUTTON, file: "InfoButton.qml", label: VLCIcons.info_dot, text: qsTr("Information") },
         { id: ControlListModel.LANG_BUTTON, file: "LangButton.qml", label: VLCIcons.audiosub, text: qsTr("Open subtitles") },
         { id: ControlListModel.BOOKMARK_BUTTON, file: "BookmarkButton.qml", label: VLCIcons.bookmark, text: qsTr("Bookmark Button") },
         { id: ControlListModel.CHAPTER_PREVIOUS_BUTTON, file: "ChapterPreviousButton.qml", label: VLCIcons.dvd_prev, text: qsTr("Previous chapter") },
@@ -65,15 +65,15 @@ QtObject {
         { id: ControlListModel.TELETEXT_BUTTONS, file: "TeletextButton.qml", label: VLCIcons.tvtelx, text: qsTr("Teletext") },
         { id: ControlListModel.RENDERER_BUTTON, file: "RendererButton.qml", label: VLCIcons.renderer, text: qsTr("Renderer Button") },
         { id: ControlListModel.ASPECT_RATIO_COMBOBOX, file: "AspectRatioWidget.qml", label: VLCIcons.aspect_ratio, text: qsTr("Aspect Ratio") },
-        { id: ControlListModel.WIDGET_SPACER, file: "SpacerWidget.qml", label: VLCIcons.space, text: qsTr("Spacer") },
+        { id: ControlListModel.WIDGET_SPACER, file: "SpacerWidget.qml", label: "", text: qsTr("Spacer") },
         { id: ControlListModel.WIDGET_SPACER_EXTEND, file: "ExpandingSpacerWidget.qml", label: VLCIcons.space, text: qsTr("Expanding Spacer") },
-        { id: ControlListModel.PLAYER_SWITCH_BUTTON, file: "PlayerSwitchButton.qml", label: VLCIcons.fullscreen, text: qsTr("Switch Player") },
+        { id: ControlListModel.PLAYER_SWITCH_BUTTON, file: "PlayerSwitchButton.qml", label: VLCIcons.pip, text: qsTr("Switch Player") },
         { id: ControlListModel.ARTWORK_INFO, file: "ArtworkInfoWidget.qml", label: VLCIcons.info, text: qsTr("Artwork Info") },
-        { id: ControlListModel.PLAYBACK_SPEED_BUTTON, file: "PlaybackSpeedButton.qml", label: "1x", text: qsTr("Playback Speed") },
+        { id: ControlListModel.PLAYBACK_SPEED_BUTTON, file: "PlaybackSpeedButton.qml", label: VLCIcons.faster, text: qsTr("Playback Speed") },
         { id: ControlListModel.HIGH_RESOLUTION_TIME_WIDGET, file: "HighResolutionTimeWidget.qml", label: VLCIcons.time, text: qsTr("High Resolution Time") },
 
         // Customize Player palette (label = Figma's); props are applied by applyProps() from the loader's onLoaded
-        { id: ControlListModel.DIVIDER, file: "DividerWidget.qml", label: VLCIcons.space, text: qsTr("Divider") },
+        { id: ControlListModel.DIVIDER, file: "DividerWidget.qml", label: "", text: qsTr("Divider") },
         { id: ControlListModel.JUMP_FW_10_BUTTON, file: "JumpButton.qml", props: { seconds: 10 }, label: VLCIcons.jump_fw_10, text: qsTr("Forward 10s") },
         { id: ControlListModel.JUMP_BACK_10_BUTTON, file: "JumpButton.qml", props: { seconds: -10 }, label: VLCIcons.jump_back_10, text: qsTr("Backward 10s") },
         { id: ControlListModel.ZOOM_BUTTON, file: "ZoomButton.qml", label: VLCIcons.zoom, text: qsTr("Zoom") },
@@ -100,6 +100,9 @@ QtObject {
         { id: ControlListModel.WINDOW_MAXIMIZE, file: "WindowButton.qml", props: { action: CSDButton.MaximizeRestore }, label: VLCIcons.window_maximize, text: qsTr("Maximize") },
         { id: ControlListModel.WINDOW_CLOSE, file: "WindowButton.qml", props: { action: CSDButton.Close }, label: VLCIcons.window_close, text: qsTr("Close") }
     ]
+
+    // Customize Player: a control or the seekbar is being dragged; empty zones show themselves
+    property bool customizeDragging: false
 
     // the library side panel shown over the player; the player closes it each time it opens
     property bool libraryPanelOpen: false

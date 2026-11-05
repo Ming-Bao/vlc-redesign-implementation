@@ -71,11 +71,6 @@ private slots:
         QVERIFY(!p.dirty());
         QVERIFY(!p.getModel(PlayerControlbarModel::Topbar)->dirty());
     }
-    void legacyEditorListsOnlyThreePlayers() {
-        QJSEngine engine;
-        const QJSValue v = PlayerControlbarModel::getPlaylistIdentifierListModel(nullptr, &engine);
-        QCOMPARE(v.property("model").property("length").toInt(), 3);
-    }
 };
 
 QTEST_GUILESS_MAIN(TestControlIds)

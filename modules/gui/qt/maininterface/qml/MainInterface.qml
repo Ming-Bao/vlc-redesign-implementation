@@ -97,7 +97,7 @@ Item {
             yAxis.enabled: false
 
             // Qt version check in disguise, only available starting with 6.5:
-            enabled: !!xAxis?.activeValueChanged
+            enabled: !!xAxis?.activeValueChanged && !MainCtx.customizingPlayer
 
             property double accumulatedDelta: 0.0
 
@@ -334,7 +334,8 @@ Item {
         Connections {
             target: Player
             function onPlayingStateChanged() {
-                if (Player.playingState === Player.PLAYING_STATE_STOPPED) {
+                // Customize Player keeps the player, media or not, until it closes
+                if (Player.playingState === Player.PLAYING_STATE_STOPPED && !MainCtx.customizingPlayer) {
                     MainCtx.playerView = false
                 }
             }
@@ -343,6 +344,7 @@ Item {
         DropArea {
             anchors.fill: parent
             z: -1
+            enabled: !MainCtx.customizingPlayer
 
             onEntered: (drag) => {
                 // Do not handle internal drag here:
@@ -425,8 +427,36 @@ Item {
             }
         }
 
+        Connections {
+            target: DialogsProvider
+            function onShowToolbarEditorDialog() { MainCtx.customizingPlayer = true }
+        }
+
+        // over the player, sharing the window's drag surface with its bars
+        Loader {
+            id: customizePlayerLoader
+
+            anchors.fill: parent
+            z: 50
+
+            active: MainCtx.customizingPlayer
+            focus: active
+
+            sourceComponent: CustomizePlayerOverlay {
+                barsTop: viewLoader.item?.customizeBarsTop ?? 0
+                barsBottom: viewLoader.item?.customizeBarsBottom ?? height
+                bottomModel: viewLoader.item?.customizeBottomModel ?? null
+            }
+
+            onActiveChanged: {
+                if (!active)
+                    viewLoader.forceActiveFocus()
+            }
+        }
+
         Loader {
             asynchronous: true
+            active: !MainCtx.customizingPlayer
             source: "qrc:///qt/qml/VLC/Menus/GlobalShortcuts.qml"
         }
 

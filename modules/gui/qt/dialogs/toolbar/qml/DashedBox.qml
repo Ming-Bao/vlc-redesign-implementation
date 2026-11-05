@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2019 VLC authors and VideoLAN
+ * Copyright (C) 2026 VLC authors and VideoLAN
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,23 +16,33 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 import QtQuick
-
+import QtQuick.Shapes
 
 import VLC.Style
-import VLC.Widgets as Widgets
 
-Widgets.BannerTabButton {
+// Customize Player's outline around items and zones: 1 px #6B6B6B, dash 4/4 (Figma 2107:5604)
+// An Item, as a Shape's implicit size is its path's: a control's background would size itself in a loop.
+Item {
     id: root
 
-    implicitWidth: VLCStyle.button_width_large
+    readonly property real _w: VLCStyle.dp(1, VLCStyle.scale)
 
-    signal dropEnterred()
-
-    DropArea {
+    Shape {
         anchors.fill: parent
 
-        onEntered: (drag) => {
-            root.dropEnterred()
+        ShapePath {
+            strokeColor: "#6B6B6B"
+            strokeWidth: root._w
+            strokeStyle: ShapePath.DashLine
+            dashPattern: [4, 4]
+            fillColor: "transparent"
+
+            startX: root._w / 2
+            startY: root._w / 2
+            PathLine { x: root.width - root._w / 2; y: root._w / 2 }
+            PathLine { x: root.width - root._w / 2; y: root.height - root._w / 2 }
+            PathLine { x: root._w / 2; y: root.height - root._w / 2 }
+            PathLine { x: root._w / 2; y: root._w / 2 }
         }
     }
 }

@@ -360,7 +360,6 @@ void MainUI::registerQMLTypes()
         qmlRegisterUncreatableType<PlayerControlbarModel>(uri, versionMajor, versionMinor, "PlayerControlbarModel", "");
         qmlRegisterUncreatableType<ControlListModel>( uri, versionMajor, versionMinor, "ControlListModel", "" );
         qmlRegisterType<ControlListFilter>(uri, versionMajor, versionMinor, "ControlListFilter");
-        qmlRegisterSingletonType(uri, versionMajor, versionMinor, "PlayerListModel", PlayerControlbarModel::getPlaylistIdentifierListModel);
 
 
         qmlRegisterModule(uri, versionMajor, versionMinor);

@@ -20,6 +20,7 @@ import QtQuick.Templates as T
 import QtQuick.Layouts
 
 import VLC.MainInterface
+import VLC.Player
 import VLC.Style
 
 // the window title: the playing media, or the application name until media plays
@@ -38,7 +39,7 @@ T.Label {
         colorSet: ColorContext.Window
     }
 
-    text: MainCtx.intfMainWindow.title || qsTr("VLC media player")
+    text: (paintOnly && !Player.isStarted) ? qsTr("Title") : (MainCtx.intfMainWindow.title || qsTr("VLC media player"))
     color: theme.fg.secondary
     font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
     elide: Text.ElideRight

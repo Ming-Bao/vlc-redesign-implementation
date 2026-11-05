@@ -40,6 +40,12 @@ FocusScope {
 
     readonly property int positionSliderY: controlBar.y + controlBar.sliderY
 
+    // the room between the bars, for Customize Player's card
+    readonly property real customizeBarsTop: topBar.y + topBar.height
+    readonly property real customizeBarsBottom: controlBar.y
+    // the model of the bottom row
+    readonly property PlayerControlbarModel customizeBottomModel: controlBar._bottomModel
+
     // Only applicable in video mode:
     // Figma: solid bars, no gradient over the video
     property bool displayFadeRectangles: false
@@ -62,6 +68,15 @@ FocusScope {
     // The state lives in PlayerControlbarControls, where the panel's toggle control reaches it.
     readonly property bool libraryPanelOpen: PlayerControlbarControls.libraryPanelOpen
 
+    // Customize Player edits the bars: they stay shown, and everything else here ignores input
+    readonly property bool _customizing: MainCtx.customizingPlayer
+
+    function _followVideoOutput() {
+        return Player.hasVideoOutput ? PlayerControlbarModel.Videoplayer : PlayerControlbarModel.Audioplayer
+    }
+    // the bottom row's model; held while customizing: media ending under the overlay doesn't change what's being edited
+    property int _barIdentifier: _followVideoOutput()
+
     // Settings
 
     Accessible.role: Accessible.Client
@@ -72,7 +87,9 @@ FocusScope {
 
     Component.onCompleted: {
         PlayerControlbarControls.libraryPanelOpen = false
-        MainCtx.preferHotkeys = true
+        MainCtx.preferHotkeys = !_customizing
+        if (_customizing)
+            _barIdentifier = _barIdentifier
     }
     Component.onDestruction: MainCtx.preferHotkeys = false
 
@@ -97,6 +114,21 @@ FocusScope {
         _keyPressed = false
 
         rootPlayer.Navigation.defaultKeyReleaseAction(event)
+    }
+
+    on_CustomizingChanged: {
+        MainCtx.preferHotkeys = !_customizing
+        lockUnlockAutoHide(_customizing)
+        if (!_customizing) {
+            _barIdentifier = Qt.binding(_followVideoOutput)
+        } else {
+            _barIdentifier = _barIdentifier
+            PlayerControlbarControls.libraryPanelOpen = false
+            if (playlistVisibility.isPlaylistVisible)
+                playlistVisibility.togglePlaylistVisibility()
+            controlBar.forceUnlock()
+            topBar.forceUnlock()
+        }
     }
 
     on_ControlsUnderVideoChanged: {
@@ -147,8 +179,11 @@ FocusScope {
 
         // locks sent before the FSM starts are dropped, so apply the initial value here
         onStartedChanged: {
-            if (started)
+            if (started) {
                 rootPlayer.lockUnlockAutoHide(rootPlayer._controlsUnderVideo)
+                if (rootPlayer._customizing)
+                    rootPlayer.lockUnlockAutoHide(true)
+            }
         }
 
         onForceUnlock:{
@@ -664,10 +699,11 @@ FocusScope {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        z: 1
+        z: rootPlayer._customizing ? 6 : 1
 
         focus: true
 
+        editing: rootPlayer._customizing
         controlModel: MainCtx.controlbarProfileModel.currentModel?.getModel(PlayerControlbarModel.Topbar) ?? null
 
         tintColor: rootPlayer._barColor
@@ -708,7 +744,11 @@ FocusScope {
 
         // like the previous player top bar, start with the focus here (not on a control
         // that may be rebuilt when the video output appears), without a keyboard reason
-        Component.onCompleted: Qt.callLater(() => topBar.focusStart(Qt.OtherFocusReason))
+        // (Customize Player's card has the focus when it brought this page up)
+        Component.onCompleted: Qt.callLater(() => {
+            if (!rootPlayer._customizing)
+                topBar.focusStart(Qt.OtherFocusReason)
+        })
     }
 
     // Figma Sidebar 848:1995, between the title bar and the control bar
@@ -907,8 +947,21 @@ FocusScope {
         }
     }
 
+    // Customize Player: only the bars (above this) and the card (over the player) take input
+    MouseArea {
+        anchors.fill: parent
+        z: 5
+
+        visible: rootPlayer._customizing
+        acceptedButtons: Qt.AllButtons
+        hoverEnabled: true
+        onWheel: (wheel) => { wheel.accepted = true }
+    }
+
     ControlBar {
         id: controlBar
+
+        z: rootPlayer._customizing ? 6 : 0
 
         anchors {
             bottom: parent.bottom
@@ -927,12 +980,14 @@ FocusScope {
 
         // Figma Controls (default): ⏮ ▶ ⏭ · time · seek · duration · volume tracks settings queue
         compactStyle: true
+        editing: rootPlayer._customizing
         textPosition: ControlBar.TimeTextPosition.Inline
         seekRowModel: MainCtx.controlbarProfileModel.currentModel?.getModel(PlayerControlbarModel.SeekRow) ?? null
         // a centre section that holds items cannot host the inline seek bar: the row above takes it
         inlineFallback: ControlBar.TimeTextPosition.LeftRightSlider
         sliderHeight: _compact ? VLCStyle.dp(28, VLCStyle.scale) : VLCStyle.heightBar_xxsmall
-        topPadding: _compact ? VLCStyle.dp(11, VLCStyle.scale) : 0
+        topPadding: _twoRows ? VLCStyle.dp(14, VLCStyle.scale)
+                             : _compact ? VLCStyle.dp(11, VLCStyle.scale) : 0
 
         // hide right text so that it won't overlap with play queue
         showRemainingTime: (_textPosition !== ControlBar.TimeTextPosition.AboveSlider)
@@ -960,8 +1015,7 @@ FocusScope {
 
         onRequestLockUnlockAutoHide: (lock) => rootPlayer.lockUnlockAutoHide(lock)
 
-        identifier: (Player.hasVideoOutput) ? PlayerControlbarModel.Videoplayer
-                                            : PlayerControlbarModel.Audioplayer
+        identifier: rootPlayer._barIdentifier
         musicMode: !Player.hasVideoOutput
 
         onHoveredChanged: rootPlayer.lockUnlockAutoHide(hovered)
@@ -985,7 +1039,7 @@ FocusScope {
 
     TapHandler {
         acceptedButtons: Qt.RightButton
-        enabled: !MainCtx.hasEmbededVideo
+        enabled: !MainCtx.hasEmbededVideo && !rootPlayer._customizing
 
         onTapped: (eventPoint, button) => {
             if (button & Qt.RightButton) {
@@ -997,6 +1051,7 @@ FocusScope {
     MouseArea {
         anchors.fill: parent
         acceptedButtons: Qt.BackButton
+        enabled: !rootPlayer._customizing
         propagateComposedEvents: true
         cursorShape: undefined
         onClicked: {

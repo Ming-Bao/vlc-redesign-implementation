@@ -39,8 +39,7 @@ Widgets.IconToolButton {
     signal requestLockUnlockAutoHide(bool lock)
     signal menuOpened(var menu)
 
-    readonly property var _parentItem: ((typeof rootPlayer !== 'undefined') && (rootPlayer !== null)) ? rootPlayer
-                                                                                                       : g_mainDisplay
+    readonly property var _parentItem: rootPlayer
 
     enabled: panelLoader.status === Loader.Ready
 

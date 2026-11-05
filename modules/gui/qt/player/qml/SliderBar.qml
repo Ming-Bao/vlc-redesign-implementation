@@ -247,8 +247,13 @@ T.ProgressBar {
     //we use our own HoverHandler
     hoverEnabled: false
 
+    // drawn only (Customize Player): no seeking, the pointer's for dragging the bar
+    property bool paintOnly: false
+
     HoverHandler {
         id: hoverHandler
+
+        enabled: !control.paintOnly
 
         onHoveredChanged: () => {
             if (hovered) {
@@ -267,6 +272,7 @@ T.ProgressBar {
 
         //placing the TapHandler directly in the Control doesn't work with 6.2
         TapHandler {
+            enabled: !control.paintOnly
             acceptedButtons: Qt.LeftButton
 
             gesturePolicy: TapHandler.WithinBounds
@@ -286,6 +292,7 @@ T.ProgressBar {
 
         DragHandler {
             id: dragHandler
+            enabled: !control.paintOnly
             acceptedButtons: Qt.LeftButton
 
             // Make it easier to drag with touch screen:
@@ -323,6 +330,7 @@ T.ProgressBar {
         }
 
         WheelHandler {
+            enabled: !control.paintOnly
             orientation: Qt.Vertical | Qt.Horizontal
 
             acceptedDevices: PointerDevice.AllDevices

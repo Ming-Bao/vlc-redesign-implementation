@@ -1176,11 +1176,9 @@ libqml_module_dialogs_a_QML = \
 	dialogs/dialogs/qml/WindowDialog.qml \
 	dialogs/toolbar/qml/EditorDNDDelegate.qml \
 	dialogs/toolbar/qml/EditorDNDView.qml\
-	dialogs/toolbar/qml/EditorDummyButton.qml \
-	dialogs/toolbar/qml/EditorTabButton.qml \
-	dialogs/toolbar/qml/ToolbarEditor.qml \
-	dialogs/toolbar/qml/ToolbarEditorDialog.qml \
-	dialogs/toolbar/qml/ToolbarEditorButtonList.qml \
+	dialogs/toolbar/qml/CustomizePlayerOverlay.qml \
+	dialogs/toolbar/qml/CustomizePalette.js \
+	dialogs/toolbar/qml/DashedBox.qml \
 	dialogs/settings/qml/AdvancedBar.qml \
 	dialogs/hotkeys/qml/HotkeysData.js \
 	dialogs/settings/qml/SettingsData.js \
@@ -2265,9 +2263,9 @@ endif
 QML_LOG_COMPILER = $(builddir)/qml_test -input
 
 if HAVE_QT_QUICK_TEST
-qml_test_SOURCES = tests/qml_test.cpp tests/qml_test.hpp
-nodist_qml_test_SOURCES = tests/qml_test.moc.cpp
-CLEANFILES += $(nodist_qml_test_SOURCES)
+qml_test_SOURCES = tests/qml_test.cpp tests/qml_test.hpp player/control_list_model.cpp player/control_list_model.hpp
+nodist_qml_test_SOURCES = tests/qml_test.moc.cpp player/control_list_model.moc.cpp
+CLEANFILES += tests/qml_test.moc.cpp
 qml_test_CPPFLAGS = $(libqt_plugin_la_CPPFLAGS)
 qml_test_CXXFLAGS = $(AM_CXXFLAGS) $(QT_CFLAGS) -fPIC $(CXXFLAGS_qt) ${QT_QUICK_TEST_CFLAGS} -DQUICK_TEST_SOURCE_DIR="\"${srcdir}/tests\"" -I"${builddir}/tests"
 qml_test_LDADD = $(QT_INDIRECT_LIBS) ${QT_QUICK_TEST_LIBS} $(QT_LIBS) $(LIBS_qt) libqml_module_util.a
@@ -2276,8 +2274,8 @@ check_PROGRAMS += qml_test
 EXTRA_DIST += tests/tst_FSM.qml
 TESTS += tests/tst_FSM.qml
 EXTRA_DIST += tests/tst_LibraryHelpers.qml
-EXTRA_DIST += tests/tst_SettingsData.qml tests/tst_HotkeysData.qml
+EXTRA_DIST += tests/tst_SettingsData.qml tests/tst_HotkeysData.qml tests/tst_CustomizePalette.qml
 TESTS += tests/tst_LibraryHelpers.qml
-TESTS += tests/tst_SettingsData.qml tests/tst_HotkeysData.qml
+TESTS += tests/tst_SettingsData.qml tests/tst_HotkeysData.qml tests/tst_CustomizePalette.qml
 endif
 endif

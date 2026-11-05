@@ -29,6 +29,7 @@ import VLC.Player
 import VLC.Playlist
 import VLC.Widgets as Widgets
 import VLC.PlayerControls as Controls
+import VLC.Dialogs
 import VLC.Util
 
 T.ToolBar {
@@ -51,6 +52,9 @@ T.ToolBar {
     // null keeps the library's fixed layout
     property Controls.PlayerControlbarModel controlModel: null
     readonly property bool _modelDriven: controlModel !== null
+
+    // Customize Player: the zones are drawn in place of the rows
+    property bool editing: false
 
     //whether the navigation pannel is actually visible or not (fixed layout)
     property alias navigationVisible: navigationVisibilty.checked
@@ -205,7 +209,7 @@ T.ToolBar {
             bar: root
             index: 0
             source: root.controlModel?.left ?? null
-            visible: root._modelDriven
+            visible: root._modelDriven && !root.editing
             spacing: VLCStyle.margin_xsmall
 
             anchors {
@@ -225,7 +229,7 @@ T.ToolBar {
             bar: root
             index: 1
             source: root.controlModel?.center ?? null
-            visible: root._modelDriven
+            visible: root._modelDriven && !root.editing
             spacing: VLCStyle.margin_xsmall
 
             // keeps the centre of the window while there is room on both sides
@@ -252,7 +256,7 @@ T.ToolBar {
             bar: root
             index: 2
             source: root.controlModel?.right ?? null
-            visible: root._modelDriven
+            visible: root._modelDriven && !root.editing
 
             anchors {
                 right: parent.right
@@ -264,6 +268,54 @@ T.ToolBar {
 
             onRequestLockUnlockAutoHide: (lock) => root.requestLockUnlockAutoHide(lock)
             onMenuOpened: (menu) => root.menuOpened(menu)
+        }
+
+        // Customize Player's zones; an empty one shows while something is dragged (Figma 2160:7437)
+        Loader {
+            anchors.fill: parent
+            active: root.editing
+
+            sourceComponent: Item {
+                EditorDNDView {
+                    id: editLeft
+
+                    x: logo.x + logo.width + VLCStyle.margin_xsmall
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: Math.min(implicitWidth, editCenter.x - x)
+
+                    model: root.controlModel?.left ?? null
+                    dashFreeSpace: false
+                    emptyWidth: VLCStyle.dp(120, VLCStyle.scale)
+                }
+
+                EditorDNDView {
+                    id: editCenter
+
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: Math.min(implicitWidth, parent.width - 2 * editRight.width - VLCStyle.margin_large * 2)
+
+                    model: root.controlModel?.center ?? null
+                    alignment: Qt.AlignHCenter
+                    dashFreeSpace: false
+                    emptyWidth: VLCStyle.dp(120, VLCStyle.scale)
+                }
+
+                EditorDNDView {
+                    id: editRight
+
+                    anchors.right: parent.right
+                    anchors.rightMargin: VLCStyle.margin_xsmall
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: implicitWidth
+
+                    model: root.controlModel?.right ?? null
+                    alignment: Qt.AlignRight
+                    spacing: 0
+                    dashFreeSpace: false
+                    emptyWidth: VLCStyle.dp(120, VLCStyle.scale)
+                }
+            }
         }
 
         // the library's fixed layout

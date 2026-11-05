@@ -667,11 +667,9 @@ qml_modules += {
         'dialogs/dialogs/qml/WindowDialog.qml',
         'dialogs/toolbar/qml/EditorDNDDelegate.qml',
         'dialogs/toolbar/qml/EditorDNDView.qml',
-        'dialogs/toolbar/qml/EditorDummyButton.qml',
-        'dialogs/toolbar/qml/EditorTabButton.qml',
-        'dialogs/toolbar/qml/ToolbarEditor.qml',
-        'dialogs/toolbar/qml/ToolbarEditorDialog.qml',
-        'dialogs/toolbar/qml/ToolbarEditorButtonList.qml',
+        'dialogs/toolbar/qml/CustomizePlayerOverlay.qml',
+        'dialogs/toolbar/qml/CustomizePalette.js',
+        'dialogs/toolbar/qml/DashedBox.qml',
         'dialogs/settings/qml/AdvancedBar.qml',
         'dialogs/hotkeys/qml/HotkeysData.js',
         'dialogs/settings/qml/SettingsData.js',
@@ -1070,6 +1068,7 @@ qml_tests = {
     'tst_LibraryHelpers': files('tests/tst_LibraryHelpers.qml'),
     'tst_SettingsData': files('tests/tst_SettingsData.qml'),
     'tst_HotkeysData': files('tests/tst_HotkeysData.qml'),
+    'tst_CustomizePalette': files('tests/tst_CustomizePalette.qml'),
 }
 
 qmllibs = []
@@ -1770,15 +1769,16 @@ if qt6_dep.found()
     quicktest_qt6_dep = dependency('qt6', version: '=' + qt6_dep.version(), modules: ['QuickTest'], required: false)
     if quicktest_qt6_dep.found() and  qtest_qt6_dep.found()
         qml_test_moc = qt6.compile_moc(
-            headers : files('tests/qml_test.hpp'),
+            headers : files('tests/qml_test.hpp', 'player/control_list_model.hpp'),
             dependencies : [quicktest_qt6_dep, qt6_dep]
         )
         qml_test = executable(
           'qml_test',
-          [files('tests/qml_test.cpp', 'tests/qml_test.hpp'), qml_test_moc],
+          [files('tests/qml_test.cpp', 'tests/qml_test.hpp', 'player/control_list_model.cpp'), qml_test_moc],
           qt6pre_qrc,
           build_by_default: false,
           dependencies: [quicktest_qt6_dep, qt6_dep, qtest_qt6_dep],
+          include_directories: qt_include_dir,
           link_with: qmllibs,
           cpp_args: ['-DQUICK_TEST_SOURCE_DIR="' + meson.current_source_dir() + '/tests"']
         )

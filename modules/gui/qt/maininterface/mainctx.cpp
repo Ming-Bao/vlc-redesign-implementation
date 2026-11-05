@@ -1073,6 +1073,16 @@ void MainCtx::setPreferHotkeys(bool enable)
     emit preferHotkeysChanged();
 }
 
+void MainCtx::setCustomizingPlayer(bool enable)
+{
+    if (m_customizingPlayer == enable)
+        return;
+
+    m_customizingPlayer = enable;
+
+    emit customizingPlayerChanged();
+}
+
 QWindow *MainCtx::intfMainWindow() const
 {
     if (p_intf->p_compositor)

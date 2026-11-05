@@ -19,6 +19,8 @@
 #include <QtQuickTest>
 #include "qml_test.hpp"
 
+#include "player/control_list_model.hpp"
+
 // not much right now, type registration & initialisation may be required later on
 // https://doc.qt.io/qt-5/qtquicktest-index.html#executing-c-before-qml-tests
 
@@ -29,6 +31,8 @@ void Setup::qmlEngineAvailable(QQmlEngine *engine)
 #else
     (void)engine;
 #endif
+    // tst_CustomizePalette: CustomizePalette.js takes its ids from here
+    qmlRegisterUncreatableType<ControlListModel>("VLC.PlayerControls", 1, 0, "ControlListModel", "");
 }
 
 int main(int argc, char **argv)
