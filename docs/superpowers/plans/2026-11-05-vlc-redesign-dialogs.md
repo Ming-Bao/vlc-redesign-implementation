@@ -760,4 +760,59 @@ git commit -m "qt: Add Subtitles from OpenSubtitles"
 
 ## Ledger
 
-Filled in during Task 12.
+What the spec left to the implementer (*my call*) and what the build changed. Section names follow the spec.
+
+### Spec calls that shipped
+
+**Shared window**
+- The four form dialogs are separate modal windows (`Qt.ApplicationModal`), like Settings, not overlays.
+
+**Open Network Stream**
+- One URL per line, blank lines ignored, a line without `://` gets `http://`.
+- Without a name the button reads **Open** and plays without saving. The user confirmed this on 2026-11-05 ("go with your plan").
+- Saved streams are `<userdata>/network-playlists/<name>.m3u8` (`#EXTM3U`, `#PLAYLIST:<name>`, one line per URL), so they need no media library and VLC's browse tree can open them.
+- `NetworkHomeDisplay` shows one tile per saved file after Radio. Activating it opens `folderTree` on the single URL, or on the file when it has several. The tile menu has Delete, with no confirmation.
+
+**New Playlist**
+- Save is on when the name is non-blank. Files are optional.
+- Once the drop box holds files it lists them in rows with a remove x and keeps the + button.
+- Dropped folders add their media files, not recursively.
+- A custom cover is copied to `<userdata>/playlist-covers/<id>.<ext>`. `MLPlaylistListModel::getCover` prefers it, and deleting the playlist deletes it.
+
+**Keyboard Shortcuts**
+- Every `key-*` option the Figma doesn't show goes into a section from `HotkeysData.js` and uses VLC's own text.
+- Clicking a cell or its pencil captures ("Press a key..."), clicking elsewhere cancels. Delete clears a focused cell that isn't capturing.
+- Capture replaces the option's whole value, so a row with two default keys ends up with one. Existing multi-key values display joined by `, `.
+- Changes apply on the next launch, and a note by Save says so. `Esc` displays as `esc`.
+
+**Add Subtitles**
+- From Computer is a full-width folder row that opens a folder picker. From Link takes a URL, To This File only.
+- To This File: multi-select, and a file matching the media starts ticked.
+- To This Folder / Playlist: clicking the paired subtitle opens a menu of the candidates plus **None**. A media with no match shows **None** in `#404040`.
+- Folder media are the library's media directly in that folder. Candidate subtitle files come from one directory scan with VLC's subtitle extensions.
+- From OpenSubtitles: pending. Task 13 follows this one and adds its own entry.
+
+**Customize Player**
+- With no media the editor shows placeholder text, "Title" and `00:00`.
+- The seekbar is one mandatory item that bounces back if dropped on the palette or anywhere but the Seek row or the inline centre.
+- Only the player's title bar is model-driven. The library's `LocalTopbar` stays fixed.
+- Picture in Picture leaves the player for the mini card.
+- Title-bar-only widgets (`MORE_MENU`, `LIBRARY_PANEL`, `FOLDER_CHIP`, `MEDIA_TITLE`, `WINDOW_*`) can go in any zone and reappear in the palette after the Figma's items.
+- Profile > New asks for a name ("Profile %1" by default, as the removed editor did), clones the selected profile, selects the clone and opens Customize Player. Cancel in the prompt changes nothing. Cancel in the editor keeps the clone, because the overlay saves on open and `reload()` restores that.
+
+### Changed during the build
+
+- Ruling: the default Topbar's right group is minimize, maximize, fullscreen, close, with the queue toggle only in the bottom bar. The spec's zone table and frame 2107:5604 set this, and Figma outranks the plan's "identical" line.
+- Ruling: Customize Player's seek row uses `ControlBar.TimeTextPosition.LeftRightSlider`, which draws frame 2160:6137 (times beside the slider in their own row).
+- Ruling: empty title-bar zones and the empty seek row are dashed only during a drag. Frames 2107:5604 and 2160:7437 show them undashed.
+- Ruling: Customize Player opens the player through `MainCtx.playerView`, not `History.push(["player"])`, because the player isn't a History page here.
+- Ruling: the palette also lists prev, play, next, volume, tracks, extended settings, queue and fullscreen after the Figma's items when unplaced, so dragging them off doesn't lose them.
+- Ruling: the legacy preferences dialog's Toolbar Editor button is hidden. The card opened behind that modal dialog with the bars unresponsive, and closing the dialog first would lose unsaved preferences. Legacy-prefs users reach Customize Player through the "..." menu.
+- Ruling: a media with no library id that isn't playing counts as failed when attaching subtitles, because the player can only attach to its current input.
+- Ruling: To This Playlist stays disabled when the opener has no playlist.
+- Ruling: Task 7's playlist menu path was found by searching the Figma labels.
+- Ruling: work stayed on branch `redesign/dialogs` in the main checkout, no worktree.
+- Ruling: Task 13's gate is cleared by the user's "go with your plan". A local mock server replaces a real API key unless one is supplied, so the live service stays unverified.
+- Profile > New is only offered when the interface isn't a dialog provider, since the overlay lives in the main window.
+- Removed: `ToolbarEditorDialog.qml`, `ToolbarEditor.qml`, `ToolbarEditorButtonList.qml`. `EditorTabButton.qml` and `EditorDummyButton.qml` became `SettingsButton.qml` and `DividerWidget.qml` in `player/qml/controlbarcontrols/`.
+- Known gaps, reviewed and left: `Makefile.am` has never been built or run through automake. The default bottom bar has no "visualizer" control although the spec's zone table lists one (pre-existing).

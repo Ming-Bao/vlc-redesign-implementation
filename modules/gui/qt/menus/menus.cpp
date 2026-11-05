@@ -295,10 +295,26 @@ void VLCMenuBar::MainMenu( qt_intf_t *p_intf, QMenu *menu, std::function<void()>
                 profiles->setSelectedProfile( row );
             } );
         }
-        profileMenu->addSeparator();
-        QAction *add = addDPStaticEntry( profileMenu, qtr( "&New" ), "",
-                                         &DialogsProvider::showToolbarEditorDialog );
-        add->setIcon( QIcon( ":/redesign/menu/add.svg" ) );
+        /* the editor is the main window's overlay, so there is none to open for a dialog provider */
+        if( !p_intf->b_isDialogProvider )
+        {
+            profileMenu->addSeparator();
+            QAction *add = profileMenu->addAction( qtr( "&New" ) );
+            add->setIcon( QIcon( ":/redesign/menu/add.svg" ) );
+            connect( add, &QAction::triggered, profiles, [profiles]() {
+                bool ok = false;
+                const QString name = DialogsProvider::getTextDialog( nullptr,
+                    qtr( "Profile Name" ), qtr( "Please enter the new profile name:" ),
+                    qtr( "Profile %1" ).arg( profiles->rowCount() + 1 ), &ok ).toString();
+                /* cancelling leaves everything as it was */
+                if( !ok )
+                    return;
+                /* the clone is appended, so it is the last row */
+                profiles->cloneSelectedProfile( name );
+                profiles->setSelectedProfile( profiles->rowCount() - 1 );
+                emit THEDP->showToolbarEditorDialog();
+            } );
+        }
     }
 
     entry( qtr( "&Keyboard Shortcuts" ), ":/redesign/menu/keyboard.svg",

@@ -844,7 +844,6 @@ modules/gui/qt/network/standardpathmodel.cpp
 modules/gui/qt/network/standardpathmodel.hpp
 modules/gui/qt/network/qml/BrowseDisplay.qml
 modules/gui/qt/network/qml/BrowseTreeDisplay.qml
-modules/gui/qt/network/qml/BrowseTreeHeader.qml
 modules/gui/qt/network/qml/DiscoverDisplay.qml
 modules/gui/qt/network/qml/DiscoverUrlDisplay.qml
 modules/gui/qt/network/qml/NetworkGridItem.qml
