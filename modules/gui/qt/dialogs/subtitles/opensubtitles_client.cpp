@@ -26,7 +26,6 @@
 #include <QHostAddress>
 #include <QRegularExpression>
 #include <QSaveFile>
-#include <QUrlQuery>
 
 namespace {
 constexpr int TimeoutMs = 20000;
@@ -153,13 +152,14 @@ void OpenSubtitlesClient::search(const QString& query, const QString& language)
         old->abort();
         old->deleteLater();
     }
-    // the API wants lower-case, alphabetically ordered parameters
-    QUrlQuery q;
+    // the API's own form: lower case, alphabetical order, "+" for a space. It answers a "%20" with a redirect before it
+    // looks at the key, and request() follows none. QUrlQuery can't write this: it leaves "+" and "'" unencoded.
+    const QByteArray text = QUrl::toPercentEncoding(query.toLower()).replace("%20", "+");
+    QString params = QStringLiteral("query=") + QString::fromLatin1(text);
     if (!language.isEmpty())
-        q.addQueryItem(QStringLiteral("languages"), language.toLower());
-    q.addQueryItem(QStringLiteral("query"), query.toLower());
+        params.prepend(QStringLiteral("languages=%1&").arg(QString::fromLatin1(QUrl::toPercentEncoding(language.toLower()))));
     QUrl url(m_base.toString() + QStringLiteral("/subtitles"));
-    url.setQuery(q);
+    url.setQuery(params);
 
     QNetworkReply* reply = m_search = m_nam->get(request(url, true));
     const auto buffer = capSize(reply);

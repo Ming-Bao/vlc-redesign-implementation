@@ -111,7 +111,6 @@ private slots:
         QCOMPARE(results[0][0].value<QVector<SubtitleHit>>().size(), 2);
 
         const QByteArray searchReq = server.requests[0];
-        QVERIFY(searchReq.contains("GET /api/v1/subtitles?languages=en&query=the%20wand%20s01e01"));
         QVERIFY(searchReq.toLower().contains("api-key: dummy-key"));
         QVERIFY(searchReq.toLower().contains("user-agent: vlc"));
 
@@ -127,6 +126,33 @@ private slots:
         QVERIFY(f.open(QIODevice::ReadOnly));
         QVERIFY(f.readAll().contains("Hi"));
         QCOMPARE(QDir(dir.path()).entryList(QDir::Files).size(), 1);
+    }
+
+    // Pins what the real service takes (checked against it on 2026-11-06). It answers a "%20" with a 301 to the "+"
+    // form, before looking at the key, and the client follows no redirect: the mock must not accept anything else.
+    void search_requestLine_data() {
+        QTest::addColumn<QString>("query");
+        QTest::addColumn<QString>("language");
+        QTest::addColumn<QByteArray>("line");
+        QTest::newRow("spaces") << "The Wand S01E01" << "en" << QByteArray("languages=en&query=the+wand+s01e01");
+        QTest::newRow("accent") << QString::fromUtf8("Caf\xc3\xa9 Noir") << "en" << QByteArray("languages=en&query=caf%C3%A9+noir");
+        QTest::newRow("quote and plus") << "It's 1+1" << "en" << QByteArray("languages=en&query=it%27s+1%2B1");
+        QTest::newRow("language case") << "x" << "pt-PT" << QByteArray("languages=pt-pt&query=x");
+        QTest::newRow("no language") << "a b" << "" << QByteArray("query=a+b");
+        QTest::newRow("reserved") << "a&b=c#d" << "en" << QByteArray("languages=en&query=a%26b%3Dc%23d");
+    }
+    void search_requestLine() {
+        QFETCH(QString, query);
+        QFETCH(QString, language);
+        QFETCH(QByteArray, line);
+        FakeServer server;
+        server.handler = [&](const QByteArray&) { return FakeServer::reply(200, "{\"data\":[]}"); };
+        OpenSubtitlesClient c("dummy-key", server.base());
+        QSignalSpy results(&c, &OpenSubtitlesClient::results);
+        c.search(query, language);
+        QTRY_COMPARE(results.size(), 1);
+        const QByteArray first = server.requests[0].left(server.requests[0].indexOf("\r\n"));
+        QCOMPARE(first, "GET /api/v1/subtitles?" + line + " HTTP/1.1");
     }
 
     void httpErrors_data() {
