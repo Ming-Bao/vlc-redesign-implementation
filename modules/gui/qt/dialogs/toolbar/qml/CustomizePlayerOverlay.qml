@@ -76,6 +76,9 @@ FocusScope {
     }
 
     function _close(save) {
+        // an Escape or Enter during a drag: the MouseArea that would end it goes away with this
+        PlayerControlbarControls.customizeDragging = false
+
         if (save)
             _profiles.save()
         else

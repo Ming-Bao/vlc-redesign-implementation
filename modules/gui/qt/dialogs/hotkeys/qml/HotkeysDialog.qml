@@ -28,7 +28,7 @@ import "HotkeysData.js" as HotkeysData
 
 // Keyboard Shortcuts (Figma 2437:14832): the key-* options in sections, a hotkey and a global hotkey cell each. A cell
 // captures the next key combination. Edits stay in a model loaded each time the dialog opens until Save.
-// Single instance, opened by Dialogs.qml.
+// Single instance, opened by MainInterface.qml.
 DialogCard {
     id: root
 
@@ -270,6 +270,10 @@ DialogCard {
             if (!editable)
                 return
             if (capturing) {
+                // Tab moves on, as everywhere: VLC never takes it as a hotkey (interface_window_handler.cpp), so
+                // a binding would be dead
+                if (event.key === Qt.Key_Tab || event.key === Qt.Key_Backtab)
+                    return
                 _capture(event)
                 event.accepted = true
             } else if (event.key === Qt.Key_Delete) {

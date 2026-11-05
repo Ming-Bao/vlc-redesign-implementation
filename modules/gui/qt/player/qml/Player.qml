@@ -130,8 +130,6 @@ FocusScope {
         } else {
             _holdBarIdentifier()
             PlayerControlbarControls.libraryPanelOpen = false
-            if (playlistVisibility.isPlaylistVisible)
-                playlistVisibility.togglePlaylistVisibility()
             controlBar.forceUnlock()
             topBar.forceUnlock()
         }
@@ -832,8 +830,9 @@ FocusScope {
     QueuePanel {
         id: playlistpopup
 
-        // the play queue state (button, hotkey, FSM) decides; the card follows it
-        readonly property bool shown: playlistVisibility.isPlaylistVisible
+        // the play queue state (button, hotkey, FSM) decides; the card follows it. Customize Player only hides it: the
+        // saved state stays what it was
+        readonly property bool shown: playlistVisibility.isPlaylistVisible && !rootPlayer._customizing
 
         parent: rootPlayer
         x: rootPlayer.width - width - VLCStyle.dp(20, VLCStyle.scale)
@@ -847,7 +846,7 @@ FocusScope {
         Component.onCompleted: if (shown) open()
         // Escape closes the card itself: keep the play queue state in step
         // (only while the docked queue is still shown: undocking closes the card too)
-        onClosed: if (playlistVisibility.isPlaylistVisible && MainCtx.playqueuePanel.docked)
+        onClosed: if (playlistVisibility.isPlaylistVisible && MainCtx.playqueuePanel.docked && !rootPlayer._customizing)
                       playlistVisibility.togglePlaylistVisibility()
 
         navigationParent: rootPlayer
