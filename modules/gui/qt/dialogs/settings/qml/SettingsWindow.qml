@@ -59,6 +59,9 @@ DialogCard {
     titleLeftMargin: VLCStyle.dp(32, VLCStyle.scale)
     barPadding: VLCStyle.dp(14, VLCStyle.scale)
 
+    // Tab goes sidebar, search, close, content
+    afterHeader: content
+
     onCancelled: close()
     onClosing: {
         // a field being edited commits on focus loss: take the focus first, so that the save has its value
@@ -79,6 +82,7 @@ DialogCard {
     headerExtra: Item {
         implicitWidth: VLCStyle.dp(8, VLCStyle.scale) + searchBox.width
         implicitHeight: searchBox.height
+        readonly property Item field: searchField
 
         Rectangle {
             id: searchBox
@@ -114,6 +118,7 @@ DialogCard {
                 anchors.verticalCenter: parent.verticalCenter
 
                 activeFocusOnTab: true
+                KeyNavigation.backtab: sidebar
                 clip: true
                 selectByMouse: true
                 text: root.searchText
@@ -140,7 +145,7 @@ DialogCard {
         }
     }
 
-    // first in the tree so that Tab goes sidebar, search, content
+    // first in the body, so that Tab starts here; the KeyNavigation entries make it go sidebar, search, close, content
     SettingsSidebar {
         id: sidebar
 
@@ -148,6 +153,7 @@ DialogCard {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
 
+        KeyNavigation.tab: root.headerItem?.field ?? null
         style: root._s
         pages: root.pages
         currentIndex: root.searchText.trim() ? -1 : root.currentPage
@@ -160,6 +166,8 @@ DialogCard {
     // the page
     FocusScope {
         id: content
+
+        KeyNavigation.backtab: root.closeItem
 
         anchors.left: sidebar.right
         anchors.right: parent.right

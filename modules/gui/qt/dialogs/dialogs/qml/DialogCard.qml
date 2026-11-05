@@ -53,6 +53,11 @@ Window {
     property real titleLeftMargin: VLCStyle.dp(10, VLCStyle.scale)
     property real barPadding: VLCStyle.dp(9, VLCStyle.scale)
     property Component headerExtra: null
+    // the item Tab goes to after the close button (default: the next in the tree), and the item and button the
+    // owner may need for its own Tab order
+    property Item afterHeader: null
+    readonly property Item headerItem: extra.item
+    readonly property Item closeItem: closeButton
 
     default property alias content: body.data
 
@@ -165,7 +170,8 @@ Window {
             implicitHeight: parent.height + blurRadius * compensationFactor * 2
         }
 
-        // first in the tree so that Tab reaches the body before the title bar and the footer
+        // first in the tree so that Tab reaches the body before the title bar and the footer (an owner can reorder with
+        // KeyNavigation, see afterHeader)
         Item {
             id: body
 
@@ -218,7 +224,8 @@ Window {
 
             Widgets.LabelExt {
                 anchors.left: extra.right
-                anchors.leftMargin: root.titleLeftMargin
+                // the title row is padded further inside the bar's padding when nothing precedes it
+                anchors.leftMargin: root.titleLeftMargin + (extra.item ? 0 : root.barPadding)
                 anchors.right: closeButton.left
                 anchors.verticalCenter: parent.verticalCenter
 
@@ -241,6 +248,7 @@ Window {
                 radius: VLCStyle.dp(6, VLCStyle.scale)
                 color: closeHover.hovered || activeFocus ? root._s.face : "transparent"
                 activeFocusOnTab: true
+                KeyNavigation.tab: root.afterHeader
 
                 Accessible.role: Accessible.Button
                 Accessible.name: qsTr("Close")
@@ -295,7 +303,7 @@ Window {
                 Accessible.onPressAction: activated()
 
                 Keys.onPressed: (event) => {
-                    if (event.key === Qt.Key_Space) {
+                    if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
                         activated()
                         event.accepted = true
                     }
