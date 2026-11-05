@@ -32,6 +32,8 @@ DialogCard {
     readonly property AddSubtitlesController controller: AddSubtitlesController
     // what the opener gave: it says which targets this dialog can switch to
     property var context: ({})
+    // asks Dialogs.qml to open Settings on its Network page
+    signal openNetworkSettings()
     // set once a save left some subtitles unattached: the dialog stays open to say so
     property int failedCount: 0
 
@@ -56,6 +58,8 @@ DialogCard {
     }
 
     onCancelled: close()
+    // back from Settings: a key typed there is picked up
+    onActiveChanged: if (active && _searchMode && !controller.hasKey) controller.searchOpenSubtitles()
     onSaved: {
         if (saveEnabled)
             controller.save()
@@ -77,9 +81,9 @@ DialogCard {
         { text: qsTr("To This Folder"), value: AddSubtitlesController.Folder, ok: !!context.folder },
         { text: qsTr("To This Playlist"), value: AddSubtitlesController.Playlist, ok: context.playlistId !== undefined }
     ]
-    // OpenSubtitles joins the list with its task
     readonly property var _origins: [
         { text: qsTr("From Computer"), value: AddSubtitlesController.Computer },
+        { text: qsTr("From OpenSubtitles"), value: AddSubtitlesController.OpenSubtitles },
         { text: qsTr("From Link ..."), value: AddSubtitlesController.Link, ok: controller.target === AddSubtitlesController.File }
     ]
 
@@ -88,8 +92,8 @@ DialogCard {
         id: dd
 
         property var options: []
-        property int current
-        signal picked(int value)
+        property var current
+        signal picked(var value)
 
         width: VLCStyle.dp(200, VLCStyle.scale)
         height: VLCStyle.dp(34, VLCStyle.scale)
@@ -149,6 +153,19 @@ DialogCard {
             source: "qrc:///redesign/settings/chevron-down.svg"
         }
     }
+
+    // OpenSubtitles language codes
+    readonly property var _languages: [
+        { text: qsTr("English"), value: "en" }, { text: qsTr("Spanish"), value: "es" },
+        { text: qsTr("French"), value: "fr" }, { text: qsTr("German"), value: "de" },
+        { text: qsTr("Italian"), value: "it" }, { text: qsTr("Portuguese (Portugal)"), value: "pt-PT" },
+        { text: qsTr("Portuguese (Brazil)"), value: "pt-BR" }, { text: qsTr("Dutch"), value: "nl" },
+        { text: qsTr("Polish"), value: "pl" }, { text: qsTr("Russian"), value: "ru" },
+        { text: qsTr("Turkish"), value: "tr" }, { text: qsTr("Arabic"), value: "ar" },
+        { text: qsTr("Chinese (simplified)"), value: "zh-CN" }, { text: qsTr("Japanese"), value: "ja" },
+        { text: qsTr("Korean"), value: "ko" }, { text: qsTr("Swedish"), value: "sv" }
+    ]
+    readonly property bool _searchMode: controller.origin === AddSubtitlesController.OpenSubtitles
 
     component Glyph: Image {
         width: VLCStyle.dp(24, VLCStyle.scale)
@@ -247,6 +264,88 @@ DialogCard {
             }
         }
 
+        // From OpenSubtitles: the search text and the language
+        Dropdown {
+            id: languageBox
+            visible: root._searchMode
+            anchors.right: parent.right
+            anchors.rightMargin: VLCStyle.dp(9, VLCStyle.scale)
+            anchors.verticalCenter: parent.verticalCenter
+            options: root._languages
+            current: root.controller.osLanguage
+            Accessible.name: qsTr("Subtitle language")
+            onPicked: (value) => root.controller.osLanguage = value
+        }
+
+        Rectangle {
+            visible: root._searchMode
+            anchors.left: originBox.right
+            anchors.leftMargin: VLCStyle.dp(10, VLCStyle.scale)
+            anchors.right: languageBox.left
+            anchors.rightMargin: VLCStyle.dp(10, VLCStyle.scale)
+            anchors.verticalCenter: parent.verticalCenter
+            height: VLCStyle.dp(34, VLCStyle.scale)
+            radius: VLCStyle.dp(6, VLCStyle.scale)
+            color: root._s.searchBg
+            border.width: searchField.activeFocus ? VLCStyle.dp(1, VLCStyle.scale) : 0
+            border.color: root._s.accent
+            onVisibleChanged: if (visible) searchField.forceActiveFocus()
+
+            Widgets.IconLabel {
+                id: searchGlyph
+                anchors.left: parent.left
+                anchors.leftMargin: VLCStyle.dp(8, VLCStyle.scale)
+                anchors.verticalCenter: parent.verticalCenter
+                text: VLCIcons.search
+                font.pixelSize: VLCStyle.dp(24, VLCStyle.scale)
+                color: root._s.title
+            }
+
+            // a search runs when typing pauses, or on Enter
+            Timer {
+                id: searchDelay
+                interval: 700
+                onTriggered: root.controller.searchOpenSubtitles()
+            }
+
+            TextInput {
+                id: searchField
+
+                anchors.left: searchGlyph.right
+                anchors.leftMargin: VLCStyle.dp(10, VLCStyle.scale)
+                anchors.right: parent.right
+                anchors.rightMargin: VLCStyle.dp(12, VLCStyle.scale)
+                anchors.verticalCenter: parent.verticalCenter
+                clip: true
+                selectByMouse: true
+                font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
+                color: root._s.labelActive
+                selectionColor: root._s.accentDim
+                selectedTextColor: root._s.labelActive
+                text: root.controller.osQuery
+                onTextEdited: {
+                    root.controller.osQuery = text
+                    searchDelay.restart()
+                }
+                onAccepted: {
+                    searchDelay.stop()
+                    root.controller.searchOpenSubtitles()
+                }
+                Accessible.role: Accessible.EditableText
+                Accessible.name: qsTr("Search OpenSubtitles")
+
+                Widgets.LabelExt {
+                    anchors.fill: parent
+                    verticalAlignment: Text.AlignVCenter
+                    visible: !searchField.text && !searchField.preeditText
+                    text: qsTr("Search for a title")
+                    font: searchField.font
+                    color: root._s.placeholder
+                    Accessible.ignored: true
+                }
+            }
+        }
+
         // From Link: replaces the location
         Rectangle {
             visible: root.controller.origin === AddSubtitlesController.Link
@@ -313,10 +412,60 @@ DialogCard {
 
         Widgets.LabelExt {
             anchors.centerIn: parent
-            visible: list.count === 0 && !root.controller.busy
-            text: root.controller.origin === AddSubtitlesController.Link ? "" : qsTr("No subtitle files found")
+            visible: list.count === 0 && !root.controller.busy && !(root._searchMode && !root.controller.hasKey)
+            text: root.controller.origin === AddSubtitlesController.Link ? ""
+                : !root._searchMode ? qsTr("No subtitle files found")
+                : root.controller.osError ? root.controller.osError
+                : root.controller.osSearching ? qsTr("Searching...")
+                : qsTr("Type a title to search OpenSubtitles")
             font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
             color: root._s.placeholder
+        }
+
+        // no API key yet: say where to put it
+        Column {
+            visible: root._searchMode && !root.controller.hasKey
+            anchors.centerIn: parent
+            spacing: VLCStyle.dp(16, VLCStyle.scale)
+
+            Widgets.LabelExt {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: qsTr("Add an OpenSubtitles API key in Settings \u25B8 Network")
+                font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
+                color: root._s.placeholder
+            }
+
+            Rectangle {
+                id: settingsButton
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: VLCStyle.dp(140, VLCStyle.scale)
+                height: VLCStyle.dp(32, VLCStyle.scale)
+                radius: VLCStyle.dp(6, VLCStyle.scale)
+                color: root._s.box
+                activeFocusOnTab: true
+                border.width: activeFocus ? VLCStyle.dp(1, VLCStyle.scale) : 0
+                border.color: root._s.value
+
+                Accessible.role: Accessible.Button
+                Accessible.name: openSettingsLabel.text
+                Accessible.onPressAction: root.openNetworkSettings()
+                Keys.onPressed: (event) => {
+                    if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
+                        root.openNetworkSettings()
+                        event.accepted = true
+                    }
+                }
+                TapHandler { onTapped: root.openNetworkSettings() }
+
+                Widgets.LabelExt {
+                    id: openSettingsLabel
+                    anchors.centerIn: parent
+                    text: qsTr("Open Settings")
+                    font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
+                    font.weight: Font.DemiBold
+                    color: root._s.value
+                }
+            }
         }
 
         delegate: Item {

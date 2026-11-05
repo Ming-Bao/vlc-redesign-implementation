@@ -151,6 +151,8 @@ static void ShowDialog   ( intf_thread_t *, int, int, intf_dialog_args_t * );
 #define INITIAL_PREFS_VIEW_LONGTEXT N_( "Select which preferences view to show upon "\
                                         "opening the preferences dialog." )
 
+#define OPENSUBTITLES_KEY_TEXT N_( "OpenSubtitles API key" )
+#define OPENSUBTITLES_KEY_LONGTEXT N_( "Your own API key from opensubtitles.com, used by Add Subtitles to search and download subtitles. It is sent only to api.opensubtitles.com." )
 #define SYSTRAY_TEXT N_( "Systray icon" )
 #define SYSTRAY_LONGTEXT N_( "Show an icon in the systray " \
                              "allowing you to control VLC media player " \
@@ -362,6 +364,7 @@ vlc_module_begin ()
     add_bool( "qt-minimal-view", false, QT_MINIMAL_MODE_TEXT,
               nullptr )
 
+    add_string( "qt-opensubtitles-key", "", OPENSUBTITLES_KEY_TEXT, OPENSUBTITLES_KEY_LONGTEXT )
     add_bool( "qt-system-tray", true, SYSTRAY_TEXT, SYSTRAY_LONGTEXT)
 
     add_integer( "qt-notification", NOTIFICATION_MINIMIZED,

@@ -29,10 +29,12 @@
 #include "util/folder_tree.hpp"
 
 #include <vlc_interface.h> // EXTENSIONS_SUBTITLE
+#include <vlc_configuration.h>
 #include <vlc_url.h>
 
 #include <QDir>
 #include <QFileInfo>
+#include <QRegularExpression>
 
 namespace {
 
@@ -176,9 +178,116 @@ void AddSubtitlesController::setOrigin(Origin o)
         o = Computer;
     if (o == m_origin)
         return;
+    const bool wasSearch = m_origin == OpenSubtitles;
     m_origin = o;
     emit originChanged();
+    if (o == OpenSubtitles) {
+        readKey();
+        if (m_osQuery.isEmpty() && !m_media.isEmpty()) {
+            // the media's name, or the folder's, as the search text
+            const QVariantMap first = m_media.first().toMap();
+            QString q = m_target == File ? QFileInfo(first["name"].toString()).completeBaseName()
+                      : m_target == Folder ? QDir(m_dir).dirName() : QString();
+            m_osQuery = q.replace(QRegularExpression(QStringLiteral("[._]+")), QStringLiteral(" ")).trimmed();
+            emit osQueryChanged();
+        }
+        applyCandidates();
+        searchOpenSubtitles();
+    } else if (wasSearch) {
+        if (m_client) {
+            m_client->deleteLater();
+            m_client = nullptr;
+        }
+        setOsState({}, false);
+        applyCandidates();
+    }
     updateCanSave();
+}
+
+bool AddSubtitlesController::readKey(QString* key)
+{
+    char* k = var_InheritString(m_intf, "qt-opensubtitles-key");
+    const QString v = qfu(k).trimmed();
+    free(k);
+    if (key)
+        *key = v;
+    const bool has = !v.isEmpty();
+    if (has != m_hasKey) {
+        m_hasKey = has;
+        emit osStateChanged();
+    }
+    return has;
+}
+
+void AddSubtitlesController::setOsState(const QString& error, bool searching)
+{
+    if (error == m_osError && searching == m_searching)
+        return;
+    m_osError = error;
+    m_searching = searching;
+    emit osStateChanged();
+}
+
+void AddSubtitlesController::setOsQuery(const QString& q)
+{
+    if (q == m_osQuery)
+        return;
+    m_osQuery = q;
+    emit osQueryChanged();
+}
+
+void AddSubtitlesController::setOsLanguage(const QString& l)
+{
+    if (l == m_osLanguage)
+        return;
+    m_osLanguage = l;
+    emit osLanguageChanged();
+    if (m_origin == OpenSubtitles)
+        searchOpenSubtitles();
+}
+
+void AddSubtitlesController::searchOpenSubtitles()
+{
+    if (m_origin != OpenSubtitles || m_busy)
+        return;
+    if (m_client) {
+        m_client->deleteLater();
+        m_client = nullptr;
+    }
+    m_hits.clear();
+    applyCandidates();
+    QString key;
+    const QString query = m_osQuery.trimmed();
+    if (!readKey(&key) || query.isEmpty()) {
+        setOsState({}, false);
+        return;
+    }
+    // the base URL is fixed: no option may point the key somewhere else
+    m_client = new OpenSubtitlesClient(key, OpenSubtitlesClient::defaultBaseUrl(), this);
+    connect(m_client, &OpenSubtitlesClient::results, this, [this](const QVector<SubtitleHit>& hits) {
+        m_hits = hits;
+        applyCandidates();
+        setOsState(hits.isEmpty() ? tr("No subtitles found") : QString(), false);
+    });
+    connect(m_client, &OpenSubtitlesClient::failed, this, [this](const QString& message) {
+        setOsState(message, false);
+    });
+    setOsState({}, true);
+    m_client->search(query, m_osLanguage);
+}
+
+void AddSubtitlesController::resetOpenSubtitles()
+{
+    if (m_client) {
+        m_client->deleteLater();
+        m_client = nullptr;
+    }
+    m_downloads.clear();
+    setBusy(false);
+    m_hits.clear();
+    m_osQuery.clear();
+    emit osQueryChanged();
+    setOsState({}, false);
 }
 
 void AddSubtitlesController::setLink(const QString& l)
@@ -200,14 +309,16 @@ void AddSubtitlesController::updateCanSave()
 {
     bool can = false;
     switch (m_origin) {
+    case OpenSubtitles:
+        if (!m_hasKey)
+            break;
+        [[fallthrough]];
     case Computer:
         can = m_target == File ? !m_ticked.isEmpty() && !m_media.isEmpty()
                                : std::any_of(m_pairs.begin(), m_pairs.end(), [](int p) { return p >= 0; });
         break;
     case Link:
         can = validLink() && !m_media.isEmpty();
-        break;
-    case OpenSubtitles: // Task 13
         break;
     }
     if (can != m_canSave) {
@@ -242,8 +353,10 @@ void AddSubtitlesController::setContext(const QVariantMap& ctx)
     // the singleton outlives the dialog: nothing of the last session may stay saveable
     m_dir.clear();
     setOrigin(Computer);
+    resetOpenSubtitles();
     setLink({});
     m_media.clear();
+    m_local.clear();
     m_candidates.clear();
     m_pairs.clear();
     m_ticked.clear();
@@ -288,20 +401,8 @@ void AddSubtitlesController::refresh(bool reloadMedia)
             emit mediaItemsChanged();
         }
         m_dir = r.dir;
-        m_candidates = r.candidates;
-        emit candidatesChanged();
-
-        QStringList names;
-        for (const QVariant& m : m_media)
-            names << m.toMap()["name"].toString();
-        m_pairs = matchSubtitles(names, m_candidates);
-        emit pairsChanged();
-        // a file matching the media starts ticked
-        m_ticked.clear();
-        if (m_target == File && !m_pairs.isEmpty() && m_pairs.first() >= 0)
-            m_ticked << m_pairs.first();
-        emit tickedChanged();
-        updateCanSave();
+        m_local = r.candidates;
+        applyCandidates();
         m_reloadPending = false;
         setBusy(false);
     };
@@ -323,6 +424,30 @@ void AddSubtitlesController::refresh(bool reloadMedia)
             m_task = 0;
             apply(r);
         });
+}
+
+void AddSubtitlesController::applyCandidates()
+{
+    if (m_origin == OpenSubtitles) {
+        m_candidates.clear();
+        for (const SubtitleHit& h : std::as_const(m_hits))
+            m_candidates << h.fileName;
+    } else {
+        m_candidates = m_local;
+    }
+    emit candidatesChanged();
+
+    QStringList names;
+    for (const QVariant& m : m_media)
+        names << m.toMap()["name"].toString();
+    m_pairs = matchSubtitles(names, m_candidates);
+    emit pairsChanged();
+    // a file matching the media starts ticked
+    m_ticked.clear();
+    if (m_target == File && !m_pairs.isEmpty() && m_pairs.first() >= 0)
+        m_ticked << m_pairs.first();
+    emit tickedChanged();
+    updateCanSave();
 }
 
 void AddSubtitlesController::setPair(int mediaRow, int candidate)
@@ -375,6 +500,8 @@ void AddSubtitlesController::save()
 {
     if (!m_canSave || m_busy || m_media.isEmpty())
         return;
+    if (m_origin == OpenSubtitles)
+        return saveOpenSubtitles();
     int attached = 0, failed = 0;
     auto count = [&](bool ok) { ok ? ++attached : ++failed; };
 
@@ -389,4 +516,75 @@ void AddSubtitlesController::save()
                 count(attach(m_media[row].toMap(), QDir(m_dir).filePath(m_candidates[m_pairs[row]]), true));
     }
     emit finished(attached, failed);
+}
+
+// beside the media when that folder takes a file, else <userdata>/subtitles/; "<stem>.<lang>.srt", and a number
+// before .srt when that name is taken, so nothing the user has is overwritten
+QString AddSubtitlesController::downloadPath(const QVariantMap& media, const SubtitleHit& hit) const
+{
+    const QUrl mrl(media["mrl"].toString());
+    QString dir;
+    if (mrl.isLocalFile() && QFileInfo(QFileInfo(mrl.toLocalFile()).absolutePath()).isWritable())
+        dir = QFileInfo(mrl.toLocalFile()).absolutePath();
+    else {
+        char* userdata = config_GetUserDir(VLC_USERDATA_DIR);
+        dir = qfu(userdata) + QStringLiteral("/subtitles");
+        free(userdata);
+        if (!QDir().mkpath(dir))
+            return {};
+    }
+    const QString stem = QFileInfo(media["name"].toString()).completeBaseName();
+    const QString name = OpenSubtitlesClient::subtitleFileName(stem, hit.language);
+    QString path = QDir(dir).filePath(name);
+    for (int n = 2; QFileInfo::exists(path) && n < 1000; ++n)
+        path = QDir(dir).filePath(QFileInfo(name).completeBaseName() + QStringLiteral(".%1.srt").arg(n));
+    return QFileInfo::exists(path) ? QString() : path;
+}
+
+void AddSubtitlesController::saveOpenSubtitles()
+{
+    QString key;
+    if (!readKey(&key))
+        return;
+    m_downloads.clear();
+    if (m_target == File) {
+        for (int c : std::as_const(m_ticked))
+            m_downloads.append({m_media.first().toMap(), m_hits[c]});
+    } else {
+        for (int row = 0; row < m_pairs.size(); ++row)
+            if (m_pairs[row] >= 0)
+                m_downloads.append({m_media[row].toMap(), m_hits[m_pairs[row]]});
+    }
+    if (m_client)
+        m_client->deleteLater();
+    m_client = new OpenSubtitlesClient(key, OpenSubtitlesClient::defaultBaseUrl(), this);
+    // a downloaded file is attached; a failed one is skipped and counted
+    connect(m_client, &OpenSubtitlesClient::downloaded, this, [this](const QString& path) {
+        attach(m_current.media, path, true) ? ++m_attached : ++m_failed;
+        nextDownload();
+    });
+    connect(m_client, &OpenSubtitlesClient::downloadFailed, this, [this](const QString&) {
+        ++m_failed;
+        nextDownload();
+    });
+    m_attached = m_failed = 0;
+    setBusy(true);
+    nextDownload();
+}
+
+void AddSubtitlesController::nextDownload()
+{
+    while (!m_downloads.isEmpty()) {
+        m_current = m_downloads.takeFirst();
+        const QString path = downloadPath(m_current.media, m_current.hit);
+        if (!path.isEmpty()) {
+            m_client->download(m_current.hit.fileId, path);
+            return;
+        }
+        ++m_failed;
+    }
+    m_client->deleteLater();
+    m_client = nullptr;
+    setBusy(false);
+    emit finished(m_attached, m_failed);
 }

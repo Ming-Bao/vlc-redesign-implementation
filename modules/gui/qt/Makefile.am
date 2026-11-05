@@ -175,6 +175,8 @@ libqt_plugin_la_SOURCES = \
 	dialogs/playlists/playlist_cover.cpp dialogs/playlists/playlist_cover.hpp \
 	dialogs/subtitles/add_subtitles_controller.cpp \
 	dialogs/subtitles/add_subtitles_controller.hpp \
+	dialogs/subtitles/opensubtitles_client.cpp \
+	dialogs/subtitles/opensubtitles_client.hpp \
 	dialogs/subtitles/subtitle_matching.cpp \
 	dialogs/subtitles/subtitle_matching.hpp \
 	dialogs/playlists/playlists.cpp dialogs/playlists/playlists.hpp \
@@ -471,6 +473,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	dialogs/systray/systray.moc.cpp \
 	dialogs/network/saved_streams.moc.cpp \
 	dialogs/hotkeys/hotkey_model.moc.cpp \
+	dialogs/subtitles/opensubtitles_client.moc.cpp \
 	dialogs/subtitles/add_subtitles_controller.moc.cpp \
 	dialogs/settings/settings_bridge.moc.cpp \
 	dialogs/toolbar/controlbar_profile.moc.cpp \
@@ -2097,6 +2100,21 @@ test_control_ids_LDADD = $(QT_QTEST_COMMON_ldadd)
 test_control_ids_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
 check_PROGRAMS += test_control_ids
 TESTS += test_control_ids
+
+# test_opensubtitles_client
+test_opensubtitles_client_SOURCES = \
+	tests/test_opensubtitles_client.cpp \
+	dialogs/subtitles/opensubtitles_client.hpp dialogs/subtitles/opensubtitles_client.cpp
+nodist_test_opensubtitles_client_SOURCES = tests/test_opensubtitles_client.moc \
+	dialogs/subtitles/opensubtitles_client.moc.cpp
+BUILT_SOURCES += tests/test_opensubtitles_client.moc
+CLEANFILES += tests/test_opensubtitles_client.moc
+test_opensubtitles_client_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)
+test_opensubtitles_client_CXXFLAGS = $(QT_QTEST_COMMON_cxxflags)
+test_opensubtitles_client_LDADD = $(QT_QTEST_COMMON_ldadd)
+test_opensubtitles_client_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
+check_PROGRAMS += test_opensubtitles_client
+TESTS += test_opensubtitles_client
 
 # test_subtitle_matching
 test_subtitle_matching_SOURCES = \

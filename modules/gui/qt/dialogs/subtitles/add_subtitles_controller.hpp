@@ -27,6 +27,7 @@
 #include <QVector>
 
 #include "qt.hpp"
+#include "opensubtitles_client.hpp"
 
 // State and actions of the Add Subtitles dialog (singleton "AddSubtitlesController")
 class AddSubtitlesController : public QObject
@@ -52,6 +53,13 @@ public:
     Q_PROPERTY(QVector<int> pairs READ pairs NOTIFY pairsChanged FINAL)
     // candidates to attach to the file (File target)
     Q_PROPERTY(QVector<int> ticked READ ticked NOTIFY tickedChanged FINAL)
+    // From OpenSubtitles: the search text and language code, the last failure, whether a key is set (Settings > Network)
+    // and whether a search is out. The hits are the candidates.
+    Q_PROPERTY(QString osQuery READ osQuery WRITE setOsQuery NOTIFY osQueryChanged FINAL)
+    Q_PROPERTY(QString osLanguage READ osLanguage WRITE setOsLanguage NOTIFY osLanguageChanged FINAL)
+    Q_PROPERTY(QString osError READ osError NOTIFY osStateChanged FINAL)
+    Q_PROPERTY(bool hasKey READ hasKey NOTIFY osStateChanged FINAL)
+    Q_PROPERTY(bool osSearching READ osSearching NOTIFY osStateChanged FINAL)
     Q_PROPERTY(bool canSave READ canSave NOTIFY canSaveChanged FINAL)
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged FINAL)
 
@@ -68,6 +76,13 @@ public:
     QStringList candidates() const { return m_candidates; }
     QVector<int> pairs() const { return m_pairs; }
     QVector<int> ticked() const { return m_ticked; }
+    QString osQuery() const { return m_osQuery; }
+    void setOsQuery(const QString& q);
+    QString osLanguage() const { return m_osLanguage; }
+    void setOsLanguage(const QString& l);
+    QString osError() const { return m_osError; }
+    bool hasKey() const { return m_hasKey; }
+    bool osSearching() const { return m_searching; }
     bool canSave() const { return m_canSave; }
     bool busy() const { return m_busy; }
 
@@ -81,6 +96,8 @@ public:
     Q_INVOKABLE void setPair(int mediaRow, int candidate);
     Q_INVOKABLE void toggle(int candidate);
     Q_INVOKABLE void save();
+    // reads the key again (Settings may have changed it) and searches for osQuery
+    Q_INVOKABLE void searchOpenSubtitles();
 
 signals:
     void targetChanged();
@@ -92,10 +109,21 @@ signals:
     void tickedChanged();
     void canSaveChanged();
     void busyChanged();
+    void osQueryChanged();
+    void osLanguageChanged();
+    void osStateChanged();
     void finished(int attached, int failed);
 
 private:
     void refresh(bool reloadMedia);
+    // candidates, pairs and ticks from the origin's list (the scanned files or the search hits)
+    void applyCandidates();
+    void setOsState(const QString& error, bool searching);
+    bool readKey(QString* key = nullptr);
+    void resetOpenSubtitles();
+    void saveOpenSubtitles();
+    void nextDownload();
+    QString downloadPath(const QVariantMap& media, const SubtitleHit& hit) const;
     void setBusy(bool busy);
     void updateCanSave();
     bool validLink() const;
@@ -110,6 +138,16 @@ private:
     QString m_dir; // folder scanned for candidates, local path
     QVariantList m_media;
     QStringList m_candidates;
+    QStringList m_local; // the files found in m_dir
+    QVector<SubtitleHit> m_hits;
+    QString m_osQuery, m_osLanguage = QStringLiteral("en"), m_osError;
+    bool m_hasKey = false;
+    bool m_searching = false;
+    OpenSubtitlesClient* m_client = nullptr; // the search in flight, or the downloads of a save
+    struct Download { QVariantMap media; SubtitleHit hit; };
+    QVector<Download> m_downloads;
+    Download m_current;
+    int m_attached = 0, m_failed = 0;
     QVector<int> m_pairs;
     QVector<int> m_ticked;
     bool m_canSave = false;

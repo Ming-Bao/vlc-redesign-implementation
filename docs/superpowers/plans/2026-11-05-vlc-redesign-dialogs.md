@@ -29,7 +29,7 @@
   - QML and C++ files go in `modules/gui/qt/meson.build`, `Makefile.am` and `po/POTFILES.in`; QML in the `VLC.Dialogs` list (controls in the `VLC.PlayerControls` list).
   - SVGs and fonts go in `assets.qrc`, `Makefile.am` and the meson resource list.
 - **Legacy fallback:** each `DialogsProvider` entry that now emits a signal checks `isSignalConnected` and falls back to the legacy dialog when nothing listens, as `prefsDialog()` does since slice 7.
-- **Merge points:** the branch is mergeable after Tasks 3, 5, 7 and 12. Task 13 waits for the user's decision on OpenSubtitles.
+- **Merge points:** the branch is mergeable after Tasks 3, 5, 7 and 12. Task 13 shipped on the user's go-ahead of 2026-11-05.
 
 ## Review Focus
 
@@ -790,7 +790,11 @@ What the spec left to the implementer (*my call*) and what the build changed. Se
 - To This File: multi-select, and a file matching the media starts ticked.
 - To This Folder / Playlist: clicking the paired subtitle opens a menu of the candidates plus **None**. A media with no match shows **None** in `#404040`.
 - Folder media are the library's media directly in that folder. Candidate subtitle files come from one directory scan with VLC's subtitle extensions.
-- From OpenSubtitles: pending. Task 13 follows this one and adds its own entry.
+- From OpenSubtitles (Task 13): `qt-opensubtitles-key` is a password row in Settings ▸ Network. An empty key shows "Add an OpenSubtitles API key in Settings ▸ Network" with an Open Settings button that opens Settings on that page.
+  - The search box searches after a 0.7 s pause or on Enter, and the language is a dropdown of 16 codes. Hits are the candidates, so To This File ticks them and To This Folder / Playlist pair them with `matchSubtitles` through the same menu. The search text starts as the media's name (File) or the folder's name.
+  - Save downloads one file at a time to `<media stem>.<lang>.srt` beside the media, or to `<userdata>/subtitles/` when that folder isn't writable, then attaches it. The name is built from the local stem and a language code kept to `[a-z0-9-]`, never from the server's `file_name`; a taken name gets `.2`, `.3` and so on. A failed download is counted in `finished(attached, failed)`, and nothing partial is written (`QSaveFile`).
+  - The key goes only to `https://api.opensubtitles.com/api/v1`; the client's base URL is a constructor argument used by the tests, and no option sets it. The file link a download returns is fetched without the key. Errors never carry the key or the response body.
+  - Unverified: a live search or download with a real key, and the exact download requirements (the official docs could not be read; see the Task 13 report). The real service refused a dummy key and the dialog showed it.
 
 **Customize Player**
 - With no media the editor shows placeholder text, "Title" and `00:00`.

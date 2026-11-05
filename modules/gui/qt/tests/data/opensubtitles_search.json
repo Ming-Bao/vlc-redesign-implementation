@@ -1,0 +1,32 @@
+{
+  "_note": "NOT A CAPTURED RESPONSE. Written by hand from the shape in the OpenSubtitles API docs (GET /subtitles) and third-party guides, because no API key was available. Values are invented. Replace with a real capture when a key exists.",
+  "total_pages": 1,
+  "total_count": 2,
+  "per_page": 50,
+  "page": 1,
+  "data": [
+    {
+      "id": "6296527",
+      "type": "subtitle",
+      "attributes": {
+        "subtitle_id": "6296527",
+        "language": "en",
+        "download_count": 1204,
+        "release": "The.Wand.S01E01.WEB.x264",
+        "feature_details": { "feature_type": "Episode", "title": "The Wand", "season_number": 1, "episode_number": 1 },
+        "files": [ { "file_id": 6411421, "cd_number": 1, "file_name": "The.Wand.S01E01.WEB.x264.srt" } ]
+      }
+    },
+    {
+      "id": "6296528",
+      "type": "subtitle",
+      "attributes": {
+        "subtitle_id": "6296528",
+        "language": "pt-BR",
+        "download_count": 87,
+        "release": "The.Wand.S01E01.720p",
+        "files": [ { "file_id": 6411500, "cd_number": 1, "file_name": "The_Wand_S01E01_720p.srt" } ]
+      }
+    }
+  ]
+}

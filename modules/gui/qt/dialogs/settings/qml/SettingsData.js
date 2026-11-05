@@ -372,6 +372,10 @@ var pages = [
             { label: qsTr("HTTP proxy"), kind: "field", option: "http-proxy", placeholder: qsTr("System proxy") },
             { label: qsTr("HTTP proxy password"), kind: "password", option: "http-proxy-pwd" }
         ] },
+        { title: qsTr("OpenSubtitles"), rows: [
+            { label: qsTr("OpenSubtitles API key"), kind: "password", option: "qt-opensubtitles-key",
+              keywords: qsTr("subtitles download") }
+        ] },
         { title: qsTr("Security"), rows: [
             { label: qsTr("Verify certificates against the system trust store"), kind: "toggle", option: "gnutls-system-trust" },
             { label: qsTr("Cipher preference"), kind: "dropdown", option: "gnutls-priorities" }

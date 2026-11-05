@@ -16,7 +16,7 @@ qt6_dep = dependency('qt6',
     version: '>=6.2',
     modules: [
         'Core', 'Gui', 'Widgets', 'Qml',
-        'Quick', 'QuickControls2'
+        'Quick', 'QuickControls2', 'Network'
         ],
     private_headers: true,
     required: get_option('qt'))
@@ -72,6 +72,7 @@ moc_headers = files(
     'dialogs/network/saved_streams.hpp',
     'dialogs/hotkeys/hotkey_model.hpp',
     'dialogs/subtitles/add_subtitles_controller.hpp',
+    'dialogs/subtitles/opensubtitles_client.hpp',
     'dialogs/toolbar/controlbar_profile.hpp',
     'dialogs/toolbar/controlbar_profile_model.hpp',
     'dialogs/playlists/playlists.hpp',
@@ -306,6 +307,8 @@ qt_plugin_sources = files(
     'dialogs/playlists/playlist_cover.hpp',
     'dialogs/subtitles/add_subtitles_controller.cpp',
     'dialogs/subtitles/add_subtitles_controller.hpp',
+    'dialogs/subtitles/opensubtitles_client.cpp',
+    'dialogs/subtitles/opensubtitles_client.hpp',
     'dialogs/subtitles/subtitle_matching.cpp',
     'dialogs/subtitles/subtitle_matching.hpp',
     'dialogs/playlists/playlists.cpp',
@@ -1597,6 +1600,22 @@ if qt6_dep.found()
                 'dialogs/playlists/playlist_cover.hpp'
             ),
             'moc_sources': files('tests/test_playlist_cover.cpp'),
+            'suite': ['qt'],
+            'link_with': [libvlccore],
+            'include_directories' : qt_include_dir,
+            'link_args': qt_link_args,
+            'dependencies': [qt6_dep, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
+            'name': 'test_qt_opensubtitles_client',
+            'sources': files(
+                'tests/test_opensubtitles_client.cpp',
+                'dialogs/subtitles/opensubtitles_client.cpp',
+                'dialogs/subtitles/opensubtitles_client.hpp'
+            ),
+            'moc_sources': files('tests/test_opensubtitles_client.cpp'),
+            'moc_headers': files('dialogs/subtitles/opensubtitles_client.hpp'),
             'suite': ['qt'],
             'link_with': [libvlccore],
             'include_directories' : qt_include_dir,

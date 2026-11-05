@@ -667,5 +667,18 @@ Item {
                 addSubtitlesLoader.item.openWith(context)
             }
         }
+
+        // the "no API key" button: Settings opens on its Network page, over the dialog
+        Connections {
+            target: addSubtitlesLoader.item
+            ignoreUnknownSignals: true
+
+            function onOpenNetworkSettings() {
+                settingsWindowLoader.active = true
+                const win = settingsWindowLoader.item
+                win.currentPage = win.pages.findIndex(p => p.name === "network")
+                win.open()
+            }
+        }
     }
 }
