@@ -18,10 +18,13 @@
 #ifndef VLC_QT_OPENSUBTITLES_CLIENT_HPP
 #define VLC_QT_OPENSUBTITLES_CLIENT_HPP
 
+#include <QByteArray>
 #include <QObject>
 #include <QString>
 #include <QUrl>
 #include <QVector>
+
+#include <memory>
 
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -55,6 +58,9 @@ public:
     static QVector<SubtitleHit> parseResults(const QByteArray& json);
     // "<stem>.<language>.srt" for a media: the name is built from the local stem and a language code kept to
     // [a-z0-9-], so nothing a server sends can name a path
+    // a link the file may be fetched from when the client talks to the real service: https, and a host that is
+    // not "localhost" or a loopback, private or link-local address (checked on the literal, no DNS lookup)
+    static bool isSafeFileLink(const QUrl& url);
     static QString subtitleFileName(const QString& mediaStem, const QString& language);
 
 signals:
@@ -65,10 +71,15 @@ signals:
 
 private:
     QNetworkRequest request(const QUrl& url, bool withKey) const;
+    // aborts a reply that sends more than MaxSubtitleBytes, whether or not it announced a length
+    static std::shared_ptr<QByteArray> capSize(QNetworkReply* reply);
+    bool linkAllowed(const QUrl& url) const;
+    void fetchFile(const QUrl& url, int redirects, const QString& destPath);
     static QString errorFor(QNetworkReply* reply, const QByteArray& body);
 
     QString m_key;
     QUrl m_base;
+    bool m_strict; // the real service: file links must pass isSafeFileLink
     QNetworkAccessManager* m_nam;
     QNetworkReply* m_search = nullptr;
     QNetworkReply* m_download = nullptr;

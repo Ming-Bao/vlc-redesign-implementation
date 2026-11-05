@@ -23,6 +23,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
+#include <QHostAddress>
 #include <QRegularExpression>
 #include <QSaveFile>
 #include <QUrlQuery>
@@ -33,7 +34,8 @@ constexpr qint64 MaxSubtitleBytes = 5 * 1024 * 1024;
 }
 
 OpenSubtitlesClient::OpenSubtitlesClient(const QString& apiKey, const QUrl& baseUrl, QObject* parent)
-    : QObject(parent), m_key(apiKey.trimmed()), m_base(baseUrl), m_nam(new QNetworkAccessManager(this))
+    : QObject(parent), m_key(apiKey.trimmed()), m_base(baseUrl),
+      m_strict(baseUrl.host() == defaultBaseUrl().host()), m_nam(new QNetworkAccessManager(this))
 {
     qRegisterMetaType<QVector<SubtitleHit>>();
 }
@@ -46,9 +48,8 @@ QNetworkRequest OpenSubtitlesClient::request(const QUrl& url, bool withKey) cons
     r.setRawHeader("Accept", "application/json");
     if (withKey)
         r.setRawHeader("Api-Key", m_key.toUtf8());
-    // a redirect would carry the key somewhere else: API calls fail on one
-    r.setAttribute(QNetworkRequest::RedirectPolicyAttribute, withKey ? QNetworkRequest::ManualRedirectPolicy
-                                                                      : QNetworkRequest::NoLessSafeRedirectPolicy);
+    // redirects are never followed by Qt: an API call fails on one (the key stays put), a file fetch checks each hop
+    r.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::ManualRedirectPolicy);
     r.setTransferTimeout(TimeoutMs);
     return r;
 }
@@ -57,15 +58,78 @@ QNetworkRequest OpenSubtitlesClient::request(const QUrl& url, bool withKey) cons
 QString OpenSubtitlesClient::errorFor(QNetworkReply* reply, const QByteArray&)
 {
     const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    if (reply->property("tooBig").toBool())
+        return tr("OpenSubtitles sent more data than VLC accepts");
     if (status == 401 || status == 403)
         return tr("OpenSubtitles refused the API key");
     if (status == 429)
         return tr("OpenSubtitles limit reached, try again later");
-    if (status >= 400)
+    if (status >= 300)
         return tr("OpenSubtitles answered with error %1").arg(status);
     if (reply->error() == QNetworkReply::OperationCanceledError || reply->error() == QNetworkReply::TimeoutError)
         return tr("OpenSubtitles did not answer in time");
     return tr("Could not reach OpenSubtitles");
+}
+
+// Drains the reply as it arrives into the returned buffer, so Qt never holds more than the cap, and aborts once
+// the body passes it or a Content-Length announces that it will.
+std::shared_ptr<QByteArray> OpenSubtitlesClient::capSize(QNetworkReply* reply)
+{
+    auto body = std::make_shared<QByteArray>();
+    auto tooBig = [reply] {
+        reply->setProperty("tooBig", true);
+        reply->abort();
+    };
+    connect(reply, &QNetworkReply::readyRead, reply, [reply, body, tooBig] {
+        body->append(reply->readAll());
+        if (body->size() > MaxSubtitleBytes)
+            tooBig();
+    });
+    connect(reply, &QNetworkReply::downloadProgress, reply, [tooBig](qint64, qint64 total) {
+        if (total > MaxSubtitleBytes)
+            tooBig();
+    });
+    return body;
+}
+
+// a reply that finished with a 2xx
+static bool succeeded(QNetworkReply* reply)
+{
+    const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    return reply->error() == QNetworkReply::NoError && status >= 200 && status < 300;
+}
+
+bool OpenSubtitlesClient::isSafeFileLink(const QUrl& url)
+{
+    if (!url.isValid() || url.scheme() != QLatin1String("https"))
+        return false;
+    const QString host = url.host().toLower();
+    if (host.isEmpty() || host == QLatin1String("localhost") || host.endsWith(QLatin1String(".localhost")))
+        return false;
+    // a numeric last label is an address in some spelling ("2130706433", "0x7f.1"); no host name ends that way
+    const QString last = host.section(QLatin1Char('.'), -1);
+    static const QRegularExpression numeric(QStringLiteral("^(0x[0-9a-f]*|[0-9]+)$"));
+    QHostAddress addr;
+    if (!addr.setAddress(host))
+        return !numeric.match(last).hasMatch();
+    bool v4 = false;
+    const quint32 a = addr.toIPv4Address(&v4); // also reads an IPv4-mapped IPv6 address
+    if (v4) {
+        const quint8 b0 = a >> 24, b1 = (a >> 16) & 0xff;
+        return !(b0 == 0 || b0 == 10 || b0 == 127 || b0 >= 224 || (b0 == 169 && b1 == 254)
+                 || (b0 == 172 && (b1 & 0xf0) == 16) || (b0 == 192 && b1 == 168) || (b0 == 100 && (b1 & 0xc0) == 64));
+    }
+    const Q_IPV6ADDR b = addr.toIPv6Address();
+    return !(addr.isNull() || addr == QHostAddress(QHostAddress::LocalHostIPv6) || b[0] == 0xff
+             || (b[0] & 0xfe) == 0xfc || (b[0] == 0xfe && (b[1] & 0xc0) == 0x80)
+             || addr == QHostAddress(QHostAddress::AnyIPv6));
+}
+
+bool OpenSubtitlesClient::linkAllowed(const QUrl& url) const
+{
+    if (m_strict)
+        return isSafeFileLink(url);
+    return url.isValid() && (url.scheme() == QLatin1String("https") || url.scheme() == QLatin1String("http"));
 }
 
 void OpenSubtitlesClient::abort()
@@ -98,11 +162,12 @@ void OpenSubtitlesClient::search(const QString& query, const QString& language)
     url.setQuery(q);
 
     QNetworkReply* reply = m_search = m_nam->get(request(url, true));
-    connect(reply, &QNetworkReply::finished, this, [this, reply] {
+    const auto buffer = capSize(reply);
+    connect(reply, &QNetworkReply::finished, this, [this, reply, buffer] {
         m_search = nullptr;
         reply->deleteLater();
-        const QByteArray body = reply->read(MaxSubtitleBytes);
-        if (reply->error() != QNetworkReply::NoError)
+        const QByteArray body = *buffer + reply->readAll();
+        if (!succeeded(reply))
             return emit failed(errorFor(reply, body));
         const QJsonDocument doc = QJsonDocument::fromJson(body);
         if (!doc.isObject() || !doc.object().value(QStringLiteral("data")).isArray())
@@ -125,33 +190,46 @@ void OpenSubtitlesClient::download(int fileId, const QString& destPath)
     const QByteArray payload = QJsonDocument(QJsonObject{{QStringLiteral("file_id"), fileId}}).toJson(QJsonDocument::Compact);
 
     QNetworkReply* reply = m_download = m_nam->post(r, payload);
-    connect(reply, &QNetworkReply::finished, this, [this, reply, destPath] {
+    const auto buffer = capSize(reply);
+    connect(reply, &QNetworkReply::finished, this, [this, reply, buffer, destPath] {
         reply->deleteLater();
-        const QByteArray body = reply->read(MaxSubtitleBytes);
-        if (reply->error() != QNetworkReply::NoError) {
+        const QByteArray body = *buffer + reply->readAll();
+        if (!succeeded(reply)) {
             m_download = nullptr;
             return emit downloadFailed(errorFor(reply, body));
         }
         const QUrl link(QJsonDocument::fromJson(body).object().value(QStringLiteral("link")).toString());
-        if (!link.isValid() || (link.scheme() != QLatin1String("https") && link.scheme() != QLatin1String("http"))) {
-            m_download = nullptr;
-            return emit downloadFailed(tr("OpenSubtitles sent an answer VLC does not understand"));
+        m_download = nullptr;
+        fetchFile(link, 0, destPath);
+    });
+}
+
+// the file's own host never sees the key; every hop, the first included, must pass linkAllowed
+void OpenSubtitlesClient::fetchFile(const QUrl& url, int redirects, const QString& destPath)
+{
+    if (!linkAllowed(url))
+        return emit downloadFailed(tr("OpenSubtitles sent an answer VLC does not understand"));
+    QNetworkReply* file = m_download = m_nam->get(request(url, false));
+    const auto buffer = capSize(file);
+    connect(file, &QNetworkReply::finished, this, [this, file, buffer, url, redirects, destPath] {
+        m_download = nullptr;
+        file->deleteLater();
+        const int status = file->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if (file->error() == QNetworkReply::NoError && status >= 300 && status < 400) {
+            const QUrl next = url.resolved(file->header(QNetworkRequest::LocationHeader).toUrl());
+            if (redirects >= 3 || !next.isValid())
+                return emit downloadFailed(tr("Could not reach OpenSubtitles"));
+            return fetchFile(next, redirects + 1, destPath);
         }
-        // the file's own host never sees the key
-        QNetworkReply* file = m_download = m_nam->get(request(link, false));
-        connect(file, &QNetworkReply::finished, this, [this, file, destPath] {
-            m_download = nullptr;
-            file->deleteLater();
-            const QByteArray data = file->read(MaxSubtitleBytes + 1);
-            if (file->error() != QNetworkReply::NoError)
-                return emit downloadFailed(errorFor(file, data));
-            if (data.isEmpty() || data.size() > MaxSubtitleBytes)
-                return emit downloadFailed(tr("OpenSubtitles sent an answer VLC does not understand"));
-            QSaveFile out(destPath);
-            if (!out.open(QIODevice::WriteOnly) || out.write(data) != data.size() || !out.commit())
-                return emit downloadFailed(tr("Could not save the subtitle file"));
-            emit downloaded(destPath);
-        });
+        const QByteArray data = *buffer + file->readAll();
+        if (!succeeded(file))
+            return emit downloadFailed(errorFor(file, data));
+        if (data.isEmpty() || data.size() > MaxSubtitleBytes)
+            return emit downloadFailed(tr("OpenSubtitles sent an answer VLC does not understand"));
+        QSaveFile out(destPath);
+        if (!out.open(QIODevice::WriteOnly) || out.write(data) != data.size() || !out.commit())
+            return emit downloadFailed(tr("Could not save the subtitle file"));
+        emit downloaded(destPath);
     });
 }
 

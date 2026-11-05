@@ -194,10 +194,7 @@ void AddSubtitlesController::setOrigin(Origin o)
         applyCandidates();
         searchOpenSubtitles();
     } else if (wasSearch) {
-        if (m_client) {
-            m_client->deleteLater();
-            m_client = nullptr;
-        }
+        cancelOpenSubtitles();
         setOsState({}, false);
         applyCandidates();
     }
@@ -250,10 +247,7 @@ void AddSubtitlesController::searchOpenSubtitles()
 {
     if (m_origin != OpenSubtitles || m_busy)
         return;
-    if (m_client) {
-        m_client->deleteLater();
-        m_client = nullptr;
-    }
+    dropClient();
     m_hits.clear();
     applyCandidates();
     QString key;
@@ -276,14 +270,31 @@ void AddSubtitlesController::searchOpenSubtitles()
     m_client->search(query, m_osLanguage);
 }
 
+// the client is gone for good: nothing it already queued may reach this object
+void AddSubtitlesController::dropClient()
+{
+    if (!m_client)
+        return;
+    m_client->abort();
+    m_client->disconnect(this);
+    m_client->deleteLater();
+    m_client = nullptr;
+}
+
+// stops a search or a save in flight; a save that was running no longer holds the dialog busy
+void AddSubtitlesController::cancelOpenSubtitles()
+{
+    dropClient();
+    m_downloads.clear();
+    if (m_saving) {
+        m_saving = false;
+        setBusy(false);
+    }
+}
+
 void AddSubtitlesController::resetOpenSubtitles()
 {
-    if (m_client) {
-        m_client->deleteLater();
-        m_client = nullptr;
-    }
-    m_downloads.clear();
-    setBusy(false);
+    cancelOpenSubtitles();
     m_hits.clear();
     m_osQuery.clear();
     emit osQueryChanged();
@@ -555,8 +566,7 @@ void AddSubtitlesController::saveOpenSubtitles()
             if (m_pairs[row] >= 0)
                 m_downloads.append({m_media[row].toMap(), m_hits[m_pairs[row]]});
     }
-    if (m_client)
-        m_client->deleteLater();
+    dropClient();
     m_client = new OpenSubtitlesClient(key, OpenSubtitlesClient::defaultBaseUrl(), this);
     // a downloaded file is attached; a failed one is skipped and counted
     connect(m_client, &OpenSubtitlesClient::downloaded, this, [this](const QString& path) {
@@ -568,12 +578,15 @@ void AddSubtitlesController::saveOpenSubtitles()
         nextDownload();
     });
     m_attached = m_failed = 0;
+    m_saving = true;
     setBusy(true);
     nextDownload();
 }
 
 void AddSubtitlesController::nextDownload()
 {
+    if (!m_client)
+        return;
     while (!m_downloads.isEmpty()) {
         m_current = m_downloads.takeFirst();
         const QString path = downloadPath(m_current.media, m_current.hit);
@@ -583,8 +596,8 @@ void AddSubtitlesController::nextDownload()
         }
         ++m_failed;
     }
-    m_client->deleteLater();
-    m_client = nullptr;
+    dropClient();
+    m_saving = false;
     setBusy(false);
     emit finished(m_attached, m_failed);
 }

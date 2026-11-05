@@ -121,6 +121,8 @@ private:
     void setOsState(const QString& error, bool searching);
     bool readKey(QString* key = nullptr);
     void resetOpenSubtitles();
+    void cancelOpenSubtitles();
+    void dropClient();
     void saveOpenSubtitles();
     void nextDownload();
     QString downloadPath(const QVariantMap& media, const SubtitleHit& hit) const;
@@ -148,6 +150,7 @@ private:
     QVector<Download> m_downloads;
     Download m_current;
     int m_attached = 0, m_failed = 0;
+    bool m_saving = false;
     QVector<int> m_pairs;
     QVector<int> m_ticked;
     bool m_canSave = false;

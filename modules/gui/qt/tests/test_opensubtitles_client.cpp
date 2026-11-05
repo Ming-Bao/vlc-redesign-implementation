@@ -171,6 +171,99 @@ private slots:
         QVERIFY(QDir(dir.path()).entryList(QDir::Files).isEmpty());
     }
 
+    void isSafeFileLink_table() {
+        const char* ok[] = {"https://dl.opensubtitles.org/en/download/sub/1", "https://example.com:8443/a.srt",
+                            "https://8.8.8.8/a", "https://[2606:4700::1111]/a"};
+        const char* bad[] = {"file:///etc/passwd", "ftp://example.com/a.srt", "http://example.com/a.srt", "", "https:///a",
+                             "https://localhost/a", "https://x.localhost/a", "https://127.0.0.1/a", "https://127.1.2.3/a",
+                             "https://10.0.0.5/a", "https://172.16.0.1/a", "https://172.31.255.255/a", "https://192.168.1.1/a",
+                             "https://169.254.169.254/a", "https://0.0.0.0/a", "https://100.64.0.1/a", "https://[::1]/a",
+                             "https://[::]/a", "https://[fd00::1]/a", "https://[fe80::1]/a", "https://[::ffff:127.0.0.1]/a",
+                             "https://2130706433/a", "https://0x7f.1/a"};
+        for (const char* u : ok)
+            QVERIFY2(OpenSubtitlesClient::isSafeFileLink(QUrl(QString::fromLatin1(u))), u);
+        for (const char* u : bad)
+            QVERIFY2(!OpenSubtitlesClient::isSafeFileLink(QUrl(QString::fromLatin1(u))), u);
+        QVERIFY(OpenSubtitlesClient::isSafeFileLink(QUrl("https://172.32.0.1/a"))); // outside 172.16/12
+    }
+
+    void oversizedBody_data() {
+        QTest::addColumn<bool>("withLength");
+        QTest::newRow("with Content-Length") << true;
+        QTest::newRow("without Content-Length") << false;
+    }
+    void oversizedBody() {
+        QFETCH(bool, withLength);
+        const QByteArray big(6 * 1024 * 1024, 'x');
+        FakeServer server;
+        QTemporaryDir dir;
+        auto answer = [&](const QByteArray& body) {
+            return withLength ? FakeServer::reply(200, body)
+                              : "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nConnection: close\r\n\r\n" + body;
+        };
+        server.handler = [&](const QByteArray& req) -> QByteArray {
+            if (req.startsWith("GET /file"))
+                return answer(big);
+            if (req.startsWith("POST"))
+                return FakeServer::reply(200, "{\"link\":\"http://127.0.0.1:" + QByteArray::number(server.serverPort()) + "/file\"}");
+            return answer("{\"data\":[],\"pad\":\"" + big + "\"}");
+        };
+        OpenSubtitlesClient c("dummy-key", server.base());
+        QSignalSpy failed(&c, &OpenSubtitlesClient::failed), results(&c, &OpenSubtitlesClient::results),
+                   dfailed(&c, &OpenSubtitlesClient::downloadFailed), done(&c, &OpenSubtitlesClient::downloaded);
+        c.search("x", "en");
+        QTRY_COMPARE_WITH_TIMEOUT(failed.size(), 1, 10000);
+        QCOMPARE(results.size(), 0);
+        QVERIFY2(failed[0][0].toString().contains("more data"), qPrintable(failed[0][0].toString()));
+        c.download(1, dir.filePath("x.srt"));
+        QTRY_COMPARE_WITH_TIMEOUT(dfailed.size(), 1, 10000);
+        QCOMPARE(done.size(), 0);
+        QVERIFY(QDir(dir.path()).entryList(QDir::Files).isEmpty());
+    }
+
+    void apiRedirect_isNotFollowed() {
+        FakeServer server;
+        server.handler = [&](const QByteArray&) -> QByteArray {
+            return "HTTP/1.1 302 Found\r\nLocation: /api/v1/elsewhere\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
+        };
+        QTemporaryDir dir;
+        OpenSubtitlesClient c("dummy-key", server.base());
+        QSignalSpy failed(&c, &OpenSubtitlesClient::failed), dfailed(&c, &OpenSubtitlesClient::downloadFailed);
+        c.search("x", "en");
+        QTRY_COMPARE(failed.size(), 1);
+        c.download(1, dir.filePath("x.srt"));
+        QTRY_COMPARE(dfailed.size(), 1);
+        // one request each: the key was never sent again
+        QCOMPARE(server.requests.size(), 2);
+        QVERIFY(QDir(dir.path()).entryList(QDir::Files).isEmpty());
+    }
+
+    void fileLink_notAllowed() {
+        FakeServer server;
+        server.handler = [&](const QByteArray& req) -> QByteArray {
+            if (req.startsWith("POST"))
+                return FakeServer::reply(200, "{\"link\":\"ftp://127.0.0.1/x.srt\"}");
+            return FakeServer::reply(404, "{}");
+        };
+        QTemporaryDir dir;
+        OpenSubtitlesClient c("dummy-key", server.base());
+        QSignalSpy dfailed(&c, &OpenSubtitlesClient::downloadFailed);
+        c.download(1, dir.filePath("x.srt"));
+        QTRY_COMPARE(dfailed.size(), 1);
+        QCOMPARE(server.requests.size(), 1); // the link was never fetched
+    }
+
+    void abort_leavesNoSignalBehind() {
+        FakeServer server;
+        server.handler = [&](const QByteArray&) { return FakeServer::reply(200, fixture()); };
+        OpenSubtitlesClient c("dummy-key", server.base());
+        QSignalSpy results(&c, &OpenSubtitlesClient::results), failed(&c, &OpenSubtitlesClient::failed);
+        c.search("x", "en");
+        c.abort();
+        QTest::qWait(300);
+        QCOMPARE(results.size() + failed.size(), 0);
+    }
+
     void unreachableServer() {
         quint16 port;
         { FakeServer s; port = s.serverPort(); } // closed again
