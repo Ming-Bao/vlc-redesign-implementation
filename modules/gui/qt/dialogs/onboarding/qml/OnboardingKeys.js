@@ -48,3 +48,14 @@ function caps(value) {
         parts.push("+")
     return parts.map(p => _special[p] || (_modifiers.includes(p) || p.length === 1 ? p.toUpperCase() : p))
 }
+
+// Two bindings drawn as a pair: the leading modifiers both share are drawn once ("SHIFT ← / →").
+// Each side keeps at least its last cap.
+function pairCaps(a, b) {
+    const l = caps(a), r = caps(b)
+    let n = 0
+    while (n < l.length - 1 && n < r.length - 1 && l[n] === r[n]
+           && _modifiers.some(m => m.toUpperCase() === l[n]))
+        n++
+    return { shared: l.slice(0, n), left: l.slice(n), right: r.slice(n) }
+}

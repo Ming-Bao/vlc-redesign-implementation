@@ -77,6 +77,28 @@ DialogCard {
         close()
     }
 
+    function _binding(key) {
+        return key.startsWith("=") ? key.slice(1) : SettingsBridge.value(key)
+    }
+
+    // a shortcut row's keys as a flat list of caps and "/", each with the Figma gap before it: 4 inside a chord,
+    // 10 around the "/". A pair's shared modifiers are drawn once ("SHIFT ← / →").
+    function _keyParts(keys) {
+        const parts = []
+        const add = (caps, gap) => caps.forEach((text, i) =>
+            parts.push({ text: text, slash: false, gap: parts.length === 0 ? 0 : (i === 0 ? gap : 4) }))
+        if (keys.length === 2) {
+            const pair = OnboardingKeys.pairCaps(_binding(keys[0]), _binding(keys[1]))
+            add(pair.shared, 4)
+            add(pair.left, 4)
+            parts.push({ text: "/", slash: true, gap: 10 })
+            add(pair.right, 10)
+        } else {
+            add(OnboardingKeys.caps(_binding(keys[0])), 4)
+        }
+        return parts
+    }
+
     function _skip() {
         if (_done)
             return
@@ -690,40 +712,42 @@ DialogCard {
 
                         Row {
                             x: VLCStyle.dp(220 + 20, VLCStyle.scale)
-                            spacing: VLCStyle.dp(10, VLCStyle.scale)
+                            // a long binding is shrunk to stay 20 clear of the right column's label (left column) or
+                            // of the card's edge (right column): 605 - 20 - 302 and 1090 - 20 - 845
+                            scale: Math.min(1, VLCStyle.dp(parent.index < 6 ? 283 : 225, VLCStyle.scale) / implicitWidth)
+                            transformOrigin: Item.Left
 
                             Repeater {
-                                model: parent.parent.modelData.keys
+                                model: root._keyParts(parent.parent.modelData.keys)
 
-                                Row {
-                                    required property int index
-                                    required property string modelData
+                                // a cap or a "/", after its gap
+                                Item {
+                                    id: part
 
-                                    spacing: VLCStyle.dp(10, VLCStyle.scale)
+                                    required property var modelData
+                                    readonly property real _gap: VLCStyle.dp(modelData.gap, VLCStyle.scale)
+
+                                    width: _gap + (modelData.slash ? slash.implicitWidth : partCap.implicitWidth)
+                                    height: VLCStyle.dp(42, VLCStyle.scale)
 
                                     Text {
+                                        id: slash
+
+                                        x: part._gap
                                         anchors.verticalCenter: parent.verticalCenter
-                                        visible: parent.index > 0
+                                        visible: part.modelData.slash
                                         text: "/"
                                         font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
                                         font.weight: Font.Light
                                         color: "#969696"
                                     }
 
-                                    Row {
-                                        spacing: VLCStyle.dp(4, VLCStyle.scale)
+                                    Cap {
+                                        id: partCap
 
-                                        Repeater {
-                                            model: {
-                                                const k = parent.parent.modelData
-                                                return OnboardingKeys.caps(k.startsWith("=") ? k.slice(1) : SettingsBridge.value(k))
-                                            }
-
-                                            Cap {
-                                                required property string modelData
-                                                text: modelData
-                                            }
-                                        }
+                                        x: part._gap
+                                        visible: !part.modelData.slash
+                                        text: part.modelData.slash ? "" : part.modelData.text
                                     }
                                 }
                             }
