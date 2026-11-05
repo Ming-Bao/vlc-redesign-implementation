@@ -109,6 +109,9 @@
         <file alias="subtitle-file.svg">pixmaps/redesign/dialogs/subtitle-file.svg</file>
         <file alias="swap.svg">pixmaps/redesign/dialogs/swap.svg</file>
     </qresource>
+    <qresource prefix="/redesign/onboarding">
+        <file alias="cone.svg">pixmaps/redesign/onboarding/cone.svg</file>
+    </qresource>
     <qresource prefix="/redesign/settings">
         <file alias="audio.svg">pixmaps/redesign/settings/audio.svg</file>
         <file alias="audio-active.svg">pixmaps/redesign/settings/audio-active.svg</file>

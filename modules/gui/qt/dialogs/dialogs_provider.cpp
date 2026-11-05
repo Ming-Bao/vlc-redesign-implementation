@@ -60,7 +60,6 @@
 #include "dialogs/plugins/plugins.hpp"
 #include "dialogs/epg/epg.hpp"
 #include "dialogs/playlists/playlists.hpp"
-#include "dialogs/firstrun/firstrunwizard.hpp"
 
 #include <vlc_url.h>
 #include <vlc_media_library.h>
@@ -82,7 +81,6 @@
 #define BASE_DIALOG(X) \
     X(prefsDialog) \
     X(openDialog) \
-    X(firstRunDialog) \
     X(extendedDialog) \
     X(messagesDialog) \
     X(gotoTimeDialog) \
@@ -348,9 +346,15 @@ void DialogsProvider::legacyPrefsDialog()
 
 void DialogsProvider::firstRunDialog()
 {
-    ensureDialog(m_firstRunDialog);
-    QVLCDialog::setWindowTransientParent(m_firstRunDialog.get(), nullptr, p_intf);
-    m_firstRunDialog->show();
+    if (!p_intf->b_isDialogProvider
+        && isSignalConnected(QMetaMethod::fromSignal(&DialogsProvider::showOnboarding)))
+    {
+        emit showOnboarding();
+        return;
+    }
+    // no onboarding card (skins2's provider, or no QML): don't ask again
+    config_PutInt("qt-privacy-ask", 0);
+    config_SaveConfigFile(p_intf);
 }
 
 void DialogsProvider::extendedDialog()

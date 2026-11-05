@@ -493,6 +493,21 @@ Item {
             }
 
             Loader {
+                id: onboardingLoader
+                active: false
+                source: "qrc:///qt/qml/VLC/Dialogs/OnboardingWindow.qml"
+
+                Connections {
+                    target: DialogsProvider
+
+                    function onShowOnboarding() {
+                        onboardingLoader.active = true
+                        onboardingLoader.item.open()
+                    }
+                }
+            }
+
+            Loader {
                 id: newPlaylistDialogLoader
                 active: false
                 source: "qrc:///qt/qml/VLC/Dialogs/NewPlaylistDialog.qml"
