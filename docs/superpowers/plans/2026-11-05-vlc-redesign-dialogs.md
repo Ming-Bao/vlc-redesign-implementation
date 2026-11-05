@@ -766,12 +766,13 @@ What the spec left to the implementer (*my call*) and what the build changed. Se
 
 **Shared window**
 - The four form dialogs are separate modal windows (`Qt.ApplicationModal`), like Settings, not overlays.
+- Their Loaders and Settings' live in `MainInterface.qml`, not the per-view `Dialogs`, so a view change doesn't destroy them with their edits. The per-view `Dialogs` keeps the popups that need `bgContent`. This also gives minimal view the new dialogs instead of the legacy fallback (read from the code, not run).
 
 **Open Network Stream**
 - One URL per line, blank lines ignored, a line without `://` gets `http://`.
 - Without a name the button reads **Open** and plays without saving. The user confirmed this on 2026-11-05 ("go with your plan").
 - Saved streams are `<userdata>/network-playlists/<name>.m3u8` (`#EXTM3U`, `#PLAYLIST:<name>`, one line per URL), so they need no media library and VLC's browse tree can open them.
-- `NetworkHomeDisplay` shows one tile per saved file after Radio. Activating it opens `folderTree` on the single URL, or on the file when it has several. The tile menu has Delete, with no confirmation.
+- `NetworkHomeDisplay` shows one tile per saved file after Radio. Activating it opens `folderTree` on the single URL when that URL's path ends in `.m3u`, `.pls` or `.xspf`, otherwise on the saved file, whose rows play. The tile menu has Delete, with no confirmation.
 
 **New Playlist**
 - Save is on when the name is non-blank. Files are optional.
@@ -791,10 +792,11 @@ What the spec left to the implementer (*my call*) and what the build changed. Se
 - To This Folder / Playlist: clicking the paired subtitle opens a menu of the candidates plus **None**. A media with no match shows **None** in `#404040`.
 - Folder media are the library's media directly in that folder. Candidate subtitle files come from one directory scan with VLC's subtitle extensions.
 - From OpenSubtitles (Task 13): `qt-opensubtitles-key` is a password row in Settings ▸ Network. An empty key shows "Add an OpenSubtitles API key in Settings ▸ Network" with an Open Settings button that opens Settings on that page.
-  - The search box searches after a 0.7 s pause or on Enter, and the language is a dropdown of 16 codes. Hits are the candidates, so To This File ticks them and To This Folder / Playlist pair them with `matchSubtitles` through the same menu. The search text starts as the media's name (File) or the folder's name.
+  - The search box searches after a 0.7 s pause in typing or on Enter, and the language is a dropdown of 16 codes. Choosing From OpenSubtitles or coming back from Settings sends nothing: the prefilled file name stays on this machine until the user asks, and the page says "Press Enter to search OpenSubtitles". Changing the language with a query in the box does search. Hits are the candidates, so To This File ticks them and To This Folder / Playlist pair them with `matchSubtitles` through the same menu. The search text starts as the media's name (File) or the folder's name.
   - Save downloads one file at a time to `<media stem>.<lang>.srt` beside the media, or to `<userdata>/subtitles/` when that folder isn't writable, then attaches it. The name is built from the local stem and a language code kept to `[a-z0-9-]`, never from the server's `file_name`; a taken name gets `.2`, `.3` and so on. A failed download is counted in `finished(attached, failed)`, and nothing partial is written (`QSaveFile`).
   - The key goes only to `https://api.opensubtitles.com/api/v1`; the client's base URL is a constructor argument used by the tests, and no option sets it. The file link a download returns is fetched without the key. Errors never carry the key or the response body.
-  - Unverified: a live search or download with a real key, and the exact download requirements (the official docs could not be read; see the Task 13 report). The real service refused a dummy key and the dialog showed it.
+  - Open Settings opens Settings modal to the dialog for that trip; on return the dialog reads the key again and takes the focus back. Closing the dialog however it closes stops a search or download in flight.
+  - Unverified: any search or download with a real key, so real results, the real response shape, `POST /download` auth and the User-Agent rules are all open (the official docs could not be read; see the Task 13 report). What the real service has shown: a multi-word search with a dummy key, sent by the app, passes its redirect and reaches the key check, and the dialog says "OpenSubtitles refused the API key". That is the only path a dummy key can reach. Saving and cancelling were run against a local mock only.
 
 **Customize Player**
 - With no media the editor shows placeholder text, "Title" and `00:00`.
@@ -819,4 +821,8 @@ What the spec left to the implementer (*my call*) and what the build changed. Se
 - Ruling: Task 13's gate is cleared by the user's "go with your plan". A local mock server replaces a real API key unless one is supplied, so the live service stays unverified.
 - Profile > New is only offered when the interface isn't a dialog provider, since the overlay lives in the main window.
 - Removed: `ToolbarEditorDialog.qml`, `ToolbarEditor.qml`, `ToolbarEditorButtonList.qml`. `EditorTabButton.qml` and `EditorDummyButton.qml` became `SettingsButton.qml` and `DividerWidget.qml` in `player/qml/controlbarcontrols/`.
-- Known gaps, reviewed and left: `Makefile.am` has never been built or run through automake. The default bottom bar has no "visualizer" control although the spec's zone table lists one (pre-existing).
+- Known gaps, reviewed and left: The default bottom bar has no "visualizer" control although the spec's zone table lists one (pre-existing). The main `make` of the plugin has never been run; automake and configure have, in a temporary copy, and `test_control_ids` and `test_opensubtitles_client` built and passed there with `make`.
+- Ruling (final review I3): contrib Qt builds set `FEATURE_network=OFF` (`contrib/src/qt/rules.mak`), so From OpenSubtitles' `Qt6Network` requirement would break them. This fork builds on system Qt, so the build stays as it is. A contrib build needs the module enabled, or Network made optional, first.
+- Ruling (final review I8): a visible modal `DialogCard` turns `MainCtx.useGlobalShortcuts` off, through a count (`MainCtx.holdGlobalShortcuts`) so nested cards restore in any order and a search field losing focus can't turn it back on. The property was seen going off and back on across Cancel, x, Escape, Save, Alt+F4 (Wayland) and the Add Subtitles to Settings trip. Whether a shortcut is really held off over a card stays a hand check: Qt Shortcuts never fire on Xvfb and `wl-drive` can't send Ctrl chords. On a real session: Ctrl+N from the library, then Ctrl+P and Ctrl+N with Keyboard Shortcuts open and its search field focused.
+- Final review I6: Customize Player hides the queue card and leaves the saved state alone, so `MainWindow/playqueue-panel-visible` is unchanged after Cancel and an open queue is open again after.
+- Final review Minor 5: Add Subtitles to a playing file looks up its library id from the mrl, so the Tracks panel's Add persists for a library file as the file menu's does.

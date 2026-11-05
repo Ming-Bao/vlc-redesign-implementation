@@ -62,7 +62,7 @@ Opened by `DialogsProvider::openNetDialog()`, which now emits a signal for the Q
 - **With a name:** the links are saved, the dialog closes, and the Network page opens on the saved entry, as the video does at 13:18. *(video)*
 - **Without a name:** nothing is saved. The links are queued and the first plays, as Ctrl+N does today. The button reads **Open** instead of Save. *(my call: the field says "optional" and a Save that saves nothing would lie. **Flagged for review.**)*
 - **Storage:** `<userdata>/network-playlists/<name>.m3u8`, a plain `#EXTM3U` file with `#PLAYLIST:<name>` and one line per URL. The name is sanitised for the file system. A name that exists overwrites after a confirmation. *(my call: no media library needed, so it works in builds without one, and VLC's own browse tree can open it.)*
-- **On the Network page:** `NetworkHomeDisplay` adds one tile per saved file, after Radio, titled by name. Activating it opens `folderTree` on the single URL when the file has one, otherwise on the file. The tile's menu has Delete. *(my call)*
+- **On the Network page:** `NetworkHomeDisplay` adds one tile per saved file, after Radio, titled by name. Activating it opens `folderTree` on the single URL only when the file has one link and its path ends in `.m3u`, `.pls` or `.xspf`, so its channels are the page; otherwise on the saved file, which lists each link as a row that plays. A plain media URL, or an HLS `.m3u8`, has no rows to browse and would open an empty page, so a playlist saved under `.m3u8` also opens as one row. The tile's menu has Delete. *(my call, changed after the final review)*
 
 ## New Playlist
 
