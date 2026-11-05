@@ -78,9 +78,9 @@ Out of scope:
 | Back, Next | as above |
 
 **Behaviour:**
-- **The page opens on the current values:** `MainCtx.colorScheme.scheme` and `qt-accent-color`. On a first run that is Dark and orange, as in the frame. *(my call: VLC's default scheme is System. The frame shows Dark selected, so the page preselects Dark on a first run, when `qt-privacy-ask` is still on.)*
 - **Picking a swatch recolours the whole card at once:** the preview's accents, the theme ring, the Next and Finish buttons, the welcome cone, and the focus rings. This is what the eight colour frames show.
 - **A theme tile only moves the ring.** The preview stays dark until slice 10. *(my call)*
+- **Dark is always preselected.** The card only appears on a first run, so the frame's Dark wins over VLC's System default. The accent preselects the current `qt-accent-color`, so a command-line `--qt-accent-color` shows. *(my call)*
 - **Nothing is written until Finish.**
 
 ## Page 3: Keyboard shortcuts
@@ -104,9 +104,9 @@ Out of scope:
 | Cycle Subtitle Track | `key-subtitle-track` | Take a Snapshot | `key-snapshot` |
 | Cycle Audio Track | `key-audio-track` | Record | `key-record` |
 
-- **Show / Hide File Browser** has no shortcut today. Add `Ctrl+Shift+L` in `GlobalShortcuts.qml`. It toggles the player's library side panel (4e, `PlayerControlbarControls.libraryPanelOpen`) while the player is shown, and does nothing elsewhere. *(my call: Figma's `L` is VLC's loop key and Ctrl+B is bookmarks. Ctrl+Shift+L pairs with the queue's Ctrl+L. The builder confirms it is free.)*
+- **Show / Hide File Browser** has no shortcut today. Add `Ctrl+Shift+L` in `GlobalShortcuts.qml`. It toggles the player's library side panel (4e, `PlayerControlbarControls.libraryPanelOpen`) while `MainCtx.playerView` is true, and does nothing elsewhere. *(my call: Figma's `L` is VLC's loop key and Ctrl+B is bookmarks. Ctrl+Shift+L pairs with the queue's Ctrl+L. The builder confirms it is free.)*
 - **A row whose binding is empty** shows a single cap with "—". *(my call)*
-- **The cap text uses the same conversion as slice 8's `HotkeyModel::displayKeys`**, so both screens spell keys alike. Reuse it; don't write a second one.
+- **The cap split is a small pure JS function** (`OnboardingKeys.js`). Slice 8's `HotkeyModel::displayKeys` joins whole bindings with `, ` and cannot split a chord into caps, but the spelling of `Esc` follows it (`esc`).
 
 ## Finish
 
