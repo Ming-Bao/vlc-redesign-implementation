@@ -1071,9 +1071,6 @@ libqt_plugin_la_RES = \
 	pixmaps/redesign/mini/replay.svg \
 	pixmaps/misc/cone.svg \
 	pixmaps/misc/new_indicator.svg \
-	pixmaps/misc/theme_dark.svg \
-	pixmaps/misc/theme_daynight.svg \
-	pixmaps/misc/theme_light.svg \
 	pixmaps/misc/wait1.svg \
 	pixmaps/misc/wait2.svg \
 	pixmaps/misc/wait3.svg \
