@@ -327,7 +327,7 @@ What the spec left to the implementer (*my call*) and what the build changed. Se
 
 **Page 1: Welcome**
 - The folder field starts with the XDG Videos folder, shown with `~`. With no Videos folder it is empty with the placeholder `e.g., ~/Videos` in `#404040`.
-- The field is editable and `~` is expanded. Next is at 50 % opacity while the text is not an existing folder. An empty field is allowed and means no folder.
+- The field is editable and `~` is expanded. Next is at 50 % opacity while the text is not an existing absolute folder (relative paths are invalid). An empty field is allowed and means no folder.
 
 **Page 2: Theme and colour**
 - A theme tile only moves the ring. The preview stays dark until slice 10.
@@ -350,7 +350,8 @@ What the spec left to the implementer (*my call*) and what the build changed. Se
 - **Page-3 rendering rule: every chord is drawn in full, and a row too wide for its room shrinks to fit.** Seek is about 0.92, File Browser about 0.93 and Volume about 0.76 (0.759 at interface scale 1.5); the other nine rows are 1.0. A row never gets within 20 px of the next column's labels or the card's edge. A shorthand that draws a shared modifier once (`SHIFT <- / ->`) was built and dropped: `SHIFT E / E` (Previous/Next Frame) reads as Shift on both, and X+(a/b) looks the same as (X+a)/b in a row of caps. There is no floor on the shrink, so a long custom binding can go below 0.75.
 - `Ctrl+Shift+L` is gated on `MainCtx.useGlobalShortcuts` as well, and `GlobalShortcuts.qml` imports `VLC.Player`.
 - When `DialogCard` caps the window at 90 % of the screen (for example at interface scale 1.5), the card content is scaled to fit. The cap does not keep the aspect ratio, so the content sits centred with empty card space at the sides.
-- The card holds the accent as the upper-case hex string `accentHex` and passes that to `AccentSwatches.optionValue`. A QML `color` stringifies in lower case, which would write `#d37918` instead of `default`.
+- The card holds the effective accent option (`Onboarding.currentAccent`, command line included) as `accentOption` and writes it back unchanged unless a swatch is clicked, so a `system` or command-line accent is kept. `accentHex` (upper-case hex, or the first swatch for a non-hex option) is only for display; a QML `color` stringifies in lower case, which would write `#d37918` instead of `default`.
+- Final review fixes: relative folder paths (`Videos`, `~other`) are invalid; drags that start on a control do not move the window (`DragHandler` is `TakeOverForbidden`); an empty `qt-accent-color` reads as `default` in `SystemPalette`; the wizard's dead `theme_{dark,daynight,light}.svg` are removed.
 - `qt6.pro` is not updated for the new files. It lists none of slice 7-8's files (`saved_streams`, `hotkey_model`, `settings_bridge`), so a qmake build already misses them.
 - The harness `seed` now passes `--aout=dummy -vv`.
 - The preview's top is y 19, not 17, as measured from the Figma shot. The volume wedge is a `Shape` because QtSvg cannot render the Figma SVG's mask. Inter is not set explicitly, as elsewhere in the codebase.
@@ -367,7 +368,6 @@ What the spec left to the implementer (*my call*) and what the build changed. Se
 - `systempalette.cpp` hardcodes the default accent `#D37918` / `#FF610A`, duplicating `COLOR_DEFINITION` in `systempalette.hpp`.
 - `Onboarding::finish()` does not re-check the folder; it relies on the QML `folderValid` gate. `pickFolder`'s `QFileDialog` has a null parent. The `POTFILES` order is cosmetic.
 - `caps` matches modifiers case-sensitively, and `test_rows` coverage is thin.
-- The card-wide `DragHandler` can steal drags that start on swatches, buttons or the field.
 - No floor on the page-3 row shrink.
 - Swatch accessible names are hex codes, and only the Welcome heading has the Heading role.
 - `OnboardingWindow.qml` is 770 lines; the preview could be split out. It also uses `parent.parent` in a delegate and duplicates the cone colorize.
