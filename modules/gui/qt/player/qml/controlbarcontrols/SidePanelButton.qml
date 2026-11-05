@@ -24,7 +24,7 @@ import VLC.Util
 
 // Figma palette "Right Sidebar": the player's side panel (queue, bookmarks, chapters)
 Widgets.IconToolButton {
-    text: VLCIcons.panel_left
+    text: VLCIcons.panel_right
     description: qsTr("Right Sidebar")
     checked: MainCtx.playqueuePanel.visible
     onClicked: MainCtx.playqueuePanel.visible = !MainCtx.playqueuePanel.visible

@@ -128,6 +128,7 @@
         {"key":"thumbnail", "path": "./redesign/customize/thumbnail.svg"},
         {"key":"jump_fw_10", "path": "./redesign/forward-10-sec.svg"},
         {"key":"jump_back_10", "path": "./redesign/backward-10-sec.svg"},
-        {"key":"pip", "path": "./redesign/customize/pip.svg"}
+        {"key":"pip", "path": "./redesign/customize/pip.svg"},
+        {"key":"panel_right", "path": "./redesign/customize/panel-right.svg"}
     ]
 }

@@ -874,9 +874,8 @@ SPrefsPanel::SPrefsPanel( qt_intf_t *_p_intf, QWidget *_parent,
             QObject::connect( ui.intfScaleFactorSpinBox, QOverload<int>::of(&QSpinBox::valueChanged)
                               , p_intf->p_mi , updateIntfUserScaleFactorFromControls );
 
-            DialogsProvider *provider = DialogsProvider::getInstance();
-
-            QObject::connect( ui.toolbarEditor, &QAbstractButton::clicked, provider, &DialogsProvider::showToolbarEditorDialog);
+            // Customize Player is a card in the main window, which this modal dialog blocks; the menus lead to it
+            ui.toolbarEditor->hide();
 
             configBool( "qt-titlebar", ui.titleBarCheckBox );
 

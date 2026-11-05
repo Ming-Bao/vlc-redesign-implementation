@@ -77,7 +77,7 @@ QtObject {
         { id: ControlListModel.JUMP_FW_10_BUTTON, file: "JumpButton.qml", props: { seconds: 10 }, label: VLCIcons.jump_fw_10, text: qsTr("Forward 10s") },
         { id: ControlListModel.JUMP_BACK_10_BUTTON, file: "JumpButton.qml", props: { seconds: -10 }, label: VLCIcons.jump_back_10, text: qsTr("Backward 10s") },
         { id: ControlListModel.ZOOM_BUTTON, file: "ZoomButton.qml", label: VLCIcons.zoom, text: qsTr("Zoom") },
-        { id: ControlListModel.SIDE_PANEL_BUTTON, file: "SidePanelButton.qml", label: VLCIcons.panel_left, text: qsTr("Right Sidebar") },
+        { id: ControlListModel.SIDE_PANEL_BUTTON, file: "SidePanelButton.qml", label: VLCIcons.panel_right, text: qsTr("Right Sidebar") },
         { id: ControlListModel.SETTINGS_BUTTON, file: "SettingsButton.qml", label: VLCIcons.settings, text: qsTr("VLC Settings") },
         { id: ControlListModel.HOME_BUTTON, file: "HomeButton.qml", label: VLCIcons.home, text: qsTr("Go Home") },
         { id: ControlListModel.THUMBNAIL_WIDGET, file: "ThumbnailWidget.qml", label: VLCIcons.thumbnail, text: qsTr("Thumbnail") },

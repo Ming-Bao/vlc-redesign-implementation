@@ -74,8 +74,14 @@ FocusScope {
     function _followVideoOutput() {
         return Player.hasVideoOutput ? PlayerControlbarModel.Videoplayer : PlayerControlbarModel.Audioplayer
     }
-    // the bottom row's model; held while customizing: media ending under the overlay doesn't change what's being edited
+    // the bottom row's model; chosen when Customize Player opens and held: media ending or starting under the overlay
+    // doesn't change what's being edited. With nothing playing that's the video bar, the one the next video shows.
     property int _barIdentifier: _followVideoOutput()
+
+    function _holdBarIdentifier() {
+        _barIdentifier = (Player.isStarted && !Player.hasVideoOutput) ? PlayerControlbarModel.Audioplayer
+                                                                      : PlayerControlbarModel.Videoplayer
+    }
 
     // Settings
 
@@ -89,7 +95,7 @@ FocusScope {
         PlayerControlbarControls.libraryPanelOpen = false
         MainCtx.preferHotkeys = !_customizing
         if (_customizing)
-            _barIdentifier = _barIdentifier
+            _holdBarIdentifier()
     }
     Component.onDestruction: MainCtx.preferHotkeys = false
 
@@ -122,7 +128,7 @@ FocusScope {
         if (!_customizing) {
             _barIdentifier = Qt.binding(_followVideoOutput)
         } else {
-            _barIdentifier = _barIdentifier
+            _holdBarIdentifier()
             PlayerControlbarControls.libraryPanelOpen = false
             if (playlistVisibility.isPlaylistVisible)
                 playlistVisibility.togglePlaylistVisibility()
@@ -1016,7 +1022,7 @@ FocusScope {
         onRequestLockUnlockAutoHide: (lock) => rootPlayer.lockUnlockAutoHide(lock)
 
         identifier: rootPlayer._barIdentifier
-        musicMode: !Player.hasVideoOutput
+        musicMode: !Player.hasVideoOutput && rootPlayer._barIdentifier === PlayerControlbarModel.Audioplayer
 
         onHoveredChanged: rootPlayer.lockUnlockAutoHide(hovered)
 
