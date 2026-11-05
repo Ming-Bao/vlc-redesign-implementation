@@ -13,6 +13,7 @@ Steps (executed in order):
     move:X,Y          move the pointer to monitor coordinates
     click:X,Y         left click at monitor coordinates
     rclick:X,Y        right click at monitor coordinates
+    drag:X1,Y1,X2,Y2  press at X1,Y1, move to X2,Y2 in 10 steps, release (moves a window by its title bar)
     key:KEYSYM        press+release a keysym (e.g. space, Escape); KEY+KEY for a chord (Alt_L+F4)
     exit:SECONDS      wait for VLC to exit; if it doesn't, save its stacks to OUTDIR/hang.txt
 Writes OUTDIR/vlc.log and OUTDIR/shell.log.
@@ -139,6 +140,17 @@ def main():
             pump(0.3)
             rd.call_sync("NotifyPointerButton", GLib.Variant("(ib)", (btn, True)), 0, 5000, None)
             rd.call_sync("NotifyPointerButton", GLib.Variant("(ib)", (btn, False)), 0, 5000, None)
+            pump(0.3)
+        elif verb == "drag":
+            x1, y1, x2, y2 = (float(v) for v in arg.split(","))
+            rd.call_sync("NotifyPointerMotionAbsolute", GLib.Variant("(sdd)", (stream_path, x1, y1)), 0, 5000, None)
+            pump(0.3)
+            rd.call_sync("NotifyPointerButton", GLib.Variant("(ib)", (BTN_LEFT, True)), 0, 5000, None)
+            for i in range(1, 11):
+                rd.call_sync("NotifyPointerMotionAbsolute", GLib.Variant(
+                    "(sdd)", (stream_path, x1 + (x2 - x1) * i / 10, y1 + (y2 - y1) * i / 10)), 0, 5000, None)
+                pump(0.05)
+            rd.call_sync("NotifyPointerButton", GLib.Variant("(ib)", (BTN_LEFT, False)), 0, 5000, None)
             pump(0.3)
         elif verb == "key":
             syms = [KEYSYMS.get(k) or int(k, 0) for k in arg.split("+")]

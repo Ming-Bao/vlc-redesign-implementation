@@ -644,6 +644,7 @@ qml_modules += {
     'outdir' : 'VLC/Dialogs',
     'sources': files(
         'dialogs/dialogs/qml/CustomDialog.qml',
+        'dialogs/dialogs/qml/DialogCard.qml',
         'dialogs/dialogs/qml/Dialogs.qml',
         'dialogs/dialogs/qml/ModalDialog.qml',
         'dialogs/dialogs/qml/WindowDialog.qml',

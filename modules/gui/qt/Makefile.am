@@ -1148,6 +1148,7 @@ libqml_module_dialogs_a_CXXFLAGS = $(libqt_plugin_la_CXXFLAGS)
 libqml_module_dialogs_a_CPPFLAGS = $(libqt_plugin_la_CPPFLAGS)
 libqml_module_dialogs_a_QML = \
 	dialogs/dialogs/qml/CustomDialog.qml \
+	dialogs/dialogs/qml/DialogCard.qml \
 	dialogs/dialogs/qml/Dialogs.qml \
 	dialogs/dialogs/qml/ModalDialog.qml \
 	dialogs/dialogs/qml/WindowDialog.qml \

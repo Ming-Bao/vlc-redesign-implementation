@@ -168,11 +168,11 @@ FocusScope {
         case "editHotkeys": DialogsProvider.prefsDialog(5); break   // SPrefsHotkeys
         case "resetAll":
             win.ask(qsTr("Are you sure you want to reset your VLC media player preferences?"),
-                    () => SettingsBridge.resetAll())
+                    () => SettingsBridge.resetAll(), qsTr("Reset"))
             break
         case "resetHotkeys":
             win.ask(qsTr("Reset all keyboard shortcuts to their defaults?"),
-                    () => SettingsBridge.resetPrefixes(["key-", "global-key-"]))
+                    () => SettingsBridge.resetPrefixes(["key-", "global-key-"]), qsTr("Reset"))
             break
         case "clearHistory":
             // VLC.MediaLibrary only exists with a media library (the button is disabled otherwise)
