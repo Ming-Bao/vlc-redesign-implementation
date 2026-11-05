@@ -753,6 +753,10 @@ modules/gui/qt/dialogs/settings/qml/rows/StartupVolumeRow.qml
 modules/gui/qt/dialogs/settings/qml/rows/ThemeRow.qml
 modules/gui/qt/dialogs/settings/settings_bridge.cpp
 modules/gui/qt/dialogs/settings/settings_bridge.hpp
+modules/gui/qt/dialogs/onboarding/onboarding_controller.cpp
+modules/gui/qt/dialogs/onboarding/onboarding_controller.hpp
+modules/gui/qt/dialogs/onboarding/onboarding_folders.cpp
+modules/gui/qt/dialogs/onboarding/onboarding_folders.hpp
 modules/gui/qt/dialogs/sout/convert.cpp
 modules/gui/qt/dialogs/sout/convert.hpp
 modules/gui/qt/dialogs/sout/profile_selector.cpp

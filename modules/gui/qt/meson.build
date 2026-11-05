@@ -70,6 +70,7 @@ moc_headers = files(
     'dialogs/systray/systray.hpp',
     'dialogs/settings/settings_bridge.hpp',
     'dialogs/network/saved_streams.hpp',
+    'dialogs/onboarding/onboarding_controller.hpp',
     'dialogs/hotkeys/hotkey_model.hpp',
     'dialogs/subtitles/add_subtitles_controller.hpp',
     'dialogs/subtitles/opensubtitles_client.hpp',
@@ -283,6 +284,10 @@ qt_plugin_sources = files(
     'dialogs/settings/settings_bridge.cpp',
     'dialogs/network/saved_streams.cpp',
     'dialogs/network/saved_streams.hpp',
+    'dialogs/onboarding/onboarding_controller.cpp',
+    'dialogs/onboarding/onboarding_controller.hpp',
+    'dialogs/onboarding/onboarding_folders.cpp',
+    'dialogs/onboarding/onboarding_folders.hpp',
     'dialogs/hotkeys/hotkey_model.cpp',
     'dialogs/hotkeys/hotkey_model.hpp',
     'dialogs/settings/settings_bridge.hpp',
@@ -1587,6 +1592,20 @@ if qt6_dep.found()
             ),
             'moc_sources': files('tests/test_saved_streams.cpp'),
             'moc_headers': files('dialogs/network/saved_streams.hpp'),
+            'suite': ['qt'],
+            'include_directories' : qt_include_dir,
+            'link_args': qt_link_args,
+            'dependencies': [qt6_dep, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
+            'name': 'test_qt_onboarding_folders',
+            'sources': files(
+                'tests/test_onboarding_folders.cpp',
+                'dialogs/onboarding/onboarding_folders.cpp',
+                'dialogs/onboarding/onboarding_folders.hpp'
+            ),
+            'moc_sources': files('tests/test_onboarding_folders.cpp'),
             'suite': ['qt'],
             'include_directories' : qt_include_dir,
             'link_args': qt_link_args,

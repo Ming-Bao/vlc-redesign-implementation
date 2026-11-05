@@ -162,6 +162,10 @@ libqt_plugin_la_SOURCES = \
 	dialogs/systray/systray.hpp \
 	dialogs/network/saved_streams.cpp \
 	dialogs/network/saved_streams.hpp \
+	dialogs/onboarding/onboarding_controller.cpp \
+	dialogs/onboarding/onboarding_controller.hpp \
+	dialogs/onboarding/onboarding_folders.cpp \
+	dialogs/onboarding/onboarding_folders.hpp \
 	dialogs/hotkeys/hotkey_model.cpp \
 	dialogs/hotkeys/hotkey_model.hpp \
 	dialogs/settings/settings_bridge.cpp \
@@ -472,6 +476,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	dialogs/sout/sout_widgets.moc.cpp \
 	dialogs/systray/systray.moc.cpp \
 	dialogs/network/saved_streams.moc.cpp \
+	dialogs/onboarding/onboarding_controller.moc.cpp \
 	dialogs/hotkeys/hotkey_model.moc.cpp \
 	dialogs/subtitles/opensubtitles_client.moc.cpp \
 	dialogs/subtitles/add_subtitles_controller.moc.cpp \
@@ -2055,6 +2060,21 @@ test_hotkey_model_LDADD = $(QT_QTEST_COMMON_ldadd)
 test_hotkey_model_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
 check_PROGRAMS += test_hotkey_model
 TESTS += test_hotkey_model
+
+# test_onboarding_folders
+test_onboarding_folders_SOURCES = \
+	tests/test_onboarding_folders.cpp \
+	dialogs/onboarding/onboarding_folders.hpp dialogs/onboarding/onboarding_folders.cpp
+nodist_test_onboarding_folders_SOURCES = \
+	tests/test_onboarding_folders.moc
+BUILT_SOURCES += tests/test_onboarding_folders.moc
+CLEANFILES += tests/test_onboarding_folders.moc
+test_onboarding_folders_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)
+test_onboarding_folders_CXXFLAGS = $(QT_QTEST_COMMON_cxxflags)
+test_onboarding_folders_LDADD = $(QT_QTEST_COMMON_ldadd)
+test_onboarding_folders_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
+check_PROGRAMS += test_onboarding_folders
+TESTS += test_onboarding_folders
 
 # test_saved_streams
 test_saved_streams_SOURCES = \
