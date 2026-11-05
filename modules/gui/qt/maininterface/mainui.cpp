@@ -68,6 +68,7 @@
 #include "dialogs/dialogs_provider.hpp"
 #include "dialogs/dialogs/dialogmodel.hpp"
 #include "dialogs/settings/settings_bridge.hpp"
+#include "dialogs/subtitles/add_subtitles_controller.hpp"
 #ifdef UPDATE_CHECK
 #include "dialogs/help/help.hpp" // UpdateModel
 #endif
@@ -288,6 +289,8 @@ void MainUI::registerQMLTypes()
         assert(DialogErrorModel::getInstance<false>());
         qmlRegisterSingletonInstance<DialogErrorModel>(uri, versionMajor, versionMinor, "DialogErrorModel", DialogErrorModel::getInstance<false>());
         qmlRegisterSingletonInstance<SettingsBridge>(uri, versionMajor, versionMinor, "SettingsBridge", new SettingsBridge(m_intf, this));
+        qmlRegisterSingletonInstance<AddSubtitlesController>(uri, versionMajor, versionMinor, "AddSubtitlesController",
+                                                             new AddSubtitlesController(m_intf, this));
         {
             char* userdata = config_GetUserDir(VLC_USERDATA_DIR);
             qmlRegisterSingletonInstance<SavedStreams>(uri, versionMajor, versionMinor, "SavedStreams",

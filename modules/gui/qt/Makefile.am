@@ -173,6 +173,10 @@ libqt_plugin_la_SOURCES = \
 	dialogs/toolbar/controlbar_profile_model.hpp \
 	dialogs/vlm/vlm.cpp dialogs/vlm/vlm.hpp \
 	dialogs/playlists/playlist_cover.cpp dialogs/playlists/playlist_cover.hpp \
+	dialogs/subtitles/add_subtitles_controller.cpp \
+	dialogs/subtitles/add_subtitles_controller.hpp \
+	dialogs/subtitles/subtitle_matching.cpp \
+	dialogs/subtitles/subtitle_matching.hpp \
 	dialogs/playlists/playlists.cpp dialogs/playlists/playlists.hpp \
 	maininterface/compositor.hpp \
 	maininterface/compositor.cpp \
@@ -467,6 +471,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	dialogs/systray/systray.moc.cpp \
 	dialogs/network/saved_streams.moc.cpp \
 	dialogs/hotkeys/hotkey_model.moc.cpp \
+	dialogs/subtitles/add_subtitles_controller.moc.cpp \
 	dialogs/settings/settings_bridge.moc.cpp \
 	dialogs/toolbar/controlbar_profile.moc.cpp \
 	dialogs/toolbar/controlbar_profile_model.moc.cpp \
@@ -2056,6 +2061,20 @@ test_playlist_cover_LDADD = $(QT_QTEST_COMMON_ldadd)
 test_playlist_cover_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
 check_PROGRAMS += test_playlist_cover
 TESTS += test_playlist_cover
+
+# test_subtitle_matching
+test_subtitle_matching_SOURCES = \
+	tests/test_subtitle_matching.cpp \
+	dialogs/subtitles/subtitle_matching.hpp dialogs/subtitles/subtitle_matching.cpp
+nodist_test_subtitle_matching_SOURCES = tests/test_subtitle_matching.moc
+BUILT_SOURCES += tests/test_subtitle_matching.moc
+CLEANFILES += tests/test_subtitle_matching.moc
+test_subtitle_matching_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)
+test_subtitle_matching_CXXFLAGS = $(QT_QTEST_COMMON_cxxflags)
+test_subtitle_matching_LDADD = $(QT_QTEST_COMMON_ldadd)
+test_subtitle_matching_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
+check_PROGRAMS += test_subtitle_matching
+TESTS += test_subtitle_matching
 
 # test_effects_util
 

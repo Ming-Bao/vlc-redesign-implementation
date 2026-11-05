@@ -714,6 +714,7 @@ modules/gui/qt/dialogs/open/open_panels.hpp
 modules/gui/qt/dialogs/open/openurl.cpp
 modules/gui/qt/dialogs/open/openurl.hpp
 modules/gui/qt/dialogs/playlists/playlist_cover.cpp
+modules/gui/qt/dialogs/subtitles/add_subtitles_controller.cpp
 modules/gui/qt/dialogs/playlists/playlists.cpp
 modules/gui/qt/dialogs/playlists/playlists.hpp
 modules/gui/qt/dialogs/plugins/plugins.cpp

@@ -71,6 +71,7 @@ moc_headers = files(
     'dialogs/settings/settings_bridge.hpp',
     'dialogs/network/saved_streams.hpp',
     'dialogs/hotkeys/hotkey_model.hpp',
+    'dialogs/subtitles/add_subtitles_controller.hpp',
     'dialogs/toolbar/controlbar_profile.hpp',
     'dialogs/toolbar/controlbar_profile_model.hpp',
     'dialogs/playlists/playlists.hpp',
@@ -303,6 +304,10 @@ qt_plugin_sources = files(
     'dialogs/vlm/vlm.cpp',
     'dialogs/playlists/playlist_cover.cpp',
     'dialogs/playlists/playlist_cover.hpp',
+    'dialogs/subtitles/add_subtitles_controller.cpp',
+    'dialogs/subtitles/add_subtitles_controller.hpp',
+    'dialogs/subtitles/subtitle_matching.cpp',
+    'dialogs/subtitles/subtitle_matching.hpp',
     'dialogs/playlists/playlists.cpp',
     'dialogs/playlists/playlists.hpp',
     'maininterface/compositor.hpp',
@@ -1574,6 +1579,21 @@ if qt6_dep.found()
                 'dialogs/playlists/playlist_cover.hpp'
             ),
             'moc_sources': files('tests/test_playlist_cover.cpp'),
+            'suite': ['qt'],
+            'link_with': [libvlccore],
+            'include_directories' : qt_include_dir,
+            'link_args': qt_link_args,
+            'dependencies': [qt6_dep, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
+            'name': 'test_qt_subtitle_matching',
+            'sources': files(
+                'tests/test_subtitle_matching.cpp',
+                'dialogs/subtitles/subtitle_matching.cpp',
+                'dialogs/subtitles/subtitle_matching.hpp'
+            ),
+            'moc_sources': files('tests/test_subtitle_matching.cpp'),
             'suite': ['qt'],
             'link_with': [libvlccore],
             'include_directories' : qt_include_dir,
