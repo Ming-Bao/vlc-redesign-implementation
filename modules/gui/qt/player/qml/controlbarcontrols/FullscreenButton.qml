@@ -16,6 +16,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 import QtQuick
+import QtQuick.Window
+
+import VLC.MainInterface
 
 
 import VLC.Widgets as Widgets
@@ -26,9 +29,17 @@ import VLC.Util
 Widgets.IconToolButton {
     id: fullScreenBtn
 
-    enabled: Player.hasVideoOutput
-    text: Player.fullscreen ? VLCIcons.defullscreen :VLCIcons.fullscreen
-    onClicked: Player.fullscreen = !Player.fullscreen
+    // without a video output (music) the window itself goes fullscreen, as the title bar's button did
+    readonly property bool _fullscreen: Player.hasVideoOutput ? Player.fullscreen
+                                                              : (MainCtx.intfMainWindow.visibility === Window.FullScreen)
+
+    text: _fullscreen ? VLCIcons.defullscreen :VLCIcons.fullscreen
+    onClicked: {
+        if (Player.hasVideoOutput)
+            Player.fullscreen = !Player.fullscreen
+        else
+            MainCtx.toggleInterfaceFullScreen()
+    }
     description: qsTr("fullscreen")
 
     AccessibleCompat.id: "fullscreenButton"

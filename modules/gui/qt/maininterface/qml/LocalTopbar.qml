@@ -25,6 +25,7 @@ import QtQuick.Window
 
 import VLC.MainInterface
 import VLC.Style
+import VLC.Player
 import VLC.Playlist
 import VLC.Widgets as Widgets
 import VLC.PlayerControls as Controls
@@ -46,14 +47,33 @@ T.ToolBar {
         && !(MainCtx.intfMainWindow.visibility === Window.FullScreen)
         && !MainCtx.hasToolbarMenu
 
-    //whether the navigation pannel is actually visible or not
+    // the player's title bar follows this profile model (PlayerControlbarModel::Topbar);
+    // null keeps the library's fixed layout
+    property Controls.PlayerControlbarModel controlModel: null
+    readonly property bool _modelDriven: controlModel !== null
+
+    //whether the navigation pannel is actually visible or not (fixed layout)
     property alias navigationVisible: navigationVisibilty.checked
     property alias playqueueVisible: playlistBtn.checked
 
-    property alias navigationButton: navigationVisibilty
+    // where the focus goes back to after the library panel: the sidebar button
+    function focusNavigationButton(reason) {
+        if (!_modelDriven) {
+            navigationVisibilty.forceActiveFocus(reason)
+            return
+        }
+        for (const row of _rows) {
+            for (let i = 0; i < row.repeater.count; ++i) {
+                const loader = row.repeater.itemAt(i)
+                if (loader.controlId === Controls.ControlListModel.LIBRARY_PANEL && loader.item?.focus) {
+                    loader.item.forceActiveFocus(reason)
+                    return
+                }
+            }
+        }
+        _focusRow(-1, 1, reason)
+    }
 
-    // the folder chip of the playing media (player only)
-    property bool showFolder: false
     property bool showNavigationToggle: true
     property color tintColor: theme.bg.secondary
 
@@ -69,6 +89,63 @@ T.ToolBar {
     ///incomming signal to request all menu and popup to close
     function forceUnlock() {
         menuBtn.forceUnlock()
+        for (const row of _rows)
+            row.forceUnlock()
+    }
+
+    readonly property var _rows: [leftRow, centerRow, rightRow]
+
+    // focuses the first (step 1) or last (step -1) focusable control of the rows after (before) `from`
+    function _focusRow(from, step, reason) {
+        for (let r = from + step; r >= 0 && r < _rows.length; r += step) {
+            const repeater = _rows[r].repeater
+            for (let i = (step > 0 ? 0 : repeater.count - 1); i >= 0 && i < repeater.count; i += step) {
+                const item = repeater.itemAt(i)?.item
+                if (item?.focus) {
+                    item.forceActiveFocus(reason)
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    // one of the three rows of the model-driven bar
+    component BarRow: RowLayout {
+        id: row
+
+        required property Item bar
+        property Controls.ControlListModel source: null
+        property alias repeater: repeater
+        property int index: 0
+
+        signal requestLockUnlockAutoHide(bool lock)
+        signal forceUnlock()
+
+        visible: false
+
+        ControlRepeater {
+            id: repeater
+
+            model: Controls.ControlListFilter {
+                sourceModel: row.source
+
+                player: Player
+                ctx: MainCtx
+            }
+
+            availableWidth: row.width
+            availableHeight: row.height
+
+            Navigation.parentItem: row.bar
+            Navigation.leftAction: function() { return row.bar._focusRow(row.index, -1, Qt.BacktabFocusReason) }
+            Navigation.rightAction: function() { return row.bar._focusRow(row.index, 1, Qt.TabFocusReason) }
+
+            Component.onCompleted: {
+                requestLockUnlockAutoHide.connect(row.requestLockUnlockAutoHide)
+                row.forceUnlock.connect(repeater.forceUnlock)
+            }
+        }
     }
 
     implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
@@ -90,17 +167,100 @@ T.ToolBar {
     contentItem: Item {
 
         implicitHeight: VLCStyle.globalToolbar_height
-        implicitWidth: navigationButtons.implicitWidth
-                     + playqueueButtonsTop.implicitWidth
+        implicitWidth: logo.width
+                     + (root._modelDriven ? leftRow.implicitWidth + centerRow.implicitWidth + rightRow.implicitWidth
+                                          : navigationButtons.implicitWidth + playqueueButtonsTop.implicitWidth)
                      + VLCStyle.margin_xsmall * 2
 
-        Item {
-            id: navigationButtons
-
-            implicitWidth: navigationButtonsRow.implicitWidth
+        Widgets.BannerCone {
+            id: logo
 
             anchors {
                 left: parent.left
+                leftMargin: VLCStyle.margin_xsmall
+                verticalCenter: parent.verticalCenter
+            }
+
+            sourceSize.width: VLCStyle.icon_normal
+            sourceSize.height: VLCStyle.icon_normal
+            color: theme.accent
+        }
+
+        // the model-driven bar: left beside the cone, centre on the window's centre
+        // (as the fixed title is), right at the edge
+        BarRow {
+            id: leftRow
+
+            bar: root
+            index: 0
+            source: root.controlModel?.left ?? null
+            visible: root._modelDriven
+            spacing: VLCStyle.margin_xsmall
+
+            anchors {
+                left: logo.right
+                leftMargin: VLCStyle.margin_xsmall
+                top: parent.top
+                bottom: parent.bottom
+            }
+
+            onRequestLockUnlockAutoHide: (lock) => root.requestLockUnlockAutoHide(lock)
+        }
+
+        BarRow {
+            id: centerRow
+
+            bar: root
+            index: 1
+            source: root.controlModel?.center ?? null
+            visible: root._modelDriven
+            spacing: VLCStyle.margin_xsmall
+
+            // keeps the centre of the window while there is room on both sides
+            readonly property real room: 2 * Math.min(parent.width / 2 - (leftRow.x + leftRow.width),
+                                                      rightRow.x - parent.width / 2)
+                                         - VLCStyle.margin_large * 2
+
+            // whole pixels: a layout rounds down, which would elide text that fits
+            width: Math.max(0, Math.min(Math.ceil(implicitWidth), room))
+
+            anchors {
+                horizontalCenter: parent.horizontalCenter
+                top: parent.top
+                bottom: parent.bottom
+            }
+
+            onRequestLockUnlockAutoHide: (lock) => root.requestLockUnlockAutoHide(lock)
+        }
+
+        BarRow {
+            id: rightRow
+
+            bar: root
+            index: 2
+            source: root.controlModel?.right ?? null
+            visible: root._modelDriven
+
+            anchors {
+                right: parent.right
+                // the window buttons are flush with the edge
+                rightMargin: root._showCSD ? 0 : VLCStyle.margin_xsmall
+                top: parent.top
+                bottom: parent.bottom
+            }
+
+            onRequestLockUnlockAutoHide: (lock) => root.requestLockUnlockAutoHide(lock)
+        }
+
+        // the library's fixed layout
+        Item {
+            id: navigationButtons
+
+            visible: !root._modelDriven
+            implicitWidth: navigationButtonsRow.implicitWidth
+
+            anchors {
+                left: logo.right
                 top: parent.top
                 bottom: parent.bottom
                 leftMargin: VLCStyle.margin_xsmall
@@ -117,22 +277,12 @@ T.ToolBar {
                 Navigation.parentItem: root
                 Navigation.rightItem: playqueueButtonsTop
 
-                Widgets.BannerCone {
-                    id: logo
-
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    sourceSize.width: VLCStyle.icon_normal
-                    sourceSize.height: VLCStyle.icon_normal
-                    color: theme.accent
-                }
-
                 Controls.MoreMenuButton {
                     id: menuBtn
 
                     anchors.verticalCenter: parent.verticalCenter
 
-                    // initial focus when the navigation toggle is hidden (player)
+                    // initial focus when the navigation toggle is hidden
                     focus: !root.showNavigationToggle
 
                     Navigation.parentItem: navigationButtons
@@ -153,30 +303,9 @@ T.ToolBar {
 
                     Navigation.parentItem: navigationButtons
                     Navigation.leftItem: menuBtn
-                    Navigation.rightItem: folderChip
 
                     hostHandles: true
                     onClicked: root.toggleNavigationVisibility()
-                }
-
-                // Figma player title bar: divider + folder of the playing media
-                Rectangle {
-                    visible: folderChip.visible
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: VLCStyle.dp(1, VLCStyle.scale)
-                    height: VLCStyle.dp(20, VLCStyle.scale)
-                    color: theme.separator
-                }
-
-                Controls.FolderChipWidget {
-                    id: folderChip
-
-                    visible: root.showFolder
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    Navigation.parentItem: navigationButtons
-                    Navigation.leftItem: navigationVisibilty
-                    Navigation.rightItem: playlistBtn
                 }
             }
         }
@@ -184,6 +313,7 @@ T.ToolBar {
         Item {
             id: playqueueButtonsTop
 
+            visible: !root._modelDriven
             implicitWidth: playqueueButtonsTopRow.implicitWidth
 
             anchors {
@@ -215,7 +345,7 @@ T.ToolBar {
 
                     Navigation.parentItem: playqueueButtonsTop
                     Navigation.rightItem: fullscreenBtn
-                    Navigation.leftItem: folderChip
+                    Navigation.leftItem: navigationVisibilty
 
                     onClicked:  root.togglePlayqueueVisibility()
                 }
@@ -245,7 +375,7 @@ T.ToolBar {
             width: Math.min(implicitWidth,
                             playqueueButtonsTop.x - (navigationButtons.x + navigationButtons.width) - VLCStyle.margin_large * 2)
 
-            visible: width > VLCStyle.dp(40, VLCStyle.scale)
+            visible: !root._modelDriven && width > VLCStyle.dp(40, VLCStyle.scale)
         }
 
         Loader {
@@ -269,7 +399,7 @@ T.ToolBar {
         }
 
         height: VLCStyle.globalToolbar_height
-        active: root._showCSD
+        active: root._showCSD && !root._modelDriven
         source: VLCStyle.palette.hasCSDImage
                   ? "qrc:///qt/qml/VLC/Widgets/CSDThemeButtonSet.qml"
                   : "qrc:///qt/qml/VLC/Widgets/CSDWindowButtonSet.qml"

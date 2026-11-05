@@ -38,6 +38,19 @@ Widgets.ButtonExt {
 
     enabled: !paintOnly
 
+    // the divider between the title bar's buttons and the chip, drawn in the chip's own width
+    leftInset: dividerRect.width + VLCStyle.margin_xsmall
+    leftPadding: padding + leftInset
+
+    Rectangle {
+        id: dividerRect
+
+        anchors.verticalCenter: parent.verticalCenter
+        width: VLCStyle.dp(1, VLCStyle.scale)
+        height: VLCStyle.dp(20, VLCStyle.scale)
+        color: windowTheme.separator
+    }
+
     // the chip is text on the window, not a standard button
     readonly property ColorContext windowContext: ColorContext {
         id: windowTheme

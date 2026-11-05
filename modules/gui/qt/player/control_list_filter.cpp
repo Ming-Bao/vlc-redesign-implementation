@@ -83,6 +83,11 @@ bool ControlListFilter::filterAcceptsRow(int source_row, const QModelIndex &) co
     {
         return m_player->isTeletextAvailable();
     }
+    // NOTE: the menu bar (macOS, global menu) takes over the "..." menu
+    else if (type == ControlListModel::MORE_MENU)
+    {
+        return !m_ctx->hasToolbarMenu();
+    }
 
     return true;
 }
@@ -125,6 +130,10 @@ void ControlListFilter::setCtx(MainCtx* ctx)
 {
     if (m_ctx == ctx)
         return;
+    if (m_ctx)
+        disconnect(m_ctx, nullptr, this, nullptr);
     m_ctx = ctx;
+    if (ctx)
+        connect(ctx, &MainCtx::hasToolbarMenuChanged, this, &ControlListFilter::invalidateFilter);
     emit ctxChanged();
 }

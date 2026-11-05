@@ -26,6 +26,7 @@ import VLC.MainInterface
 import VLC.Style
 import VLC.Widgets as Widgets
 import VLC.Player
+import VLC.PlayerControls
 import VLC.Util
 
 T.Pane {
@@ -64,13 +65,23 @@ T.Pane {
     // centre section (e.g. saved before the redesign) falls back to this position
     property int inlineFallback: ControlBar.TimeTextPosition.LeftRightSlider
 
-    readonly property int _textPosition: (textPosition === ControlBar.TimeTextPosition.Inline
-                                          && !contentItem.playerControlLayout.fillerItem)
-                                         ? inlineFallback
-                                         : textPosition
+    // the profile's seek row (PlayerControlbarModel::SeekRow): when it holds anything the
+    // seek bar goes to its own row with the times beside it (Figma 2160:6137)
+    property PlayerControlbarModel seekRowModel: null
 
-    // the compact look only applies when the inline layout is actually in use
-    readonly property bool _compact: compactStyle && (_textPosition === ControlBar.TimeTextPosition.Inline)
+    readonly property bool _seekRowUsed: !!seekRowModel && !seekRowModel.empty
+
+    readonly property int _textPosition: {
+        if (_seekRowUsed)
+            return ControlBar.TimeTextPosition.LeftRightSlider
+        // a filled centre section leaves no spacer to hold it inline
+        if (textPosition === ControlBar.TimeTextPosition.Inline && !contentItem.playerControlLayout.fillerItem)
+            return inlineFallback
+        return textPosition
+    }
+
+    // the compact look applies to the inline layout and to the seek row (Figma 2160:6137)
+    readonly property bool _compact: compactStyle && (_textPosition === ControlBar.TimeTextPosition.Inline || _seekRowUsed)
     readonly property bool _dark: theme.palette.isDark
     readonly property bool _sideTimes: (_textPosition === ControlBar.TimeTextPosition.LeftRightSlider
                                         || _textPosition === ControlBar.TimeTextPosition.Inline)

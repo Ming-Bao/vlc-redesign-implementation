@@ -17,6 +17,7 @@
  *****************************************************************************/
 import QtQuick
 import QtQuick.Templates as T
+import QtQuick.Layouts
 
 import VLC.MainInterface
 import VLC.Style
@@ -26,6 +27,11 @@ T.Label {
     id: root
 
     property bool paintOnly: false
+
+    // elided where it meets its neighbours, never squeezed out before this
+    Layout.minimumWidth: VLCStyle.dp(40, VLCStyle.scale)
+    // text, not a stop for keyboard navigation
+    enabled: false
 
     readonly property ColorContext colorContext: ColorContext {
         id: theme

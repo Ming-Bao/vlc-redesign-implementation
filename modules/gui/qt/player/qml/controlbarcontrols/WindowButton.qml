@@ -31,7 +31,10 @@ Item {
 
     // the model's button, which does the platform's work
     readonly property var _button: MainCtx.csdButtonModel.windowCSDButtons.find(b => b.type === action)
-    readonly property bool _shown: paintOnly || MainCtx.clientSideDecoration
+    // as the fixed title bar's: none in fullscreen, and the menu bar carries them when it is shown
+    readonly property bool _shown: paintOnly || (MainCtx.clientSideDecoration
+                                                 && !MainCtx.hasToolbarMenu
+                                                 && MainCtx.intfMainWindow.visibility !== Window.FullScreen)
     readonly property bool useWinIcons: ((MainCtx.osName === MainCtx.Windows) && (MainCtx.osVersion >= 10))
 
     enabled: _shown && !paintOnly

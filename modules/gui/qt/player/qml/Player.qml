@@ -107,7 +107,7 @@ FocusScope {
     onLibraryPanelOpenChanged: {
         lockUnlockAutoHide(libraryPanelOpen)
         if (!libraryPanelOpen && libraryPanel.activeFocus)
-            topBar.navigationButton.forceActiveFocus(Qt.BacktabFocusReason)
+            topBar.focusNavigationButton(Qt.BacktabFocusReason)
     }
 
     // Functions
@@ -668,15 +668,9 @@ FocusScope {
 
         focus: true
 
-        showNavigationToggle: true
-        navigationVisible: rootPlayer.libraryPanelOpen
-        onToggleNavigationVisibility: PlayerControlbarControls.libraryPanelOpen = !PlayerControlbarControls.libraryPanelOpen
-
-        showFolder: true
+        controlModel: MainCtx.controlbarProfileModel.currentModel?.getModel(PlayerControlbarModel.Topbar) ?? null
 
         tintColor: rootPlayer._barColor
-
-        playqueueVisible: playlistVisibility.isPlaylistVisible
 
         plListView: (playlistWindowLoader?.status === Loader.Ready) ? playlistWindowLoader.item.playlistView : null
 
@@ -697,13 +691,6 @@ FocusScope {
         Binding on state {
             when: playerToolbarVisibilityFSM.started
             value: (playerToolbarVisibilityFSM.isVisible || rootPlayer._controlsUnderVideo) ? "visible" : "hidden"
-        }
-
-        onTogglePlayqueueVisibility: playlistVisibility.togglePlaylistVisibility()
-
-        onDiscoverRequested: {
-            leavePlayer()
-            History.push(["discover"])
         }
 
         onRequestLockUnlockAutoHide: (lock) => rootPlayer.lockUnlockAutoHide(lock)
@@ -746,7 +733,7 @@ FocusScope {
         Navigation.upItem: topBar
         Navigation.rightItem: MainCtx.hasEmbededVideo ? playerSpecializationLoader : controlBar
 
-        onNavigationCancel: topBar.navigationButton.forceActiveFocus(Qt.BacktabFocusReason)
+        onNavigationCancel: topBar.focusNavigationButton(Qt.BacktabFocusReason)
     }
 
     // Figma "continue" toast: resume prompt above the control bar
@@ -938,7 +925,8 @@ FocusScope {
         // Figma Controls (default): ⏮ ▶ ⏭ · time · seek · duration · volume tracks settings queue
         compactStyle: true
         textPosition: ControlBar.TimeTextPosition.Inline
-        // pre-redesign profiles fill the centre section and cannot host the inline seek bar
+        seekRowModel: MainCtx.controlbarProfileModel.currentModel?.getModel(PlayerControlbarModel.SeekRow) ?? null
+        // a centre section that holds items cannot host the inline seek bar: the row above takes it
         inlineFallback: ControlBar.TimeTextPosition.LeftRightSlider
         sliderHeight: _compact ? VLCStyle.dp(28, VLCStyle.scale) : VLCStyle.heightBar_xxsmall
         topPadding: _compact ? VLCStyle.dp(11, VLCStyle.scale) : 0

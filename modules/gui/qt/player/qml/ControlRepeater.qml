@@ -56,6 +56,8 @@ Repeater {
 
         // Settings
 
+        readonly property int controlId: model.id
+
         source: PlayerControlbarControls.control(model.id).source
 
         focus: (index === 0)
