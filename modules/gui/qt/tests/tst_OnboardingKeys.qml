@@ -39,13 +39,6 @@ TestCase {
         compare(Keys.caps("Page Up"), ["Page Up"])
         compare(Keys.caps(" f "), ["F"])
     }
-    function test_pairCaps() {
-        compare(Keys.pairCaps("Shift+Left", "Shift+Right"), { shared: ["SHIFT"], left: ["←"], right: ["→"] })
-        compare(Keys.pairCaps("p", "n"), { shared: [], left: ["P"], right: ["N"] })
-        compare(Keys.pairCaps("Ctrl+Up\tVolume Up", "Ctrl+Down"), { shared: ["CTRL"], left: ["↑"], right: ["↓"] })
-        compare(Keys.pairCaps("Shift+e", "e"), { shared: [], left: ["SHIFT", "E"], right: ["E"] })
-        compare(Keys.pairCaps("", "Ctrl+x"), { shared: [], left: ["—"], right: ["CTRL", "X"] })
-    }
     function test_rows() {
         compare(Keys.rows.length, 12)
         compare(Keys.rows[1].keys, ["key-jump-extrashort", "key-jump+extrashort"])

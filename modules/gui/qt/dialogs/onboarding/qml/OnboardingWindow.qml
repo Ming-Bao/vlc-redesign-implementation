@@ -82,20 +82,15 @@ DialogCard {
     }
 
     // a shortcut row's keys as a flat list of caps and "/", each with the Figma gap before it: 4 inside a chord,
-    // 10 around the "/". A pair's shared modifiers are drawn once ("SHIFT ← / →").
+    // 10 around the "/". Every chord is drawn in full.
     function _keyParts(keys) {
         const parts = []
-        const add = (caps, gap) => caps.forEach((text, i) =>
-            parts.push({ text: text, slash: false, gap: parts.length === 0 ? 0 : (i === 0 ? gap : 4) }))
-        if (keys.length === 2) {
-            const pair = OnboardingKeys.pairCaps(_binding(keys[0]), _binding(keys[1]))
-            add(pair.shared, 4)
-            add(pair.left, 4)
-            parts.push({ text: "/", slash: true, gap: 10 })
-            add(pair.right, 10)
-        } else {
-            add(OnboardingKeys.caps(_binding(keys[0])), 4)
-        }
+        keys.forEach((key, k) => {
+            if (k > 0)
+                parts.push({ text: "/", slash: true, gap: 10 })
+            OnboardingKeys.caps(_binding(key)).forEach((text, i) =>
+                parts.push({ text: text, slash: false, gap: parts.length === 0 ? 0 : (i === 0 ? 10 : 4) }))
+        })
         return parts
     }
 
