@@ -681,6 +681,7 @@ qml_modules += {
         'dialogs/toolbar/qml/DashedBox.qml',
         'dialogs/settings/qml/AdvancedBar.qml',
         'dialogs/hotkeys/qml/HotkeysData.js',
+        'dialogs/onboarding/qml/OnboardingKeys.js',
         'dialogs/settings/qml/SettingsData.js',
         'dialogs/settings/qml/SettingsRowDelegate.qml',
         'dialogs/settings/qml/SettingsSidebar.qml',
@@ -1077,6 +1078,7 @@ qml_tests = {
     'tst_LibraryHelpers': files('tests/tst_LibraryHelpers.qml'),
     'tst_SettingsData': files('tests/tst_SettingsData.qml'),
     'tst_HotkeysData': files('tests/tst_HotkeysData.qml'),
+    'tst_OnboardingKeys': files('tests/tst_OnboardingKeys.qml'),
     'tst_CustomizePalette': files('tests/tst_CustomizePalette.qml'),
 }
 

@@ -1190,6 +1190,7 @@ libqml_module_dialogs_a_QML = \
 	dialogs/toolbar/qml/DashedBox.qml \
 	dialogs/settings/qml/AdvancedBar.qml \
 	dialogs/hotkeys/qml/HotkeysData.js \
+	dialogs/onboarding/qml/OnboardingKeys.js \
 	dialogs/settings/qml/SettingsData.js \
 	dialogs/settings/qml/SettingsRowDelegate.qml \
 	dialogs/settings/qml/SettingsSidebar.qml \
@@ -2317,8 +2318,8 @@ check_PROGRAMS += qml_test
 EXTRA_DIST += tests/tst_FSM.qml
 TESTS += tests/tst_FSM.qml
 EXTRA_DIST += tests/tst_LibraryHelpers.qml
-EXTRA_DIST += tests/tst_SettingsData.qml tests/tst_HotkeysData.qml tests/tst_CustomizePalette.qml
+EXTRA_DIST += tests/tst_SettingsData.qml tests/tst_HotkeysData.qml tests/tst_OnboardingKeys.qml tests/tst_CustomizePalette.qml
 TESTS += tests/tst_LibraryHelpers.qml
-TESTS += tests/tst_SettingsData.qml tests/tst_HotkeysData.qml tests/tst_CustomizePalette.qml
+TESTS += tests/tst_SettingsData.qml tests/tst_HotkeysData.qml tests/tst_OnboardingKeys.qml tests/tst_CustomizePalette.qml
 endif
 endif

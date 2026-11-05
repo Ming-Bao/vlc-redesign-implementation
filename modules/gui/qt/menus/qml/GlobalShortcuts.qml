@@ -19,6 +19,7 @@ import QtQuick
 
 import VLC.MainInterface
 import VLC.Dialogs
+import VLC.Player
 
 Item {
 
@@ -43,6 +44,7 @@ Item {
     ShortcutExt{ sequence:"Ctrl+Shift+W"; onActivated: DialogsProvider.vlmDialog(); }
 
     ShortcutExt{ sequence:"Ctrl+L"; onActivated: MainCtx.playqueuePanel.visible = !MainCtx.playqueuePanel.visible; }
+    ShortcutExt{ sequence:"Ctrl+Shift+L"; enabled: MainCtx.useGlobalShortcuts && MainCtx.playerView; onActivated: PlayerControlbarControls.libraryPanelOpen = !PlayerControlbarControls.libraryPanelOpen }
 
     ShortcutExt{ sequence:"F1"; onActivated: DialogsProvider.helpDialog() }
     ShortcutExt{ sequence:"F10"; onActivated: MainCtx.toggleToolbarMenu() }
