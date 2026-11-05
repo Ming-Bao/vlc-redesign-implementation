@@ -258,8 +258,10 @@ public:
     inline void setDialogFilePath(const QUrl& filepath ){ m_dialogFilepath = filepath; }
     inline bool hasAcrylicSurface() const { return m_hasAcrylicSurface; }
     inline void reloadFromSettings() { loadFromSettingsImpl(true); }
-    inline bool getUseGlobalShortcuts() const { return m_useGlobalShortcuts; }
+    inline bool getUseGlobalShortcuts() const { return m_useGlobalShortcuts && m_globalShortcutHolds == 0; }
     void setUseGlobalShortcuts(bool useGlobalShortcuts );
+    // off while any hold is on, whatever useGlobalShortcuts is set to; a visible modal DialogCard holds one
+    Q_INVOKABLE void holdGlobalShortcuts(bool hold);
     inline int maxVolume() const { return m_maxVolume; }
 
     inline float safeArea() const { return m_safeArea; }
@@ -469,6 +471,7 @@ protected:
     float                m_pinOpacity       = 1.0f;
 
     bool                 m_useGlobalShortcuts = true;
+    int                  m_globalShortcutHolds = 0;
     QUrl                 m_dialogFilepath; /* Last path used in dialogs */
 
     /* States */

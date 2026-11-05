@@ -28,11 +28,12 @@ import "SettingsData.js" as SettingsData
 
 // The Figma settings window (frames "Settings - *", 1048 x 865): a DialogCard without footer, whose title bar holds
 // the search box and the page title, with a sidebar of pages and the page content. Single instance, opened by
-// Dialogs.qml.
+// MainInterface.qml.
 DialogCard {
     id: root
 
-    // the selected page, an index into SettingsData.pages; kept for the session (the Loader in Dialogs.qml stays active)
+    // the selected page, an index into SettingsData.pages; kept for the session (the Loader in MainInterface.qml stays
+    // active)
     property int currentPage: 0
     property string searchText: ""
     // what the content area shows for the current page

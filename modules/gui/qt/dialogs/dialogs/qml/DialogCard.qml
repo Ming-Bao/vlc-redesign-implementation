@@ -73,6 +73,12 @@ Window {
     transientParent: MainCtx.intfMainWindow
     modality: modal ? Qt.ApplicationModal : Qt.NonModal
 
+    // over a modal card the global shortcuts would open windows it blocks (they are application-wide). A count in MainCtx
+    // and not a write of useGlobalShortcuts: a search field losing focus as this opens sets that back to true, and
+    // nested cards (Add Subtitles to Settings) would restore each other's value.
+    readonly property bool _holdsShortcuts: visible && modal
+    on_HoldsShortcutsChanged: MainCtx.holdGlobalShortcuts(_holdsShortcuts)
+
     readonly property ColorContext colorContext: ColorContext {
         id: theme
         palette: VLCStyle.palette

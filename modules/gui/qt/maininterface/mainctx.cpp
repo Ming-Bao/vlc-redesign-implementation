@@ -390,10 +390,18 @@ bool MainCtx::hasFirstrun() const {
 
 void MainCtx::setUseGlobalShortcuts( bool useShortcuts )
 {
-    if (m_useGlobalShortcuts == useShortcuts)
-        return;
+    const bool was = getUseGlobalShortcuts();
     m_useGlobalShortcuts = useShortcuts;
-    emit useGlobalShortcutsChanged(m_useGlobalShortcuts);
+    if (was != getUseGlobalShortcuts())
+        emit useGlobalShortcutsChanged(getUseGlobalShortcuts());
+}
+
+void MainCtx::holdGlobalShortcuts( bool hold )
+{
+    const bool was = getUseGlobalShortcuts();
+    m_globalShortcutHolds += hold ? 1 : -1;
+    if (was != getUseGlobalShortcuts())
+        emit useGlobalShortcutsChanged(getUseGlobalShortcuts());
 }
 
 void MainCtx::setWindowSuportExtendedFrame(bool support) {

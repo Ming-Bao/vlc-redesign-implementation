@@ -308,7 +308,7 @@ PrefsDialog* DialogsProvider::ensurePrefsDialog()
 
 void DialogsProvider::prefsDialog()
 {
-    // as skins2's dialogs provider there is no Dialogs.qml to show the Settings window: use the legacy dialog
+    // as skins2's dialogs provider there is no MainInterface.qml to show the Settings window: use the legacy dialog
     if (p_intf->b_isDialogProvider
         || !isSignalConnected(QMetaMethod::fromSignal(&DialogsProvider::showSettingsWindow)))
         prefsDialog(0);

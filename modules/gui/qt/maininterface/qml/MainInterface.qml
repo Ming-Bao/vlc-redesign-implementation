@@ -454,6 +454,121 @@ Item {
             }
         }
 
+        // The dialog windows live here and not in the per-view Dialogs: a view change (the media ending behind a dialog,
+        // Customize Player opening over the library) must not destroy them and their edits. Each stays once loaded.
+        Item {
+            id: dialogWindows
+
+            Loader {
+                id: settingsWindowLoader
+                active: false
+                source: "qrc:///qt/qml/VLC/Dialogs/SettingsWindow.qml"
+
+                Connections {
+                    target: DialogsProvider
+
+                    function onShowSettingsWindow() {
+                        settingsWindowLoader.active = true
+                        // modal only for a trip from Add Subtitles. Not cleared as that closes: Qt reads it after
+                        // visibleChanged, and would leave the hidden window on its modal list, blocking the application
+                        settingsWindowLoader.item.modal = false
+                        settingsWindowLoader.item.open()
+                    }
+                }
+            }
+
+            Loader {
+                id: networkStreamDialogLoader
+                active: false
+                source: "qrc:///qt/qml/VLC/Dialogs/NetworkStreamDialog.qml"
+
+                Connections {
+                    target: DialogsProvider
+
+                    function onShowNetworkStreamDialog() {
+                        networkStreamDialogLoader.active = true
+                        networkStreamDialogLoader.item.open()
+                    }
+                }
+            }
+
+            Loader {
+                id: newPlaylistDialogLoader
+                active: false
+                source: "qrc:///qt/qml/VLC/Dialogs/NewPlaylistDialog.qml"
+
+                Connections {
+                    target: DialogsProvider
+
+                    function onShowNewPlaylistDialog() {
+                        newPlaylistDialogLoader.active = true
+                        newPlaylistDialogLoader.item.open()
+                    }
+                }
+            }
+
+            Loader {
+                id: hotkeysDialogLoader
+                active: false
+                source: "qrc:///qt/qml/VLC/Dialogs/HotkeysDialog.qml"
+
+                Connections {
+                    target: DialogsProvider
+
+                    function onShowHotkeysDialog() {
+                        hotkeysDialogLoader.active = true
+                        hotkeysDialogLoader.item.open()
+                    }
+                }
+            }
+
+            Loader {
+                id: addSubtitlesLoader
+                active: false
+                source: "qrc:///qt/qml/VLC/Dialogs/AddSubtitlesDialog.qml"
+
+                Connections {
+                    target: DialogsProvider
+
+                    function onShowAddSubtitles(context) {
+                        addSubtitlesLoader.active = true
+                        addSubtitlesLoader.item.openWith(context)
+                    }
+                }
+
+                // the "no API key" button: Settings opens on its Network page, over the dialog and modal to it
+                Connections {
+                    target: addSubtitlesLoader.item
+                    ignoreUnknownSignals: true
+
+                    function onOpenNetworkSettings() {
+                        settingsWindowLoader.active = true
+                        const win = settingsWindowLoader.item
+                        // the newest modal window is the one that takes input, and modality only applies on the next show
+                        win.close()
+                        win.modal = true
+                        win.searchText = ""
+                        win.currentPage = win.pages.findIndex(p => p.name === "network")
+                        win.open()
+                    }
+                }
+
+                // back from Settings: a key typed there counts, and the dialog takes the focus again (the window
+                // manager may give it to the main window, which the dialog blocks)
+                Connections {
+                    target: settingsWindowLoader.item
+
+                    function onVisibleChanged() {
+                        const dialog = addSubtitlesLoader.item
+                        if (settingsWindowLoader.item.visible || !dialog?.visible)
+                            return
+                        dialog.controller.refreshKey()
+                        dialog.open()
+                    }
+                }
+            }
+        }
+
         Loader {
             asynchronous: true
             active: !MainCtx.customizingPlayer

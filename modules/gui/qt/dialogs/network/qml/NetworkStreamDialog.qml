@@ -20,13 +20,14 @@ import QtQuick.Templates as T
 
 import VLC.MainInterface
 import VLC.MediaLibrary
+import VLC.Player
 import VLC.Style
 import VLC.Widgets as Widgets
 import VLC.Dialogs
 import VLC.Util
 
 // Open Network Stream (Figma 6216:13614): a list of links and an optional name. With a name the links are saved and
-// the Network page opens on them, without one they are played. Single instance, opened by Dialogs.qml.
+// the Network page opens on them, without one they are played. Single instance, opened by MainInterface.qml.
 DialogCard {
     id: root
 
@@ -64,8 +65,11 @@ DialogCard {
                 return
             close()
             const tree = MainCtx.folderTree(entry.mrl, entry.name)
-            if (tree)
+            if (tree) {
+                // from the player's menu too: the page has to be seen
+                PlayerControlbarControls.leavePlayer()
                 History.push(["network", "browse"], { tree: tree })
+            }
         } else {
             close()
             if (MainCtx.mediaLibraryAvailable) {

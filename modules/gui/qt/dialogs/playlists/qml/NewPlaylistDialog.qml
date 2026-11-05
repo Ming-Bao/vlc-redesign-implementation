@@ -24,7 +24,7 @@ import VLC.Style
 import VLC.Widgets as Widgets
 import VLC.Dialogs
 
-// New Playlist (Figma 6259:14954): a title, a cover and the files to start with. Single instance, opened by Dialogs.qml.
+// New Playlist (Figma 6259:14954): a title, a cover and the files to start with. Single instance, opened by MainInterface.qml.
 DialogCard {
     id: root
 
