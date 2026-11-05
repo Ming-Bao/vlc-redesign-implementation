@@ -304,35 +304,37 @@ SystemPalette::SystemPalette(QObject* parent)
 
 void SystemPalette::componentComplete()
 {
+    updatePalette();
+}
+
+void SystemPalette::readAccent()
+{
+    assert(m_ctx);
+    char* accentColor = var_InheritString(m_ctx->getIntf(), "qt-accent-color");
+    assert(accentColor);
+
+    if (!strcmp(accentColor, "default"))
     {
-        assert(m_ctx);
-        char* accentColor = var_InheritString(m_ctx->getIntf(), "qt-accent-color");
-        assert(accentColor);
-
-        if (!strcmp(accentColor, "default"))
-        {
-            // Use default
-        }
+        orange500 = QColor(QStringLiteral("#D37918"));
+        orange800 = QColor(QStringLiteral("#FF610A"));
+    }
 #if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
-        else if (!strcmp(accentColor, "system"))
-        {
-            assert(qApp);
-            const auto palette = qApp->palette();
+    else if (!strcmp(accentColor, "system"))
+    {
+        assert(qApp);
+        const auto palette = qApp->palette();
 
-            orange500 = palette.color(QPalette::Normal, QPalette::Accent);
-            orange800 = orange500.lighter(150);
-        }
+        orange500 = palette.color(QPalette::Normal, QPalette::Accent);
+        orange800 = orange500.lighter(150);
+    }
 #endif
-        else
-        {
-            orange500 = QColor(accentColor);
-            orange800 = orange500.lighter(150);
-        }
-
-        free(accentColor);
+    else
+    {
+        orange500 = QColor(accentColor);
+        orange800 = orange500.lighter(150);
     }
 
-    updatePalette();
+    free(accentColor);
 }
 
 ColorSchemeModel::ColorScheme SystemPalette::source() const
@@ -377,13 +379,19 @@ void SystemPalette::setCtx(MainCtx* ctx)
 {
     if (ctx == m_ctx)
         return;
+    if (m_ctx)
+        disconnect(m_ctx, &MainCtx::accentColorChanged, this, &SystemPalette::updatePalette);
     m_ctx = ctx;
+    if (m_ctx)
+        connect(m_ctx, &MainCtx::accentColorChanged, this, &SystemPalette::updatePalette);
     emit ctxChanged();
     updatePalette();
 }
 
 void SystemPalette::updatePalette()
 {
+    if (m_ctx)
+        readAccent();
     m_palettePriv.reset();
     switch(m_source)
     {

@@ -659,6 +659,7 @@ qml_modules += {
     'target' : 'dialogs',
     'outdir' : 'VLC/Dialogs',
     'sources': files(
+        'dialogs/dialogs/qml/AccentSwatches.js',
         'dialogs/dialogs/qml/CustomDialog.qml',
         'dialogs/dialogs/qml/DialogCard.qml',
         'dialogs/hotkeys/qml/HotkeysDialog.qml',

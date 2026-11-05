@@ -21,10 +21,12 @@ import QtQuick.Templates as T
 import VLC.Style
 import VLC.Widgets as Widgets
 import VLC.Player
+import VLC.MainInterface
 import VLC.Dialogs
+import "qrc:/qt/qml/VLC/Dialogs/AccentSwatches.js" as AccentSwatches
 
 // General's Accent colour: nine swatches. The first (the default orange) writes `default`, the others their hex, to
-// qt-accent-color. The palette reads the option once: the accent applies on the next launch (my call).
+// qt-accent-color, then MainCtx.reloadAccentColor() re-reads it: the accent applies at once.
 Item {
     id: root
 
@@ -32,11 +34,9 @@ Item {
     property Item delegate              // the SettingsRowDelegate (set by it): rev, value, style
     readonly property bool fullRow: true
 
-    readonly property var swatches: [ "#D37918", "#E15032", "#C49E23", "#19A234", "#18AAD3", "#185DD3", "#8E42FF", "#F052B3", "#AFAFAF" ]
     readonly property string current: {
         void(delegate ? delegate.rev : 0)
-        const v = String(SettingsBridge.value("qt-accent-color") ?? "default")
-        return v === "default" ? swatches[0] : v.toUpperCase()
+        return AccentSwatches.fromOption(String(SettingsBridge.value("qt-accent-color") ?? "default"))
     }
 
     implicitHeight: VLCStyle.dp(36, VLCStyle.scale)
@@ -61,7 +61,7 @@ Item {
             spacing: VLCStyle.dp(4, VLCStyle.scale)
 
             Repeater {
-                model: root.swatches
+                model: AccentSwatches.colors
 
                 T.Button {
                     id: swatch
@@ -75,7 +75,10 @@ Item {
                     height: parent.height
                     opacity: selected ? 1.0 : 0.7
                     padding: VLCStyle.dp(6, VLCStyle.scale)
-                    onClicked: SettingsBridge.setValue("qt-accent-color", index === 0 ? "default" : modelData)
+                    onClicked: {
+                        SettingsBridge.setValue("qt-accent-color", AccentSwatches.optionValue(modelData))
+                        MainCtx.reloadAccentColor()
+                    }
                     Accessible.name: modelData
                     Accessible.checked: selected
 

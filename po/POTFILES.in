@@ -657,6 +657,7 @@ modules/gui/minimal_macosx/macosx.c
 modules/gui/ncurses.c
 modules/gui/qt/dialogs/bookmarks/bookmarks.cpp
 modules/gui/qt/dialogs/bookmarks/bookmarks.hpp
+modules/gui/qt/dialogs/dialogs/qml/AccentSwatches.js
 modules/gui/qt/dialogs/dialogs/qml/CustomDialog.qml
 modules/gui/qt/dialogs/dialogs/qml/DialogCard.qml
 modules/gui/qt/dialogs/network/qml/NetworkStreamDialog.qml
