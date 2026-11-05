@@ -56,7 +56,7 @@ QVariantMap mediaItem(const QString& name, const QString& mrl, qint64 id)
     return {{"name", name}, {"mrl", mrl}, {"id", id}};
 }
 
-QVariantList listMedia(vlc_medialibrary_t* ml, vlc_ml_media_list_t* list)
+QVariantList listMedia(vlc_ml_media_list_t* list)
 {
     QVariantList out;
     if (!list)
@@ -74,7 +74,6 @@ QVariantList listMedia(vlc_medialibrary_t* ml, vlc_ml_media_list_t* list)
             name = QUrl(mrl).fileName();
         out << mediaItem(name, mrl, m.i_id);
     }
-    Q_UNUSED(ml);
     return out;
 }
 
@@ -90,13 +89,16 @@ void scan(vlc_medialibrary_t* ml, const ScanInput& in, ScanResult& out)
         case AddSubtitlesController::Folder:
             if (ml && in.mlId >= 0) {
                 vlc_ml_query_params_t q = vlc_ml_query_params_create();
-                out.media = listMedia(ml, vlc_ml_list_folder_media(ml, &q, in.mlId));
+                out.media = listMedia(vlc_ml_list_folder_media(ml, &q, in.mlId));
+                std::stable_sort(out.media.begin(), out.media.end(), [](const QVariant& a, const QVariant& b) {
+                    return a.toMap()["name"].toString().compare(b.toMap()["name"].toString(), Qt::CaseInsensitive) < 0;
+                });
             }
             break;
         case AddSubtitlesController::Playlist:
             if (ml && in.playlistId >= 0) {
                 vlc_ml_query_params_t q = vlc_ml_query_params_create();
-                out.media = listMedia(ml, vlc_ml_list_playlist_media(ml, &q, in.playlistId));
+                out.media = listMedia(vlc_ml_list_playlist_media(ml, &q, in.playlistId));
             }
             break;
         }
@@ -172,7 +174,7 @@ void AddSubtitlesController::updateCanSave()
     bool can = false;
     switch (m_origin) {
     case Computer:
-        can = m_target == File ? !m_ticked.isEmpty()
+        can = m_target == File ? !m_ticked.isEmpty() && !m_media.isEmpty()
                                : std::any_of(m_pairs.begin(), m_pairs.end(), [](int p) { return p >= 0; });
         break;
     case Link:
@@ -200,7 +202,19 @@ void AddSubtitlesController::setContext(const QVariantMap& context)
     m_context = context;
     const QString t = context.value("target").toString();
     setTarget(t == "folder" ? Folder : t == "playlist" ? Playlist : File);
+    // the singleton outlives the dialog: nothing of the last session may stay saveable
     m_dir.clear();
+    setOrigin(Computer);
+    setLink({});
+    m_media.clear();
+    m_candidates.clear();
+    m_pairs.clear();
+    m_ticked.clear();
+    emit mediaItemsChanged();
+    emit candidatesChanged();
+    emit pairsChanged();
+    emit tickedChanged();
+    updateCanSave();
     refresh(true);
 }
 
@@ -217,6 +231,9 @@ void AddSubtitlesController::refresh(bool reloadMedia)
     MediaLib* ml = m_intf->p_mi ? m_intf->p_mi->getMediaLibrary() : nullptr;
     if (ml && m_task)
         ml->cancelMLTask(this, m_task);
+    // a cancelled scan may have been the one reloading the media
+    reloadMedia = reloadMedia || m_reloadPending;
+    m_reloadPending = reloadMedia;
 
     const ScanInput in{
         m_target,
@@ -248,6 +265,7 @@ void AddSubtitlesController::refresh(bool reloadMedia)
             m_ticked << m_pairs.first();
         emit tickedChanged();
         updateCanSave();
+        m_reloadPending = false;
         setBusy(false);
     };
 
@@ -295,7 +313,7 @@ bool AddSubtitlesController::attach(const QVariantMap& media, const QString& sub
     MediaLib* ml = m_intf->p_mi ? m_intf->p_mi->getMediaLibrary() : nullptr;
     const QUrl url = local ? QUrl::fromLocalFile(subtitle) : QUrl(subtitle);
     const qint64 mediaId = media["id"].toLongLong(); // -1 outside the library
-    const bool playing = QUrl(media["mrl"].toString()) == m_intf->p_mainPlayerController->getUrl();
+    const bool playing = sameMedia(media["mrl"].toString(), m_intf->p_mainPlayerController->getUrl().toString(QUrl::FullyEncoded));
     bool ok = false;
 
     if (ml && mediaId > 0) {
@@ -318,7 +336,7 @@ bool AddSubtitlesController::attach(const QVariantMap& media, const QString& sub
 
 void AddSubtitlesController::save()
 {
-    if (!m_canSave)
+    if (!m_canSave || m_busy || m_media.isEmpty())
         return;
     int attached = 0, failed = 0;
     auto count = [&](bool ok) { ok ? ++attached : ++failed; };

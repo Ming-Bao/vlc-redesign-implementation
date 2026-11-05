@@ -45,6 +45,14 @@ private slots:
         QCOMPARE(subtitleCandidates({"b.SRT", "a.ass", "movie.mkv", "c.txt", "d.idx"}, "*.cdg;*.idx;*.srt;*.ass"),
                  (QStringList{"a.ass", "b.SRT", "d.idx"}));
     }
+    void sameMedia_cases() {
+        QVERIFY(sameMedia("file:///m/a%20b.mkv", "file:///m/a b.mkv"));
+        QVERIFY(sameMedia("file:///home/%7Eu/a.mkv", "file:///home/~u/a.mkv"));
+        QVERIFY(sameMedia("file:///m/x/../a.mkv", "file:///m/a.mkv"));
+        QVERIFY(!sameMedia("file:///m/a.mkv", "file:///m/b.mkv"));
+        QVERIFY(!sameMedia("", ""));
+        QVERIFY(!sameMedia("", "file:///m/a.mkv"));
+    }
     void locationBreadcrumb_cases() {
         QCOMPARE(locationBreadcrumb("/home/u/Videos/Shows/The Wand/S01", "/home/u"),
                  QString("Videos / Shows / The Wand / S01"));

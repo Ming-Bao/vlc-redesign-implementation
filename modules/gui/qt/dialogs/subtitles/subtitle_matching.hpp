@@ -33,4 +33,7 @@ QStringList subtitleCandidates(const QStringList& fileNames, const QString& exte
 // "Videos / Shows / S01": `dir` relative to `home` when inside it, else from the root
 QString locationBreadcrumb(const QString& dir, const QString& home);
 
+// whether two mrls name the same media: equal once decoded and path-normalised, never for empty ones
+bool sameMedia(const QString& a, const QString& b);
+
 #endif

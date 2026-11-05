@@ -113,6 +113,7 @@ private:
     bool m_canSave = false;
     bool m_busy = false;
     quint64 m_task = 0;
+    bool m_reloadPending = false; // a media reload was requested and has not landed yet
 };
 
 #endif

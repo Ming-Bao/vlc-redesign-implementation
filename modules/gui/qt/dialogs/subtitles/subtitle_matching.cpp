@@ -23,6 +23,7 @@
 
 #include <QDir>
 #include <QRegularExpression>
+#include <QUrl>
 
 #include <functional>
 #include <utility>
@@ -119,4 +120,13 @@ QString locationBreadcrumb(const QString& dir, const QString& home)
     if (!h.isEmpty() && path.startsWith(h + '/'))
         path = path.mid(h.size());
     return path.split('/', Qt::SkipEmptyParts).join(" / ");
+}
+
+bool sameMedia(const QString& a, const QString& b)
+{
+    auto canonical = [](const QString& mrl) {
+        const QUrl u(mrl.trimmed());
+        return QUrl::fromPercentEncoding(u.adjusted(QUrl::NormalizePathSegments).toString(QUrl::FullyEncoded).toUtf8());
+    };
+    return !a.trimmed().isEmpty() && canonical(a) == canonical(b);
 }
