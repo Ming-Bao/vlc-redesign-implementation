@@ -33,6 +33,7 @@
 #include "mlhelper.hpp"
 #include "mlcustomcover.hpp"
 #include "mlplaylist.hpp"
+#include "dialogs/playlists/playlist_cover.hpp"
 
 //-------------------------------------------------------------------------------------------------
 // Static variables
@@ -112,6 +113,57 @@ void appendMediaIntoPlaylist(vlc_medialibrary_t* ml, int64_t playlistId, const s
         {
             append(ctx.createdPlaylistId, initialItems);
         }
+    });
+}
+
+/* Q_INVOKABLE */ void MLPlaylistListModel::createFromFiles(const QString & name, const QList<QUrl> & files, const QUrl & cover)
+{
+    assert(m_mediaLib);
+
+    struct Ctx {
+        bool created = false;
+    };
+
+    setTransactionPending(true);
+
+    m_mediaLib->runOnMLThread<Ctx>(this,
+    //ML thread
+    [name, files, cover](vlc_medialibrary_t* ml, Ctx& ctx)
+    {
+        vlc_ml_playlist_t * playlist = vlc_ml_playlist_create(ml, qtu(name));
+        if (!playlist)
+            return;
+
+        const int64_t id = playlist->i_id;
+        vlc_ml_playlist_release(playlist);
+        ctx.created = true;
+
+        for (const QUrl & file : files)
+        {
+            const QByteArray uri = file.toEncoded();
+
+            vlc_ml_media_t * media = vlc_ml_get_media_by_mrl(ml, uri.constData());
+            if (media == nullptr)
+            {
+                media = vlc_ml_new_external_media(ml, uri.constData());
+                if (media == nullptr)
+                    continue;
+            }
+
+            vlc_ml_playlist_append(ml, id, &media->i_id, 1);
+            vlc_ml_media_release(media);
+        }
+
+        // the model reloads once the transaction ends, so the cover is in place before it is asked for
+        if (!cover.isEmpty())
+            storeCustomCover(coverDir(), id, cover);
+    },
+    //UI thread
+    [this](quint64, const Ctx& ctx) {
+        endTransaction();
+
+        if (ctx.created)
+            emit DialogsProvider::getInstance()->playlistCreated();
     });
 }
 
@@ -199,7 +251,10 @@ void appendMediaIntoPlaylist(vlc_medialibrary_t* ml, int64_t playlistId, const s
     [itemList](vlc_medialibrary_t* ml)
     {
         for (auto itemId : itemList)
+        {
             vlc_ml_playlist_delete(ml, itemId.id);
+            removeCustomCover(coverDir(), itemId.id);
+        }
     },
     //UI thread
     [this](){
@@ -395,6 +450,10 @@ bool MLPlaylistListModel::setTransactionPending(const bool value)
 
 QString MLPlaylistListModel::getCover(const MLPlaylist * playlist) const
 {
+    const QString custom = customCoverPath(coverDir(), playlist->getId().id);
+    if (!custom.isEmpty())
+        return QUrl::fromLocalFile(custom).toString();
+
     return MLCustomCover::url(playlist->getId()
                             , m_coverSize
                             , m_coverDefault

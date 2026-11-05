@@ -170,6 +170,7 @@ libqt_plugin_la_SOURCES = \
 	dialogs/toolbar/controlbar_profile_model.cpp \
 	dialogs/toolbar/controlbar_profile_model.hpp \
 	dialogs/vlm/vlm.cpp dialogs/vlm/vlm.hpp \
+	dialogs/playlists/playlist_cover.cpp dialogs/playlists/playlist_cover.hpp \
 	dialogs/playlists/playlists.cpp dialogs/playlists/playlists.hpp \
 	maininterface/compositor.hpp \
 	maininterface/compositor.cpp \
@@ -1153,6 +1154,7 @@ libqml_module_dialogs_a_QML = \
 	dialogs/dialogs/qml/CustomDialog.qml \
 	dialogs/dialogs/qml/DialogCard.qml \
 	dialogs/network/qml/NetworkStreamDialog.qml \
+	dialogs/playlists/qml/NewPlaylistDialog.qml \
 	dialogs/dialogs/qml/Dialogs.qml \
 	dialogs/dialogs/qml/ModalDialog.qml \
 	dialogs/dialogs/qml/WindowDialog.qml \
@@ -2015,6 +2017,20 @@ test_saved_streams_LDADD = $(QT_QTEST_COMMON_ldadd)
 test_saved_streams_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
 check_PROGRAMS += test_saved_streams
 TESTS += test_saved_streams
+
+# test_playlist_cover
+test_playlist_cover_SOURCES = \
+	tests/test_playlist_cover.cpp \
+	dialogs/playlists/playlist_cover.hpp dialogs/playlists/playlist_cover.cpp
+nodist_test_playlist_cover_SOURCES = tests/test_playlist_cover.moc
+BUILT_SOURCES += tests/test_playlist_cover.moc
+CLEANFILES += tests/test_playlist_cover.moc
+test_playlist_cover_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)
+test_playlist_cover_CXXFLAGS = $(QT_QTEST_COMMON_cxxflags)
+test_playlist_cover_LDADD = $(QT_QTEST_COMMON_ldadd)
+test_playlist_cover_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
+check_PROGRAMS += test_playlist_cover
+TESTS += test_playlist_cover
 
 # test_effects_util
 

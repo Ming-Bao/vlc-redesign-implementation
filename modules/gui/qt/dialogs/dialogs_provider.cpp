@@ -67,6 +67,8 @@
 #include <QApplication>
 #include <QSignalMapper>
 #include <QFileDialog>
+#include <QDir>
+#include <QFileInfo>
 #include <QUrl>
 #include <QInputDialog>
 #include <QPointer>
@@ -843,17 +845,25 @@ void DialogsProvider::addFolderToLibrary()
     }, "ML_FOLDER_ADD_QUEUE" );
 }
 
-bool DialogsProvider::newPlaylist()
+void DialogsProvider::newPlaylist()
 {
+    // as prefsDialog(): without the QML dialog (skins2's provider) a plain name prompt
+    if( !p_intf->b_isDialogProvider
+        && isSignalConnected( QMetaMethod::fromSignal( &DialogsProvider::showNewPlaylistDialog ) ) )
+    {
+        emit showNewPlaylistDialog();
+        return;
+    }
+
     MediaLib* ml = p_intf->p_mi->getMediaLibrary();
     if( !ml )
-        return false;
+        return;
 
     bool ok = false;
     const QString name = QInputDialog::getText( nullptr, qtr( "New Playlist" ),
             qtr( "Playlist name:" ), QLineEdit::Normal, {}, &ok ).trimmed();
     if( !ok || name.isEmpty() )
-        return false;
+        return;
 
     // same call as MLPlaylistListModel::create
     ml->runOnMLThread( this, [name]( vlc_medialibrary_t* p_ml ) {
@@ -861,7 +871,6 @@ bool DialogsProvider::newPlaylist()
         if( playlist )
             vlc_ml_playlist_release( playlist );
     } );
-    return true;
 }
 
 void DialogsProvider::PLOpenDir()
@@ -1081,6 +1090,33 @@ QUrl DialogsProvider::pickFile( const QString& title, bool subtitle, const QUrl&
                                         near.isValid() ? near.adjusted( QUrl::RemoveFilename )
                                                        : p_intf->p_mi->getDialogFilePath(),
                                         filter );
+}
+
+QUrl DialogsProvider::pickImage( const QString& title )
+{
+    // the selected filter makes it the active one
+    QString images = qtr( "Images" ) + " (*.png *.jpg *.jpeg *.webp *.bmp *.gif)";
+    return QFileDialog::getOpenFileUrl( nullptr, title, p_intf->p_mi->getDialogFilePath(), images,
+                                        &images, {}, { QStringLiteral( "file" ) } );
+}
+
+QStringList DialogsProvider::expandFolders( const QList<QUrl>& urls )
+{
+    QStringList filters;
+    for( const QString& ext : qfu( EXTENSIONS_MEDIA ).split( ';', Qt::SkipEmptyParts ) )
+        filters << ext.trimmed();
+
+    QStringList res;
+    for( const QUrl& url : urls )
+    {
+        const QDir dir( url.toLocalFile() );
+        if( url.isLocalFile() && dir.exists() )
+            for( const QFileInfo& info : dir.entryInfoList( filters, QDir::Files, QDir::Name | QDir::IgnoreCase ) )
+                res << QUrl::fromLocalFile( info.absoluteFilePath() ).toEncoded();
+        else
+            res << url.toEncoded();
+    }
+    return res;
 }
 
 QUrl DialogsProvider::pickFolder( const QString& title, const QUrl& folder )

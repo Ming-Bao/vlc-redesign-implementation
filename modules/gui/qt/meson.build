@@ -298,6 +298,8 @@ qt_plugin_sources = files(
     'dialogs/toolbar/controlbar_profile_model.cpp',
     'dialogs/toolbar/controlbar_profile_model.hpp',
     'dialogs/vlm/vlm.cpp',
+    'dialogs/playlists/playlist_cover.cpp',
+    'dialogs/playlists/playlist_cover.hpp',
     'dialogs/playlists/playlists.cpp',
     'dialogs/playlists/playlists.hpp',
     'maininterface/compositor.hpp',
@@ -649,6 +651,7 @@ qml_modules += {
         'dialogs/dialogs/qml/CustomDialog.qml',
         'dialogs/dialogs/qml/DialogCard.qml',
         'dialogs/network/qml/NetworkStreamDialog.qml',
+        'dialogs/playlists/qml/NewPlaylistDialog.qml',
         'dialogs/dialogs/qml/Dialogs.qml',
         'dialogs/dialogs/qml/ModalDialog.qml',
         'dialogs/dialogs/qml/WindowDialog.qml',
@@ -1535,6 +1538,21 @@ if qt6_dep.found()
             'moc_sources': files('tests/test_saved_streams.cpp'),
             'moc_headers': files('dialogs/network/saved_streams.hpp'),
             'suite': ['qt'],
+            'include_directories' : qt_include_dir,
+            'link_args': qt_link_args,
+            'dependencies': [qt6_dep, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
+            'name': 'test_qt_playlist_cover',
+            'sources': files(
+                'tests/test_playlist_cover.cpp',
+                'dialogs/playlists/playlist_cover.cpp',
+                'dialogs/playlists/playlist_cover.hpp'
+            ),
+            'moc_sources': files('tests/test_playlist_cover.cpp'),
+            'suite': ['qt'],
+            'link_with': [libvlccore],
             'include_directories' : qt_include_dir,
             'link_args': qt_link_args,
             'dependencies': [qt6_dep, qtest_qt6_dep]

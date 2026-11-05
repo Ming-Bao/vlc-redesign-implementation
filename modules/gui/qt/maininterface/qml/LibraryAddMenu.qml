@@ -27,6 +27,18 @@ Widgets.FigmaMenu {
 
     // the LibraryPageLoader the menu navigates
     property Item loader
+    // the New playlist row opened the dialog: show the Playlists page when it is saved
+    property bool _opened: false
+
+    Connections {
+        target: DialogsProvider
+
+        function onPlaylistCreated() {
+            if (root._opened && !root.loader.isDefaulLoadedForPath(["playlists"]))
+                History.push(["playlists"])
+            root._opened = false
+        }
+    }
 
     rows: (MainCtx.mediaLibraryAvailable ? [
               { text: qsTr("Add folder to library"), run: () => DialogsProvider.addFolderToLibrary() }
@@ -34,9 +46,8 @@ Widgets.FigmaMenu {
           .concat([{ text: qsTr("Open network stream"), run: () => DialogsProvider.openNetDialog() }])
           .concat(MainCtx.mediaLibraryAvailable ? [
               { text: qsTr("New playlist"), run: () => {
-                  if (DialogsProvider.newPlaylist() &&
-                      !loader.isDefaulLoadedForPath(["playlists"]))
-                      History.push(["playlists"])
+                  _opened = true
+                  DialogsProvider.newPlaylist()
               } }
           ] : [])
 }

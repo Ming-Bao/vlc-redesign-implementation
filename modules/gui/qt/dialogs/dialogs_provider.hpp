@@ -154,7 +154,8 @@ public:
 
     /* redesign library actions, called from QML */
     Q_INVOKABLE void addFolderToLibrary();
-    Q_INVOKABLE bool newPlaylist();
+    // opens the New Playlist dialog; the plain name prompt when no QML dialog is connected
+    Q_INVOKABLE void newPlaylist();
 
 protected:
     void customEvent( QEvent *) override;
@@ -271,6 +272,10 @@ public slots:
     // nothing picked: [] and an empty url
     Q_INVOKABLE QStringList pickMedia( const QString& title, const QUrl& folder )
         { return showSimpleOpen( title, EXT_FILTER_MEDIA | EXT_FILTER_VIDEO | EXT_FILTER_AUDIO | EXT_FILTER_PLAYLIST, folder ); }
+    // the New Playlist dialog's cover picker; an empty url when cancelled
+    Q_INVOKABLE QUrl pickImage( const QString& title );
+    // `urls` as URL strings, each local folder replaced by the media files directly inside it (not recursive)
+    Q_INVOKABLE QStringList expandFolders( const QList<QUrl>& urls );
     Q_INVOKABLE QUrl pickFolder( const QString& title, const QUrl& folder );
     void openAndStreamingDialogs();
     void openAndTranscodingDialogs();
@@ -309,6 +314,9 @@ signals:
     void showToolbarEditorDialog();
     void showSettingsWindow();
     void showNetworkStreamDialog();
+    void showNewPlaylistDialog();
+    // a playlist was created by the New Playlist dialog
+    void playlistCreated();
 
     //visiblity signal
     void openDialogVisibleChanged();

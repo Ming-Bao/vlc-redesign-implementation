@@ -638,4 +638,19 @@ Item {
             }
         }
     }
+
+    Loader {
+        id: newPlaylistDialogLoader
+        active: false
+        source: "qrc:///qt/qml/VLC/Dialogs/NewPlaylistDialog.qml"
+
+        Connections {
+            target: DialogsProvider
+
+            function onShowNewPlaylistDialog() {
+                newPlaylistDialogLoader.active = true
+                newPlaylistDialogLoader.item.open()
+            }
+        }
+    }
 }

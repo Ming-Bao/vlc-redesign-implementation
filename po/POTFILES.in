@@ -660,6 +660,7 @@ modules/gui/qt/dialogs/bookmarks/bookmarks.hpp
 modules/gui/qt/dialogs/dialogs/qml/CustomDialog.qml
 modules/gui/qt/dialogs/dialogs/qml/DialogCard.qml
 modules/gui/qt/dialogs/network/qml/NetworkStreamDialog.qml
+modules/gui/qt/dialogs/playlists/qml/NewPlaylistDialog.qml
 modules/gui/qt/dialogs/dialogs/qml/Dialogs.qml
 modules/gui/qt/dialogs/dialogs/qml/WindowDialog.qml
 modules/gui/qt/dialogs/dialogs_provider.cpp
@@ -710,6 +711,7 @@ modules/gui/qt/dialogs/open/open_panels.cpp
 modules/gui/qt/dialogs/open/open_panels.hpp
 modules/gui/qt/dialogs/open/openurl.cpp
 modules/gui/qt/dialogs/open/openurl.hpp
+modules/gui/qt/dialogs/playlists/playlist_cover.cpp
 modules/gui/qt/dialogs/playlists/playlists.cpp
 modules/gui/qt/dialogs/playlists/playlists.hpp
 modules/gui/qt/dialogs/plugins/plugins.cpp
