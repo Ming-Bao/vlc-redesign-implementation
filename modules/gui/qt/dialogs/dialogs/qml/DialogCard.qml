@@ -192,6 +192,7 @@ Window {
         DragHandler {
             enabled: !root.showHeader
             target: null
+            grabPermissions: PointerHandler.TakeOverForbidden
             onActiveChanged: if (active) root.startSystemMove()
         }
 
