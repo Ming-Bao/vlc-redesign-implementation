@@ -1603,6 +1603,30 @@ if qt6_dep.found()
         }
 
         vlc_tests += {
+            'name': 'test_qt_control_ids',
+            'sources': files(
+                'tests/test_control_ids.cpp',
+                'dialogs/toolbar/controlbar_profile.cpp',
+                'dialogs/toolbar/controlbar_profile.hpp',
+                'player/player_controlbar_model.cpp',
+                'player/player_controlbar_model.hpp',
+                'player/control_list_model.cpp',
+                'player/control_list_model.hpp'
+            ),
+            'moc_sources': files('tests/test_control_ids.cpp'),
+            'moc_headers': files(
+                'dialogs/toolbar/controlbar_profile.hpp',
+                'player/player_controlbar_model.hpp',
+                'player/control_list_model.hpp'
+            ),
+            'suite': ['qt'],
+            'link_with': [libvlccore],
+            'include_directories' : qt_include_dir,
+            'link_args': qt_link_args,
+            'dependencies': [qt6_dep, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
             'name': 'test_qt_effects_util',
             'sources': files(
                 'tests/test_effects_util.cpp',

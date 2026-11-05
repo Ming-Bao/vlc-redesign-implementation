@@ -117,6 +117,8 @@ private:
     };
 
     static const QVector<Profile> m_defaults;
+    static const std::array<QVector<int>, 3> topbarDefaults;
+    static const std::array<QVector<int>, 3> seekRowDefaults;
 
 private:
     void insertDefaults();

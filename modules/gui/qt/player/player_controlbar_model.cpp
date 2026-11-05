@@ -39,7 +39,8 @@ QJSValue PlayerControlbarModel::getPlaylistIdentifierListModel(QQmlEngine *engin
 
     QJSValue array = scriptEngine->newArray();
 
-    for (int i = 0; i < metaEnum.keyCount(); ++i)
+    // Topbar and SeekRow are not editable per tab; ponytail: drop this limit when the legacy editor goes (Task 11)
+    for (int i = 0; i < metaEnum.keyCount() && metaEnum.value(i) <= Miniplayer; ++i)
     {
        QJSValue obj = scriptEngine->newObject();
 

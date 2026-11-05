@@ -51,7 +51,10 @@ public:
     enum PlayerIdentifier {
         Videoplayer = 0,
         Audioplayer,
-        Miniplayer
+        Miniplayer,
+        // Customize Player models, not listed by the legacy editor
+        Topbar,
+        SeekRow
     };
     Q_ENUM(PlayerIdentifier)
     // This enum is iterated through QMetaEnum, and

@@ -2066,6 +2066,22 @@ test_playlist_cover_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
 check_PROGRAMS += test_playlist_cover
 TESTS += test_playlist_cover
 
+# test_control_ids
+test_control_ids_SOURCES = \
+	tests/test_control_ids.cpp \
+	dialogs/toolbar/controlbar_profile.cpp dialogs/toolbar/controlbar_profile.hpp \
+	player/player_controlbar_model.cpp player/player_controlbar_model.hpp \
+	player/control_list_model.cpp player/control_list_model.hpp
+nodist_test_control_ids_SOURCES = tests/test_control_ids.moc
+BUILT_SOURCES += tests/test_control_ids.moc
+CLEANFILES += tests/test_control_ids.moc
+test_control_ids_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)
+test_control_ids_CXXFLAGS = $(QT_QTEST_COMMON_cxxflags)
+test_control_ids_LDADD = $(QT_QTEST_COMMON_ldadd)
+test_control_ids_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
+check_PROGRAMS += test_control_ids
+TESTS += test_control_ids
+
 # test_subtitle_matching
 test_subtitle_matching_SOURCES = \
 	tests/test_subtitle_matching.cpp \

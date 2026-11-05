@@ -36,6 +36,14 @@ constexpr QChar SETTINGS_CONTROL_SEPARATOR {','};
 constexpr QChar SETTINGS_CONFIGURATION_SEPARATOR {'|'};
 constexpr QChar SETTINGS_PROFILE_SEPARATOR {'$'};
 
+const std::array<QVector<int>, 3> ControlbarProfileModel::topbarDefaults {{
+    { ControlListModel::MORE_MENU, ControlListModel::LIBRARY_PANEL, ControlListModel::FOLDER_CHIP },
+    { ControlListModel::MEDIA_TITLE },
+    { ControlListModel::WINDOW_MINIMIZE, ControlListModel::WINDOW_MAXIMIZE,
+      ControlListModel::FULLSCREEN_BUTTON, ControlListModel::WINDOW_CLOSE }
+}};
+const std::array<QVector<int>, 3> ControlbarProfileModel::seekRowDefaults {};
+
 decltype (ControlbarProfileModel::m_defaults)
     ControlbarProfileModel::m_defaults =
         {
@@ -90,7 +98,9 @@ decltype (ControlbarProfileModel::m_defaults)
                                 }
                             }
                         }
-                    }
+                    },
+                    { PlayerControlbarModel::Topbar, topbarDefaults },
+                    { PlayerControlbarModel::SeekRow, seekRowDefaults }
                 }
             },
             {
@@ -162,7 +172,9 @@ decltype (ControlbarProfileModel::m_defaults)
                                 }
                             }
                         }
-                    }
+                    },
+                    { PlayerControlbarModel::Topbar, topbarDefaults },
+                    { PlayerControlbarModel::SeekRow, seekRowDefaults }
                 }
             },
             {
@@ -230,7 +242,9 @@ decltype (ControlbarProfileModel::m_defaults)
                                 }, {}
                             }
                         }
-                    }
+                    },
+                    { PlayerControlbarModel::Topbar, topbarDefaults },
+                    { PlayerControlbarModel::SeekRow, seekRowDefaults }
                 }
             },
             {
@@ -308,7 +322,9 @@ decltype (ControlbarProfileModel::m_defaults)
                                 }, {}
                             }
                         }
-                    }
+                    },
+                    { PlayerControlbarModel::Topbar, topbarDefaults },
+                    { PlayerControlbarModel::SeekRow, seekRowDefaults }
                 }
             },
             {
@@ -365,7 +381,9 @@ decltype (ControlbarProfileModel::m_defaults)
                                 }, {}
                             }
                         }
-                    }
+                    },
+                    { PlayerControlbarModel::Topbar, topbarDefaults },
+                    { PlayerControlbarModel::SeekRow, seekRowDefaults }
                 }
             },
             {
@@ -448,7 +466,9 @@ decltype (ControlbarProfileModel::m_defaults)
                                 }
                             }
                         }
-                    }
+                    },
+                    { PlayerControlbarModel::Topbar, topbarDefaults },
+                    { PlayerControlbarModel::SeekRow, seekRowDefaults }
                 }
             }
         };
@@ -819,6 +839,10 @@ bool ControlbarProfileModel::reload()
             ptrNewProfile->setModelData(identifier, data);
             ptrNewProfile->resetDirty(); // Newly loaded model can not be dirty
         }
+
+        // Profiles saved before Topbar/SeekRow existed gain their defaults:
+        ptrNewProfile->ensureModel(PlayerControlbarModel::Topbar, topbarDefaults);
+        ptrNewProfile->ensureModel(PlayerControlbarModel::SeekRow, seekRowDefaults);
 
         profiles.append(ptrNewProfile);
     }

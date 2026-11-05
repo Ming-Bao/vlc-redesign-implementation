@@ -45,6 +45,9 @@ public:
     void setModelData(int identifier, const std::array<QVector<int>, 3>& data);
     std::array<QVector<int>, 3> getModelData(int identifier) const;
 
+    // Creates the model with defaults unless it exists, without marking it dirty.
+    void ensureModel(int identifier, const std::array<QVector<int>, 3>& defaults);
+
     void deleteModel(int identifier);
 
     bool dirty() const;

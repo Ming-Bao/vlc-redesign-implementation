@@ -94,6 +94,16 @@ std::array<QVector<int>, 3> ControlbarProfile::getModelData(int identifier) cons
     return ptrModel->serializeModels();
 }
 
+void ControlbarProfile::ensureModel(int identifier, const std::array<QVector<int>, 3> &defaults)
+{
+    if (m_models.contains(identifier))
+        return;
+
+    setModelData(identifier, defaults);
+    if (const auto model = getModel(identifier))
+        model->setDirty(false);
+}
+
 void ControlbarProfile::deleteModel(int identifier)
 {
     if (m_models.contains(identifier))

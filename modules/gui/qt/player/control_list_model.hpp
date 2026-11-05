@@ -82,37 +82,42 @@ public:
         NAVIGATION_BUTTONS,
         PROGRAM_BUTTON,
         NAVIGATION_BOX,
-        RESERVED_0X2B,
-        RESERVED_0X2C,
-        RESERVED_0X2D,
-        RESERVED_0X2E,
-        RESERVED_0X2F,
-        RESERVED_0X30,
-        RESERVED_0X31,
-        RESERVED_0X32,
-        RESERVED_0X33,
-        RESERVED_0X34,
-        RESERVED_0X35,
-        RESERVED_0X36,
-        RESERVED_0X37,
-        RESERVED_0X38,
-        RESERVED_0X39,
-        RESERVED_0X3A,
-        RESERVED_0X3B,
-        RESERVED_0X3C,
-        RESERVED_0X3D,
-        RESERVED_0X3E,
-        RESERVED_0X3F,
+        DIVIDER,
+        JUMP_FW_10_BUTTON,
+        JUMP_BACK_10_BUTTON,
+        ZOOM_BUTTON,
+        SIDE_PANEL_BUTTON,
+        SETTINGS_BUTTON,
+        HOME_BUTTON,
+        THUMBNAIL_WIDGET,
+        FILE_NAME_WIDGET,
+        ARTIST_NAME_WIDGET,
+        FOLDER_NAME_WIDGET,
+        PLAYLIST_NAME_WIDGET,
+        REPLAY_BUTTON,
+        CHAPTERS_BUTTON,
+        FAVORITE_BUTTON,
+        BOOKMARKS_BUTTON,
+        PLAYLISTS_BUTTON,
+        MORE_MENU,
+        LIBRARY_PANEL,
+        FOLDER_CHIP,
+        MEDIA_TITLE,
 
         WIDGET_SPACER = 0x40,
         WIDGET_SPACER_EXTEND,
+        WINDOW_MINIMIZE,
+        WINDOW_MAXIMIZE,
+        WINDOW_CLOSE,
+        SEEKBAR,
         WIDGET_MAX,
     };
     Q_ENUM(ControlType)
 
     static_assert(RESERVED_0X1F == 0x1F, "missaligned");
-    static_assert(RESERVED_0X2B == 0x2B, "missaligned");
-    static_assert(RESERVED_0X3F == 0x3F, "missaligned");
+    static_assert(DIVIDER == 0x2B, "missaligned");
+    static_assert(MEDIA_TITLE == 0x3F, "missaligned");
+    static_assert(SEEKBAR == 0x45, "missaligned");
 
     // Basic functionality:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
