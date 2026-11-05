@@ -661,6 +661,7 @@ modules/gui/qt/dialogs/dialogs/qml/CustomDialog.qml
 modules/gui/qt/dialogs/dialogs/qml/DialogCard.qml
 modules/gui/qt/dialogs/network/qml/NetworkStreamDialog.qml
 modules/gui/qt/dialogs/hotkeys/qml/HotkeysData.js
+modules/gui/qt/dialogs/hotkeys/qml/HotkeysDialog.qml
 modules/gui/qt/dialogs/playlists/qml/NewPlaylistDialog.qml
 modules/gui/qt/dialogs/dialogs/qml/Dialogs.qml
 modules/gui/qt/dialogs/dialogs/qml/WindowDialog.qml

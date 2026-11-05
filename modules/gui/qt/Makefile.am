@@ -825,6 +825,8 @@ ui_%.h: %.ui
 
 libqt_plugin_la_RES = \
 	pixmaps/VLCIcons.ttf \
+	fonts/DMMono-Regular.ttf \
+	fonts/DMMono-OFL.txt \
 	pixmaps/addons/addon_default.svg \
 	pixmaps/addons/addon_broken.svg \
 	pixmaps/addons/addon_blue.svg \
@@ -1012,6 +1014,7 @@ libqt_plugin_la_RES = \
 	pixmaps/redesign/menu/stream.svg \
 	pixmaps/redesign/menu/subtitles.svg \
 	pixmaps/redesign/menu/video.svg \
+	pixmaps/redesign/dialogs/pencil.svg \
 	pixmaps/redesign/settings/audio.svg \
 	pixmaps/redesign/settings/audio-active.svg \
 	pixmaps/redesign/settings/chevron-down.svg \
@@ -1156,6 +1159,7 @@ libqml_module_dialogs_a_CPPFLAGS = $(libqt_plugin_la_CPPFLAGS)
 libqml_module_dialogs_a_QML = \
 	dialogs/dialogs/qml/CustomDialog.qml \
 	dialogs/dialogs/qml/DialogCard.qml \
+	dialogs/hotkeys/qml/HotkeysDialog.qml \
 	dialogs/network/qml/NetworkStreamDialog.qml \
 	dialogs/playlists/qml/NewPlaylistDialog.qml \
 	dialogs/dialogs/qml/Dialogs.qml \

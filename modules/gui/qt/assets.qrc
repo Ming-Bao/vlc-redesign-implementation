@@ -103,6 +103,9 @@
         <file alias="subtitles.svg">pixmaps/redesign/menu/subtitles.svg</file>
         <file alias="video.svg">pixmaps/redesign/menu/video.svg</file>
     </qresource>
+    <qresource prefix="/redesign/dialogs">
+        <file alias="pencil.svg">pixmaps/redesign/dialogs/pencil.svg</file>
+    </qresource>
     <qresource prefix="/redesign/settings">
         <file alias="audio.svg">pixmaps/redesign/settings/audio.svg</file>
         <file alias="audio-active.svg">pixmaps/redesign/settings/audio-active.svg</file>
@@ -191,6 +194,7 @@
     </qresource>
     <qresource prefix="/">
         <file alias="VLCIcons.ttf">pixmaps/VLCIcons.ttf</file>
+        <file alias="DMMono-Regular.ttf">fonts/DMMono-Regular.ttf</file>
     </qresource>
     <qresource prefix="/prefsmenu">
         <file alias="advprefs_audio.svg">pixmaps/prefs/advprefs_audio.svg</file>

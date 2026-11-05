@@ -302,7 +302,7 @@ void VLCMenuBar::MainMenu( qt_intf_t *p_intf, QMenu *menu, std::function<void()>
     }
 
     entry( qtr( "&Keyboard Shortcuts" ), ":/redesign/menu/keyboard.svg",
-           []() { THEDP->prefsDialog( SPrefsHotkeys ); } );
+           &DialogsProvider::hotkeysDialog );
     if( !p_intf->b_isDialogProvider )
         entry( qtr( "Customi&ze Player" ), ":/redesign/menu/customize.svg",
                &DialogsProvider::showToolbarEditorDialog );

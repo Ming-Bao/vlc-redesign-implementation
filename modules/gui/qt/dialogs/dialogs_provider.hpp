@@ -156,6 +156,8 @@ public:
     Q_INVOKABLE void addFolderToLibrary();
     // opens the New Playlist dialog; the plain name prompt when no QML dialog is connected
     Q_INVOKABLE void newPlaylist();
+    // a model freshly loaded from the configuration, owned by the caller (QML)
+    Q_INVOKABLE QObject* loadHotkeyModel();
 
 protected:
     void customEvent( QEvent *) override;
@@ -226,6 +228,8 @@ public slots:
     void prefsDialog(int simplePanel);
     /* the legacy Preferences dialog on its All view (the settings window's "All settings") */
     void legacyPrefsDialog();
+    /* the Keyboard Shortcuts dialog (the legacy hotkeys panel when there is no QML one) */
+    void hotkeysDialog();
     void firstRunDialog();
     void extendedDialog();
     void synchroDialog();
@@ -315,6 +319,7 @@ signals:
     void showSettingsWindow();
     void showNetworkStreamDialog();
     void showNewPlaylistDialog();
+    void showHotkeysDialog();
     // a playlist was created by the New Playlist dialog
     void playlistCreated();
 

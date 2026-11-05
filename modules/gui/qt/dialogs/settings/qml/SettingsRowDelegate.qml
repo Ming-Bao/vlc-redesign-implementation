@@ -165,7 +165,7 @@ FocusScope {
         switch (action) {
         case "openConfig": SettingsBridge.openConfigFolder(); break
         case "legacyPrefs": DialogsProvider.legacyPrefsDialog(); break
-        case "editHotkeys": DialogsProvider.prefsDialog(5); break   // SPrefsHotkeys
+        case "editHotkeys": DialogsProvider.hotkeysDialog(); break
         case "resetAll":
             win.ask(qsTr("Are you sure you want to reset your VLC media player preferences?"),
                     () => SettingsBridge.resetAll(), qsTr("Reset"))

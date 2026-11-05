@@ -104,17 +104,31 @@ int HotkeyModel::rowOf(const QString& option) const
     return -1;
 }
 
+QVariantMap HotkeyModel::rowAt(int row) const
+{
+    if (row < 0 || row >= m_rows.size())
+        return {};
+    const HotkeyRow& r = m_rows.at(row);
+    return {{"option", r.option}, {"label", r.label}, {"keys", r.keys}, {"globalKeys", r.globalKeys}, {"hasGlobal", !r.globalOption.isEmpty()}};
+}
+
 QString& HotkeyModel::cell(int row, bool global)
 {
     return global ? m_rows[row].globalKeys : m_rows[row].keys;
 }
 
-QString HotkeyModel::conflict(const QString& key, int row, bool global) const
+int HotkeyModel::conflictRow(const QString& key, int row, bool global) const
 {
     for (int i = 0; i < m_rows.size(); i++)
         if (i != row && (global ? m_rows[i].globalKeys : m_rows[i].keys).split('\t', Qt::SkipEmptyParts).contains(key))
-            return m_rows[i].label;
-    return {};
+            return i;
+    return -1;
+}
+
+QString HotkeyModel::conflict(const QString& key, int row, bool global) const
+{
+    const int i = conflictRow(key, row, global);
+    return i < 0 ? QString{} : m_rows[i].label;
 }
 
 void HotkeyModel::setCell(int row, bool global, const QString& keys)

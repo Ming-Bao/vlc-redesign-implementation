@@ -653,4 +653,19 @@ Item {
             }
         }
     }
+
+    Loader {
+        id: hotkeysDialogLoader
+        active: false
+        source: "qrc:///qt/qml/VLC/Dialogs/HotkeysDialog.qml"
+
+        Connections {
+            target: DialogsProvider
+
+            function onShowHotkeysDialog() {
+                hotkeysDialogLoader.active = true
+                hotkeysDialogLoader.item.open()
+            }
+        }
+    }
 }

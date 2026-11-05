@@ -19,6 +19,7 @@
 #define VLC_QT_HOTKEY_MODEL_HPP
 
 #include <QAbstractListModel>
+#include <QVariantMap>
 #include <QVector>
 
 typedef struct qt_intf_t qt_intf_t;
@@ -32,7 +33,7 @@ struct HotkeyRow
 };
 
 // The key-* options of the main module, one row per action, with its hotkey and global hotkey cells.
-// Edits stay in the model until save() (singleton "HotkeyModel" in VLC.Dialogs)
+// Edits stay in the model until save() (DialogsProvider.loadHotkeyModel() gives the dialog a fresh one each time it opens)
 class HotkeyModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -53,7 +54,11 @@ public:
     bool dirty() const { return m_dirty; }
 
     Q_INVOKABLE int rowOf(const QString& option) const;
-    // the label of the other row that has key in this column, or empty
+    // { option, label, keys, globalKeys, hasGlobal } of a row, for delegates that are not driven by the model's roles
+    Q_INVOKABLE QVariantMap rowAt(int row) const;
+    // the other row that has key in this column, or -1
+    Q_INVOKABLE int conflictRow(const QString& key, int row, bool global) const;
+    // the label of that row, or empty
     Q_INVOKABLE QString conflict(const QString& key, int row, bool global) const;
     // replaces the cell with key alone and removes key from every other row of the column
     Q_INVOKABLE void assign(int row, bool global, const QString& key);

@@ -33,6 +33,7 @@
 #include "qt.hpp"
 #include "dialogs_provider.hpp"
 #include <QMetaMethod>
+#include <QQmlEngine>
 #include "player/player_controller.hpp" /* Load Subtitles */
 #include "playlist/playlist_controller.hpp"
 #include "menus/menus.hpp"
@@ -43,6 +44,7 @@
 
 /* The dialogs */
 #include "dialogs/bookmarks/bookmarks.hpp"
+#include "dialogs/hotkeys/hotkey_model.hpp"
 #include "dialogs/preferences/preferences.hpp"
 #include "dialogs/mediainfo/mediainfo.hpp"
 #include "dialogs/messages/messages.hpp"
@@ -319,6 +321,22 @@ void DialogsProvider::prefsDialog(int simplePanel)
     ensurePrefsDialog()->showSimplePanel(simplePanel);
     m_prefsDialog->raise();
     m_prefsDialog->activateWindow();
+}
+
+void DialogsProvider::hotkeysDialog()
+{
+    if (p_intf->b_isDialogProvider
+        || !isSignalConnected(QMetaMethod::fromSignal(&DialogsProvider::showHotkeysDialog)))
+        prefsDialog(SPrefsHotkeys);
+    else
+        emit showHotkeysDialog();
+}
+
+QObject* DialogsProvider::loadHotkeyModel()
+{
+    auto* model = new HotkeyModel(p_intf);
+    QQmlEngine::setObjectOwnership(model, QQmlEngine::JavaScriptOwnership);
+    return model;
 }
 
 void DialogsProvider::legacyPrefsDialog()
