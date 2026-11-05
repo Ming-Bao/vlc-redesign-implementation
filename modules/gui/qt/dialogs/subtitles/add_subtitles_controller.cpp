@@ -90,11 +90,14 @@ qint64 idOf(const QVariant& v)
 qint64 folderIdOf(vlc_medialibrary_t* ml, const QString& mrl)
 {
     const QString wanted = folder_tree::normalized(mrl);
-    ml_unique_ptr<vlc_ml_folder_list_t> folders(vlc_ml_list_folders_by_type(ml, nullptr, VLC_ML_MEDIA_TYPE_VIDEO));
-    if (folders)
-        for (const vlc_ml_folder_t& f : ml_range_iterate<vlc_ml_folder_t>(folders))
-            if (f.psz_mrl && folder_tree::normalized(qfu(f.psz_mrl)) == wanted)
-                return f.i_id;
+    // a folder holding only audio is as valid a target as one holding videos
+    for (auto type : {VLC_ML_MEDIA_TYPE_VIDEO, VLC_ML_MEDIA_TYPE_AUDIO}) {
+        ml_unique_ptr<vlc_ml_folder_list_t> folders(vlc_ml_list_folders_by_type(ml, nullptr, type));
+        if (folders)
+            for (const vlc_ml_folder_t& f : ml_range_iterate<vlc_ml_folder_t>(folders))
+                if (f.psz_mrl && folder_tree::normalized(qfu(f.psz_mrl)) == wanted)
+                    return f.i_id;
+    }
     return -1;
 }
 
@@ -221,8 +224,18 @@ void AddSubtitlesController::setBusy(bool busy)
     emit busyChanged();
 }
 
-void AddSubtitlesController::setContext(const QVariantMap& context)
+QVariantMap AddSubtitlesController::completeContext(QVariantMap context)
 {
+    // a local file's folder is its directory, so every target a file opener can reach is offered
+    const QUrl mrl(context.value("mrl").toString());
+    if (!context.contains("folder") && mrl.isLocalFile())
+        context["folder"] = mrl.adjusted(QUrl::RemoveFilename).toString(QUrl::FullyEncoded);
+    return context;
+}
+
+void AddSubtitlesController::setContext(const QVariantMap& ctx)
+{
+    const QVariantMap context = completeContext(ctx);
     m_context = context;
     const QString t = context.value("target").toString();
     setTarget(t == "folder" ? Folder : t == "playlist" ? Playlist : File);

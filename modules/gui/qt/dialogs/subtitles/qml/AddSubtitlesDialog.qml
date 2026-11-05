@@ -48,9 +48,9 @@ DialogCard {
     footerNote: failedCount > 0 ? qsTr("%n subtitle(s) could not be added.", "", failedCount) : ""
 
     function openWith(ctx) {
-        context = ctx
+        context = controller.completeContext(ctx)
         failedCount = 0
-        controller.setContext(ctx)
+        controller.setContext(context)
         list.positionViewAtBeginning()
         open()
     }
@@ -437,7 +437,7 @@ DialogCard {
                     Widgets.LabelExt {
                         id: mediaName
                         anchors.left: mediaGlyph.right
-                        anchors.leftMargin: VLCStyle.dp(10, VLCStyle.scale)
+                        anchors.leftMargin: VLCStyle.dp(14, VLCStyle.scale)
                         anchors.verticalCenter: parent.verticalCenter
                         width: Math.min(implicitWidth, pair.split - x - VLCStyle.dp(60, VLCStyle.scale))
                         text: line.modelData.name
@@ -447,15 +447,16 @@ DialogCard {
                     }
 
                     Shape {
-                        x: mediaName.x + mediaName.width + VLCStyle.dp(10, VLCStyle.scale)
-                        width: pair.split - VLCStyle.dp(14, VLCStyle.scale) - x
+                        x: mediaName.x + mediaName.width + VLCStyle.dp(14, VLCStyle.scale)
+                        width: pair.split - x
                         height: parent.height
                         ShapePath {
-                            strokeColor: root._s.tick
+                            // Figma "Vector 77": 1 px #373737, dash 8 8
+                            strokeColor: "#373737"
                             strokeWidth: VLCStyle.dp(1, VLCStyle.scale)
                             strokeStyle: ShapePath.DashLine
                             // in units of the stroke width
-                            dashPattern: [VLCStyle.dp(6, VLCStyle.scale), VLCStyle.dp(6, VLCStyle.scale)]
+                            dashPattern: [8, 8]
                             fillColor: "transparent"
                             startX: 0; startY: height / 2
                             PathLine { x: width; y: height / 2 }
@@ -465,9 +466,9 @@ DialogCard {
                     Rectangle {
                         id: cell
 
-                        x: pair.split
-                        width: Math.max(VLCStyle.dp(240, VLCStyle.scale), implicitWidth)
-                        implicitWidth: subGlyph.width + subName.implicitWidth + swap.width + VLCStyle.dp(48, VLCStyle.scale)
+                        // Figma: the cell starts 20 after the split and ends 20 before the edge
+                        x: pair.split + root._margin
+                        width: pair.width - x - root._margin
                         height: parent.height
                         radius: VLCStyle.dp(6, VLCStyle.scale)
                         color: hover.hovered || activeFocus ? root._s.field : "transparent"

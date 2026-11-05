@@ -73,6 +73,8 @@ public:
 
     // keys: target ("file"|"folder"|"playlist"); file: mrl and mlId (-1 or absent when not in
     // the library); folder: folder (its mrl; the library id is found from it, or given as mlId); playlist: playlistId
+    // the context with the folder of a local file added when missing; what setContext works with
+    Q_INVOKABLE static QVariantMap completeContext(QVariantMap context);
     Q_INVOKABLE void setContext(const QVariantMap& context);
     // scan another folder for candidates; the media list stays
     Q_INVOKABLE void setFolder(const QUrl& folder);
