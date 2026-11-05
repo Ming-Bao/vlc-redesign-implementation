@@ -64,5 +64,14 @@
   "streaming-filled.svg": ["network_filled"],
   "playlists-filled.svg": ["playlists_filled"],
   "open-in-library.svg": ["open_in_library"],
-  "music-folder.svg": ["music_folder"]
+  "music-folder.svg": ["music_folder"],
+  "customize/zoom.svg": ["zoom"],
+  "customize/quit.svg": ["quit_app"],
+  "customize/info-dot.svg": ["info_dot"],
+  "customize/replay.svg": ["replay"],
+  "customize/favorite.svg": ["favorite"],
+  "customize/bookmarks.svg": ["bookmarks"],
+  "customize/thumbnail.svg": ["thumbnail"],
+  "forward-10-sec.svg": ["jump_fw_10"],
+  "backward-10-sec.svg": ["jump_back_10"]
 }

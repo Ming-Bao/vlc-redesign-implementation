@@ -128,6 +128,15 @@ class VLCIcons : public QObject {
     Q_PROPERTY(QChar recent_filled MEMBER recent_filled CONSTANT FINAL)
     Q_PROPERTY(QChar open_in_library MEMBER open_in_library CONSTANT FINAL)
     Q_PROPERTY(QChar music_folder MEMBER music_folder CONSTANT FINAL)
+    Q_PROPERTY(QChar zoom MEMBER zoom CONSTANT FINAL)
+    Q_PROPERTY(QChar quit_app MEMBER quit_app CONSTANT FINAL)
+    Q_PROPERTY(QChar info_dot MEMBER info_dot CONSTANT FINAL)
+    Q_PROPERTY(QChar replay MEMBER replay CONSTANT FINAL)
+    Q_PROPERTY(QChar favorite MEMBER favorite CONSTANT FINAL)
+    Q_PROPERTY(QChar bookmarks MEMBER bookmarks CONSTANT FINAL)
+    Q_PROPERTY(QChar thumbnail MEMBER thumbnail CONSTANT FINAL)
+    Q_PROPERTY(QChar jump_fw_10 MEMBER jump_fw_10 CONSTANT FINAL)
+    Q_PROPERTY(QChar jump_back_10 MEMBER jump_back_10 CONSTANT FINAL)
 
 
 public:
@@ -252,6 +261,15 @@ public:
     static constexpr inline QChar recent_filled{ u'\ue06f' };
     static constexpr inline QChar open_in_library{ u'\ue070' };
     static constexpr inline QChar music_folder{ u'\ue071' };
+    static constexpr inline QChar zoom{ u'\ue072' };
+    static constexpr inline QChar quit_app{ u'\ue073' };
+    static constexpr inline QChar info_dot{ u'\ue074' };
+    static constexpr inline QChar replay{ u'\ue075' };
+    static constexpr inline QChar favorite{ u'\ue076' };
+    static constexpr inline QChar bookmarks{ u'\ue077' };
+    static constexpr inline QChar thumbnail{ u'\ue078' };
+    static constexpr inline QChar jump_fw_10{ u'\ue079' };
+    static constexpr inline QChar jump_back_10{ u'\ue07a' };
 
 };
 

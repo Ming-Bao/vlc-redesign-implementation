@@ -326,6 +326,42 @@ void MediaLib::folderTrail(const QString& folder, QJSValue callback)
     });
 }
 
+void MediaLib::mediaFavorite(const QUrl& url, QJSValue callback)
+{
+    const QString mrl = url.toString(QUrl::FullyEncoded);
+    struct Context {
+        bool inLibrary = false;
+        bool favorite = false;
+    };
+    runOnMLThread<Context>(this,
+    //ML thread
+    [mrl](vlc_medialibrary_t* ml, Context& ctx){
+        ml_unique_ptr<vlc_ml_media_t> media {vlc_ml_get_media_by_mrl(ml, qtu(mrl))};
+        if (media)
+        {
+            ctx.inLibrary = true;
+            ctx.favorite = media->b_is_favorite;
+        }
+    },
+    //UI thread
+    [this, callback](quint64, Context& ctx) mutable {
+        QJSEngine* engine = qjsEngine(this);
+        if (engine && callback.isCallable())
+            callback.call({ctx.inLibrary, ctx.favorite});
+    });
+}
+
+void MediaLib::setMediaFavorite(const QUrl& url, bool favorite)
+{
+    const QString mrl = url.toString(QUrl::FullyEncoded);
+    runOnMLThread(this,
+    [mrl, favorite](vlc_medialibrary_t* ml){
+        ml_unique_ptr<vlc_ml_media_t> media {vlc_ml_get_media_by_mrl(ml, qtu(mrl))};
+        if (media)
+            vlc_ml_media_set_favorite(ml, media->i_id, favorite);
+    });
+}
+
 void MediaLib::mlInputItem(const QVector<MLItemId>& itemIdVector, QJSValue callback)
 {
     if (!callback.isCallable()) // invalid argument

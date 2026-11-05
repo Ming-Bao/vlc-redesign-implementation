@@ -17,6 +17,7 @@
  *****************************************************************************/
 import QtQuick
 
+import VLC.MainInterface
 import VLC.Style
 
 // Figma queue card: stays open while watching (non-modal), fills the height beside the video
@@ -28,6 +29,15 @@ PlayerPanel {
         { text: qsTr("Bookmarks"), icon: VLCIcons.bookmark },
         { text: qsTr("Chapters"), icon: VLCIcons.chapters }
     ]
+
+    // shared with the controls that open a page (Bookmarks, Chapters)
+    currentTab: MainCtx.playqueuePanel.currentTab
+    onCurrentTabChanged: MainCtx.playqueuePanel.currentTab = currentTab
+    // the tab buttons assign currentTab, which drops the binding above
+    Connections {
+        target: MainCtx.playqueuePanel
+        function onCurrentTabChanged() { root.currentTab = MainCtx.playqueuePanel.currentTab }
+    }
 
     fillHeight: true
     modal: false

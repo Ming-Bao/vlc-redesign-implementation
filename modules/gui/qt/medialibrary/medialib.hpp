@@ -76,6 +76,11 @@ public:
     // [] when no entry point holds it (see folder_tree::trail)
     Q_INVOKABLE void folderTrail(const QString& folder, QJSValue callback);
 
+    // callback(inLibrary, isFavorite) for the media at url; used by the player's Favorite control
+    Q_INVOKABLE void mediaFavorite(const QUrl& url, QJSValue callback);
+    // no-op when url is not in the library
+    Q_INVOKABLE void setMediaFavorite(const QUrl& url, bool favorite);
+
     inline bool idle() const { return m_idle; }
     inline int discoveryPending() const { return m_discoveryPending; }
     inline QString discoveryEntryPoint() const { return m_discoveryEntryPoint; }

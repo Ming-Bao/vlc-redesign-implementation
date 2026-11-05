@@ -115,6 +115,8 @@ class SidePanelCtx: public QObject
     Q_PROPERTY(bool visible READ isVisible WRITE setVisible NOTIFY visibleChanged FINAL)
     Q_PROPERTY(bool docked READ isDocked WRITE setDocked NOTIFY dockedChanged FINAL)
     Q_PROPERTY(double width READ width WRITE setWidth NOTIFY widthChanged FINAL)
+    // the page shown by the player's side card (Queue, Bookmarks, Chapters); not saved
+    Q_PROPERTY(int currentTab READ currentTab WRITE setCurrentTab NOTIFY currentTabChanged FINAL)
 
 public:
     SidePanelCtx(MainCtx* ctx, QObject* parent = nullptr);
@@ -122,7 +124,9 @@ public:
     inline bool isDocked() const { return m_docked; }
     inline bool isVisible() const { return m_visible; }
     double width() const;
+    inline int currentTab() const { return m_currentTab; }
 
+    void setCurrentTab(int value);
     void setDocked(bool value);
     void setVisible(bool value);
     void setWidth(double value);
@@ -131,11 +135,13 @@ signals:
     void visibleChanged(bool visible);
     void dockedChanged(bool);
     void widthChanged(double);
+    void currentTabChanged(int);
 
 private:
     MainCtx* m_ctx = nullptr;
     bool m_visible = true;
     bool m_docked = false;
+    int m_currentTab = 0;
     // size in dp
     double  m_width = 120;
 

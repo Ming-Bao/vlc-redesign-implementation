@@ -1416,6 +1416,24 @@ libqml_module_playercontrols_a_QML = \
 	player/qml/controlbarcontrols/SkipForwardButton.qml \
 	player/qml/controlbarcontrols/SlowerButton.qml \
 	player/qml/controlbarcontrols/SnapshotButton.qml \
+	player/qml/controlbarcontrols/DividerWidget.qml \
+	player/qml/controlbarcontrols/JumpButton.qml \
+	player/qml/controlbarcontrols/ZoomButton.qml \
+	player/qml/controlbarcontrols/SidePanelButton.qml \
+	player/qml/controlbarcontrols/SettingsButton.qml \
+	player/qml/controlbarcontrols/HomeButton.qml \
+	player/qml/controlbarcontrols/ThumbnailWidget.qml \
+	player/qml/controlbarcontrols/MediaTextWidget.qml \
+	player/qml/controlbarcontrols/ReplayButton.qml \
+	player/qml/controlbarcontrols/ChaptersButton.qml \
+	player/qml/controlbarcontrols/FavoriteButton.qml \
+	player/qml/controlbarcontrols/BookmarksButton.qml \
+	player/qml/controlbarcontrols/PlaylistsButton.qml \
+	player/qml/controlbarcontrols/MoreMenuButton.qml \
+	player/qml/controlbarcontrols/LibraryPanelButton.qml \
+	player/qml/controlbarcontrols/FolderChipWidget.qml \
+	player/qml/controlbarcontrols/MediaTitleWidget.qml \
+	player/qml/controlbarcontrols/WindowButton.qml \
 	player/qml/controlbarcontrols/SpacerWidget.qml \
 	player/qml/controlbarcontrols/StopButton.qml \
 	player/qml/controlbarcontrols/TeletextButton.qml \

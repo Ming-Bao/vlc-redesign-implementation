@@ -118,6 +118,15 @@
         {"key":"playlists_filled", "path": "./redesign/playlists-filled.svg"},
         {"key":"recent_filled", "path": "./redesign/recent.svg"},
         {"key":"open_in_library", "path": "./redesign/open-in-library.svg"},
-        {"key":"music_folder", "path": "./redesign/music-folder.svg"}
+        {"key":"music_folder", "path": "./redesign/music-folder.svg"},
+        {"key":"zoom", "path": "./redesign/customize/zoom.svg"},
+        {"key":"quit_app", "path": "./redesign/customize/quit.svg"},
+        {"key":"info_dot", "path": "./redesign/customize/info-dot.svg"},
+        {"key":"replay", "path": "./redesign/customize/replay.svg"},
+        {"key":"favorite", "path": "./redesign/customize/favorite.svg"},
+        {"key":"bookmarks", "path": "./redesign/customize/bookmarks.svg"},
+        {"key":"thumbnail", "path": "./redesign/customize/thumbnail.svg"},
+        {"key":"jump_fw_10", "path": "./redesign/forward-10-sec.svg"},
+        {"key":"jump_back_10", "path": "./redesign/backward-10-sec.svg"}
     ]
 }

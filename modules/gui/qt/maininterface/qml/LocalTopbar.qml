@@ -27,7 +27,7 @@ import VLC.MainInterface
 import VLC.Style
 import VLC.Playlist
 import VLC.Widgets as Widgets
-import VLC.Menus as Menus
+import VLC.PlayerControls as Controls
 import VLC.Util
 
 T.ToolBar {
@@ -52,14 +52,13 @@ T.ToolBar {
 
     property alias navigationButton: navigationVisibilty
 
-    // name of the folder holding the playing media, shown as a chip (player only)
-    property string folderName: ""
+    // the folder chip of the playing media (player only)
+    property bool showFolder: false
     property bool showNavigationToggle: true
     property color tintColor: theme.bg.secondary
 
     signal toggleNavigationVisibility()
     signal togglePlayqueueVisibility()
-    signal folderClicked()
     signal discoverRequested()
     // the player keeps its bars shown while the title bar is hovered or its menu is open
     signal requestLockUnlockAutoHide(bool lock)
@@ -69,7 +68,7 @@ T.ToolBar {
 
     ///incomming signal to request all menu and popup to close
     function forceUnlock() {
-        contextMenu.close()
+        menuBtn.forceUnlock()
     }
 
     implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
@@ -128,7 +127,7 @@ T.ToolBar {
                     color: theme.accent
                 }
 
-                Widgets.IconToolButton {
+                Controls.MoreMenuButton {
                     id: menuBtn
 
                     anchors.verticalCenter: parent.verticalCenter
@@ -136,32 +135,14 @@ T.ToolBar {
                     // initial focus when the navigation toggle is hidden (player)
                     focus: !root.showNavigationToggle
 
-                    visible: !MainCtx.hasToolbarMenu
-                    font.pixelSize: VLCStyle.icon_banner
-                    text: VLCIcons.ellipsis
-                    description: qsTr("Menu")
-                    width: VLCStyle.bannerButton_width
-                    height: VLCStyle.bannerButton_height
-                    checked: contextMenu.shown
-
                     Navigation.parentItem: navigationButtons
                     Navigation.rightItem: navigationVisibilty
 
-                    onClicked: contextMenu.popup(this.mapToGlobal(0, height))
-
-                    Menus.QmlGlobalMenu {
-                        id: contextMenu
-                        ctx: MainCtx
-                        flat: true
-
-                        onDiscoverRequested: root.discoverRequested()
-
-                        onAboutToShow: root.requestLockUnlockAutoHide(true)
-                        onAboutToHide: root.requestLockUnlockAutoHide(false)
-                    }
+                    onDiscoverRequested: root.discoverRequested()
+                    onRequestLockUnlockAutoHide: (lock) => root.requestLockUnlockAutoHide(lock)
                 }
 
-                Widgets.IconToolButton {
+                Controls.LibraryPanelButton {
                     id: navigationVisibilty
 
                     anchors.verticalCenter: parent.verticalCenter
@@ -169,20 +150,11 @@ T.ToolBar {
                     visible: root.showNavigationToggle
                     focus: root.showNavigationToggle
 
-                    text: VLCIcons.panel_left
-                    description: qsTr("Show navigation menu")
-
-                    AccessibleCompat.id: "sidebarToggleButton"
-
-                    font.pixelSize: VLCStyle.icon_banner
-                    height: VLCStyle.bannerButton_height
-                    width: VLCStyle.bannerButton_width
-
-                    onClicked: root.toggleNavigationVisibility()
-
                     Navigation.parentItem: navigationButtons
                     Navigation.leftItem: menuBtn
                     Navigation.rightItem: folderChip
+
+                    onClicked: root.toggleNavigationVisibility()
                 }
 
                 // Figma player title bar: divider + folder of the playing media
@@ -194,24 +166,15 @@ T.ToolBar {
                     color: theme.separator
                 }
 
-                Widgets.ButtonExt {
+                Controls.FolderChipWidget {
                     id: folderChip
 
-                    visible: root.folderName.length > 0
+                    visible: root.showFolder
                     anchors.verticalCenter: parent.verticalCenter
-
-                    iconTxt: VLCIcons.folder
-                    text: root.folderName
-                    color: theme.fg.secondary
-                    font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-
-                    Accessible.description: qsTr("Back to the library")
 
                     Navigation.parentItem: navigationButtons
                     Navigation.leftItem: navigationVisibilty
                     Navigation.rightItem: playlistBtn
-
-                    onClicked: root.folderClicked()
                 }
             }
         }
@@ -273,21 +236,14 @@ T.ToolBar {
             }
         }
 
-        T.Label {
+        Controls.MediaTitleWidget {
             id: windowTitle
 
             anchors.centerIn: parent
             width: Math.min(implicitWidth,
                             playqueueButtonsTop.x - (navigationButtons.x + navigationButtons.width) - VLCStyle.margin_large * 2)
 
-            // the window title is empty until media plays
-            text: MainCtx.intfMainWindow.title || qsTr("VLC media player")
-            color: theme.fg.secondary
-            font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-            elide: Text.ElideRight
             visible: width > VLCStyle.dp(40, VLCStyle.scale)
-
-            Accessible.ignored: true
         }
 
         Loader {

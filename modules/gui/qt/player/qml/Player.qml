@@ -58,8 +58,9 @@ FocusScope {
 
     property bool _keyPressed: false
 
-    // the library side panel; closed each time the player opens, not saved
-    property bool libraryPanelOpen: false
+    // the library side panel; closed each time the player opens, not saved.
+    // The state lives in PlayerControlbarControls, where the panel's toggle control reaches it.
+    readonly property bool libraryPanelOpen: PlayerControlbarControls.libraryPanelOpen
 
     // Settings
 
@@ -70,6 +71,7 @@ FocusScope {
     // Events
 
     Component.onCompleted: {
+        PlayerControlbarControls.libraryPanelOpen = false
         MainCtx.preferHotkeys = true
     }
     Component.onDestruction: MainCtx.preferHotkeys = false
@@ -668,16 +670,9 @@ FocusScope {
 
         showNavigationToggle: true
         navigationVisible: rootPlayer.libraryPanelOpen
-        onToggleNavigationVisibility: rootPlayer.libraryPanelOpen = !rootPlayer.libraryPanelOpen
+        onToggleNavigationVisibility: PlayerControlbarControls.libraryPanelOpen = !PlayerControlbarControls.libraryPanelOpen
 
-        // the chip is also the way back to the library, so media without a folder
-        // (streams, discs) get a generic label instead of no chip
-        folderName: {
-            const url = Player.url.toString()
-            const parts = url.startsWith("file:") ? decodeURIComponent(url).split("/") : []
-            const folder = (parts.length > 2) ? parts[parts.length - 2] : ""
-            return folder.length > 0 ? folder : qsTr("Library")
-        }
+        showFolder: true
 
         tintColor: rootPlayer._barColor
 
@@ -714,20 +709,7 @@ FocusScope {
         onRequestLockUnlockAutoHide: (lock) => rootPlayer.lockUnlockAutoHide(lock)
 
         function leavePlayer() {
-            if (MainCtx.hasEmbededVideo && !MainCtx.canShowVideoPIP) {
-               MainPlaylistController.stop()
-            }
-            MainCtx.playerView = false
-        }
-
-        // open the folder of the playing media in the browser, or the library for other media
-        onFolderClicked: {
-            leavePlayer()
-
-            const folder = MainCtx.folderMRL(Player.url)
-            const tree = MainCtx.folderTree(folder)
-            if (tree)
-                History.push(["network", "browse"], { tree: tree })
+            PlayerControlbarControls.leavePlayer()
         }
 
         FadeControllerStateGroup {

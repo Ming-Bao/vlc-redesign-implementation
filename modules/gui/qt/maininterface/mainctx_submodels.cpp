@@ -36,6 +36,13 @@ double SidePanelCtx::width() const {
     return m_ctx->dp(m_width);
 }
 
+void SidePanelCtx::setCurrentTab(int value) {
+    if (value == m_currentTab)
+        return;
+    m_currentTab = value;
+    emit currentTabChanged(value);
+}
+
 void SidePanelCtx::setDocked(bool value) {
     if (value == m_docked)
         return;

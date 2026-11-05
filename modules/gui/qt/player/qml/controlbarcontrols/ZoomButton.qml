@@ -1,0 +1,65 @@
+/*****************************************************************************
+ * Copyright (C) 2026 VLC authors and VideoLAN
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * ( at your option ) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
+ *****************************************************************************/
+import QtQuick
+
+import VLC.MainInterface
+import VLC.Widgets as Widgets
+import VLC.Style
+import VLC.Player
+import VLC.Util
+
+Widgets.IconToolButton {
+    id: root
+
+    signal requestLockUnlockAutoHide(bool lock)
+
+    enabled: !paintOnly && Player.hasVideoOutput
+
+    text: VLCIcons.zoom
+    description: qsTr("Zoom")
+    checked: menu.visible
+
+    AccessibleCompat.id: "zoomButton"
+
+    function forceUnlock() {
+        menu.close()
+    }
+
+    onClicked: {
+        const model = Player.zoom
+        const rows = []
+        for (let i = 0; i < model.rowCount(); ++i) {
+            const index = model.index(i, 0)
+            rows.push({
+                text: model.data(index, Qt.DisplayRole),
+                checked: !!model.data(index, Qt.CheckStateRole),
+                run: () => model.setData(index, true, Qt.CheckStateRole)
+            })
+        }
+        menu.rows = rows
+        // above the button: the control bar sits at the bottom of the window
+        menu.popup(root, 0, -menu.implicitHeight - VLCStyle.margin_xxsmall)
+    }
+
+    Widgets.FigmaMenu {
+        id: menu
+
+        onAboutToShow: root.requestLockUnlockAutoHide(true)
+        onAboutToHide: root.requestLockUnlockAutoHide(false)
+    }
+}

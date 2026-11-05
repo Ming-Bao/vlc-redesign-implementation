@@ -23,6 +23,7 @@ import QtQml
 
 import VLC.MainInterface
 import VLC.PlayerControls
+import VLC.Playlist
 import VLC.Widgets as Widgets
 import VLC.Style
 
@@ -69,8 +70,46 @@ QtObject {
         { id: ControlListModel.PLAYER_SWITCH_BUTTON, file: "PlayerSwitchButton.qml", label: VLCIcons.fullscreen, text: qsTr("Switch Player") },
         { id: ControlListModel.ARTWORK_INFO, file: "ArtworkInfoWidget.qml", label: VLCIcons.info, text: qsTr("Artwork Info") },
         { id: ControlListModel.PLAYBACK_SPEED_BUTTON, file: "PlaybackSpeedButton.qml", label: "1x", text: qsTr("Playback Speed") },
-        { id: ControlListModel.HIGH_RESOLUTION_TIME_WIDGET, file: "HighResolutionTimeWidget.qml", label: VLCIcons.time, text: qsTr("High Resolution Time") }
+        { id: ControlListModel.HIGH_RESOLUTION_TIME_WIDGET, file: "HighResolutionTimeWidget.qml", label: VLCIcons.time, text: qsTr("High Resolution Time") },
+
+        // Customize Player palette (label = Figma's); props are set on the control once loaded
+        { id: ControlListModel.DIVIDER, file: "DividerWidget.qml", label: VLCIcons.space, text: qsTr("Divider") },
+        { id: ControlListModel.JUMP_FW_10_BUTTON, file: "JumpButton.qml", props: { seconds: 10 }, label: VLCIcons.jump_fw_10, text: qsTr("Forward 10s") },
+        { id: ControlListModel.JUMP_BACK_10_BUTTON, file: "JumpButton.qml", props: { seconds: -10 }, label: VLCIcons.jump_back_10, text: qsTr("Backward 10s") },
+        { id: ControlListModel.ZOOM_BUTTON, file: "ZoomButton.qml", label: VLCIcons.zoom, text: qsTr("Zoom") },
+        { id: ControlListModel.SIDE_PANEL_BUTTON, file: "SidePanelButton.qml", label: VLCIcons.panel_left, text: qsTr("Right Sidebar") },
+        { id: ControlListModel.SETTINGS_BUTTON, file: "SettingsButton.qml", label: VLCIcons.settings, text: qsTr("VLC Settings") },
+        { id: ControlListModel.HOME_BUTTON, file: "HomeButton.qml", label: VLCIcons.home, text: qsTr("Go Home") },
+        { id: ControlListModel.THUMBNAIL_WIDGET, file: "ThumbnailWidget.qml", label: VLCIcons.thumbnail, text: qsTr("Thumbnail") },
+        { id: ControlListModel.FILE_NAME_WIDGET, file: "MediaTextWidget.qml", props: { field: "file" }, label: VLCIcons.info_dot, text: qsTr("File Name") },
+        { id: ControlListModel.ARTIST_NAME_WIDGET, file: "MediaTextWidget.qml", props: { field: "artist" }, label: VLCIcons.info_dot, text: qsTr("Artist Name") },
+        { id: ControlListModel.FOLDER_NAME_WIDGET, file: "MediaTextWidget.qml", props: { field: "folder" }, label: VLCIcons.info_dot, text: qsTr("Folder Name") },
+        { id: ControlListModel.PLAYLIST_NAME_WIDGET, file: "MediaTextWidget.qml", props: { field: "playlist" }, label: VLCIcons.info_dot, text: qsTr("Playlist Name") },
+        { id: ControlListModel.REPLAY_BUTTON, file: "ReplayButton.qml", label: VLCIcons.replay, text: qsTr("Replay") },
+        { id: ControlListModel.CHAPTERS_BUTTON, file: "ChaptersButton.qml", label: VLCIcons.chapters, text: qsTr("Chapters") },
+        { id: ControlListModel.FAVORITE_BUTTON, file: "FavoriteButton.qml", label: VLCIcons.favorite, text: qsTr("Favorite") },
+        { id: ControlListModel.BOOKMARKS_BUTTON, file: "BookmarksButton.qml", label: VLCIcons.bookmarks, text: qsTr("Bookmarks") },
+        { id: ControlListModel.PLAYLISTS_BUTTON, file: "PlaylistsButton.qml", label: VLCIcons.playlists, text: qsTr("Playlists") },
+
+        // title bar widgets: not in the figma palette, listed after it
+        { id: ControlListModel.MORE_MENU, file: "MoreMenuButton.qml", label: VLCIcons.ellipsis, text: qsTr("More") },
+        { id: ControlListModel.LIBRARY_PANEL, file: "LibraryPanelButton.qml", label: VLCIcons.panel_left, text: qsTr("Library Sidebar") },
+        { id: ControlListModel.FOLDER_CHIP, file: "FolderChipWidget.qml", label: VLCIcons.folder, text: qsTr("Folder") },
+        { id: ControlListModel.MEDIA_TITLE, file: "MediaTitleWidget.qml", label: VLCIcons.info_dot, text: qsTr("Title") },
+        { id: ControlListModel.WINDOW_MINIMIZE, file: "WindowButton.qml", props: { action: CSDButton.Minimize }, label: VLCIcons.window_minimize, text: qsTr("Minimize") },
+        { id: ControlListModel.WINDOW_MAXIMIZE, file: "WindowButton.qml", props: { action: CSDButton.MaximizeRestore }, label: VLCIcons.window_maximize, text: qsTr("Maximize") },
+        { id: ControlListModel.WINDOW_CLOSE, file: "WindowButton.qml", props: { action: CSDButton.Close }, label: VLCIcons.window_close, text: qsTr("Close") }
     ]
+
+    // the library side panel shown over the player; the player closes it each time it opens
+    property bool libraryPanelOpen: false
+
+    // back to the library from the player (stops media that would otherwise keep a video window)
+    function leavePlayer() {
+        if (MainCtx.hasEmbededVideo && !MainCtx.canShowVideoPIP)
+            MainPlaylistController.stop()
+        MainCtx.playerView = false
+    }
 
     function control(id) {
         const entry = controlList.find( function(e) { return ( e.id === id ) } )
