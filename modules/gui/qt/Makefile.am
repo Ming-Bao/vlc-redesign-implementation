@@ -162,6 +162,8 @@ libqt_plugin_la_SOURCES = \
 	dialogs/systray/systray.hpp \
 	dialogs/network/saved_streams.cpp \
 	dialogs/network/saved_streams.hpp \
+	dialogs/hotkeys/hotkey_model.cpp \
+	dialogs/hotkeys/hotkey_model.hpp \
 	dialogs/settings/settings_bridge.cpp \
 	dialogs/settings/settings_bridge.hpp \
 	dialogs/settings/settings_extensions.cpp \
@@ -464,6 +466,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	dialogs/sout/sout_widgets.moc.cpp \
 	dialogs/systray/systray.moc.cpp \
 	dialogs/network/saved_streams.moc.cpp \
+	dialogs/hotkeys/hotkey_model.moc.cpp \
 	dialogs/settings/settings_bridge.moc.cpp \
 	dialogs/toolbar/controlbar_profile.moc.cpp \
 	dialogs/toolbar/controlbar_profile_model.moc.cpp \
@@ -1166,6 +1169,7 @@ libqml_module_dialogs_a_QML = \
 	dialogs/toolbar/qml/ToolbarEditorDialog.qml \
 	dialogs/toolbar/qml/ToolbarEditorButtonList.qml \
 	dialogs/settings/qml/AdvancedBar.qml \
+	dialogs/hotkeys/qml/HotkeysData.js \
 	dialogs/settings/qml/SettingsData.js \
 	dialogs/settings/qml/SettingsRowDelegate.qml \
 	dialogs/settings/qml/SettingsSidebar.qml \
@@ -2002,6 +2006,23 @@ test_settings_bridge_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
 check_PROGRAMS += test_settings_bridge
 TESTS += test_settings_bridge
 
+# test_hotkey_model
+test_hotkey_model_SOURCES = \
+	tests/test_hotkey_model.cpp \
+	dialogs/hotkeys/hotkey_model.hpp dialogs/hotkeys/hotkey_model.cpp \
+	util/vlchotkeyconverter.cpp
+nodist_test_hotkey_model_SOURCES = \
+	tests/test_hotkey_model.moc \
+	dialogs/hotkeys/hotkey_model.moc.cpp
+BUILT_SOURCES += tests/test_hotkey_model.moc
+CLEANFILES += tests/test_hotkey_model.moc
+test_hotkey_model_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)
+test_hotkey_model_CXXFLAGS = $(QT_QTEST_COMMON_cxxflags)
+test_hotkey_model_LDADD = $(QT_QTEST_COMMON_ldadd)
+test_hotkey_model_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
+check_PROGRAMS += test_hotkey_model
+TESTS += test_hotkey_model
+
 # test_saved_streams
 test_saved_streams_SOURCES = \
 	tests/test_saved_streams.cpp \
@@ -2194,8 +2215,8 @@ check_PROGRAMS += qml_test
 EXTRA_DIST += tests/tst_FSM.qml
 TESTS += tests/tst_FSM.qml
 EXTRA_DIST += tests/tst_LibraryHelpers.qml
-EXTRA_DIST += tests/tst_SettingsData.qml
+EXTRA_DIST += tests/tst_SettingsData.qml tests/tst_HotkeysData.qml
 TESTS += tests/tst_LibraryHelpers.qml
-TESTS += tests/tst_SettingsData.qml
+TESTS += tests/tst_SettingsData.qml tests/tst_HotkeysData.qml
 endif
 endif

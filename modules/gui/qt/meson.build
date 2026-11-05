@@ -70,6 +70,7 @@ moc_headers = files(
     'dialogs/systray/systray.hpp',
     'dialogs/settings/settings_bridge.hpp',
     'dialogs/network/saved_streams.hpp',
+    'dialogs/hotkeys/hotkey_model.hpp',
     'dialogs/toolbar/controlbar_profile.hpp',
     'dialogs/toolbar/controlbar_profile_model.hpp',
     'dialogs/playlists/playlists.hpp',
@@ -280,6 +281,8 @@ qt_plugin_sources = files(
     'dialogs/settings/settings_bridge.cpp',
     'dialogs/network/saved_streams.cpp',
     'dialogs/network/saved_streams.hpp',
+    'dialogs/hotkeys/hotkey_model.cpp',
+    'dialogs/hotkeys/hotkey_model.hpp',
     'dialogs/settings/settings_bridge.hpp',
     'dialogs/settings/settings_extensions.cpp',
     'dialogs/sout/convert.cpp',
@@ -663,6 +666,7 @@ qml_modules += {
         'dialogs/toolbar/qml/ToolbarEditorDialog.qml',
         'dialogs/toolbar/qml/ToolbarEditorButtonList.qml',
         'dialogs/settings/qml/AdvancedBar.qml',
+        'dialogs/hotkeys/qml/HotkeysData.js',
         'dialogs/settings/qml/SettingsData.js',
         'dialogs/settings/qml/SettingsRowDelegate.qml',
         'dialogs/settings/qml/SettingsSidebar.qml',
@@ -1040,6 +1044,7 @@ qml_tests = {
     'tst_FSM': files('tests/tst_FSM.qml'),
     'tst_LibraryHelpers': files('tests/tst_LibraryHelpers.qml'),
     'tst_SettingsData': files('tests/tst_SettingsData.qml'),
+    'tst_HotkeysData': files('tests/tst_HotkeysData.qml'),
 }
 
 qmllibs = []
@@ -1524,6 +1529,23 @@ if qt6_dep.found()
             'suite': ['qt'],
             'include_directories' : qt_include_dir,
             'link_with': [libvlccore, libvlc],
+            'link_args': qt_link_args,
+            'dependencies': [qt6_dep, qt_extra_deps, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
+            'name': 'test_qt_hotkey_model',
+            'sources': files(
+                'tests/test_hotkey_model.cpp',
+                'dialogs/hotkeys/hotkey_model.cpp',
+                'dialogs/hotkeys/hotkey_model.hpp',
+                'util/vlchotkeyconverter.cpp'
+            ),
+            'moc_sources': files('tests/test_hotkey_model.cpp'),
+            'moc_headers': files('dialogs/hotkeys/hotkey_model.hpp'),
+            'suite': ['qt'],
+            'include_directories' : qt_include_dir,
+            'link_with': [libvlccore],
             'link_args': qt_link_args,
             'dependencies': [qt6_dep, qt_extra_deps, qtest_qt6_dep]
         }
