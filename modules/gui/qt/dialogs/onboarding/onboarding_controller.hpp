@@ -29,12 +29,14 @@ class OnboardingController : public QObject
     Q_OBJECT
     Q_PROPERTY(bool hasMediaLibrary READ hasMediaLibrary CONSTANT FINAL)
     Q_PROPERTY(QString defaultFolder READ defaultFolder CONSTANT FINAL)
+    Q_PROPERTY(QString currentAccent READ currentAccent CONSTANT FINAL)
 
 public:
     explicit OnboardingController(qt_intf_t* intf, QObject* parent = nullptr);
 
     bool hasMediaLibrary() const;
     QString defaultFolder() const;
+    QString currentAccent() const;
 
     Q_INVOKABLE bool folderValid(const QString& text) const;
     Q_INVOKABLE QString pickFolder(const QString& text);

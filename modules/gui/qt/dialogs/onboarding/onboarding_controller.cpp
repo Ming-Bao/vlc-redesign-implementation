@@ -53,6 +53,13 @@ QString OnboardingController::defaultFolder() const
     return QFileInfo(videos).isDir() ? onboarding::displayPath(videos, QDir::homePath()) : QString();
 }
 
+// the effective value, command line included
+QString OnboardingController::currentAccent() const
+{
+    auto accent = vlc::wrap_cptr(var_InheritString(m_intf, "qt-accent-color"));
+    return accent ? QString::fromUtf8(accent.get()) : QStringLiteral("default");
+}
+
 bool OnboardingController::folderValid(const QString& text) const
 {
     return onboarding::fieldValid(text, QDir::homePath());

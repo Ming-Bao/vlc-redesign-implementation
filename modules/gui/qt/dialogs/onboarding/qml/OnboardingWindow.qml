@@ -34,8 +34,9 @@ import "qrc:/qt/qml/VLC/Dialogs/OnboardingKeys.js" as OnboardingKeys
 DialogCard {
     id: root
 
-    // the picked swatch, as AccentSwatches writes it (upper-case hex)
-    property string accentHex: AccentSwatches.fromOption(String(SettingsBridge.value("qt-accent-color") ?? "default"))
+    // the effective accent option ("default", "system", a hex), written back unchanged unless a swatch is clicked
+    property string accentOption: Onboarding.currentAccent
+    readonly property string accentHex: AccentSwatches.fromOption(accentOption)
     readonly property color accent: accentHex
     property int scheme: ColorSchemeModel.Night
     property int page: 0
@@ -73,7 +74,7 @@ DialogCard {
         if (_done)
             return
         _done = true
-        Onboarding.finish(scheme, AccentSwatches.optionValue(accentHex), folderField.text)
+        Onboarding.finish(scheme, accentOption, folderField.text)
         close()
     }
 
@@ -643,7 +644,7 @@ DialogCard {
                         y: VLCStyle.dp(655, VLCStyle.scale)
                         width: VLCStyle.dp(64, VLCStyle.scale)
                         height: width
-                        onClicked: root.accentHex = modelData
+                        onClicked: root.accentOption = AccentSwatches.optionValue(modelData)
                         focusPolicy: Qt.TabFocus
                         Keys.onReturnPressed: root._next()
                         Keys.onEnterPressed: root._next()

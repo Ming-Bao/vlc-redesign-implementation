@@ -311,7 +311,8 @@ void SystemPalette::readAccent()
 {
     assert(m_ctx);
     char* accentColor = var_InheritString(m_ctx->getIntf(), "qt-accent-color");
-    assert(accentColor);
+    if (!accentColor) // an empty option is stored as NULL
+        accentColor = strdup("default");
 
     if (!strcmp(accentColor, "default"))
     {

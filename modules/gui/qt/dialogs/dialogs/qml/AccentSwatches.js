@@ -25,5 +25,5 @@ function optionValue(hex) {
 }
 
 function fromOption(v) {
-    return (!v || v === "default") ? colors[0] : v.toUpperCase()
+    return (v && v.startsWith("#")) ? v.toUpperCase() : colors[0]
 }
