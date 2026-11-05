@@ -98,6 +98,10 @@ QtObject {
                         MediaLib.addToPlaylist(url)
                 }
             }, {
+                "text": qsTr("Edit Subtitle Tracks"),
+                "icon": "subtitles",
+                "action": (dataList) => DialogsProvider.addSubtitlesDialog({ target: "folder", folder: dataList[0].mrl })
+            }, {
                 "text": qsTr("Resync"),
                 "icon": "resync",
                 "action": (dataList) => MediaLib.reloadFolder(dataList[0].mrl)

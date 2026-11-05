@@ -668,4 +668,19 @@ Item {
             }
         }
     }
+
+    Loader {
+        id: addSubtitlesLoader
+        active: false
+        source: "qrc:///qt/qml/VLC/Dialogs/AddSubtitlesDialog.qml"
+
+        Connections {
+            target: DialogsProvider
+
+            function onShowAddSubtitles(context) {
+                addSubtitlesLoader.active = true
+                addSubtitlesLoader.item.openWith(context)
+            }
+        }
+    }
 }

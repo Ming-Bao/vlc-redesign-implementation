@@ -249,6 +249,9 @@ NativeMenu {
 
     // a track file for a library media, picked from the media's folder
     function addExternalTrack(media, subtitle) {
+        // the Add Subtitles dialog picks the files and attaches them itself
+        if (subtitle && DialogsProvider.addSubtitlesDialog({ target: "file", mrl: media.mrl, mlId: media[idDataRole] }))
+            return
         const file = DialogsProvider.pickFile(subtitle ? qsTr("Add Subtitle Tracks") : qsTr("Add Audio Tracks"),
                                               subtitle, media.mrl)
         MediaLib.addExternalTrack(media[idDataRole], file, subtitle)

@@ -659,6 +659,7 @@ qml_modules += {
         'dialogs/dialogs/qml/CustomDialog.qml',
         'dialogs/dialogs/qml/DialogCard.qml',
         'dialogs/hotkeys/qml/HotkeysDialog.qml',
+        'dialogs/subtitles/qml/AddSubtitlesDialog.qml',
         'dialogs/network/qml/NetworkStreamDialog.qml',
         'dialogs/playlists/qml/NewPlaylistDialog.qml',
         'dialogs/dialogs/qml/Dialogs.qml',

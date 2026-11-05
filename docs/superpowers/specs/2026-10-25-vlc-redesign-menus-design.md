@@ -148,7 +148,8 @@ This one builder serves right-click on the video, the audio player's context men
 |---|---|
 | Add File | file dialog opening in this folder; the picked files join the queue *(my call: VLC 3's playlist "Add File…")* |
 | Add Folder | folder dialog opening in this folder; the folder joins the queue *(my call)* |
-| Edit Subtitle Tracks, Edit Audio Tracks | **not shown**: VLC has no per-folder track settings *(my call; ledger)* |
+| Edit Subtitle Tracks | the Add Subtitles dialog on To This Folder *(slice 8; was not shown)* |
+| Edit Audio Tracks | **not shown**: VLC has no per-folder track settings *(my call; ledger)* |
 | Resync | `vlc_ml_reload_folder(mrl)`: rescan this folder *(my call: "resync" = re-index)* |
 | Info | **not shown**: no folder information dialog exists *(my call; ledger)* |
 
@@ -164,7 +165,8 @@ This one builder serves right-click on the video, the audio player's context men
 | Shuffle | play the playlist, then shuffle the queue |
 | Export Playlist | save dialog (`.m3u8`) → write `#EXTM3U` and the playlist's media MRLs in order *(my call: one format; VLC's own export only works on the play queue)* |
 | Add to Queue | `addToPlaylist` (today's "Enqueue") |
-| Add Subtitle Tracks, Add Audio Tracks | **not shown**: no meaning for a whole playlist *(my call; ledger)* |
+| Add Subtitle Tracks | the Add Subtitles dialog on To This Playlist *(slice 8; was not shown)* |
+| Add Audio Tracks | **not shown**: no meaning for a whole playlist *(my call; ledger)* |
 | Properties & Metadata | **not shown**: no playlist information dialog exists *(my call; ledger)* |
 
 - Rename and Delete (VLC's, not in the Figma) stay below a divider.

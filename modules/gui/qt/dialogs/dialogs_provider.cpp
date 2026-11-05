@@ -1143,8 +1143,21 @@ QUrl DialogsProvider::pickFolder( const QString& title, const QUrl& folder )
                                                  { QStringLiteral( "file" ) } );
 }
 
+bool DialogsProvider::addSubtitlesDialog(const QVariantMap& context)
+{
+    if (p_intf->b_isDialogProvider
+        || !isSignalConnected(QMetaMethod::fromSignal(&DialogsProvider::showAddSubtitles)))
+        return false;
+    emit showAddSubtitles(context);
+    return true;
+}
+
 void DialogsProvider::loadSubtitlesFile()
 {
+    // the Add Subtitles dialog for the playing media, the legacy file picker when there is none or no media plays
+    const QUrl playing = p_intf->p_mainPlayerController ? p_intf->p_mainPlayerController->getUrl() : QUrl();
+    if (!playing.isEmpty() && addSubtitlesDialog({{"target", "file"}, {"mrl", playing.toString(QUrl::FullyEncoded)}}))
+        return;
     loadMediaFile( SPU_ES, EXT_FILTER_SUBTITLE, qtr( "Open subtitles..." ) );
 }
 

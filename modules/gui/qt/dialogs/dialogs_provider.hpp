@@ -158,6 +158,9 @@ public:
     Q_INVOKABLE void newPlaylist();
     // a model freshly loaded from the configuration, owned by the caller (QML)
     Q_INVOKABLE QObject* loadHotkeyModel();
+    // opens the Add Subtitles dialog on a context (see AddSubtitlesController::setContext); false when no QML
+    // dialog is connected, the caller then falls back to its own file picker
+    Q_INVOKABLE bool addSubtitlesDialog(const QVariantMap& context);
 
 protected:
     void customEvent( QEvent *) override;
@@ -320,6 +323,7 @@ signals:
     void showNetworkStreamDialog();
     void showNewPlaylistDialog();
     void showHotkeysDialog();
+    void showAddSubtitles(const QVariantMap& context);
     // a playlist was created by the New Playlist dialog
     void playlistCreated();
 

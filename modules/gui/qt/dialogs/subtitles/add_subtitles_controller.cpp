@@ -26,6 +26,7 @@
 #include "medialibrary/medialib.hpp"
 #include "medialibrary/mlhelper.hpp"
 #include "player/player_controller.hpp"
+#include "util/folder_tree.hpp"
 
 #include <vlc_interface.h> // EXTENSIONS_SUBTITLE
 #include <vlc_url.h>
@@ -77,6 +78,26 @@ QVariantList listMedia(vlc_ml_media_list_t* list)
     return out;
 }
 
+// a library id as QML gives it: an MLItemId, or a plain number
+qint64 idOf(const QVariant& v)
+{
+    if (v.metaType() == QMetaType::fromType<MLItemId>())
+        return v.value<MLItemId>().id;
+    return v.isValid() ? v.toLongLong() : -1;
+}
+
+// the library id of a folder from its mrl, -1 when the library has no such folder
+qint64 folderIdOf(vlc_medialibrary_t* ml, const QString& mrl)
+{
+    const QString wanted = folder_tree::normalized(mrl);
+    ml_unique_ptr<vlc_ml_folder_list_t> folders(vlc_ml_list_folders_by_type(ml, nullptr, VLC_ML_MEDIA_TYPE_VIDEO));
+    if (folders)
+        for (const vlc_ml_folder_t& f : ml_range_iterate<vlc_ml_folder_t>(folders))
+            if (f.psz_mrl && folder_tree::normalized(qfu(f.psz_mrl)) == wanted)
+                return f.i_id;
+    return -1;
+}
+
 // ML thread when there is a library, else the caller's
 void scan(vlc_medialibrary_t* ml, const ScanInput& in, ScanResult& out)
 {
@@ -86,15 +107,18 @@ void scan(vlc_medialibrary_t* ml, const ScanInput& in, ScanResult& out)
             if (!in.mrl.isEmpty())
                 out.media << mediaItem(QUrl(in.mrl).fileName(), in.mrl, in.mlId);
             break;
-        case AddSubtitlesController::Folder:
-            if (ml && in.mlId >= 0) {
+        case AddSubtitlesController::Folder: {
+            // the library id is optional: the folder menus only know the folder's mrl
+            const qint64 folderId = !ml ? -1 : in.mlId >= 0 ? in.mlId : folderIdOf(ml, in.folderMrl);
+            if (folderId >= 0) {
                 vlc_ml_query_params_t q = vlc_ml_query_params_create();
-                out.media = listMedia(vlc_ml_list_folder_media(ml, &q, in.mlId));
+                out.media = listMedia(vlc_ml_list_folder_media(ml, &q, folderId));
                 std::stable_sort(out.media.begin(), out.media.end(), [](const QVariant& a, const QVariant& b) {
                     return a.toMap()["name"].toString().compare(b.toMap()["name"].toString(), Qt::CaseInsensitive) < 0;
                 });
             }
             break;
+        }
         case AddSubtitlesController::Playlist:
             if (ml && in.playlistId >= 0) {
                 vlc_ml_query_params_t q = vlc_ml_query_params_create();
@@ -240,7 +264,7 @@ void AddSubtitlesController::refresh(bool reloadMedia)
         m_context.value("mrl").toString(),
         m_context.value("folder").toString(),
         m_dir,
-        m_context.value("mlId", -1).toLongLong(),
+        idOf(m_context.value("mlId")),
         m_context.value("playlistId", -1).toLongLong(),
         reloadMedia
     };

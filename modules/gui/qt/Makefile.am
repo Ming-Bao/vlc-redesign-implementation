@@ -1019,7 +1019,10 @@ libqt_plugin_la_RES = \
 	pixmaps/redesign/menu/stream.svg \
 	pixmaps/redesign/menu/subtitles.svg \
 	pixmaps/redesign/menu/video.svg \
+	pixmaps/redesign/dialogs/media-file.svg \
 	pixmaps/redesign/dialogs/pencil.svg \
+	pixmaps/redesign/dialogs/subtitle-file.svg \
+	pixmaps/redesign/dialogs/swap.svg \
 	pixmaps/redesign/settings/audio.svg \
 	pixmaps/redesign/settings/audio-active.svg \
 	pixmaps/redesign/settings/chevron-down.svg \
@@ -1165,6 +1168,7 @@ libqml_module_dialogs_a_QML = \
 	dialogs/dialogs/qml/CustomDialog.qml \
 	dialogs/dialogs/qml/DialogCard.qml \
 	dialogs/hotkeys/qml/HotkeysDialog.qml \
+	dialogs/subtitles/qml/AddSubtitlesDialog.qml \
 	dialogs/network/qml/NetworkStreamDialog.qml \
 	dialogs/playlists/qml/NewPlaylistDialog.qml \
 	dialogs/dialogs/qml/Dialogs.qml \

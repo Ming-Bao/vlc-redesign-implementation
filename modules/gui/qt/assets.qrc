@@ -104,7 +104,10 @@
         <file alias="video.svg">pixmaps/redesign/menu/video.svg</file>
     </qresource>
     <qresource prefix="/redesign/dialogs">
+        <file alias="media-file.svg">pixmaps/redesign/dialogs/media-file.svg</file>
         <file alias="pencil.svg">pixmaps/redesign/dialogs/pencil.svg</file>
+        <file alias="subtitle-file.svg">pixmaps/redesign/dialogs/subtitle-file.svg</file>
+        <file alias="swap.svg">pixmaps/redesign/dialogs/swap.svg</file>
     </qresource>
     <qresource prefix="/redesign/settings">
         <file alias="audio.svg">pixmaps/redesign/settings/audio.svg</file>

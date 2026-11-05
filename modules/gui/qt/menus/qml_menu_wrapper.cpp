@@ -860,6 +860,14 @@ void PlaylistListContextMenu::popup(const QModelIndexList & selected, QPoint pos
         ml->addToPlaylist(ids);
     });
 
+    if (single)
+    {
+        const qint64 playlistId = ids.first().value<MLItemId>().id;
+        connect(addRow(menu, "subtitles", qtr("Add Subtitle Tracks")), &QAction::triggered, [playlistId]() {
+            DialogsProvider::getInstance()->addSubtitlesDialog({{"target", "playlist"}, {"playlistId", playlistId}});
+        });
+    }
+
     menu->addSeparator();
 
     if (single)

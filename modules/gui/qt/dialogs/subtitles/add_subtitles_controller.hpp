@@ -72,7 +72,7 @@ public:
     bool busy() const { return m_busy; }
 
     // keys: target ("file"|"folder"|"playlist"); file: mrl and mlId (-1 or absent when not in
-    // the library); folder: mlId (library folder) and folder (its mrl); playlist: playlistId
+    // the library); folder: folder (its mrl; the library id is found from it, or given as mlId); playlist: playlistId
     Q_INVOKABLE void setContext(const QVariantMap& context);
     // scan another folder for candidates; the media list stays
     Q_INVOKABLE void setFolder(const QUrl& folder);
