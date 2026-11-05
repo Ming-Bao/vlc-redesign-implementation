@@ -32,6 +32,18 @@
 
 static const QString kSuffix = QStringLiteral(".m3u8");
 
+// What a saved stream's tile opens: one link that looks like a playlist is browsed itself, so its channels are the page.
+// Anything else opens the saved file, which lists the link as a row that plays: browsing a plain media URL gives a page
+// with nothing on it. That goes for .m3u8 too, which is usually one HLS stream; a list of channels saved under that
+// suffix still plays from its row.
+static QString browseMrl(const QStringList& links, const QString& path)
+{
+    static const QStringList playlists = {"m3u", "pls", "xspf"};
+    if (links.size() == 1 && playlists.contains(QFileInfo(QUrl(links.first()).path()).suffix().toLower()))
+        return links.first();
+    return QUrl::fromLocalFile(path).toString();
+}
+
 SavedStreams::SavedStreams(const QString& dir, QObject* parent)
     : QObject(parent)
     , m_dir(dir)
@@ -80,7 +92,7 @@ QVariantMap SavedStreams::save(const QString& name, const QStringList& links)
         return {};
     reload();
     return {{"name", title},
-            {"mrl", links.size() == 1 ? links.first() : QUrl::fromLocalFile(path).toString()},
+            {"mrl", browseMrl(links, path)},
             {"path", path}};
 }
 
@@ -112,7 +124,7 @@ void SavedStreams::reload()
             }
         }
         list.push_back(QVariantMap{{"name", name},
-                                   {"mrl", links.size() == 1 ? links.first() : QUrl::fromLocalFile(info.filePath()).toString()},
+                                   {"mrl", browseMrl(links, info.filePath())},
                                    {"path", info.filePath()}});
     }
     std::sort(list.begin(), list.end(), [](const QVariant& a, const QVariant& b) {
