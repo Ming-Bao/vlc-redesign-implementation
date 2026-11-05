@@ -29,6 +29,8 @@ Widgets.IconToolButton {
     id: root
 
     signal requestLockUnlockAutoHide(bool lock)
+    // lets the player keep a single menu open across the bars
+    signal menuOpened(var menu)
     // the menu's Discover entry; leaves the player for the Discover page unless the surroundings handle it
     signal discoverRequested()
 
@@ -65,7 +67,10 @@ Widgets.IconToolButton {
 
         onDiscoverRequested: root.discoverRequested()
 
-        onAboutToShow: root.requestLockUnlockAutoHide(true)
+        onAboutToShow: {
+            root.requestLockUnlockAutoHide(true)
+            root.menuOpened(contextMenu)
+        }
         onAboutToHide: root.requestLockUnlockAutoHide(false)
     }
 }

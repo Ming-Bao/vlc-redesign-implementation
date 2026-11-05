@@ -695,6 +695,9 @@ FocusScope {
 
         onRequestLockUnlockAutoHide: (lock) => rootPlayer.lockUnlockAutoHide(lock)
 
+        // one open menu across both bars: opening one closes the other
+        onMenuOpened: (menu) => controlBar.applyMenu(menu)
+
         function leavePlayer() {
             PlayerControlbarControls.leavePlayer()
         }
@@ -705,7 +708,7 @@ FocusScope {
 
         // like the previous player top bar, start with the focus here (not on a control
         // that may be rebuilt when the video output appears), without a keyboard reason
-        Component.onCompleted: Qt.callLater(() => topBar.forceActiveFocus(Qt.OtherFocusReason))
+        Component.onCompleted: Qt.callLater(() => topBar.focusStart(Qt.OtherFocusReason))
     }
 
     // Figma Sidebar 848:1995, between the title bar and the control bar

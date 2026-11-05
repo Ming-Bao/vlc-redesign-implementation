@@ -75,6 +75,13 @@ T.ToolBar {
     }
 
     property bool showNavigationToggle: true
+
+    // initial focus: the first focusable control, whichever row it is in (every row's first
+    // delegate claims focus, so the scope alone would pick one arbitrarily)
+    function focusStart(reason) {
+        if (!_modelDriven || !_focusRow(-1, 1, reason))
+            forceActiveFocus(reason)
+    }
     property color tintColor: theme.bg.secondary
 
     signal toggleNavigationVisibility()
@@ -82,6 +89,8 @@ T.ToolBar {
     signal discoverRequested()
     // the player keeps its bars shown while the title bar is hovered or its menu is open
     signal requestLockUnlockAutoHide(bool lock)
+    // a control opened (or closed, null) a menu: the player keeps one open across both bars
+    signal menuOpened(var menu)
 
     hoverEnabled: true
     onHoveredChanged: requestLockUnlockAutoHide(hovered)
@@ -120,6 +129,7 @@ T.ToolBar {
         property int index: 0
 
         signal requestLockUnlockAutoHide(bool lock)
+        signal menuOpened(var menu)
         signal forceUnlock()
 
         visible: false
@@ -143,6 +153,7 @@ T.ToolBar {
 
             Component.onCompleted: {
                 requestLockUnlockAutoHide.connect(row.requestLockUnlockAutoHide)
+                menuOpened.connect(row.menuOpened)
                 row.forceUnlock.connect(repeater.forceUnlock)
             }
         }
@@ -205,6 +216,7 @@ T.ToolBar {
             }
 
             onRequestLockUnlockAutoHide: (lock) => root.requestLockUnlockAutoHide(lock)
+            onMenuOpened: (menu) => root.menuOpened(menu)
         }
 
         BarRow {
@@ -231,6 +243,7 @@ T.ToolBar {
             }
 
             onRequestLockUnlockAutoHide: (lock) => root.requestLockUnlockAutoHide(lock)
+            onMenuOpened: (menu) => root.menuOpened(menu)
         }
 
         BarRow {
@@ -250,6 +263,7 @@ T.ToolBar {
             }
 
             onRequestLockUnlockAutoHide: (lock) => root.requestLockUnlockAutoHide(lock)
+            onMenuOpened: (menu) => root.menuOpened(menu)
         }
 
         // the library's fixed layout
@@ -291,6 +305,7 @@ T.ToolBar {
                     hostHandles: true
                     onDiscoverRequested: root.discoverRequested()
                     onRequestLockUnlockAutoHide: (lock) => root.requestLockUnlockAutoHide(lock)
+            onMenuOpened: (menu) => root.menuOpened(menu)
                 }
 
                 Controls.LibraryPanelButton {
