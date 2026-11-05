@@ -335,7 +335,7 @@ What the spec left to the implementer (*my call*) and what the build changed. Se
 
 **Page 3: Keyboard shortcuts**
 - Keys are the user's real bindings from the `key-*` options: first binding only, modifiers as upper-case caps, arrows as ← → ↑ ↓. The Figma's keys are not shown because several do nothing in VLC.
-- A row with an empty binding shows one cap with "-".
+- A row with an empty binding shows one cap with an em dash "—".
 - Show / Hide File Browser is a new `Ctrl+Shift+L` in `GlobalShortcuts.qml`. It toggles the player's library side panel while `MainCtx.playerView` is true and does nothing elsewhere.
 
 **Finish**
