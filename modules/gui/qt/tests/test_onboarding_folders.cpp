@@ -46,6 +46,16 @@ private slots:
         QVERIFY(!onboarding::fieldValid("~/file", d.path()));
         QVERIFY(!onboarding::fieldValid("~/missing", d.path()));
     }
+    void fieldValid_relativeIsInvalid() {
+        QTemporaryDir d; QDir(d.path()).mkdir("My Videos");
+        const QString old = QDir::currentPath();
+        QVERIFY(QDir::setCurrent(d.path()));
+        const bool rel = onboarding::fieldValid("My Videos", d.path());
+        const bool other = onboarding::fieldValid("~other", d.path());
+        QDir::setCurrent(old);
+        QVERIFY(!rel);
+        QVERIFY(!other);
+    }
     void foldersToAdd_cases() {
         QCOMPARE(onboarding::foldersToAdd("/h/V", "/h/M"), (QStringList{"/h/V", "/h/M"}));
         QCOMPARE(onboarding::foldersToAdd("", "/h/M"), QStringList{"/h/M"});

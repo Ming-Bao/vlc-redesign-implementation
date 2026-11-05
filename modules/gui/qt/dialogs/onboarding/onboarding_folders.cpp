@@ -48,7 +48,10 @@ QString displayPath(const QString& path, const QString& home)
 
 bool fieldValid(const QString& text, const QString& home)
 {
-    return text.trimmed().isEmpty() || QFileInfo(expandHome(text, home)).isDir();
+    if (text.trimmed().isEmpty())
+        return true;
+    const QString path = expandHome(text, home);
+    return QDir::isAbsolutePath(path) && QFileInfo(path).isDir();
 }
 
 QStringList foldersToAdd(const QString& chosen, const QString& music)
