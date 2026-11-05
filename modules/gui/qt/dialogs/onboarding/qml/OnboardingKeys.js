@@ -41,5 +41,10 @@ function caps(value) {
     const first = String(value === undefined || value === null ? "" : value).split("\t")[0].trim()
     if (first === "")
         return ["—"]
-    return first.split("+").map(p => _special[p] || (_modifiers.includes(p) || p.length === 1 ? p.toUpperCase() : p))
+    // a trailing "+" is the plus key itself ("Ctrl++"), not a separator
+    const plus = first.endsWith("+")
+    const parts = (plus ? first.slice(0, -1) : first).split("+").filter(p => p !== "")
+    if (plus)
+        parts.push("+")
+    return parts.map(p => _special[p] || (_modifiers.includes(p) || p.length === 1 ? p.toUpperCase() : p))
 }

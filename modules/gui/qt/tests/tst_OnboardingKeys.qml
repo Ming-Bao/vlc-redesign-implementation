@@ -32,6 +32,12 @@ TestCase {
         compare(Keys.caps("Esc"), ["esc"])                     // as HotkeyModel::displayKeys
         compare(Keys.caps(""), ["—"])
         compare(Keys.caps(undefined), ["—"])
+        compare(Keys.caps("+"), ["+"])
+        compare(Keys.caps("Ctrl++"), ["CTRL", "+"])
+        compare(Keys.caps("Shift+Ctrl++"), ["SHIFT", "CTRL", "+"])
+        compare(Keys.caps("Command+Shift+r"), ["COMMAND", "SHIFT", "R"])
+        compare(Keys.caps("Page Up"), ["Page Up"])
+        compare(Keys.caps(" f "), ["F"])
     }
     function test_rows() {
         compare(Keys.rows.length, 12)
