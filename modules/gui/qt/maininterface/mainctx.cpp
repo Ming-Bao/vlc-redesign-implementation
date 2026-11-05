@@ -579,6 +579,7 @@ void MainCtx::updateIntfScaleFactor()
 void MainCtx::onWindowVisibilityChanged(QWindow::Visibility visibility)
 {
     m_windowVisibility = visibility;
+    emit interfaceVisibilityChanged();
 }
 
 void MainCtx::setHasAcrylicSurface(const bool v)

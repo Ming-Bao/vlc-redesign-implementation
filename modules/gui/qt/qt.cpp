@@ -1467,6 +1467,9 @@ static void *Thread( void *obj )
 
     /* Last settings */
     app.setQuitOnLastWindowClosed( false );
+    /* Releasing a QEventLoopLocker (RhiProbeTask) must not quit the app when
+     * no window is visible, e.g. --qt-start-minimized; we quit via THEDP */
+    app.setQuitLockEnabled( false );
 
     /* Loads and tries to apply the preferred QStyle */
 #define QTSTYLE_KEY "MainWindow/QtStyle"

@@ -560,6 +560,7 @@ signals:
     void setInterfaceVisibible(bool, bool requestActivate = false);
     void setInterfaceFullScreen( bool );
     void toggleWindowVisibility(bool requestActivate = false);
+    void interfaceVisibilityChanged();
     void askToQuit();
     void askShow();
     void askBoss();

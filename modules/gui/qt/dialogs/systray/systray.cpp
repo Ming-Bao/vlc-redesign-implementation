@@ -63,6 +63,9 @@ VLCSystray::VLCSystray(MainCtx* ctx, QObject* parent)
     /* Connect PLAY_STATUS on the systray */
     connect( m_intf->p_mainPlayerController, &PlayerController::playingStateChanged,
             this, &VLCSystray::update );
+    /* The Show/Hide entry follows the window, however it got hidden */
+    connect( m_ctx, &MainCtx::interfaceVisibilityChanged,
+            this, &VLCSystray::update );
 }
 
 VLCSystray::~VLCSystray()
