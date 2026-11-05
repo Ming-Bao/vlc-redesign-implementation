@@ -2091,7 +2091,10 @@ test_control_ids_SOURCES = \
 	dialogs/toolbar/controlbar_profile.cpp dialogs/toolbar/controlbar_profile.hpp \
 	player/player_controlbar_model.cpp player/player_controlbar_model.hpp \
 	player/control_list_model.cpp player/control_list_model.hpp
-nodist_test_control_ids_SOURCES = tests/test_control_ids.moc
+nodist_test_control_ids_SOURCES = tests/test_control_ids.moc \
+	dialogs/toolbar/controlbar_profile.moc.cpp \
+	player/player_controlbar_model.moc.cpp \
+	player/control_list_model.moc.cpp
 BUILT_SOURCES += tests/test_control_ids.moc
 CLEANFILES += tests/test_control_ids.moc
 test_control_ids_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)
@@ -2115,6 +2118,7 @@ test_opensubtitles_client_LDADD = $(QT_QTEST_COMMON_ldadd)
 test_opensubtitles_client_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
 check_PROGRAMS += test_opensubtitles_client
 TESTS += test_opensubtitles_client
+EXTRA_DIST += tests/data/opensubtitles_search.json
 
 # test_subtitle_matching
 test_subtitle_matching_SOURCES = \

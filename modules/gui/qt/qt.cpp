@@ -364,7 +364,7 @@ vlc_module_begin ()
     add_bool( "qt-minimal-view", false, QT_MINIMAL_MODE_TEXT,
               nullptr )
 
-    add_string( "qt-opensubtitles-key", "", OPENSUBTITLES_KEY_TEXT, OPENSUBTITLES_KEY_LONGTEXT )
+    add_password( "qt-opensubtitles-key", "", OPENSUBTITLES_KEY_TEXT, OPENSUBTITLES_KEY_LONGTEXT )
     add_bool( "qt-system-tray", true, SYSTRAY_TEXT, SYSTRAY_LONGTEXT)
 
     add_integer( "qt-notification", NOTIFICATION_MINIMIZED,
