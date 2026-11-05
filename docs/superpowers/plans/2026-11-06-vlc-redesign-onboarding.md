@@ -312,4 +312,65 @@ git commit -m "docs: onboarding ledger and roadmap"
 
 ## Ledger
 
-*(filled in Task 5)*
+What the spec left to the implementer (*my call*) and what the build changed. Section names follow the spec.
+
+### Spec calls that shipped
+
+**Window**
+- A frameless modal window over the main window, on `DialogCard` with `showHeader: false`. No title bar or footer bar; the buttons sit inside the page, and the card drags by its empty background.
+- Escape ends onboarding like the old wizard's reject: `qt-privacy-ask` set to 0, config saved, no folder added. Closing from a window manager is meant to share that path.
+- The old `FirstRunWizard` (`dialogs/firstrun/*`, its `.ui`, meson and Makefile.am entries) is deleted, along with its include and `m_firstRunDialog` in `dialogs_provider.{hpp,cpp}`.
+
+**Shared parts**
+- Enter activates Next or Finish. A focus ring in the accent colour marks keyboard focus on every control.
+- The theme page has Back and Next, as the video shows, and all colour variants get Back.
+
+**Page 1: Welcome**
+- The folder field starts with the XDG Videos folder, shown with `~`. With no Videos folder it is empty with the placeholder `e.g., ~/Videos` in `#404040`.
+- The field is editable and `~` is expanded. Next is at 50 % opacity while the text is not an existing folder. An empty field is allowed and means no folder.
+
+**Page 2: Theme and colour**
+- A theme tile only moves the ring. The preview stays dark until slice 10.
+- Dark is always preselected. The accent preselects the current `qt-accent-color`.
+
+**Page 3: Keyboard shortcuts**
+- Keys are the user's real bindings from the `key-*` options: first binding only, modifiers as upper-case caps, arrows as ← → ↑ ↓. The Figma's keys are not shown because several do nothing in VLC.
+- A row with an empty binding shows one cap with "-".
+- Show / Hide File Browser is a new `Ctrl+Shift+L` in `GlobalShortcuts.qml`. It toggles the player's library side panel while `MainCtx.playerView` is true and does nothing elsewhere.
+
+**Finish**
+- The chosen folder is added to the media library as an entry point, and so is the XDG Music folder when it exists and is not the same folder or inside it. With no media library, folders are skipped.
+- `metadata-network-access`, `qt-menubar`, `qt-titlebar`, `qt-pin-controls` and the control-bar profile keep their defaults.
+
+**Live accent**
+- Settings' `AccentRow` emits `MainCtx::accentColorChanged()` too, so Settings' accent applies at once. The roadmap's slice 7 "next launch" departure is removed.
+
+### What the build changed
+
+- **Page-3 rendering rule: every chord is drawn in full, and a row too wide for its room shrinks to fit.** Seek is about 0.92, File Browser about 0.93 and Volume about 0.76 (0.759 at interface scale 1.5); the other nine rows are 1.0. A row never gets within 20 px of the next column's labels or the card's edge. A shorthand that draws a shared modifier once (`SHIFT <- / ->`) was built and dropped: `SHIFT E / E` (Previous/Next Frame) reads as Shift on both, and X+(a/b) looks the same as (X+a)/b in a row of caps. There is no floor on the shrink, so a long custom binding can go below 0.75.
+- `Ctrl+Shift+L` is gated on `MainCtx.useGlobalShortcuts` as well, and `GlobalShortcuts.qml` imports `VLC.Player`.
+- When `DialogCard` caps the window at 90 % of the screen (for example at interface scale 1.5), the card content is scaled to fit. The cap does not keep the aspect ratio, so the content sits centred with empty card space at the sides.
+- The card holds the accent as the upper-case hex string `accentHex` and passes that to `AccentSwatches.optionValue`. A QML `color` stringifies in lower case, which would write `#d37918` instead of `default`.
+- `qt6.pro` is not updated for the new files. It lists none of slice 7-8's files (`saved_streams`, `hotkey_model`, `settings_bridge`), so a qmake build already misses them.
+- The harness `seed` now passes `--aout=dummy -vv`.
+- The preview's top is y 19, not 17, as measured from the Figma shot. The volume wedge is a `Shape` because QtSvg cannot render the Figma SVG's mask. Inter is not set explicitly, as elsewhere in the codebase.
+- Review fix: a lone `+` binding gave blank caps. `caps` now returns the plus key as a cap, with tests for `+`, `Ctrl++` and `Command+...`.
+
+### Unverified / for a hand check
+
+- `Ctrl+Shift+L` with its real `Qt.ApplicationShortcut` context. Xvfb cannot fire it; it was exercised with `WindowShortcut` and then committed with the default context.
+- Closing the card from a window manager. The harness has none; it is meant to share the Escape path.
+- The real GNOME desktop look (no theme provider other than the harness's was run).
+
+### Known and not fixed
+
+- `systempalette.cpp` hardcodes the default accent `#D37918` / `#FF610A`, duplicating `COLOR_DEFINITION` in `systempalette.hpp`.
+- `Onboarding::finish()` does not re-check the folder; it relies on the QML `folderValid` gate. `pickFolder`'s `QFileDialog` has a null parent. The `POTFILES` order is cosmetic.
+- `caps` matches modifiers case-sensitively, and `test_rows` coverage is thin.
+- The card-wide `DragHandler` can steal drags that start on swatches, buttons or the field.
+- No floor on the page-3 row shrink.
+- Swatch accessible names are hex codes, and only the Welcome heading has the Heading role.
+- `OnboardingWindow.qml` is 770 lines; the preview could be split out. It also uses `parent.parent` in a delegate and duplicates the cone colorize.
+- Enter on a focused Back or Browse activates that button rather than Next.
+- Scaling to fit when capped loses the aspect ratio.
+- `MainCtx::hasFirstrun` is an upstream `Q_PROPERTY` that nothing uses.
