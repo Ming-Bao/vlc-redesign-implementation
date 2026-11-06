@@ -218,9 +218,9 @@ bool ExternalPaletteImpl::isThemeDark() const
 
 bool ExternalPaletteImpl::hasCSDImages() const
 {
-    if (!m_provider->supportThemeImage)
-        return false;
-    return m_provider->supportThemeImage(m_provider, VLC_QT_THEME_IMAGE_TYPE_CSD_BUTTON);
+    // System draws VLC's own title-bar buttons, as Light and Dark do: the desktop theme's images are drawn
+    // for its own bar, not the Figma one (GTK 3 Adwaita's dark glyphs vanished on the dark bar under prefer-dark)
+    return false;
 }
 
 
@@ -303,8 +303,10 @@ SystemPalette::SystemPalette(QObject* parent)
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     // the desktop switched light/dark: System follows (MainCtx unsets the app's own scheme for System)
     if (qGuiApp)
-        connect(qGuiApp->styleHints(), &QStyleHints::colorSchemeChanged, this, [this]() {
-            if (m_source == ColorSchemeModel::System)
+        connect(qGuiApp->styleHints(), &QStyleHints::colorSchemeChanged, this, [this](Qt::ColorScheme hint) {
+            // the provider's own change signal rebuilds too: only rebuild when the hint changes the answer
+            if (m_source == ColorSchemeModel::System
+                && systemIsDark(hint, m_palettePriv ? m_palettePriv->m_provider : nullptr) != m_isDark)
                 updatePalette();
         });
 #endif
@@ -420,9 +422,10 @@ void SystemPalette::updatePalette()
 
     if (m_palettePriv)
     {
+        // queued: updatePalette() deletes the provider whose callback emits this
         connect(
             m_palettePriv.get(), &ExternalPaletteImpl::paletteChanged,
-            this, &SystemPalette::updatePalette);
+            this, &SystemPalette::updatePalette, Qt::QueuedConnection);
         connect(
             m_palettePriv.get(), &ExternalPaletteImpl::CSDMetricsChanged,
             this, &SystemPalette::CSDMetricsChanged);

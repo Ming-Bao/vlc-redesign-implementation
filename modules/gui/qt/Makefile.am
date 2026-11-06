@@ -2243,8 +2243,12 @@ TESTS += test_waveform_util
 # test_menu_style
 test_menu_style_SOURCES = \
 	tests/test_menu_style.cpp \
-	style/menustyle.hpp style/menustyle.cpp
-nodist_test_menu_style_SOURCES = tests/test_menu_style.moc assets.cpp
+	style/menustyle.hpp style/menustyle.cpp \
+	style/figmatokens.hpp style/figmatokens.cpp \
+	util/color_svg_image_provider.cpp util/color_svg_image_provider.hpp \
+	util/imagehelper.cpp util/imagehelper.hpp
+nodist_test_menu_style_SOURCES = tests/test_menu_style.moc assets.cpp \
+	style/figmatokens.moc.cpp
 BUILT_SOURCES += tests/test_menu_style.moc
 CLEANFILES += tests/test_menu_style.moc
 test_menu_style_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)

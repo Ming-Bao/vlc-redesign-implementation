@@ -31,6 +31,9 @@
 #include "../qtthemeprovider.hpp"
 #include <mutex>
 #include <functional>
+#include <algorithm>
+#include <vector>
+#include <cstdlib>
 
 #include "nav_button_provider_gtk.h"
 #include "gtk_util.h"
@@ -52,46 +55,70 @@ public:
     int csdFrameMarginRight = 0;
     int csdFrameMarginTop = 0;
     int csdFrameMarginBottom = 0;
-
-    // the desktop portal's color-scheme changes (GNOME's dark/light preference)
-    GDBusConnection* bus = nullptr;
-    guint schemeSubscription = 0;
 };
 
 // The desktop portal's org.freedesktop.appearance color-scheme: 1 prefers dark, 2 prefers light,
 // 0 no preference (or no portal). GTK 3's own theme colours ignore it.
-static guint32 portalColorScheme(GDBusConnection* bus)
+// It is read once per process and then kept by the portal's SettingChanged signal, so a System palette rebuilt
+// on every change doesn't block the GUI thread on a D-Bus call. Open, Close, isThemeDark and the signal (on
+// the default GLib main context, which Qt's GUI thread runs) all run on the GUI thread.
+static int portalScheme = -1;   // -1: not read yet
+static std::vector<vlc_qt_theme_provider_t*> schemeListeners;   // the open providers, told of a change
+
+static guint32 schemeOf(GVariant* value)
 {
+    return g_variant_is_of_type(value, G_VARIANT_TYPE_UINT32) ? g_variant_get_uint32(value) : 0;
+}
+
+static void onSettingChanged(GDBusConnection*, const gchar*, const gchar*, const gchar*, const gchar*,
+                             GVariant* params, gpointer)
+{
+    const gchar* ns = nullptr;
+    const gchar* key = nullptr;
+    GVariant* value = nullptr;
+    g_variant_get(params, "(&s&sv)", &ns, &key, &value);
+    const bool scheme = g_strcmp0(key, "color-scheme") == 0;
+    if (scheme)
+        portalScheme = schemeOf(value);
+    g_variant_unref(value);
+    if (!scheme)
+        return;
+    for (vlc_qt_theme_provider_t* obj : schemeListeners)
+        if (obj->paletteUpdated)
+            obj->paletteUpdated(obj, obj->paletteUpdatedData);
+}
+
+static void readPortalSchemeOnce()
+{
+    if (portalScheme >= 0)
+        return;
+    portalScheme = 0;
+    // without a session bus address GLib would autolaunch a dbus-daemon on X11
+    if (!getenv("DBUS_SESSION_BUS_ADDRESS"))
+        return;
+    // kept for the process: the subscription lives on it
+    GDBusConnection* bus = g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr, nullptr);
     if (!bus)
-        return 0;
+        return;
+    g_dbus_connection_signal_subscribe(bus, "org.freedesktop.portal.Desktop", "org.freedesktop.portal.Settings",
+                                       "SettingChanged", "/org/freedesktop/portal/desktop", "org.freedesktop.appearance",
+                                       G_DBUS_SIGNAL_FLAGS_NONE, onSettingChanged, nullptr, nullptr);
     GVariant* reply = g_dbus_connection_call_sync(bus, "org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop",
                                                   "org.freedesktop.portal.Settings", "ReadOne",
                                                   g_variant_new("(ss)", "org.freedesktop.appearance", "color-scheme"),
                                                   G_VARIANT_TYPE("(v)"), G_DBUS_CALL_FLAGS_NONE, 1000, nullptr, nullptr);
     if (!reply)
-        return 0;
+        return;
     GVariant* value = nullptr;
     g_variant_get(reply, "(v)", &value);
-    const guint32 scheme = g_variant_is_of_type(value, G_VARIANT_TYPE_UINT32) ? g_variant_get_uint32(value) : 0;
+    portalScheme = schemeOf(value);
     g_variant_unref(value);
     g_variant_unref(reply);
-    return scheme;
 }
 
-static void onSettingChanged(GDBusConnection*, const gchar*, const gchar*, const gchar*, const gchar*,
-                             GVariant* params, gpointer data)
+static bool isThemeDark( vlc_qt_theme_provider_t*)
 {
-    const gchar* ns = nullptr;
-    const gchar* key = nullptr;
-    g_variant_get(params, "(&s&sv)", &ns, &key, nullptr);
-    auto obj = static_cast<vlc_qt_theme_provider_t*>(data);
-    if (g_strcmp0(key, "color-scheme") == 0 && obj->paletteUpdated)
-        obj->paletteUpdated(obj, obj->paletteUpdatedData);
-}
-
-static bool isThemeDark( vlc_qt_theme_provider_t* obj)
-{
-    switch (portalColorScheme(static_cast<GtkPrivateThemeProvider*>(obj->p_sys)->bus))
+    switch (portalScheme)
     {
     case 1: return true;
     case 2: return false;
@@ -469,12 +496,7 @@ static int updatePalette(vlc_qt_theme_provider_t* obj)
 static void Close(vlc_qt_theme_provider_t* obj)
 {
     auto sys = static_cast<GtkPrivateThemeProvider*>(obj->p_sys);
-    if (sys->bus)
-    {
-        if (sys->schemeSubscription)
-            g_dbus_connection_signal_unsubscribe(sys->bus, sys->schemeSubscription);
-        g_object_unref(sys->bus);
-    }
+    schemeListeners.erase(std::remove(schemeListeners.begin(), schemeListeners.end(), obj), schemeListeners.end());
     delete sys;
 }
 
@@ -527,12 +549,8 @@ static int Open(vlc_object_t* p_this)
         return VLC_EGENERIC;
 
     obj->p_sys = sys;
-    sys->bus = g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr, nullptr);
-    if (sys->bus)
-        sys->schemeSubscription = g_dbus_connection_signal_subscribe(
-            sys->bus, "org.freedesktop.portal.Desktop", "org.freedesktop.portal.Settings", "SettingChanged",
-            "/org/freedesktop/portal/desktop", "org.freedesktop.appearance", G_DBUS_SIGNAL_FLAGS_NONE,
-            onSettingChanged, obj, nullptr);
+    readPortalSchemeOnce();
+    schemeListeners.push_back(obj);
     obj->close = Close;
     obj->isThemeDark = isThemeDark;
     obj->updatePalette = updatePalette;
