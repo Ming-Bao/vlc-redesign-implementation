@@ -32,6 +32,7 @@ static bool close(const QColor& a, const QColor& b, int tol)
 }
 
 static bool themeDark(vlc_qt_theme_provider_t*) { return true; }
+static bool themeLight(vlc_qt_theme_provider_t*) { return false; }
 
 class TokenHolder : public QObject
 {
@@ -82,6 +83,23 @@ private slots:
         QVERIFY(!systemIsDark(&p));
         p.isThemeDark = themeDark;
         QVERIFY(systemIsDark(&p));
+    }
+
+    // a provider that answers decides; without one, Qt's colour-scheme hint does
+    void systemIsDark_hint() {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        vlc_qt_theme_provider_t silent{}, light{}, dark{};
+        light.isThemeDark = themeLight;
+        dark.isThemeDark = themeDark;
+        QVERIFY(!systemIsDark(Qt::ColorScheme::Dark, &light));      // a stale hint doesn't outrank the provider
+        QVERIFY(systemIsDark(Qt::ColorScheme::Light, &dark));
+        QVERIFY(systemIsDark(Qt::ColorScheme::Dark, nullptr));      // no provider (macOS): the hint
+        QVERIFY(systemIsDark(Qt::ColorScheme::Dark, &silent));
+        QVERIFY(!systemIsDark(Qt::ColorScheme::Light, nullptr));
+        QVERIFY(!systemIsDark(Qt::ColorScheme::Unknown, nullptr));  // neither: Light
+#else
+        QSKIP("Qt < 6.5 has no colour-scheme hint");
+#endif
     }
 
     // theme.palette.tokens.fgA2 is a typed colour read in QML

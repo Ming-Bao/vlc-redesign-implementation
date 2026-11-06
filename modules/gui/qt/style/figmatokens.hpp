@@ -73,4 +73,11 @@ QColor lightPartner(const QColor& darkColour);
 // reports nothing, is Light.
 bool systemIsDark(vlc_qt_theme_provider_t* providerOrNull);
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+// System's choice with Qt's colour-scheme hint: a provider that answers decides (the GTK one reads the
+// desktop portal's color-scheme); without one the hint does (macOS). Qt's GTK 3 theme can start with a
+// stale Light hint while GNOME prefers dark, so the hint doesn't outrank the provider.
+bool systemIsDark(Qt::ColorScheme hint, vlc_qt_theme_provider_t* providerOrNull);
+#endif
+
 #endif // VLC_FIGMATOKENS_HPP

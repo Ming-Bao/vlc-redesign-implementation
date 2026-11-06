@@ -18,6 +18,7 @@
 #include "systempalette.hpp"
 #include "menustyle.hpp"
 #include <QGuiApplication>
+#include <QStyleHints>
 #include <QPalette>
 #include <QSettings>
 #include <QFile>
@@ -299,7 +300,14 @@ void ExternalPaletteImpl::updateMetrics(vlc_qt_theme_image_type type)
 SystemPalette::SystemPalette(QObject* parent)
     : QObject(parent)
 {
-
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    // the desktop switched light/dark: System follows (MainCtx unsets the app's own scheme for System)
+    if (qGuiApp)
+        connect(qGuiApp->styleHints(), &QStyleHints::colorSchemeChanged, this, [this]() {
+            if (m_source == ColorSchemeModel::System)
+                updatePalette();
+        });
+#endif
 }
 
 void SystemPalette::componentComplete()
@@ -705,8 +713,9 @@ void SystemPalette::makeFigmaPalette(bool dark)
 
 void SystemPalette::makeSystemPalette()
 {
-    // System is one of the two Figma palettes, picked by the desktop's preference; the provider's
-    // own colours aren't used. It stays for its change signal and CSD. No provider: Light.
+    // System is one of the two Figma palettes, picked by the desktop's preference: the provider's, else
+    // Qt's colour-scheme hint; the provider's own colours aren't used. It stays for its change signal
+    // and CSD. Neither: Light.
     std::unique_ptr<ExternalPaletteImpl> palette;
     if (m_ctx)
     {
@@ -714,6 +723,11 @@ void SystemPalette::makeSystemPalette()
         if (!palette->init())
             palette.reset();
     }
-    makeFigmaPalette(systemIsDark(palette ? palette->m_provider : nullptr));
+    vlc_qt_theme_provider_t* const provider = palette ? palette->m_provider : nullptr;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    makeFigmaPalette(systemIsDark(qGuiApp ? qGuiApp->styleHints()->colorScheme() : Qt::ColorScheme::Unknown, provider));
+#else
+    makeFigmaPalette(systemIsDark(provider));
+#endif
     m_palettePriv = std::move(palette);
 }

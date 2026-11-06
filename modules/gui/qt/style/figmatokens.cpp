@@ -113,3 +113,12 @@ bool systemIsDark(vlc_qt_theme_provider_t* provider)
 {
     return provider && provider->isThemeDark && provider->isThemeDark(provider);
 }
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+bool systemIsDark(Qt::ColorScheme hint, vlc_qt_theme_provider_t* provider)
+{
+    if (provider && provider->isThemeDark)
+        return provider->isThemeDark(provider);
+    return hint == Qt::ColorScheme::Dark;
+}
+#endif
