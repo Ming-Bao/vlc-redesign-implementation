@@ -102,7 +102,7 @@ FocusScope {
         id: theme
         colorSet: ColorContext.View
     }
-    readonly property color _titleColor: theme.palette?.isDark ? "#969696" : theme.fg.primary
+    readonly property color _titleColor: theme.palette?.tokens.fgA1
 
     Column {
         id: column

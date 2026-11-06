@@ -252,3 +252,11 @@ git commit -m "qt: Figma token table; both palettes and System built from it"
 ## Ledger
 
 (departures and findings, filled in during execution)
+
+Task 3 (dark keeps the exact literal; light reads the nearest token):
+- SettingsStyle.qml: `#2A2A2A` (tick) -> bgA1; `#1E1E1E` (sidebarHover) -> bgA2.
+- HomeSquareCard.qml, HomeVideoCard.qml, HomeListRow.qml: `#171717` -> bgA4 (tie with bgA5; first in list).
+- HomeDisplay.qml, HomePage.qml, LibraryRootPage.qml, PlaylistsPage.qml, LibraryFolderPage.qml (x2): `#1E1E1E` backing -> bgA2.
+- HomeListRow.qml: compact thumbnail backing `#303030` (placeholder with meaning) kept in dark; light reads bgA4 (was bg.secondary).
+- AccentRow.qml: selected swatch background now `style.accentBg` (token) instead of swatch x0.26.
+- AccentSwatches.js: swatch list marked `// fixed colour: accent swatch`.

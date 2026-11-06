@@ -18,7 +18,7 @@
 .pragma library
 
 // The nine accent swatches, shared by Settings and the onboarding card. The first is the default orange, stored as `default`.
-const colors = ["#D37918", "#E15032", "#C49E23", "#19A234", "#18AAD3", "#185DD3", "#8E42FF", "#F052B3", "#AFAFAF"]
+const colors = ["#D37918", "#E15032", "#C49E23", "#19A234", "#18AAD3", "#185DD3", "#8E42FF", "#F052B3", "#AFAFAF"]   // fixed colour: accent swatch
 
 function optionValue(hex) {
     return hex === colors[0] ? "default" : hex

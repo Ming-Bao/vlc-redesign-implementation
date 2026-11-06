@@ -89,7 +89,7 @@ T.AbstractButton {
             radius: root._artRadius
             // backing under the image like the cards have; without it the ImageExt rows painted blank
             color: root.image.toString() === "" ? "transparent"
-                                                : root._dark ? (root.compact ? "#303030" : "#171717") : theme.bg.secondary
+                                                : root._dark ? (root.compact ? "#303030" : "#171717") : theme.palette?.tokens.bgA4   // fixed colour: off-token dark value
 
             Widgets.ImageExt {
                 anchors.fill: parent
@@ -107,7 +107,7 @@ T.AbstractButton {
                 visible: root.image.toString() === ""
                 text: root.glyph
                 font.pixelSize: VLCStyle.dp(24, VLCStyle.scale)
-                color: root._dark ? "#8F8F8F" : theme.fg.secondary
+                color: theme.palette?.tokens.fgA2
             }
 
             Rectangle {
@@ -141,9 +141,9 @@ T.AbstractButton {
             text: root.text
             font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
             color: root.playing ? theme.accent
-                 : root.dimmed ? (root._dark ? "#6B6B6B" : theme.fg.secondary)
-                 : root.compact ? (root._dark ? (root.showMore && root.hovered ? "#C6C6C6" : "#969696") : theme.fg.primary)
-                 : (root._dark ? "#8F8F8F" : theme.fg.secondary)
+                 : root.dimmed ? theme.palette?.tokens.fgA3
+                 : root.compact ? (root.showMore && root.hovered ? theme.palette?.tokens.fg2 : theme.palette?.tokens.fgA1)
+                 : theme.palette?.tokens.fgA2
         }
     }
 
@@ -161,7 +161,7 @@ T.AbstractButton {
             anchors.centerIn: parent
             text: VLCIcons.more
             font.pixelSize: VLCStyle.dp(24, VLCStyle.scale)
-            color: root._dark ? "#8F8F8F" : theme.fg.secondary
+            color: theme.palette?.tokens.fgA2
         }
     }
 

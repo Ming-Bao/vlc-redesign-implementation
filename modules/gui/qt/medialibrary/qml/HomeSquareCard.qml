@@ -31,7 +31,7 @@ T.AbstractButton {
     property url image
     // VLCIcons glyph shown when there is no image
     property string glyph
-    property color backing: theme.palette?.isDark ? "#171717" : theme.bg.secondary
+    property color backing: theme.palette?.isDark ? "#171717" : theme.palette?.tokens.bgA4   // fixed colour: off-token dark value
     property string title
     property string subtitle
     // the art box is width × artHeight (a 16:9 folder tile on a video level)
@@ -50,7 +50,6 @@ T.AbstractButton {
     signal menuRequested(point globalPos)
     signal selectClicked(int modifiers)
 
-    readonly property bool _dark: theme.palette?.isDark ?? false
 
     focusPolicy: Qt.StrongFocus
     text: title
@@ -100,7 +99,7 @@ T.AbstractButton {
                 visible: root.image.toString() === ""
                 text: root.glyph
                 font.pixelSize: VLCStyle.dp(48, VLCStyle.scale)
-                color: root._dark ? "#969696" : theme.fg.primary
+                color: theme.palette?.tokens.fgA1
             }
 
             // selected: the tint shows under the focus ring too
@@ -137,7 +136,7 @@ T.AbstractButton {
                 text: root.title
                 font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
                 color: root.playing ? theme.accent
-                                    : root._dark ? "#969696" : theme.fg.primary
+                                    : theme.palette?.tokens.fgA1
             }
 
             T.Label {
@@ -146,7 +145,7 @@ T.AbstractButton {
                 elide: Text.ElideRight
                 text: root.subtitle
                 font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
-                color: root._dark ? "#6B6B6B" : theme.fg.secondary
+                color: theme.palette?.tokens.fgA3
             }
         }
     }

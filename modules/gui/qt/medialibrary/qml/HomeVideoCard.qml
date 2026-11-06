@@ -41,7 +41,6 @@ T.AbstractButton {
     // VLCIcons glyph shown on the backing when there is no thumbnail
     property string glyph
 
-    readonly property bool _dark: theme.palette?.isDark ?? false
     readonly property real _radius: VLCStyle.dp(12, VLCStyle.scale)
 
     focusPolicy: Qt.StrongFocus
@@ -75,7 +74,7 @@ T.AbstractButton {
             width: root.width
             height: Math.round(width * 9 / 16)
             radius: root._radius
-            color: root._dark ? "#171717" : theme.bg.secondary
+            color: theme.palette?.isDark ? "#171717" : theme.palette?.tokens.bgA4   // fixed colour: off-token dark value
 
             Widgets.ImageExt {
                 anchors.fill: parent
@@ -92,7 +91,7 @@ T.AbstractButton {
                 visible: !root.model.thumbnail
                 text: root.glyph
                 font.pixelSize: VLCStyle.dp(48, VLCStyle.scale)
-                color: root._dark ? "#969696" : theme.fg.primary
+                color: theme.palette?.tokens.fgA1
             }
 
             // 20 % veil
@@ -151,8 +150,8 @@ T.AbstractButton {
             text: root.text
             font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
             color: root.playing ? theme.accent
-                 : root.dimmed ? (root._dark ? "#6B6B6B" : theme.fg.secondary)
-                 : (root._dark ? "#969696" : theme.fg.primary)
+                 : root.dimmed ? theme.palette?.tokens.fgA3
+                 : theme.palette?.tokens.fgA1
         }
     }
 
