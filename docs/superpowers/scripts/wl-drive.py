@@ -16,6 +16,9 @@ Steps (executed in order):
     drag:X1,Y1,X2,Y2  press at X1,Y1, move to X2,Y2 in 10 steps, release (moves a window by its title bar)
     key:KEYSYM        press+release a keysym (e.g. space, Escape); KEY+KEY for a chord (Alt_L+F4)
     exit:SECONDS      wait for VLC to exit; if it doesn't, save its stacks to OUTDIR/hang.txt
+    gset:KEY,VAL      gsettings set org.gnome.desktop.interface KEY VAL (color-scheme prefer-dark, gtk-theme
+                      Adwaita-dark, ...) in the private session. Needs XDG_CONFIG_HOME=build/redesign-profile/config
+                      on dbus-run-session, so the bus's dconf service writes the profile's dconf, not the user's.
 Writes OUTDIR/vlc.log and OUTDIR/shell.log.
 """
 import os
@@ -159,6 +162,12 @@ def main():
             for sym in reversed(syms):
                 key(sym, False)
             pump(0.3)
+        elif verb == "gset":
+            # the dconf service this bus starts inherits dbus-run-session's environment
+            if os.environ.get("XDG_CONFIG_HOME") != f"{prof}/config":
+                sys.exit(f"gset: run as XDG_CONFIG_HOME={prof}/config dbus-run-session -- ...")
+            subprocess.run(["gsettings", "set", "org.gnome.desktop.interface", *arg.split(",", 1)], check=True)
+            pump(3)
         elif verb == "exit":
             end = time.time() + float(arg)
             while vlc.poll() is None and time.time() < end:
