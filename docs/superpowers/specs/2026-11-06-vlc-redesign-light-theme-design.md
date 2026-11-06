@@ -71,6 +71,7 @@ Every colour the redesign takes from a `Dark/*` token takes the same token's lig
   - **Dark:** BG/Accent Bright = accent × 0.26 (gives `#371F06`); Accent/Dim = `darker(accent, 1.24)`.
   - **Light:** BG/Accent Bright = 30 % accent over `#D1D1D1` (gives `#D8BA9A` from `#E8851A`). Accent/Dim = `darker(accent, 1.55)` (gives about `#965916`). Accent/Bright and BG/Accent Dark are derived the same way if anything uses them. *(my call: these formulas reproduce the Figma's values for the default orange.)*
   - **Logo:** the default is Light Accent/Logo `#C2711A`. A picked accent colours the cone as it does in dark.
+  - **Accent as text or an icon reads Accent/Dim in light** (`accentText`: the accent in dark, Accent/Dim in light). `#E8851A` on BG/Accent Bright `#D8BA9A` is about 1.5:1; `#965916` is about 3:1. Accent fills (play pill, seek handle, swatches, Next/Finish/Save fills, toggle knobs, selection rings) stay Accent/Main. Dark is unchanged. A picked grey `#AFAFAF` gives about `#717171`. *(fix wave ruling)*
 - **Literals that aren't a dark token** (for example `#1E1E1E` hover, `#171717`, `#2A2A2A`, `#303030`, `#3A3A3A`, `#202020`): take the light partner of the nearest dark token by lightness. Each one goes in the plan's Ledger with the value it got. *(my call)*
 - **Colours with meaning stay:** the record red, the volume gradient, the accent swatches, cover art, `#303030` thumbnail placeholders, and the black dimming behind dialogs.
 - **No more "light falls back to VLC 4".** Today about 45 QML bindings read `isDark ? "<Figma dark>" : theme.<VLC 4 colour>`, and about 156 hex literals sit in QML/JS. After this slice no redesign surface uses VLC 4's light colours.
@@ -87,7 +88,8 @@ Every colour the redesign takes from a `Dark/*` token takes the same token's lig
 ## System
 
 - **System picks between the two Figma palettes** by the desktop's dark/light preference: the theme provider's `isThemeDark()` (the GTK provider reads the desktop portal's `color-scheme`, which GTK 3's theme colours ignore), else Qt's colour-scheme hint when no provider answers. It no longer takes the GTK/Qt provider's own colours. *(my call: the redesign has one look per lightness. Adwaita's colours mixed with Figma literals is today's half state.)*
-- The provider is kept so a desktop switch still fires `paletteChanged`, and for its CSD metrics and images if the title bar uses them.
+- The provider is kept so a desktop switch still fires `paletteChanged`, and for its CSD metrics. *(fix wave ruling)* System doesn't take the provider's CSD button images: VLC draws its own title-bar buttons, as Light and Dark do. GTK 3 Adwaita's images are drawn for its own light bar; under `prefer-dark` they were dark glyphs on the Figma dark bar (shot on the Wayland session).
+- The GTK provider reads the portal's `color-scheme` once per process and keeps it from the portal's `SettingChanged` signal, so a rebuild makes no blocking D-Bus call. It skips the bus when `DBUS_SESSION_BUS_ADDRESS` is unset (GLib would autolaunch a bus on X11).
 - If no provider loads, System takes Qt's colour-scheme hint, else Light.
 
 ## The player (frame `2425:13624`)
@@ -106,7 +108,8 @@ The frame is the token swap applied to the slice 2/4e player, with these exact v
 | Side panel rows | unwatched names FG/A1 → `#3C3C3C`, watched FG/A3 `#6B6B6B`, the progress line the accent. The frame paints unwatched names `#969696`: an unconverted dark literal that reads lighter than the watched ones and nearly vanishes on `#E7E7E7`. *(my call: the swap keeps watched dimmer, as dark does)* |
 | Video area | unchanged (the video). |
 
-- **The player no longer forces night while a video plays.** Today `Player.qml` and `MinimalView.qml` switch to `VLCStyle.darkPalette` when there is embedded video and the controls aren't pinned. The frame shows a light player with a video playing. *(my call: drop the force in both. `ArtistTopBanner` keeps its dark palette, because it sits on artwork.)*
+- **The player no longer forces night while a video plays.** Today `Player.qml` and `MinimalView.qml` switch to `VLCStyle.darkPalette` when there is embedded video and the controls aren't pinned. The frame shows a light player with a video playing. *(my call: drop the force in `Player.qml`. `ArtistTopBanner` keeps its dark palette, because it sits on artwork.)*
+  - *(fix wave ruling)* `MinimalView.qml` (Hide UI) keeps the force: it has no bars, so the reason above doesn't apply, and its title-bar buttons sit straight on the video.
 - **No background blur.** The frame's bars have a 25 px backdrop blur, but in a window nothing scrolls under them, and the dark bars have none. *(my call)*
 - **Fullscreen overlay bars** use BG/A3 Transparent at 95 % alpha in light, as dark does, so the video under them doesn't wash out the controls. *(my call)*
 
@@ -134,7 +137,9 @@ Some redesign SVGs are drawn as images with their colours inside:
 - The light play pill is the light accent; the frame has the dark `#D37918`.
 - The side panel's unwatched names are FG/A1 `#3C3C3C`; the frame has `#969696`.
 - No backdrop blur; fullscreen bars are 95 % opaque.
-- The player no longer forces dark while a video plays.
+- The player no longer forces dark while a video plays (Hide UI still does: no bars there).
+- Accent text and icons read Accent/Dim in light; fills stay Accent/Main.
+- System draws VLC's own title-bar buttons, not the desktop theme's images.
 - System uses the Figma palettes, chosen by the desktop's dark/light preference, not the desktop's own colours.
 - The onboarding card stays dark; its preview follows the tile.
 - Baked accent colours in SVGs stay orange (carried over).

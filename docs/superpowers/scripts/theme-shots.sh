@@ -103,3 +103,14 @@ c 644 414;                 shot 22-onboarding-light # Light tile: the preview is
 c 956 414;                 shot 23-onboarding-system # System tile
 c 644 414;  c 1233 757;    c 1233 757 4; shot 24-onboarding-finish # Light, Next, Finish: the main window is light, no restart
 finish
+
+# --- slice 10 fix wave (Light checks; after the Dark baseline's numbering) ---
+# The mini player's video controls over the 60 % black veil: they must stay light in Light while media plays.
+# (The resume toast has no shot: the default restore-playback-pos is "always", and with "ask" a replay from
+# Continue Watching after a stop didn't query the restore here.)
+hover() { alive; xdotool mousemove "$1" "$2"; sleep "${3:-1}"; }
+launch mini --start-paused "$BUILD/redesign-media/plain.mp4"
+c 90 20 3;  c 382 71 3                               # side panel; open in library: the mini player
+hover 1300 620;  c 1398 666 3                        # hover the video; its play button: playing
+hover 1300 620;            shot 25-miniplayer-playing # hovered: the controls over the veil
+finish
