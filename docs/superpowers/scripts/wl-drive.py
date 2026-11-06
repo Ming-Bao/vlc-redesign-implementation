@@ -19,6 +19,7 @@ Steps (executed in order):
     gset:KEY,VAL      gsettings set org.gnome.desktop.interface KEY VAL (color-scheme prefer-dark, gtk-theme
                       Adwaita-dark, ...) in the private session. Needs XDG_CONFIG_HOME=build/redesign-profile/config
                       on dbus-run-session, so the bus's dconf service writes the profile's dconf, not the user's.
+    isolated:         only check that (gset's guard, which runs before anything else); writes nothing
 Writes OUTDIR/vlc.log and OUTDIR/shell.log.
 """
 import os
@@ -44,6 +45,27 @@ def bus_call(bus, name, path, iface, method, args, reply="()"):
                          Gio.DBusCallFlags.NONE, 10000, None)
 
 
+def check_isolated(bus, prof):
+    """Refuse unless gsettings writes land in the profile: a private bus whose dconf service has the
+    profile's XDG_CONFIG_HOME (the service, not this process, writes the file)."""
+    addr = os.environ.get("DBUS_SESSION_BUS_ADDRESS", "")
+    user_bus = f"unix:path={os.environ.get('XDG_RUNTIME_DIR', '/run/user/%d' % os.getuid())}/bus"
+    if not addr or addr.split(",")[0] == user_bus:
+        sys.exit(f"isolation: {addr or 'no bus'} is the user's session bus; run under dbus-run-session")
+    # start the dconf service (no write), then read the environment it was started with
+    bus_call(bus, "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "StartServiceByName",
+             GLib.Variant("(su)", ("ca.desrt.dconf", 0)), "(u)")
+    pid = bus_call(bus, "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus",
+                   "GetConnectionUnixProcessID", GLib.Variant("(s)", ("ca.desrt.dconf",)), "(u)")[0]
+    with open(f"/proc/{pid}/environ", "rb") as f:
+        env = dict(kv.split(b"=", 1) for kv in f.read().split(b"\0") if b"=" in kv)
+    want = f"{prof}/config".encode()
+    if env.get(b"XDG_CONFIG_HOME") != want:
+        sys.exit(f"isolation: the dconf service (pid {pid}) has XDG_CONFIG_HOME={env.get(b'XDG_CONFIG_HOME')}; "
+                 f"run as XDG_CONFIG_HOME={prof}/config dbus-run-session -- ...")
+    print(f"isolation: ok (dconf service pid {pid} writes {prof}/config/dconf)")
+
+
 def main():
     out = os.path.abspath(sys.argv[1])
     os.makedirs(out, exist_ok=True)
@@ -53,6 +75,11 @@ def main():
     env.update(XDG_CONFIG_HOME=f"{prof}/config", XDG_DATA_HOME=f"{prof}/data",
                XDG_CACHE_HOME=f"{prof}/cache", VLC_LIB_PATH=f"{BUILD}/modules",
                VLC_PLUGIN_PATH=f"{BUILD}/modules")
+
+    if any(s.startswith(("gset:", "isolated:")) for s in sys.argv[2:]):
+        check_isolated(Gio.bus_get_sync(Gio.BusType.SESSION, None), prof)   # before anything starts or writes
+        if all(s.startswith("isolated:") for s in sys.argv[2:]):
+            return
 
     shell = subprocess.Popen(["gnome-shell", "--headless", "--wayland", "--no-x11",
                               "--virtual-monitor", "1600x900", "--wayland-display", WL],
@@ -163,11 +190,10 @@ def main():
                 key(sym, False)
             pump(0.3)
         elif verb == "gset":
-            # the dconf service this bus starts inherits dbus-run-session's environment
-            if os.environ.get("XDG_CONFIG_HOME") != f"{prof}/config":
-                sys.exit(f"gset: run as XDG_CONFIG_HOME={prof}/config dbus-run-session -- ...")
             subprocess.run(["gsettings", "set", "org.gnome.desktop.interface", *arg.split(",", 1)], check=True)
             pump(3)
+        elif verb == "isolated":
+            pass   # checked at startup
         elif verb == "exit":
             end = time.time() + float(arg)
             while vlc.poll() is None and time.time() < end:
