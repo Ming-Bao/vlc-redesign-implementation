@@ -18,6 +18,7 @@
 import QtQuick
 
 import VLC.Style
+import VLC.Util
 import VLC.Widgets as Widgets
 import VLC.Player
 
@@ -168,8 +169,8 @@ FocusScope {
                                         width: VLCStyle.dp(24, VLCStyle.scale)
                                         height: width
                                         sourceSize: Qt.size(width, height)
-                                        source: "qrc:///redesign/settings/" + entry.modelData.icon
-                                                + (entry.selected ? "-active" : "") + ".svg"
+                                        source: Helpers.themedSvg(root.style.theme.palette, "qrc:///redesign/settings/" + entry.modelData.icon
+                                                                  + (entry.selected ? "-active" : "") + ".svg")
                                     }
                                 }
 

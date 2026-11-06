@@ -20,6 +20,8 @@ pragma Singleton
 
 import QtQuick
 
+import VLC.Util
+
 QtObject {
 
     function clamp(num : real, min : real, max : real) : real {
@@ -321,6 +323,13 @@ QtObject {
     // Whether playback reached the end: the last 1.5 s, and the length is known
     function playbackEnded(position : real, lengthMs : real) : bool {
         return lengthMs > 0 && position > 0 && (1 - position) * lengthMs <= 1500
+    }
+
+    // A redesign SVG (pixmaps/redesign/*) with its baked greys swapped for `palette`'s tokens: the Dark FG/A2 and
+    // FG/1 values become the palette's (a dark palette swaps each for itself). Baked accents and FG/A3 stay.
+    function themedSvg(palette : var, path : string) : string {
+        return SVGColorImage.colorize(path)
+            .any({ "#8F8F8F": palette.tokens.fgA2, "#EAEAEA": palette.tokens.fg1 }).uri()   // fixed colour: baked SVG keys
     }
 
     // Whether the card sits on the left half of an area `areaWidth` wide (its centre is left of the middle)

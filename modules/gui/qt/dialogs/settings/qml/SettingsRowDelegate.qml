@@ -20,6 +20,7 @@ import QtQuick.Templates as T
 
 import VLC.MainInterface
 import VLC.Style
+import VLC.Util
 import VLC.Widgets as Widgets
 import VLC.Player
 import VLC.Dialogs
@@ -221,7 +222,7 @@ FocusScope {
             width: VLCStyle.dp(18, VLCStyle.scale)
             height: width
             sourceSize: Qt.size(width, height)
-            source: visible ? "qrc:///redesign/settings/info.svg" : ""
+            source: visible ? Helpers.themedSvg(theme.palette, "qrc:///redesign/settings/info.svg") : ""
             activeFocusOnTab: visible
 
             Accessible.role: Accessible.StaticText

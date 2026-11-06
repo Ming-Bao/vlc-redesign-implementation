@@ -120,12 +120,6 @@ Window {
         y = Math.max(scr.virtualY, Math.min(Math.round(cy - h / 2), scr.virtualY + scr.desktopAvailableHeight - h))
     }
 
-    // a redesign SVG with its baked greys swapped for the theme's (a dark run swaps each for itself)
-    function bakedIcon(url) {
-        return SVGColorImage.colorize(url)
-            .any({ "#8F8F8F": theme.palette.tokens.fgA2, "#EAEAEA": theme.palette.tokens.fg1 }).uri()   // fixed colour: baked SVG keys
-    }
-
     function open() {
         if (!_placed) {
             _placed = true
@@ -292,7 +286,7 @@ Window {
                     width: VLCStyle.dp(24, VLCStyle.scale)
                     height: width
                     sourceSize: Qt.size(width, height)
-                    source: "qrc:///redesign/settings/close.svg"
+                    source: Helpers.themedSvg(theme.palette, "qrc:///redesign/settings/close.svg")
                 }
             }
         }

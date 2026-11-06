@@ -271,6 +271,8 @@ Task 4 (player, mini player, dialogs):
 - VolumeWidget.qml: the meter shows in both themes; light track `#888888` (fixed colour: Figma volume track (light)), dark BG/B2; a white 20 % wash over the level in light only. Kept `isDark` branches.
 - PlayButton.qml: playing pill light `#9E9E9E` -> FG/A3 (`#6B6B6B`, the dark value's token, same in both).
 - PlaybackPanel.qml: speed ticks `#3A3A3A` -> dividerBright.
-- MiniPlayer.qml: ended video backing `#202020` -> bgA2 (`#303030` video placeholder kept as a fixed colour).
+- MiniPlayer.qml: video area backing `#202020` (ended) -> bgA2, `#303030` (placeholder) -> bgA4, as Task 3's HomeListRow.
+- ThumbnailWidget.qml: `#303030` placeholder -> bgA4 (it now has a ColorContext).
+- Baked SVG greys (cross-task, includes Task 3's Settings): one helper, `Helpers.themedSvg(palette, path)` (util/qml/Helpers.qml, VLC.Util), swaps `#8F8F8F` -> fgA2 and `#EAEAEA` -> fg1. It loads every `redesign/mini/*`, `redesign/dialogs/*` and `redesign/settings/*` SVG drawn from QML: MiniPlayer, DialogCard, NewPlaylistDialog, CustomizePlayerOverlay, HotkeysDialog, AddSubtitlesDialog, SettingsWindow, SettingsSidebar, AdvancedBar, SettingsRowDelegate. Onboarding's cone is Task 5's.
 - NewPlaylistDialog.qml: "+" tile `#161616` (FG/B1 used as a surface; FG/B1 is same-in-both, so it would stay black in light) -> bgA5, like lightPartner() would; dashed box stroke `#2D2D2D` -> dividerBright.
 - SliderBar.qml waveform: played bars light `theme.accent` -> accentDim (dark already drew Qt.darker(accent, 1.24) = accentDim); unplayed fgA4. Both now repaint on a theme switch.

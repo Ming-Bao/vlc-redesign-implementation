@@ -219,7 +219,7 @@ FocusScope {
                     width: VLCStyle.dp(24, VLCStyle.scale)
                     height: width
                     sourceSize: Qt.size(width, height)
-                    source: "qrc:///redesign/settings/close.svg"
+                    source: Helpers.themedSvg(theme.palette, "qrc:///redesign/settings/close.svg")
                 }
             }
 

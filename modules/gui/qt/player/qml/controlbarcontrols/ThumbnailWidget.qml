@@ -29,7 +29,12 @@ Rectangle {
     implicitWidth: VLCStyle.dp(24, VLCStyle.scale)
     implicitHeight: VLCStyle.dp(24, VLCStyle.scale)
     radius: VLCStyle.dp(2, VLCStyle.scale)
-    color: "#303030"   // fixed colour: thumbnail placeholder
+    readonly property ColorContext colorContext: ColorContext {
+        id: theme
+    }
+
+    // the placeholder under the artwork; the palette arrives once the item is in a bar
+    color: !theme.palette || theme.palette.isDark ? "#303030" : theme.palette.tokens.bgA4   // fixed colour: off-token dark value
 
     Image {
         anchors.fill: parent

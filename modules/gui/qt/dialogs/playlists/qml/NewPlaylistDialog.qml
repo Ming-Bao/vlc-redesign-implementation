@@ -21,6 +21,7 @@ import QtQuick.Templates as T
 import VLC.MainInterface
 import VLC.MediaLibrary
 import VLC.Style
+import VLC.Util
 import VLC.Widgets as Widgets
 import VLC.Dialogs
 
@@ -356,7 +357,7 @@ DialogCard {
                             width: VLCStyle.dp(20, VLCStyle.scale)
                             height: width
                             sourceSize: Qt.size(width, height)
-                            source: "qrc:///redesign/settings/close.svg"
+                            source: Helpers.themedSvg(root.colorContext.palette, "qrc:///redesign/settings/close.svg")
                         }
                     }
                 }

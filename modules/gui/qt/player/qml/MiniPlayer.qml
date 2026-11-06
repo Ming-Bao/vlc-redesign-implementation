@@ -153,12 +153,6 @@ T.Control {
         colorSet: ColorContext.View
     }
 
-    // a redesign/mini icon with its baked greys swapped for the theme's (a dark run swaps each for itself)
-    function _icon(name) {
-        return SVGColorImage.colorize("qrc:///redesign/mini/" + name + ".svg")
-            .any({ "#8F8F8F": theme.palette.tokens.fgA2, "#EAEAEA": theme.palette.tokens.fg1 }).uri()   // fixed colour: baked SVG keys
-    }
-
     background: Rectangle {
         color: theme.palette.tokens.bgA3
         radius: VLCStyle.dp(14, VLCStyle.scale)
@@ -262,7 +256,9 @@ T.Control {
                     Layout.preferredHeight: VLCStyle.dp(211, VLCStyle.scale)
 
                     radius: VLCStyle.dp(6, VLCStyle.scale)
-                    color: root.ended ? (theme.palette.isDark ? "#202020" : theme.palette.tokens.bgA2) : "#303030"   // fixed colour: off-token dark value (#202020); #303030 video placeholder
+                    // the placeholder before the video: dark keeps its off-token greys, light their nearest tokens
+                    color: theme.palette.isDark ? (root.ended ? "#202020" : "#303030")   // fixed colour: off-token dark value
+                                                : (root.ended ? theme.palette.tokens.bgA2 : theme.palette.tokens.bgA4)
 
                     Image {
                         anchors.fill: parent
@@ -341,7 +337,7 @@ T.Control {
                             x: VLCStyle.dp(14, VLCStyle.scale)
                             y: VLCStyle.dp(14, VLCStyle.scale)
 
-                            imageSource: root._icon("close")
+                            imageSource: Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/close.svg")
                             description: root.ended ? qsTr("Close") : qsTr("Stop")
 
                             onClicked: {
@@ -361,7 +357,7 @@ T.Control {
                             x: parent.width - width - VLCStyle.dp(14, VLCStyle.scale)
                             y: VLCStyle.dp(14, VLCStyle.scale)
 
-                            imageSource: root._icon("popout")
+                            imageSource: Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/popout.svg")
                             description: qsTr("Open the player")
 
                             onClicked: MainCtx.playerView = true
@@ -380,7 +376,7 @@ T.Control {
                             anchors.verticalCenter: parent.verticalCenter
 
                             glyph: true
-                            imageSource: root._icon("previous")
+                            imageSource: Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/previous.svg")
                             description: qsTr("Previous")
 
                             enabled: root.ended ? MainPlaylistController.currentIndex > 0
@@ -411,9 +407,9 @@ T.Control {
                             readonly property bool playing: Player.playingState === Player.PLAYING_STATE_PLAYING
 
                             glyph: true
-                            imageSource: root.ended ? root._icon("replay")
-                                       : playing ? root._icon("pause")
-                                                 : root._icon("play")
+                            imageSource: root.ended ? Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/replay.svg")
+                                       : playing ? Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/pause.svg")
+                                                 : Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/play.svg")
                             description: root.ended ? qsTr("Replay")
                                        : playing ? qsTr("Pause")
                                                  : qsTr("Play")
@@ -441,7 +437,7 @@ T.Control {
                             anchors.verticalCenter: parent.verticalCenter
 
                             glyph: true
-                            imageSource: root._icon("next")
+                            imageSource: Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/next.svg")
                             description: qsTr("Next")
 
                             enabled: root.ended ? MainPlaylistController.currentIndex + 1 < MainPlaylistController.count
@@ -508,12 +504,12 @@ T.Control {
                     spacing: VLCStyle.dp(20, VLCStyle.scale)
 
                     MetaGroup {
-                        iconSource: root._icon("folder")
+                        iconSource: Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/folder.svg")
                         text: Helpers.urlFolderName(Player.url.toString())
                     }
 
                     MetaGroup {
-                        iconSource: root._icon("artist")
+                        iconSource: Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/artist.svg")
                         text: root.miniPlayerState?.artist ?? ""
                     }
 
@@ -530,8 +526,8 @@ T.Control {
                         implicitWidth: VLCStyle.dp(30, VLCStyle.scale)
                         implicitHeight: VLCStyle.dp(32, VLCStyle.scale)
 
-                        imageSource: root.queueOpen ? root._icon("queue_active")
-                                                    : root._icon("queue")
+                        imageSource: root.queueOpen ? Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/queue_active.svg")
+                                                    : Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/queue.svg")
                         description: qsTr("Queue")
 
                         onClicked: root.miniPlayerState.queueOpen = !root.queueOpen
