@@ -125,6 +125,7 @@ moc_headers = files(
     'network/networktreeitem.hpp',
     'network/standardpathmodel.hpp',
     'style/systempalette.hpp',
+    'style/figmatokens.hpp',
     'style/vlcicons.hpp',
     'style/colorcontext.hpp',
     'player/input_models.hpp',
@@ -443,6 +444,8 @@ qt_plugin_sources = files(
     'style/colorcontext.hpp',
     'style/systempalette.cpp',
     'style/systempalette.hpp',
+    'style/figmatokens.cpp',
+    'style/figmatokens.hpp',
     'style/vlcicons.cpp',
     'style/vlcicons.hpp',
     'style/menustyle.cpp',
@@ -1605,6 +1608,21 @@ if qt6_dep.found()
                 'dialogs/onboarding/onboarding_folders.hpp'
             ),
             'moc_sources': files('tests/test_onboarding_folders.cpp'),
+            'suite': ['qt'],
+            'include_directories' : qt_include_dir,
+            'link_args': qt_link_args,
+            'dependencies': [qt6_dep, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
+            'name': 'test_qt_figma_tokens',
+            'sources': files(
+                'tests/test_figma_tokens.cpp',
+                'style/figmatokens.cpp',
+                'style/figmatokens.hpp'
+            ),
+            'moc_sources': files('tests/test_figma_tokens.cpp'),
+            'moc_headers': files('style/figmatokens.hpp'),
             'suite': ['qt'],
             'include_directories' : qt_include_dir,
             'link_args': qt_link_args,

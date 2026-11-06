@@ -307,6 +307,8 @@ libqt_plugin_la_SOURCES = \
 	style/colorcontext.hpp \
 	style/systempalette.cpp \
 	style/systempalette.hpp \
+	style/figmatokens.cpp \
+	style/figmatokens.hpp \
 	style/vlcicons.cpp 	style/vlcicons.hpp \
 	style/menustyle.cpp style/menustyle.hpp \
 	style/defaultthemeproviders.hpp \
@@ -530,6 +532,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	network/standardpathmodel.moc.cpp \
 	style/colorcontext.moc.cpp \
 	style/systempalette.moc.cpp \
+	style/figmatokens.moc.cpp \
 	style/vlcicons.moc.cpp \
 	player/delay_estimator.moc.cpp \
 	player/input_models.moc.cpp \
@@ -2055,6 +2058,21 @@ test_hotkey_model_LDADD = $(QT_QTEST_COMMON_ldadd)
 test_hotkey_model_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
 check_PROGRAMS += test_hotkey_model
 TESTS += test_hotkey_model
+
+# test_figma_tokens
+test_figma_tokens_SOURCES = \
+	tests/test_figma_tokens.cpp \
+	style/figmatokens.hpp style/figmatokens.cpp
+nodist_test_figma_tokens_SOURCES = \
+	tests/test_figma_tokens.moc style/figmatokens.moc.cpp
+BUILT_SOURCES += tests/test_figma_tokens.moc
+CLEANFILES += tests/test_figma_tokens.moc
+test_figma_tokens_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)
+test_figma_tokens_CXXFLAGS = $(QT_QTEST_COMMON_cxxflags)
+test_figma_tokens_LDADD = $(QT_QTEST_COMMON_ldadd)
+test_figma_tokens_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
+check_PROGRAMS += test_figma_tokens
+TESTS += test_figma_tokens
 
 # test_onboarding_folders
 test_onboarding_folders_SOURCES = \
