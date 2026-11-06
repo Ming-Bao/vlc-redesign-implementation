@@ -39,16 +39,23 @@ setup() {
         sed -i "/^\[MainWindow\]/a color-scheme-index=$SCHEME" "$CONF"
     fi
 }
-park() { xdotool mousemove 1599 899; }   # off every control, so nothing is hovered
+park() { xdotool mousemove 1599 899 || fail "xdotool cannot reach :77"; }   # off every control, so nothing is hovered
 launch() {   # launch NAME [vlc args]
-    NAME=$1; shift
+    NAME=$1; LAST=start; shift
     setup; RUNNING=1
     env -u WAYLAND_DISPLAY GDK_BACKEND=x11 "$DRV" start -vv "$@" > /dev/null || { echo "$NAME: VLC did not start"; exit 1; }
     park; sleep 2
 }
 finish() { "$DRV" stop > /dev/null; RUNNING=; sleep 1; cp "$RUN/vlc.log" "$OUT/vlc-$NAME.log"; }
-c() { "$DRV" click "$1" "$2" > /dev/null; park; sleep "${3:-2}"; }   # c X Y [wait]
-shot() { sleep 1; "$DRV" shot "$OUT/$1.png"; }
+LAST=start
+fail() { echo "theme-shots: $NAME launch, after shot $LAST: $*"; exit 1; }
+alive() { kill -0 "$(cat "$RUN/vlc.pid")" 2> /dev/null || fail "VLC is no longer running (see $RUN/vlc.log)"; }
+c() {   # c X Y [wait]
+    alive
+    "$DRV" click "$1" "$2" > /dev/null || fail "click $1,$2 failed"
+    park; sleep "${3:-2}"
+}
+shot() { sleep 1; alive; "$DRV" shot "$OUT/$1.png" || fail "shot $1 failed"; LAST=$1; }
 RUNNING=
 trap '[ -n "$RUNNING" ] && "$DRV" stop > /dev/null 2>&1 && sleep 1; restore' EXIT
 

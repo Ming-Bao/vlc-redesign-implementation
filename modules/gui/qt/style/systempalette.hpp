@@ -141,7 +141,7 @@ public:
     CSDMetrics* getCSDMetrics() const;
 
     inline MainCtx* getCtx() const { return m_ctx; }
-    FigmaTokens tokens() const { return figmaTokens(m_isDark, orange500, m_defaultAccent); }
+    const FigmaTokens& tokens() const { return m_tokens; }
     bool hasCSDImage() const;
 
     void setColor(ColorContext::ColorSet colorSet,  ColorContext::ColorSection section,
@@ -181,6 +181,7 @@ private:
     bool m_hasCSDImage = false;
     bool m_defaultAccent = true;
     bool m_drivesWidgets = false;
+    FigmaTokens m_tokens = figmaTokens(false, orange500, true);   // built by makeFigmaPalette()
 
     std::unique_ptr<ExternalPaletteImpl> m_palettePriv;
 

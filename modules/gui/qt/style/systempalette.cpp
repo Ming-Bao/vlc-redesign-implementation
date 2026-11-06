@@ -483,7 +483,8 @@ void SystemPalette::makeFigmaPalette(bool dark)
     m_isDark = dark;
     m_colorMap.clear();
 
-    const FigmaTokens t = tokens();
+    m_tokens = figmaTokens(dark, orange500, m_defaultAccent);
+    const FigmaTokens& t = m_tokens;
     orange500 = t.accent;
     // a colour that is no token: dark keeps it, light takes the light partner of the nearest dark token
     const auto off = [dark](const QColor& c) { return dark ? c : lightPartner(c); };

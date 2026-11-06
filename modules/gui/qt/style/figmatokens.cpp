@@ -37,12 +37,13 @@ QColor over(const QColor& top, double alpha, const QColor& base)
                             top.blueF() * alpha + base.blueF() * (1 - alpha));
 }
 
-// the grey tokens lightPartner() picks from; backgrounds first, so #222222 is BG/A1, not Divider/Dim
+// the grey tokens lightPartner() picks from; backgrounds first, so #222222 is BG/A1, not Divider/Dim.
+// FG/A3 and FG/B1 are left out: they are the same in both themes, so a dark surface near them
+// (#171717 is a card backing) would stay dark in light.
 constexpr QColor FigmaTokens::* greys[] = {
     &FigmaTokens::bgA1, &FigmaTokens::bgA2, &FigmaTokens::bgA3, &FigmaTokens::bgA4,
     &FigmaTokens::bgA5, &FigmaTokens::bgB1, &FigmaTokens::bgB2,
-    &FigmaTokens::fg1, &FigmaTokens::fg2, &FigmaTokens::fgA1, &FigmaTokens::fgA2,
-    &FigmaTokens::fgA3, &FigmaTokens::fgA4, &FigmaTokens::fgB1,
+    &FigmaTokens::fg1, &FigmaTokens::fg2, &FigmaTokens::fgA1, &FigmaTokens::fgA2, &FigmaTokens::fgA4,
     &FigmaTokens::dividerDim, &FigmaTokens::dividerBright,
 };
 

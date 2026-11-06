@@ -71,6 +71,8 @@ private slots:
         QColor w(Qt::white); w.setAlphaF(0.4f);
         QColor fg1("#161616"); fg1.setAlphaF(0.4f);
         QCOMPARE(lightPartner(w), fg1);                                          // FG/1
+        QVERIFY(lightPartner(QColor("#171717")).lightness() > 200);             // a card backing stays a light surface
+        QCOMPARE(lightPartner(QColor("#222222")), QColor("#EDEDED"));           // BG/A1, not Divider/Dim
     }
 
     // Review Focus 3: no provider, or one that reports nothing, is Light
