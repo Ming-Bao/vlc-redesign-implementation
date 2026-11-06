@@ -164,7 +164,6 @@ T.Page {
         // Properties
         property var breadcrumbs: []
 
-        readonly property bool _dark: theme.palette?.isDark ?? false
 
         // leading crumbs folded into one "…" crumb so the rest fits
         readonly property int _hiddenCrumbs: {
@@ -361,7 +360,7 @@ T.Page {
                                         width: VLCStyle.dp(8, VLCStyle.scale)
                                         text: "▶"
                                         font.pixelSize: VLCStyle.dp(8, VLCStyle.scale)
-                                        color: defaultPageHeader._dark ? "#404040" : theme.fg.secondary
+                                        color: theme.palette?.tokens.fgA4 ?? "transparent"
                                     }
 
                                     T.Label {
@@ -372,8 +371,7 @@ T.Page {
                                         font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
                                         font.weight: crumb.isLast ? Font.DemiBold : Font.Normal
                                         font.underline: crumb.hovered && !crumb.isLast
-                                        color: defaultPageHeader._dark ? (crumb.isLast ? "#969696" : "#8F8F8F")
-                                                                       : (crumb.isLast ? theme.fg.primary : theme.fg.secondary)
+                                        color: crumb.isLast ? theme.palette?.tokens.fgA1 ?? "transparent" : theme.palette?.tokens.fgA2 ?? "transparent"
                                     }
                                 }
 
@@ -403,7 +401,7 @@ T.Page {
                     Layout.column: defaultPageHeader.compact ? 0 : 1
                     Layout.fillWidth: defaultPageHeader.compact
                     text: qsTr("%1 item", "%1 items", defaultPageHeader.itemCount).arg(defaultPageHeader.itemCount)
-                    color: theme.palette?.isDark ? "#6B6B6B" : theme.fg.secondary.alpha(0.75)
+                    color: theme.palette?.tokens.fgA3 ?? "transparent"
                     font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
                 }
 

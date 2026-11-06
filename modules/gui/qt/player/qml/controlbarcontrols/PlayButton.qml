@@ -252,8 +252,8 @@ T.Control {
             visible: root.compactStyle
             anchors.fill: parent
             radius: VLCStyle.dp(6, VLCStyle.scale)
-            color: (Player.playingState !== Player.PLAYING_STATE_PLAYING) ? theme.accent
-                   : theme.palette.isDark ? "#6B6B6B" : "#9E9E9E"
+            color: (Player.playingState !== Player.PLAYING_STATE_PLAYING) ? theme.palette.tokens.accent
+                                                                          : theme.palette.tokens.fgA3
             border.color: root.visualFocus ? theme.visualFocus : "transparent"
         }
 

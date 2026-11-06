@@ -32,6 +32,7 @@
 #include "qtthemeprovider.hpp"
 
 #include "colorcontext.hpp"
+#include "figmatokens.hpp"
 
 class SystemPalette;
 class ColorProperty;
@@ -75,7 +76,6 @@ public:
 
     bool hasCSDImages() const;
 
-    int update();
     void updateMetrics(vlc_qt_theme_image_type type);
 
 signals:
@@ -109,6 +109,10 @@ public:
     Q_PROPERTY(bool isDark MEMBER m_isDark NOTIFY paletteChanged FINAL)
     Q_PROPERTY(bool hasCSDImage READ hasCSDImage NOTIFY hasCSDImageChanged FINAL)
     Q_PROPERTY(CSDMetrics* csdMetrics READ getCSDMetrics NOTIFY CSDMetricsChanged FINAL)
+    // the active theme's Figma tokens, with the current accent
+    Q_PROPERTY(FigmaTokens tokens READ tokens NOTIFY paletteChanged FINAL)
+    // set on the main palette (VLCStyle.palette): the one the Qt widgets follow
+    Q_PROPERTY(bool drivesWidgets MEMBER m_drivesWidgets FINAL)
 
     //standard color definitions used by light/dark themes
     COLOR_DEFINITION(orange500, "#D37918");
@@ -125,13 +129,7 @@ public:
     COLOR_DEFINITION(darkGrey700, "#2D2D2D");
     COLOR_DEFINITION(darkGrey800, "#303030");
 
-    COLOR_DEFINITION(lightGrey100, "#FAFAFA");
-    COLOR_DEFINITION(lightGrey200, "#F6F6F6");
-    COLOR_DEFINITION(lightGrey300, "#F2F2F2");
-    COLOR_DEFINITION(lightGrey400, "#EDEDED");
-    COLOR_DEFINITION(lightGrey500, "#E9E9E9");
     COLOR_DEFINITION(lightGrey600, "#E5E5E5");
-    COLOR_DEFINITION(lightGrey700, "#E0E0E0");
 
     COLOR_DEFINITION(red500, "#FF0000");
 
@@ -143,6 +141,7 @@ public:
     CSDMetrics* getCSDMetrics() const;
 
     inline MainCtx* getCtx() const { return m_ctx; }
+    const FigmaTokens& tokens() const { return m_tokens; }
     bool hasCSDImage() const;
 
     void setColor(ColorContext::ColorSet colorSet,  ColorContext::ColorSection section,
@@ -169,8 +168,9 @@ private:
     void readAccent();
     void updatePalette();
 
-    void makeLightPalette();
-    void makeDarkPalette();
+    void makeLightPalette() { makeFigmaPalette(false); }
+    void makeDarkPalette() { makeFigmaPalette(true); }
+    void makeFigmaPalette(bool dark);
     void makeSystemPalette();
 
 private:
@@ -179,6 +179,9 @@ private:
     ColorSchemeModel::ColorScheme m_source = ColorSchemeModel::ColorScheme::Day;
     bool m_isDark = false;
     bool m_hasCSDImage = false;
+    bool m_defaultAccent = true;
+    bool m_drivesWidgets = false;
+    FigmaTokens m_tokens = figmaTokens(false, orange500, true);   // built by makeFigmaPalette()
 
     std::unique_ptr<ExternalPaletteImpl> m_palettePriv;
 

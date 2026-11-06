@@ -125,6 +125,7 @@ moc_headers = files(
     'network/networktreeitem.hpp',
     'network/standardpathmodel.hpp',
     'style/systempalette.hpp',
+    'style/figmatokens.hpp',
     'style/vlcicons.hpp',
     'style/colorcontext.hpp',
     'player/input_models.hpp',
@@ -443,6 +444,8 @@ qt_plugin_sources = files(
     'style/colorcontext.hpp',
     'style/systempalette.cpp',
     'style/systempalette.hpp',
+    'style/figmatokens.cpp',
+    'style/figmatokens.hpp',
     'style/vlcicons.cpp',
     'style/vlcicons.hpp',
     'style/menustyle.cpp',
@@ -1612,6 +1615,21 @@ if qt6_dep.found()
         }
 
         vlc_tests += {
+            'name': 'test_qt_figma_tokens',
+            'sources': files(
+                'tests/test_figma_tokens.cpp',
+                'style/figmatokens.cpp',
+                'style/figmatokens.hpp'
+            ),
+            'moc_sources': files('tests/test_figma_tokens.cpp'),
+            'moc_headers': files('style/figmatokens.hpp'),
+            'suite': ['qt'],
+            'include_directories' : qt_include_dir,
+            'link_args': qt_link_args,
+            'dependencies': [qt6_dep, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
             'name': 'test_qt_playlist_cover',
             'sources': files(
                 'tests/test_playlist_cover.cpp',
@@ -1714,9 +1732,16 @@ if qt6_dep.found()
             'sources': files(
                 'tests/test_menu_style.cpp',
                 'style/menustyle.hpp',
-                'style/menustyle.cpp'
+                'style/menustyle.cpp',
+                'style/figmatokens.cpp',
+                'style/figmatokens.hpp',
+                'util/color_svg_image_provider.cpp',
+                'util/color_svg_image_provider.hpp',
+                'util/imagehelper.cpp',
+                'util/imagehelper.hpp'
             ) + qt6pre_qrc,
             'moc_sources': files('tests/test_menu_style.cpp'),
+            'moc_headers': files('style/figmatokens.hpp'),
             'suite': ['qt'],
             'include_directories' : qt_include_dir,
             'link_args': qt_link_args,

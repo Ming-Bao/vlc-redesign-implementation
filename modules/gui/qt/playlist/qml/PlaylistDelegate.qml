@@ -257,7 +257,7 @@ T.Control {
 
                 anchors.centerIn: parent
                 visible: (delegate.isCurrent && text !== "")
-                color: theme.accent
+                color: theme.accentText
                 text: {
                     if (Player.playingState === Player.PLAYING_STATE_PLAYING)
                         return VLCIcons.volume_high

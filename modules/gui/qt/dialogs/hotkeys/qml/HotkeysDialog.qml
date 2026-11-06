@@ -20,6 +20,7 @@ import QtQuick.Templates as T
 
 import VLC.MainInterface
 import VLC.Style
+import VLC.Util
 import VLC.Widgets as Widgets
 import VLC.Player
 import VLC.Dialogs
@@ -135,7 +136,7 @@ DialogCard {
                 width: VLCStyle.dp(24, VLCStyle.scale)
                 height: width
                 sourceSize: Qt.size(width, height)
-                source: "qrc:///redesign/settings/search.svg"
+                source: Helpers.themedSvg(root.colorContext.palette, "qrc:///redesign/settings/search.svg")
             }
 
             TextInput {
@@ -298,7 +299,7 @@ DialogCard {
             text: cell.capturing ? qsTr("Press a key…") : root.hk.displayKeys(cell.keys)
             font.family: dmMono.name
             font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-            color: cell.capturing ? root._s.accent : root._s.sectionTitle
+            color: cell.capturing ? root._s.accentText : root._s.sectionTitle
         }
 
         Image {
@@ -311,7 +312,7 @@ DialogCard {
             width: VLCStyle.dp(24, VLCStyle.scale)
             height: width
             sourceSize: Qt.size(width, height)
-            source: "qrc:///redesign/dialogs/pencil.svg"
+            source: Helpers.themedSvg(root.colorContext.palette, "qrc:///redesign/dialogs/pencil.svg")
 
             HoverHandler { id: pencilHover }
 

@@ -120,7 +120,8 @@ T.Popup {
 
     background: Rectangle {
         radius: VLCStyle.dp(10, VLCStyle.scale)
-        color: root._dark ? Qt.rgba(0x0E / 255, 0x0E / 255, 0x0E / 255, 0.95) : theme.bg.primary
+        // light reads the opaque partner: 20 % of the video under light text left it unreadable (slice 10 Ledger)
+        color: root._dark ? theme.palette.tokens.bgB1Transparent : theme.palette.tokens.bgB1
     }
 
     contentItem: ColumnLayout {
@@ -140,7 +141,7 @@ T.Popup {
             visible: root.tabs.length > 0
             topLeftRadius: VLCStyle.dp(10, VLCStyle.scale)
             topRightRadius: VLCStyle.dp(10, VLCStyle.scale)
-            color: root._dark ? "#090909" : theme.bg.secondary
+            color: theme.palette.tokens.bgB2
 
             RowLayout {
                 anchors.fill: parent
@@ -166,8 +167,7 @@ T.Popup {
                             focused: tab.visualFocus
                         }
 
-                        readonly property color _fg: checked ? (root._dark ? "#8F8F8F" : theme.fg.primary)
-                                                             : (root._dark ? "#6B6B6B" : theme.fg.secondary)
+                        readonly property color _fg: checked ? theme.palette.tokens.fgA2 : theme.palette.tokens.fgA3
 
                         // an entry may carry a fixed `width` (dp); the others share the rest
                         readonly property bool _fixed: modelData.width !== undefined
@@ -309,7 +309,7 @@ T.Popup {
             visible: root.footerFlat && root.footerText.length > 0
             Layout.fillWidth: true
             implicitHeight: 1
-            color: root._dark ? "#222222" : theme.separator
+            color: theme.palette.tokens.dividerDim
         }
 
         ColumnLayout {
@@ -340,7 +340,7 @@ T.Popup {
 
             background: Rectangle {
                 radius: VLCStyle.dp(4, VLCStyle.scale)
-                color: root.footerFlat ? "transparent" : (root._dark ? "#090909" : theme.bg.secondary)
+                color: root.footerFlat ? "transparent" : theme.palette.tokens.bgB2
                 border.width: footer.visualFocus ? VLCStyle.focus_border : 0
                 border.color: footerTheme.visualFocus
             }
@@ -367,8 +367,7 @@ T.Popup {
                         anchors.verticalCenter: parent.verticalCenter
                         text: footer.text
                         font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-                        color: root.footerFlat ? (root._dark ? "#6B6B6B" : theme.fg.secondary)
-                                               : (root._dark ? "#8F8F8F" : theme.fg.primary)
+                        color: root.footerFlat ? theme.palette.tokens.fgA3 : theme.palette.tokens.fgA2
                     }
                 }
             }

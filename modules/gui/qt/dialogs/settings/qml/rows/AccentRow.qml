@@ -85,7 +85,7 @@ Item {
                     background: Rectangle {
                         radius: VLCStyle.dp(4, VLCStyle.scale)
                         color: !root.delegate ? "transparent"
-                               : swatch.selected ? Qt.rgba(swatch.color.r * 0.26, swatch.color.g * 0.26, swatch.color.b * 0.26, 1)   // as SettingsStyle.accentBg
+                               : swatch.selected ? root.delegate.style.accentBg
                                : root.delegate.style.face
                         border.width: swatch.visualFocus ? VLCStyle.focus_border : 0
                         border.color: root.delegate ? root.delegate.style.accent : "transparent"

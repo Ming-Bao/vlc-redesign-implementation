@@ -19,6 +19,7 @@ import QtQuick
 import QtQuick.Templates as T
 
 import VLC.Style
+import VLC.Util
 import VLC.Widgets as Widgets
 import VLC.Player
 
@@ -64,7 +65,7 @@ T.AbstractButton {
                 width: VLCStyle.dp(24, VLCStyle.scale)
                 height: width
                 sourceSize: Qt.size(width, height)
-                source: root.open ? "qrc:///redesign/settings/chevron-down.svg" : "qrc:///redesign/settings/chevron-right.svg"
+                source: Helpers.themedSvg(theme.palette, root.open ? "qrc:///redesign/settings/chevron-down.svg" : "qrc:///redesign/settings/chevron-right.svg")
             }
         }
     }

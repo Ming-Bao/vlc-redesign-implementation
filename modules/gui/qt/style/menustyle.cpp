@@ -26,6 +26,15 @@
 #include <QStyleOption>
 #include <algorithm>
 #include <cmath>
+#include <atomic>
+#include <tuple>
+#include <QBuffer>
+#include <QIconEngine>
+#include <QImageReader>
+#include <QMap>
+#include <QPixmap>
+#include "style/figmatokens.hpp"
+#include "util/color_svg_image_provider.hpp"
 
 namespace {
 
@@ -34,12 +43,15 @@ qreal s_scale = 1.0;
 int dp(qreal px) { return qRound(px * s_scale); }
 
 // Figma menu frames (6062:13354 and siblings), logical px
-// ponytail: dark values only; read the palette's lightness in slice 10 (light theme)
-const QColor cardColor(25, 25, 25, qRound(0.95 * 255));
-const QColor highlightColor(0x1F, 0x1F, 0x1F);
-const QColor labelColor(0x8F, 0x8F, 0x8F);
-const QColor shortcutColor(0x6B, 0x6B, 0x6B);
-const QColor dividerColor(0x22, 0x22, 0x22);
+std::atomic<bool> s_dark{true};
+
+// the grey tokens only: the menu draws no accent
+const FigmaTokens& tk()
+{
+    static const FigmaTokens dark = figmaTokens(true, QColor(), true);
+    static const FigmaTokens light = figmaTokens(false, QColor(), true);
+    return s_dark ? dark : light;
+}
 constexpr qreal shadowBlur = 15, shadowYOffset = 8, shadowAlpha = 0.46;
 constexpr qreal cardRadius = 10, cardPadding = 4;
 constexpr qreal rowHeight = 48, rowHPadding = 14, rowVPadding = 2, rowSpacing = 10, rowRadius = 6;
@@ -140,6 +152,10 @@ void MenuStyle::install()
 
 void MenuStyle::setScale(qreal scale) { s_scale = scale; }
 
+void MenuStyle::setDark(bool dark) { s_dark = dark; }
+
+bool MenuStyle::isDark() { return s_dark; }
+
 int MenuStyle::shadowMargin() { return dp(shadowBlur); }
 
 int MenuStyle::cardHeight(const QWidget* menu, int windowHeight)
@@ -191,7 +207,7 @@ void MenuStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption* opt, QPai
     p->setPen(Qt::NoPen);
     if (!isPopup(menu))
     {
-        p->fillRect(card, cardColor);
+        p->fillRect(card, tk().bgA3Transparent);
         p->restore();
         return;
     }
@@ -210,7 +226,7 @@ void MenuStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption* opt, QPai
         p->drawRoundedRect(shadow.adjusted(-e, -e, e, e), r, r);
     }
 
-    p->setBrush(cardColor);
+    p->setBrush(tk().bgA3Transparent);
     p->drawRoundedRect(card, radius, radius);
     p->restore();
 }
@@ -232,7 +248,7 @@ void MenuStyle::drawControl(ControlElement ce, const QStyleOption* opt, QPainter
     if (mi->menuItemType == QStyleOptionMenuItem::Separator && !mi->text.isEmpty())
     {
         p->setFont(menuFont(menu));
-        p->setPen(shortcutColor);
+        p->setPen(tk().fgA3);
         p->drawText(r.adjusted(dp(rowHPadding), 0, -dp(rowHPadding), 0), Qt::AlignLeft | Qt::AlignVCenter,
                     menuLabelText(mi->text));
         p->restore();
@@ -240,7 +256,7 @@ void MenuStyle::drawControl(ControlElement ce, const QStyleOption* opt, QPainter
     }
     if (mi->menuItemType == QStyleOptionMenuItem::Separator)
     {
-        p->fillRect(QRect(r.left(), r.top() + r.height() / 2, r.width(), 1), dividerColor);
+        p->fillRect(QRect(r.left(), r.top() + r.height() / 2, r.width(), 1), tk().dividerDim);
         p->restore();
         return;
     }
@@ -250,7 +266,7 @@ void MenuStyle::drawControl(ControlElement ce, const QStyleOption* opt, QPainter
     if (enabled && (mi->state & State_Selected))
     {
         p->setPen(Qt::NoPen);
-        p->setBrush(highlightColor);
+        p->setBrush(tk().bgA2);
         p->drawRoundedRect(r, dp(rowRadius), dp(rowRadius));
     }
     p->setOpacity(enabled ? 1 : 0.4);
@@ -284,12 +300,12 @@ void MenuStyle::drawControl(ControlElement ce, const QStyleOption* opt, QPainter
     if (!native.isEmpty())
     {
         const QString shortcut = shortcutColumn(native);
-        p->setPen(shortcutColor);
+        p->setPen(tk().fgA3);
         p->drawText(QRect(left, c.top(), right - left, c.height()), Qt::AlignRight | Qt::AlignVCenter, shortcut);
         right -= fm.horizontalAdvance(shortcut) + gap;
     }
 
-    p->setPen(labelColor);
+    p->setPen(tk().fgA2);
     p->drawText(QRect(left, c.top(), right - left, c.height()), Qt::AlignLeft | Qt::AlignVCenter,
                 fm.elidedText(menuLabelText(label), Qt::ElideRight, right - left));
     p->restore();
@@ -377,9 +393,56 @@ bool MenuStyle::eventFilter(QObject* obj, QEvent* ev)
     return QProxyStyle::eventFilter(obj, ev);
 }
 
+namespace {
+
+// Renders the baked-colour SVG, swapping its greys for the light tokens while MenuStyle::isDark() is
+// false. Asked at pixmap time, so an icon made before a theme switch still draws right after it.
+class MenuIconEngine : public QIconEngine
+{
+public:
+    explicit MenuIconEngine(const QString& name) : m_file(QStringLiteral(":/redesign/menu/%1.svg").arg(name)) {}
+
+    QIconEngine* clone() const override { return new MenuIconEngine(*this); }
+
+    QPixmap pixmap(const QSize& size, QIcon::Mode, QIcon::State) override
+    {
+        const auto key = std::make_tuple(size.width(), size.height(), MenuStyle::isDark());
+        const auto it = m_cache.constFind(key);
+        if (it != m_cache.constEnd())
+            return *it;
+        QList<QPair<QString, QString>> swaps;
+        if (!std::get<2>(key))
+        {
+            const FigmaTokens t = figmaTokens(false, QColor(), true);
+            swaps = { { "#8F8F8F", t.fgA2.name() }, { "#EAEAEA", t.fg1.name() } };
+        }
+        QByteArray svg = colorizeSvg(m_file, swaps).first;
+        QBuffer buf(&svg);
+        QImageReader reader(&buf, "svg");
+        reader.setScaledSize(size);
+        QPixmap px = QPixmap::fromImage(reader.read());
+        m_cache.insert(key, px);
+        return px;
+    }
+
+    void paint(QPainter* p, const QRect& r, QIcon::Mode mode, QIcon::State state) override
+    {
+        const qreal dpr = p->device()->devicePixelRatio();
+        QPixmap px = pixmap(r.size() * dpr, mode, state);
+        px.setDevicePixelRatio(dpr);
+        p->drawPixmap(r, px);
+    }
+
+private:
+    QString m_file;
+    QMap<std::tuple<int, int, bool>, QPixmap> m_cache;
+};
+
+} // namespace
+
 QIcon menuIcon(const QString& name)
 {
-    return QIcon(QStringLiteral(":/redesign/menu/%1.svg").arg(name));
+    return QIcon(new MenuIconEngine(name));
 }
 
 void addMenuRows(QMenu* menu, const QVariantList& rows, std::function<void(int)> onSelected)

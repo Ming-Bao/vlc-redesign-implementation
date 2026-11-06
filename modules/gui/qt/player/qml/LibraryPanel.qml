@@ -50,12 +50,11 @@ FocusScope {
             History.previous(Qt.BacktabFocusReason)
     }
 
-    // page area (Figma Dark/BG/B1 Transparent, 95 %); nothing is behind the
+    // page area (Figma BG/B1 Transparent); nothing is behind the
     // panel to blur, so the Figma's background blur is left out
     Rectangle {
         anchors.fill: parent
-        color: theme.palette?.isDark ? Qt.rgba(0x0E / 255, 0x0E / 255, 0x0E / 255, 0.95)
-                                     : theme.bg.primary
+        color: theme.palette?.tokens.bgB1Transparent ?? "transparent"
     }
 
     Loader {
@@ -108,7 +107,8 @@ FocusScope {
         bottomPadding: VLCStyle.margin_small
 
         background: Rectangle {
-            color: theme.palette?.isDark ? "#191919" : theme.bg.secondary // Figma Dark/BG/A4
+            // Figma: dark BG/A4, the light frame BG/A3 Transparent
+            color: theme.palette?.isDark ? theme.palette.tokens.bgA4 : theme.palette?.tokens.bgA3Transparent ?? "transparent"
         }
 
         Navigation.parentItem: root

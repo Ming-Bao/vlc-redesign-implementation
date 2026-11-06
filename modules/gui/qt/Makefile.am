@@ -307,6 +307,8 @@ libqt_plugin_la_SOURCES = \
 	style/colorcontext.hpp \
 	style/systempalette.cpp \
 	style/systempalette.hpp \
+	style/figmatokens.cpp \
+	style/figmatokens.hpp \
 	style/vlcicons.cpp 	style/vlcicons.hpp \
 	style/menustyle.cpp style/menustyle.hpp \
 	style/defaultthemeproviders.hpp \
@@ -530,6 +532,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	network/standardpathmodel.moc.cpp \
 	style/colorcontext.moc.cpp \
 	style/systempalette.moc.cpp \
+	style/figmatokens.moc.cpp \
 	style/vlcicons.moc.cpp \
 	player/delay_estimator.moc.cpp \
 	player/input_models.moc.cpp \
@@ -2056,6 +2059,21 @@ test_hotkey_model_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
 check_PROGRAMS += test_hotkey_model
 TESTS += test_hotkey_model
 
+# test_figma_tokens
+test_figma_tokens_SOURCES = \
+	tests/test_figma_tokens.cpp \
+	style/figmatokens.hpp style/figmatokens.cpp
+nodist_test_figma_tokens_SOURCES = \
+	tests/test_figma_tokens.moc style/figmatokens.moc.cpp
+BUILT_SOURCES += tests/test_figma_tokens.moc
+CLEANFILES += tests/test_figma_tokens.moc
+test_figma_tokens_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)
+test_figma_tokens_CXXFLAGS = $(QT_QTEST_COMMON_cxxflags)
+test_figma_tokens_LDADD = $(QT_QTEST_COMMON_ldadd)
+test_figma_tokens_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
+check_PROGRAMS += test_figma_tokens
+TESTS += test_figma_tokens
+
 # test_onboarding_folders
 test_onboarding_folders_SOURCES = \
 	tests/test_onboarding_folders.cpp \
@@ -2225,8 +2243,12 @@ TESTS += test_waveform_util
 # test_menu_style
 test_menu_style_SOURCES = \
 	tests/test_menu_style.cpp \
-	style/menustyle.hpp style/menustyle.cpp
-nodist_test_menu_style_SOURCES = tests/test_menu_style.moc assets.cpp
+	style/menustyle.hpp style/menustyle.cpp \
+	style/figmatokens.hpp style/figmatokens.cpp \
+	util/color_svg_image_provider.cpp util/color_svg_image_provider.hpp \
+	util/imagehelper.cpp util/imagehelper.hpp
+nodist_test_menu_style_SOURCES = tests/test_menu_style.moc assets.cpp \
+	style/figmatokens.moc.cpp
 BUILT_SOURCES += tests/test_menu_style.moc
 CLEANFILES += tests/test_menu_style.moc
 test_menu_style_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)

@@ -30,9 +30,10 @@ T.Pane {
 
     property bool paintOnly: false
 
-    // Figma compact bars: 88px meter with a green-to-red level gradient (dark theme)
+    // Figma compact bars: 88px meter with a green-to-red level gradient
     property bool compactStyle: false
-    readonly property bool _meter: compactStyle && volControl.colorContext.palette.isDark
+    readonly property bool _meter: compactStyle
+    readonly property bool _dark: volControl.colorContext.palette.isDark
 
     readonly property color sliderColor: {
         const theme = volControl.colorContext
@@ -115,7 +116,9 @@ T.Pane {
                 height: implicitHeight
 
                 radius: root._meter ? VLCStyle.dp(2, VLCStyle.scale) : volControl.radius
-                color: root._meter ? "#090909" : volControl.bgColor
+                color: !root._meter ? volControl.bgColor
+                                    : root._dark ? volControl.colorContext.palette.tokens.bgB2
+                                                 : "#888888"   // fixed colour: Figma volume track (light)
                 // as in SliderExt: mirror the fill for right-to-left layouts
                 scale: volControl.horizontal && volControl.mirrored ? -1 : 1
 
@@ -143,11 +146,20 @@ T.Pane {
 
                     gradient: Gradient {
                         orientation: Gradient.Horizontal
-                        GradientStop { position: 0.0; color: "#95D318" }
-                        GradientStop { position: 0.58; color: "#B2A918" }
+                        GradientStop { position: 0.0; color: "#95D318" }   // fixed colour: volume gradient
+                        GradientStop { position: 0.58; color: "#B2A918" }   // fixed colour: volume gradient
                         GradientStop { position: 0.79; color: volControl.colorContext.accent }
-                        GradientStop { position: 1.0; color: "#FF3737" }
+                        GradientStop { position: 1.0; color: "#FF3737" }   // fixed colour: volume gradient
                     }
+                }
+
+                // light: the frame's white 20 % wash over the gradient
+                Rectangle {
+                    visible: !root._dark
+                    width: volControl.background.width
+                    height: parent.height
+                    radius: volControl.background.radius
+                    color: Qt.rgba(1, 1, 1, 0.2)
                 }
                 }
             }

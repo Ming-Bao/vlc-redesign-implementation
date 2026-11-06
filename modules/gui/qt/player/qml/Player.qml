@@ -58,9 +58,10 @@ FocusScope {
     property bool _controlsUnderVideo: (MainCtx.intfMainWindow.visibility !== Window.FullScreen)
                                        || MainCtx.pinVideoControls // the user pins them in fullscreen too
 
-    readonly property color _barColor: !windowTheme.palette.isDark ? windowTheme.bg.primary
-                                     : _controlsUnderVideo ? "#1B1B1B"
-                                                           : Qt.rgba(0x19 / 255, 0x19 / 255, 0x19 / 255, 0.95)
+    // in a window dark is solid BG/A3, light the frame's BG/A3 Transparent; fullscreen overlays both at 95 %
+    readonly property color _barColor: !_controlsUnderVideo ? Qt.alpha(windowTheme.palette.tokens.bgA3Transparent, 0.95)
+                                     : windowTheme.palette.isDark ? windowTheme.palette.tokens.bgA3
+                                                                  : windowTheme.palette.tokens.bgA3Transparent
 
     property bool _keyPressed: false
 
@@ -170,10 +171,7 @@ FocusScope {
     ColorContext {
         id: windowTheme
 
-        // NOTE: We force the night theme when playing a video.
-        palette: (MainCtx.hasEmbededVideo && MainCtx.pinVideoControls === false)
-                 ? VLCStyle.darkPalette
-                 : VLCStyle.palette
+        palette: VLCStyle.palette
 
         colorSet: ColorContext.Window
     }
@@ -416,7 +414,7 @@ FocusScope {
                 Rectangle {
                     // Figma frame background, seen when there is no artwork to blur
                     anchors.fill: parent
-                    color: bgtheme.palette.isDark ? "#1B1B1B" : bgtheme.bg.primary
+                    color: bgtheme.palette.tokens.bgA3
                 }
 
                 // background image
@@ -609,13 +607,13 @@ FocusScope {
                             height: cover.height
                             visible: !musicView.hasArt
                             radius: cover.radius
-                            color: centerTheme.palette.isDark ? "#191919" : centerTheme.bg.secondary
+                            color: centerTheme.palette.tokens.bgA4
 
                             Widgets.IconLabel {
                                 anchors.centerIn: parent
                                 text: VLCIcons.topbar_music
                                 font.pixelSize: VLCStyle.dp(96, VLCStyle.scale)
-                                color: centerTheme.palette.isDark ? "#404040" : centerTheme.fg.secondary
+                                color: centerTheme.palette.tokens.fgA4
                             }
                         }
 
@@ -631,7 +629,7 @@ FocusScope {
                             horizontalAlignment: Text.AlignHCenter
                             font.pixelSize: VLCStyle.dp(24, VLCStyle.scale)
                             font.weight: Font.Medium
-                            color: centerTheme.palette.isDark ? "#969696" : centerTheme.fg.secondary
+                            color: centerTheme.palette.tokens.fgA1
 
                             Accessible.role: Accessible.StaticText
                             Accessible.name: text
@@ -800,8 +798,8 @@ FocusScope {
         height: resumeDialog.implicitHeight + VLCStyle.dp(20, VLCStyle.scale)
 
         radius: VLCStyle.dp(8, VLCStyle.scale)
-        color: windowTheme.palette.isDark ? Qt.rgba(0x19 / 255, 0x19 / 255, 0x19 / 255, 0.95)
-                                          : windowTheme.bg.primary
+        color: windowTheme.palette.isDark ? windowTheme.palette.tokens.bgA3Transparent
+                                           : windowTheme.palette.tokens.bgA3   // light: opaque over the video, as the popups
 
         ResumeDialog {
             id: resumeDialog
@@ -1029,6 +1027,14 @@ FocusScope {
             id: controlBarBackground
 
             color: rootPlayer._barColor
+
+            // the light frame's 1 px top border; the dark frame has none
+            Rectangle {
+                visible: !windowTheme.palette.isDark
+                width: parent.width
+                height: 1
+                color: windowTheme.palette.tokens.dividerDim
+            }
         }
 
         FadeControllerStateGroup {

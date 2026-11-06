@@ -18,6 +18,7 @@
 #include <QTest>
 #include <QApplication>
 #include <QMenu>
+#include <QImage>
 #include <QScopeGuard>
 #include <QVariantMap>
 #include "style/menustyle.hpp"
@@ -121,6 +122,70 @@ private slots:
         // what the style draws in the shortcut column
         QCOMPARE(menuShortcutText(QKeySequence::fromString(parts[1], QKeySequence::NativeText)),
                  QString("Shift + R"));
+    }
+    // the card and label follow MenuStyle::setDark
+    QImage renderMenu()
+    {
+        MenuStyle::install();
+        QMenu menu;
+        menu.addAction("Open File");
+        menu.popup(QPoint(10, 10));
+        const QImage img = menu.grab().toImage().convertToFormat(QImage::Format_ARGB32);
+        menu.hide();
+        return img;
+    }
+    static int darkestGrey(const QImage& img)
+    {
+        int m = 255;
+        for (int y = 0; y < img.height(); ++y)
+            for (int x = 0; x < img.width(); ++x)
+                if (qAlpha(img.pixel(x, y)) > 200)
+                    m = qMin(m, qRed(img.pixel(x, y)));
+        return m;
+    }
+    void lightCard()
+    {
+        MenuStyle::setDark(false);
+        const auto reset = qScopeGuard([] { MenuStyle::setDark(true); });
+        const QImage img = renderMenu();
+        const QRgb c = img.pixel(MenuStyle::shadowMargin() + 3, MenuStyle::shadowMargin() + 3);
+        // BG/A3 Transparent (#D5D5D5 at 75 %), composited over the card's own shadow
+        QVERIFY2(qRed(c) > 0xB0 && qRed(c) <= 0xD5, qPrintable(QString::number(c, 16)));
+        QVERIFY(qAlpha(c) >= qRound(0.75 * 255));
+        QVERIFY(darkestGrey(img) < 0x60);
+    }
+    void darkCard()
+    {
+        MenuStyle::setDark(true);
+        const QImage img = renderMenu();
+        const QRgb c = img.pixel(MenuStyle::shadowMargin() + 3, MenuStyle::shadowMargin() + 3);
+        QVERIFY2(qRed(c) <= 0x19, qPrintable(QString::number(c, 16)));   // #191919 at 95 %, over its shadow
+        QVERIFY(qAlpha(c) >= qRound(0.95 * 255));
+    }
+    void lightIconHasNoDarkThemeGrey()
+    {
+        MenuStyle::setDark(false);
+        const auto reset = qScopeGuard([] { MenuStyle::setDark(true); });
+        QImage img = menuIcon("open-file").pixmap(24, 24).toImage().convertToFormat(QImage::Format_ARGB32);
+        bool any = false;
+        for (int y = 0; y < img.height(); ++y)
+            for (int x = 0; x < img.width(); ++x)
+            {
+                const QRgb c = img.pixel(x, y);
+                if (qAlpha(c) < 200)
+                    continue;
+                any = true;
+                QVERIFY(qAbs(qRed(c) - 0x8F) > 8 || qAbs(qGreen(c) - 0x8F) > 8 || qAbs(qBlue(c) - 0x8F) > 8);
+            }
+        QVERIFY(any);
+        // and back to dark in the same process: no stale cache
+        MenuStyle::setDark(true);
+        img = menuIcon("open-file").pixmap(24, 24).toImage().convertToFormat(QImage::Format_ARGB32);
+        bool grey = false;
+        for (int y = 0; y < img.height(); ++y)
+            for (int x = 0; x < img.width(); ++x)
+                grey |= qAbs(qRed(img.pixel(x, y)) - 0x8F) <= 8 && qAlpha(img.pixel(x, y)) > 200;
+        QVERIFY(grey);
     }
     // native menus from QML: strings and { text, icon, separator, checked, enabled }
     void menuRows()

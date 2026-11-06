@@ -31,7 +31,6 @@ ColumnLayout {
         id: theme
         colorSet: ColorContext.Window
     }
-    readonly property bool _dark: theme.palette.isDark
     // MLBookmarkModel is only registered with a media library: create it by name, so that without
     // one the page still loads and keeps only its header
     readonly property var _model: MainCtx.mediaLibraryAvailable
@@ -60,7 +59,7 @@ ColumnLayout {
             text: qsTr("%1 Bookmarks").arg(list.count)
             elide: Text.ElideRight
             font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-            color: root._dark ? "#6B6B6B" : theme.fg.secondary
+            color: theme.palette.tokens.fgA3
         }
 
         Widgets.IconToolButton {

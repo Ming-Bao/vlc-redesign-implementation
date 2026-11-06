@@ -53,6 +53,9 @@ public:
 
     /// wraps QApplication::style() unless it already is a MenuStyle
     static void install();
+    /// the theme the menus draw in: SystemPalette sets it for the main palette (dark by default)
+    static void setDark(bool dark);
+    static bool isDark();
     /// the interface scale factor (MainCtx::getIntfScaleFactor())
     static void setScale(qreal scale);
     /// transparent margin around the card that holds its shadow, scaled

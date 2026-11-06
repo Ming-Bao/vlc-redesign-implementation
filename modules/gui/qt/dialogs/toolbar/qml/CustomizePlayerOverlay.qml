@@ -219,7 +219,7 @@ FocusScope {
                     width: VLCStyle.dp(24, VLCStyle.scale)
                     height: width
                     sourceSize: Qt.size(width, height)
-                    source: "qrc:///redesign/settings/close.svg"
+                    source: Helpers.themedSvg(theme.palette, "qrc:///redesign/settings/close.svg")
                 }
             }
 
@@ -333,11 +333,11 @@ FocusScope {
                                 Rectangle {
                                     anchors.centerIn: parent
                                     visible: cell.modelData.id === ControlListModel.DIVIDER
-                                    // Figma's cell: an 18 px line, 1.5 wide, round caps, #373737
+                                    // Figma's cell: an 18 px line, 1.5 wide, round caps, Divider/Bright
                                     width: VLCStyle.dp(1.5, VLCStyle.scale)
                                     height: VLCStyle.dp(19.5, VLCStyle.scale)
                                     radius: width / 2
-                                    color: "#373737"
+                                    color: theme.palette.tokens.dividerBright
                                 }
                             }
 
@@ -417,7 +417,7 @@ FocusScope {
                 enabled: root._profile?.dirty ?? false
                 opacity: enabled ? 1 : 0.5
                 color: root._s.accentBg
-                textColor: root._s.accent
+                textColor: root._s.accentText
                 text: qsTr("Save")
                 onActivated: root._close(true)
             }

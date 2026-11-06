@@ -36,7 +36,6 @@ T.Menu {
         palette: VLCStyle.palette
         colorSet: ColorContext.Window
     }
-    readonly property bool _dark: theme.palette?.isDark ?? false
 
     width: VLCStyle.dp(295, VLCStyle.scale)
     implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
@@ -56,7 +55,7 @@ T.Menu {
     background: Rectangle {
         radius: VLCStyle.dp(10, VLCStyle.scale)
         // ponytail: no 50 px backdrop blur; at 95 % opacity it does not show. Add a FrostedGlassEffect if the card gets lighter.
-        color: root._dark ? Qt.rgba(25 / 255, 25 / 255, 25 / 255, 0.95) : theme.bg.primary
+        color: theme.palette?.tokens.bgA3Transparent ?? "transparent"
 
         // Figma: 0 8 15 rgba(0,0,0,0.46)
         RoundedRectangleShadow {
@@ -103,20 +102,20 @@ T.Menu {
                     text: item.text
                     elide: Text.ElideRight
                     font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-                    color: root._dark ? "#8F8F8F" : theme.fg.primary
+                    color: theme.palette?.tokens.fgA2 ?? "transparent"
                 }
 
                 IconLabel {
                     visible: !!item.modelData.checked
                     text: VLCIcons.checkmark
                     font.pixelSize: VLCStyle.icon_normal
-                    color: theme.accent
+                    color: theme.accentText
                 }
             }
 
             background: Rectangle {
                 radius: VLCStyle.dp(6, VLCStyle.scale)
-                color: item.highlighted ? (root._dark ? "#1F1F1F" : theme.bg.secondary) : "transparent"
+                color: item.highlighted ? theme.palette?.tokens.bgA2 ?? "transparent" : "transparent"
             }
 
             // later: run once the menu has closed, so a modal dialog does not nest inside the menu's event handling

@@ -20,6 +20,7 @@ import QtQuick.Window
 
 import VLC.MainInterface
 import VLC.Style
+import VLC.Util
 import VLC.Widgets as Widgets
 import VLC.Player
 import VLC.Dialogs
@@ -106,7 +107,7 @@ DialogCard {
                 width: VLCStyle.dp(24, VLCStyle.scale)
                 height: width
                 sourceSize: Qt.size(width, height)
-                source: "qrc:///redesign/settings/search.svg"
+                source: Helpers.themedSvg(root.colorContext.palette, "qrc:///redesign/settings/search.svg")
             }
 
             TextInput {

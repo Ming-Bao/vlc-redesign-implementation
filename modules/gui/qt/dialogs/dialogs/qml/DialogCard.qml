@@ -22,6 +22,7 @@ import VLC.MainInterface
 import VLC.Style
 import VLC.Widgets as Widgets
 import VLC.Player
+import VLC.Util
 import VLC.Dialogs
 
 // The Figma dialog window (Settings, Open Network Stream, New Playlist, ...): a frameless card with a title bar, a
@@ -285,7 +286,7 @@ Window {
                     width: VLCStyle.dp(24, VLCStyle.scale)
                     height: width
                     sourceSize: Qt.size(width, height)
-                    source: "qrc:///redesign/settings/close.svg"
+                    source: Helpers.themedSvg(theme.palette, "qrc:///redesign/settings/close.svg")
                 }
             }
         }
@@ -358,7 +359,7 @@ Window {
                 enabled: root.saveEnabled
                 opacity: enabled ? 1 : 0.5
                 color: root._s.accentBg
-                textColor: root._s.accent
+                textColor: root._s.accentText
                 text: root.saveText
                 onActivated: root.saved()
             }

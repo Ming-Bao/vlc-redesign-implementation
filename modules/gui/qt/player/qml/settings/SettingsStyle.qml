@@ -18,42 +18,45 @@
 import QtQuick
 import VLC.Style
 
-// Figma dark tokens for the settings tabs (Dark/FG/A1…A4, Dark/BG/*); light mode falls back to the theme
+// the settings tabs read the Figma tokens (theme.palette.tokens): Dark/* in dark, the Light/* partner in light
 QtObject {
     id: style
     required property ColorContext theme
-    readonly property bool dark: theme.palette.isDark
+    readonly property var _t: theme.palette.tokens
 
-    readonly property color label:     dark ? "#6B6B6B" : theme.fg.secondary
-    readonly property color value:     dark ? "#8F8F8F" : theme.fg.primary
-    readonly property color title:     dark ? "#969696" : theme.fg.primary
-    readonly property color field:     dark ? "#090909" : theme.bg.secondary
-    readonly property color face:      dark ? "#191919" : theme.bg.primary
-    // the accent comes from the theme (qt-accent-color); dark: the background is it at 26 % over black (#371F06 for
-    // #D37918), the dim one is it darkened (~#AB6314)
+    readonly property color label:     _t.fgA3
+    readonly property color value:     _t.fgA2
+    readonly property color title:     _t.fgA1
+    readonly property color field:     _t.bgB2
+    readonly property color face:      _t.bgA4
+    // the accent comes from the theme (qt-accent-color); the tokens derive the background and dim ones from it
     // the accent is only defined in the View set (any window part may be built on another set)
     readonly property ColorContext _view: ColorContext { palette: style.theme.palette; colorSet: ColorContext.View }
     readonly property color accent:    _view.accent
-    readonly property color accentBg:  dark ? Qt.rgba(accent.r * 0.26, accent.g * 0.26, accent.b * 0.26, 1) : Qt.alpha(accent, 0.25)
-    readonly property color accentDim: dark ? Qt.darker(accent, 1.24) : accent
-    readonly property color knobOff:   dark ? "#404040" : theme.fg.secondary
-    readonly property color divider:   dark ? "#222222" : theme.separator
-    readonly property color box:       dark ? "#1B1B1B" : theme.bg.secondary
+    // the accent as text or an icon (light: Accent/Dim, so it reads on light grey); `accent` stays for fills and rings
+    readonly property color accentText: _view.accentText
+    readonly property color accentBg:  _t.accentBgBright
+    readonly property color accentDim: _t.accentDim
+    readonly property color knobOff:   _t.fgA4
+    readonly property color divider:   _t.dividerDim
+    readonly property color box:       _t.bgA3
     // controls dim to this when !enabled (e.g. vout-backed controls without a video output)
     readonly property real disabledOpacity: 0.4
-    readonly property color tick:      dark ? "#2A2A2A" : theme.separator
+    readonly property color tick:      theme.palette.isDark ? "#2A2A2A" : _t.bgA1   // fixed colour: off-token dark value
 
     // the settings window's own frame (Figma "Settings - *"): card, top bar, search box and sidebar
-    readonly property color windowBg:        dark ? Qt.rgba(14 / 255, 14 / 255, 14 / 255, 0.95) : theme.bg.primary
-    readonly property color topBar:          dark ? "#090909" : theme.bg.secondary
-    readonly property color searchBg:        dark ? "#151515" : theme.bg.primary
-    readonly property color placeholder:     dark ? "#404040" : theme.fg.secondary
-    readonly property color sidebarBg:       dark ? Qt.rgba(25 / 255, 25 / 255, 25 / 255, 0.95) : theme.bg.secondary
-    readonly property color sidebarSelected: dark ? "#222222" : theme.bg.primary
-    readonly property color sidebarHover:    dark ? "#1E1E1E" : theme.bg.primary
-    readonly property color labelActive:     dark ? "#EAEAEA" : theme.fg.primary
+    // light reads the opaque partner: these are separate windows (and the Customize Player card over the player), and
+    // 20-25 % of the desktop or video under them made light text unreadable (slice 10 Ledger); dark keeps the frame's
+    readonly property color windowBg:        theme.palette.isDark ? _t.bgB1Transparent : _t.bgB1
+    readonly property color topBar:          _t.bgB2
+    readonly property color searchBg:        _t.bgA5
+    readonly property color placeholder:     _t.fgA4
+    readonly property color sidebarBg:       theme.palette.isDark ? _t.bgA3Transparent : _t.bgA3
+    readonly property color sidebarSelected: _t.bgA1
+    readonly property color sidebarHover:    theme.palette.isDark ? "#1E1E1E" : _t.bgA2   // fixed colour: off-token dark value
+    readonly property color labelActive:     _t.fg1
     // the settings window's pages: section headers, row labels, the Advanced Options bar
-    readonly property color sectionTitle:    dark ? "#C6C6C6" : theme.fg.primary
-    readonly property color rowLabel:        dark ? "#8F8F8F" : theme.fg.primary
-    readonly property color advancedBg:      dark ? Qt.rgba(25 / 255, 25 / 255, 25 / 255, 0.95) : theme.bg.secondary
+    readonly property color sectionTitle:    _t.fg2
+    readonly property color rowLabel:        _t.fgA2
+    readonly property color advancedBg:      _t.bgA3Transparent
 }

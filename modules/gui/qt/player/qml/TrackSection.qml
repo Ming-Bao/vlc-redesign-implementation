@@ -40,8 +40,7 @@ ColumnLayout {
         id: theme
         colorSet: ColorContext.Window
     }
-    readonly property bool _dark: theme.palette.isDark
-    readonly property color _labelColor: _dark ? "#969696" : theme.fg.primary
+    readonly property color _labelColor: theme.palette.tokens.fgA1
 
     // bumped on every model change so _anyChecked re-evaluates (the models have no notifier for it)
     property int _rev: 0
@@ -114,7 +113,9 @@ ColumnLayout {
 
         background: Rectangle {
             radius: VLCStyle.dp(4, VLCStyle.scale)
-            color: row.hovered ? Qt.rgba(1, 1, 1, 0.05) : "transparent"
+            // a wash of the text colour: white in dark, FG/1 in light (white is invisible on the light card)
+            color: row.hovered ? Qt.alpha(rowTheme.palette?.isDark ? "white" : rowTheme.palette?.tokens.fg1 ?? "transparent", 0.05)
+                               : "transparent"
             border.width: row.visualFocus ? VLCStyle.focus_border : 0
             border.color: rowTheme.visualFocus
         }
@@ -144,7 +145,7 @@ ColumnLayout {
         Layout.fillWidth: true
         implicitHeight: 1
         visible: root.divider
-        color: root._dark ? "#222222" : theme.border
+        color: theme.palette.tokens.dividerDim
     }
 
     RowLayout {
@@ -157,7 +158,7 @@ ColumnLayout {
             Layout.fillWidth: true
             text: root.title
             font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-            color: root._dark ? "#6B6B6B" : theme.fg.secondary
+            color: theme.palette.tokens.fgA3
         }
 
         Row {
@@ -172,7 +173,7 @@ ColumnLayout {
         visible: root.showNone && !!root.model
         text: qsTr("None")
         ticked: !root._anyChecked
-        tickColor: theme.accent
+        tickColor: theme.accentText
         labelColor: root._labelColor
         onClicked: root._uncheckAll(-1)
     }
@@ -188,7 +189,7 @@ ColumnLayout {
 
             text: model.display
             ticked: model.checked
-            tickColor: theme.accent
+            tickColor: theme.accentText
             labelColor: root._labelColor
             onClicked: {
                 if (model.checked)

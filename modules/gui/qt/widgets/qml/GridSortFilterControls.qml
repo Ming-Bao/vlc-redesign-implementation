@@ -40,7 +40,6 @@ NavigableRow {
         id: theme
         colorSet: ColorContext.View
     }
-    readonly property bool _dark: theme.palette?.isDark ?? false
 
     // two rows per sortModel entry (ascending, descending), then the page's extras
     function _sortRows() : var {
@@ -177,7 +176,6 @@ NavigableRow {
             id: theme
             colorSet: ColorContext.View
         }
-        readonly property bool _dark: theme.palette?.isDark ?? false
 
         enabled: visible
         width: VLCStyle.dp(325, VLCStyle.scale)
@@ -190,13 +188,13 @@ NavigableRow {
         selectionColor: theme.bg.highlight
         selectedTextColor: theme.fg.highlight
         placeholderText: qsTr("Search")
-        placeholderTextColor: searchField._dark ? "#404040" : theme.fg.secondary
+        placeholderTextColor: theme.palette?.tokens.fgA4 ?? "transparent"
         selectByMouse: true
 
         Accessible.name: qsTr("Search")
 
         background: Rectangle {
-            color: searchField._dark ? "#151515" : theme.bg.secondary
+            color: theme.palette?.tokens.bgA5 ?? "transparent"
             radius: VLCStyle.dp(6, VLCStyle.scale)
             border.width: searchField.activeFocus ? VLCStyle.dp(1, VLCStyle.scale) : 0
             border.color: theme.visualFocus
@@ -206,7 +204,7 @@ NavigableRow {
                 anchors.verticalCenter: parent.verticalCenter
                 text: VLCIcons.search
                 font.pixelSize: VLCStyle.icon_normal
-                color: searchField._dark ? "#8F8F8F" : theme.fg.secondary
+                color: theme.palette?.tokens.fgA2 ?? "transparent"
             }
         }
 

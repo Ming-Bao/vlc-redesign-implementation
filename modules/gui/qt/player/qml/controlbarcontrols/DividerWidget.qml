@@ -19,13 +19,17 @@ import QtQuick
 
 import VLC.Style
 
-// Figma palette "Divider": 1 x 24, #222222
+// Figma palette "Divider": 1 x 24, Divider/Dim
 Rectangle {
     property bool paintOnly: false
+
+    readonly property ColorContext colorContext: ColorContext {
+        id: theme
+    }
 
     enabled: false
 
     implicitWidth: VLCStyle.dp(1, VLCStyle.scale)
     implicitHeight: VLCStyle.dp(24, VLCStyle.scale)
-    color: "#222222"
+    color: theme.palette?.tokens.dividerDim ?? "transparent"
 }

@@ -34,7 +34,7 @@ T.ToolButton {
 
     required property string description
 
-    property color color: (control.checked) ? theme.accent : theme.fg.primary
+    property color color: (control.checked) ? theme.accentText : theme.fg.primary
 
     property color backgroundColor: theme.bg.primary
 

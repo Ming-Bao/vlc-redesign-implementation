@@ -72,6 +72,11 @@ T.Control {
                                            || (contentItem.activeFocus && !queueSection.activeFocus)
                                            || (!hideControls && _mediaHovered)
 
+    // the video controls' SVGs are Dark FG/1 for the 60 % black veil; once ended the veil is off and they sit on the card
+    function _veiledSvg(path : string) : string {
+        return root.ended ? Helpers.themedSvg(theme.palette, path) : path
+    }
+
     // 12 spacing, 2 rows
     readonly property real _queueListMinimum: VLCStyle.dp(76, VLCStyle.scale)
     readonly property real _queueListHeight: Math.max(_queueListMinimum,
@@ -147,8 +152,14 @@ T.Control {
 
     Accessible.name: qsTr("Mini player")
 
+    readonly property ColorContext colorContext: ColorContext {
+        id: theme
+        palette: VLCStyle.palette
+        colorSet: ColorContext.View
+    }
+
     background: Rectangle {
-        color: "#1B1B1B"
+        color: theme.palette.tokens.bgA3
         radius: VLCStyle.dp(14, VLCStyle.scale)
 
         Widgets.RoundedRectangleShadow {
@@ -189,7 +200,7 @@ T.Control {
                     anchors.right: parent.right
 
                     height: VLCStyle.dp(58, VLCStyle.scale)
-                    color: "#151515"
+                    color: theme.palette.tokens.bgA5
                     radius: VLCStyle.dp(14, VLCStyle.scale)
 
                     Component.onCompleted: {
@@ -202,7 +213,7 @@ T.Control {
                     CardLabel {
                         anchors.centerIn: parent
 
-                        color: "#8F8F8F"
+                        color: theme.palette.tokens.fgA2
                         text: qsTr("Queue")
                     }
                 }
@@ -250,7 +261,9 @@ T.Control {
                     Layout.preferredHeight: VLCStyle.dp(211, VLCStyle.scale)
 
                     radius: VLCStyle.dp(6, VLCStyle.scale)
-                    color: root.ended ? "#202020" : "#303030"
+                    // the placeholder before the video: dark keeps its off-token greys, light their nearest tokens
+                    color: theme.palette.isDark ? (root.ended ? "#202020" : "#303030")   // fixed colour: off-token dark value
+                                                : (root.ended ? theme.palette.tokens.bgA2 : theme.palette.tokens.bgA4)
 
                     Image {
                         anchors.fill: parent
@@ -329,7 +342,7 @@ T.Control {
                             x: VLCStyle.dp(14, VLCStyle.scale)
                             y: VLCStyle.dp(14, VLCStyle.scale)
 
-                            imageSource: "qrc:///redesign/mini/close.svg"
+                            imageSource: root._veiledSvg("qrc:///redesign/mini/close.svg")
                             description: root.ended ? qsTr("Close") : qsTr("Stop")
 
                             onClicked: {
@@ -349,7 +362,7 @@ T.Control {
                             x: parent.width - width - VLCStyle.dp(14, VLCStyle.scale)
                             y: VLCStyle.dp(14, VLCStyle.scale)
 
-                            imageSource: "qrc:///redesign/mini/popout.svg"
+                            imageSource: root._veiledSvg("qrc:///redesign/mini/popout.svg")
                             description: qsTr("Open the player")
 
                             onClicked: MainCtx.playerView = true
@@ -368,7 +381,7 @@ T.Control {
                             anchors.verticalCenter: parent.verticalCenter
 
                             glyph: true
-                            imageSource: "qrc:///redesign/mini/previous.svg"
+                            imageSource: root._veiledSvg("qrc:///redesign/mini/previous.svg")
                             description: qsTr("Previous")
 
                             enabled: root.ended ? MainPlaylistController.currentIndex > 0
@@ -399,8 +412,8 @@ T.Control {
                             readonly property bool playing: Player.playingState === Player.PLAYING_STATE_PLAYING
 
                             glyph: true
-                            imageSource: root.ended ? "qrc:///redesign/mini/replay.svg"
-                                       : playing ? "qrc:///redesign/mini/pause.svg"
+                            imageSource: root.ended ? Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/replay.svg")
+                                       : playing ? "qrc:///redesign/mini/pause.svg"   // under the veil
                                                  : "qrc:///redesign/mini/play.svg"
                             description: root.ended ? qsTr("Replay")
                                        : playing ? qsTr("Pause")
@@ -429,7 +442,7 @@ T.Control {
                             anchors.verticalCenter: parent.verticalCenter
 
                             glyph: true
-                            imageSource: "qrc:///redesign/mini/next.svg"
+                            imageSource: root._veiledSvg("qrc:///redesign/mini/next.svg")
                             description: qsTr("Next")
 
                             enabled: root.ended ? MainPlaylistController.currentIndex + 1 < MainPlaylistController.count
@@ -454,7 +467,7 @@ T.Control {
 
                         color: "transparent"
                         border.width: videoArea.borderWidth
-                        border.color: "#090909"
+                        border.color: theme.palette.tokens.bgB2
                     }
                 }
 
@@ -465,8 +478,8 @@ T.Control {
                     barHeight: VLCStyle.dp(16, VLCStyle.scale)
                     handleShown: root._mediaHovered || root.ended
 
-                    backgroundColor: "#090909"
-                    progressColor: Qt.rgba(theme.accent.r * 0.26, theme.accent.g * 0.26, theme.accent.b * 0.26, 1)   // the accent at 26 % over black (#371F06 for #D37918)
+                    backgroundColor: theme.palette.tokens.bgB2
+                    progressColor: theme.palette.tokens.accentBgBright
 
                     enabled: Player.playingState === Player.PLAYING_STATE_PLAYING
                              || Player.playingState === Player.PLAYING_STATE_PAUSED
@@ -496,12 +509,12 @@ T.Control {
                     spacing: VLCStyle.dp(20, VLCStyle.scale)
 
                     MetaGroup {
-                        iconSource: "qrc:///redesign/mini/folder.svg"
+                        iconSource: Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/folder.svg")
                         text: Helpers.urlFolderName(Player.url.toString())
                     }
 
                     MetaGroup {
-                        iconSource: "qrc:///redesign/mini/artist.svg"
+                        iconSource: Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/artist.svg")
                         text: root.miniPlayerState?.artist ?? ""
                     }
 
@@ -518,8 +531,8 @@ T.Control {
                         implicitWidth: VLCStyle.dp(30, VLCStyle.scale)
                         implicitHeight: VLCStyle.dp(32, VLCStyle.scale)
 
-                        imageSource: root.queueOpen ? "qrc:///redesign/mini/queue_active.svg"
-                                                    : "qrc:///redesign/mini/queue.svg"
+                        imageSource: root.queueOpen ? Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/queue_active.svg")
+                                                    : Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/queue.svg")
                         description: qsTr("Queue")
 
                         onClicked: root.miniPlayerState.queueOpen = !root.queueOpen
@@ -532,7 +545,7 @@ T.Control {
     }
 
     component CardLabel: Text {
-        color: "#969696"
+        color: theme.palette.tokens.fgA1
         font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
         elide: Text.ElideRight
     }

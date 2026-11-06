@@ -21,6 +21,7 @@ import QtQuick.Templates as T
 
 import VLC.MainInterface
 import VLC.Style
+import VLC.Util
 import VLC.Widgets as Widgets
 import VLC.Dialogs
 
@@ -155,7 +156,7 @@ DialogCard {
             width: VLCStyle.dp(24, VLCStyle.scale)
             height: width
             sourceSize: Qt.size(width, height)
-            source: "qrc:///redesign/settings/chevron-down.svg"
+            source: Helpers.themedSvg(root.colorContext.palette, "qrc:///redesign/settings/chevron-down.svg")
         }
     }
 
@@ -523,7 +524,7 @@ DialogCard {
                         anchors.left: parent.left
                         anchors.leftMargin: VLCStyle.dp(8, VLCStyle.scale)
                         anchors.verticalCenter: parent.verticalCenter
-                        source: "qrc:///redesign/dialogs/subtitle-file.svg"
+                        source: Helpers.themedSvg(root.colorContext.palette, "qrc:///redesign/dialogs/subtitle-file.svg")
                     }
                     Widgets.LabelExt {
                         anchors.left: fileGlyph.right
@@ -543,7 +544,7 @@ DialogCard {
                         anchors.verticalCenter: parent.verticalCenter
                         text: VLCIcons.checkmark
                         font.pixelSize: VLCStyle.dp(24, VLCStyle.scale)
-                        color: root._s.accent
+                        color: root._s.accentText
                     }
                 }
             }
@@ -557,7 +558,7 @@ DialogCard {
                         id: linkGlyph
                         x: root._margin + VLCStyle.dp(8, VLCStyle.scale)
                         anchors.verticalCenter: parent.verticalCenter
-                        source: "qrc:///redesign/dialogs/media-file.svg"
+                        source: Helpers.themedSvg(root.colorContext.palette, "qrc:///redesign/dialogs/media-file.svg")
                     }
                     Widgets.LabelExt {
                         anchors.left: linkGlyph.right
@@ -587,7 +588,7 @@ DialogCard {
                         id: mediaGlyph
                         x: root._margin + VLCStyle.dp(8, VLCStyle.scale)
                         anchors.verticalCenter: parent.verticalCenter
-                        source: "qrc:///redesign/dialogs/media-file.svg"
+                        source: Helpers.themedSvg(root.colorContext.palette, "qrc:///redesign/dialogs/media-file.svg")
                     }
                     Widgets.LabelExt {
                         id: mediaName
@@ -606,8 +607,8 @@ DialogCard {
                         width: pair.split - x
                         height: parent.height
                         ShapePath {
-                            // Figma "Vector 77": 1 px #373737, dash 8 8
-                            strokeColor: "#373737"
+                            // Figma "Vector 77": 1 px Divider/Bright, dash 8 8
+                            strokeColor: root.colorContext.palette.tokens.dividerBright
                             strokeWidth: VLCStyle.dp(1, VLCStyle.scale)
                             strokeStyle: ShapePath.DashLine
                             // in units of the stroke width
@@ -666,7 +667,7 @@ DialogCard {
                             anchors.leftMargin: VLCStyle.dp(8, VLCStyle.scale)
                             anchors.verticalCenter: parent.verticalCenter
                             opacity: pair.paired >= 0 ? 1 : 0.4
-                            source: "qrc:///redesign/dialogs/subtitle-file.svg"
+                            source: Helpers.themedSvg(root.colorContext.palette, "qrc:///redesign/dialogs/subtitle-file.svg")
                         }
                         Widgets.LabelExt {
                             id: subName
@@ -685,7 +686,7 @@ DialogCard {
                             anchors.rightMargin: VLCStyle.dp(8, VLCStyle.scale)
                             anchors.verticalCenter: parent.verticalCenter
                             visible: hover.hovered || cell.activeFocus
-                            source: "qrc:///redesign/dialogs/swap.svg"
+                            source: Helpers.themedSvg(root.colorContext.palette, "qrc:///redesign/dialogs/swap.svg")
                         }
                     }
                 }

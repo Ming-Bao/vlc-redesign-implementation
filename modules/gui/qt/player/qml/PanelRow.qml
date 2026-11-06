@@ -35,9 +35,6 @@ T.ItemDelegate {
         id: theme
         colorSet: ColorContext.Item
     }
-    // the palette is gone while a removed row is torn down
-    readonly property bool _dark: theme.palette?.isDark ?? false
-
     implicitHeight: VLCStyle.dp(32, VLCStyle.scale)
     // the list keeps keyboard focus and moves its cursor; rows only take clicks
     focusPolicy: Qt.NoFocus
@@ -47,8 +44,10 @@ T.ItemDelegate {
 
     background: Rectangle {
         radius: VLCStyle.dp(4, VLCStyle.scale)
-        color: row.selected ? Qt.rgba(1, 1, 1, 0.08)
-                            : (row.hovered ? Qt.rgba(1, 1, 1, 0.04) : "transparent")
+        // a wash of the text colour: white in dark, FG/1 in light (white is invisible on the light card)
+        readonly property color _wash: theme.palette?.isDark ? "white" : theme.palette?.tokens.fg1 ?? "transparent"
+        color: row.selected ? Qt.alpha(_wash, 0.08)
+                            : (row.hovered ? Qt.alpha(_wash, 0.04) : "transparent")
     }
 
     contentItem: RowLayout {
@@ -66,14 +65,14 @@ T.ItemDelegate {
             text: row.text
             elide: Text.ElideRight
             font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-            color: row.current ? theme.accent : (row._dark ? "#969696" : theme.fg.primary)
+            color: row.current ? theme.accentText : theme.palette?.tokens.fgA1 ?? "transparent"
         }
 
         Widgets.LabelExt {
             visible: text.length > 0
             text: row.trailingText
             font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-            color: row._dark ? "#6B6B6B" : theme.fg.secondary
+            color: theme.palette?.tokens.fgA3 ?? "transparent"
         }
     }
 }
