@@ -798,7 +798,8 @@ FocusScope {
         height: resumeDialog.implicitHeight + VLCStyle.dp(20, VLCStyle.scale)
 
         radius: VLCStyle.dp(8, VLCStyle.scale)
-        color: windowTheme.palette.tokens.bgA3Transparent
+        color: windowTheme.palette.isDark ? windowTheme.palette.tokens.bgA3Transparent
+                                           : windowTheme.palette.tokens.bgA3   // light: opaque over the video, as the popups
 
         ResumeDialog {
             id: resumeDialog

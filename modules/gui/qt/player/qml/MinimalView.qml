@@ -35,7 +35,10 @@ FocusScope {
     readonly property ColorContext colorContext: ColorContext {
         id: theme
 
-        palette: VLCStyle.palette
+        // no bars here: the CSD buttons sit on the video, so they stay dark over it as before the light theme
+        palette: (MainCtx.hasEmbededVideo && MainCtx.pinVideoControls === false)
+                 ? VLCStyle.darkPalette
+                 : VLCStyle.palette
 
         colorSet: ColorContext.Window
     }

@@ -326,8 +326,11 @@ QtObject {
     }
 
     // A redesign SVG (pixmaps/redesign/*) with its baked greys swapped for `palette`'s tokens: the Dark FG/A2 and
-    // FG/1 values become the palette's (a dark palette swaps each for itself). Baked accents and FG/A3 stay.
+    // FG/1 values become the palette's. Dark (or no palette yet) keeps the plain path, so the icon loads from qrc
+    // synchronously, as before the light theme. Baked accents and FG/A3 stay.
     function themedSvg(palette : var, path : string) : string {
+        if (!palette || palette.isDark)
+            return path
         return SVGColorImage.colorize(path)
             .any({ "#8F8F8F": palette.tokens.fgA2, "#EAEAEA": palette.tokens.fg1 }).uri()   // fixed colour: baked SVG keys
     }

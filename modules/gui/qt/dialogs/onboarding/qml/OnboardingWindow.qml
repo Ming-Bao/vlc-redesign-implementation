@@ -47,6 +47,11 @@ DialogCard {
     readonly property var dk: VLCStyle.darkPalette.tokens
     readonly property var pv: previewPalette.tokens
     readonly property bool previewDark: previewPalette.isDark
+    // the default swatch shows the theme's own accent tokens (Light: Accent/Main #E8851A, BG/Accent Bright #D8BA9A), as the
+    // app will; the preview palette has them while the app's accent is still the default. A picked swatch isn't applied
+    // yet, so the preview derives its tokens below.
+    readonly property bool _previewDefault: accentHex === AccentSwatches.colors[0] && Onboarding.currentAccent === "default"
+    readonly property color previewAccent: _previewDefault ? pv.accent : accent
 
     SystemPalette {
         id: previewPalette
@@ -395,7 +400,8 @@ DialogCard {
                             width: VLCStyle.dp(13.2, VLCStyle.scale)
                             height: VLCStyle.dp(13.2, VLCStyle.scale)
                             sourceSize: Qt.size(width, height)
-                            source: SVGColorImage.colorize("qrc:///redesign/onboarding/cone.svg").accent(root.accent).uri()
+                            source: SVGColorImage.colorize("qrc:///redesign/onboarding/cone.svg")
+                                        .accent(root._previewDefault ? pv.logo : root.accent).uri()
                         }
 
                         Row {
@@ -446,7 +452,7 @@ DialogCard {
                                     width: VLCStyle.dp(29.7, VLCStyle.scale)
                                     height: VLCStyle.dp(15.4, VLCStyle.scale)
                                     radius: VLCStyle.dp(3.3, VLCStyle.scale)
-                                    color: root.accent
+                                    color: root.previewAccent
 
                                     PreviewIcon {
                                         anchors.centerIn: parent
@@ -479,7 +485,8 @@ DialogCard {
                                     height: VLCStyle.dp(13.2, VLCStyle.scale)
                                     radius: VLCStyle.dp(2.2, VLCStyle.scale)
                                     // BG/Accent Bright for the picked swatch; light mirrors style/figmatokens.cpp (30 % accent over #D1D1D1)
-                                    color: root.previewDark
+                                    color: root._previewDefault ? pv.accentBgBright
+                                         : root.previewDark
                                            ? Qt.rgba(root.accent.r * 0.26, root.accent.g * 0.26, root.accent.b * 0.26, 1)
                                            : Qt.tint("#D1D1D1", Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.30))   // fixed colour: light BG/Accent Bright formula
                                 }
@@ -489,7 +496,7 @@ DialogCard {
                                     width: VLCStyle.dp(4.4, VLCStyle.scale)
                                     height: VLCStyle.dp(13.2, VLCStyle.scale)
                                     radius: VLCStyle.dp(2.2, VLCStyle.scale)
-                                    color: root.accent
+                                    color: root.previewAccent
                                 }
                             }
 

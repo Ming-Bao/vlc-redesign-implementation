@@ -72,6 +72,11 @@ T.Control {
                                            || (contentItem.activeFocus && !queueSection.activeFocus)
                                            || (!hideControls && _mediaHovered)
 
+    // the video controls' SVGs are Dark FG/1 for the 60 % black veil; once ended the veil is off and they sit on the card
+    function _veiledSvg(path : string) : string {
+        return root.ended ? Helpers.themedSvg(theme.palette, path) : path
+    }
+
     // 12 spacing, 2 rows
     readonly property real _queueListMinimum: VLCStyle.dp(76, VLCStyle.scale)
     readonly property real _queueListHeight: Math.max(_queueListMinimum,
@@ -337,7 +342,7 @@ T.Control {
                             x: VLCStyle.dp(14, VLCStyle.scale)
                             y: VLCStyle.dp(14, VLCStyle.scale)
 
-                            imageSource: Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/close.svg")
+                            imageSource: root._veiledSvg("qrc:///redesign/mini/close.svg")
                             description: root.ended ? qsTr("Close") : qsTr("Stop")
 
                             onClicked: {
@@ -357,7 +362,7 @@ T.Control {
                             x: parent.width - width - VLCStyle.dp(14, VLCStyle.scale)
                             y: VLCStyle.dp(14, VLCStyle.scale)
 
-                            imageSource: Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/popout.svg")
+                            imageSource: root._veiledSvg("qrc:///redesign/mini/popout.svg")
                             description: qsTr("Open the player")
 
                             onClicked: MainCtx.playerView = true
@@ -376,7 +381,7 @@ T.Control {
                             anchors.verticalCenter: parent.verticalCenter
 
                             glyph: true
-                            imageSource: Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/previous.svg")
+                            imageSource: root._veiledSvg("qrc:///redesign/mini/previous.svg")
                             description: qsTr("Previous")
 
                             enabled: root.ended ? MainPlaylistController.currentIndex > 0
@@ -408,8 +413,8 @@ T.Control {
 
                             glyph: true
                             imageSource: root.ended ? Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/replay.svg")
-                                       : playing ? Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/pause.svg")
-                                                 : Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/play.svg")
+                                       : playing ? "qrc:///redesign/mini/pause.svg"   // under the veil
+                                                 : "qrc:///redesign/mini/play.svg"
                             description: root.ended ? qsTr("Replay")
                                        : playing ? qsTr("Pause")
                                                  : qsTr("Play")
@@ -437,7 +442,7 @@ T.Control {
                             anchors.verticalCenter: parent.verticalCenter
 
                             glyph: true
-                            imageSource: Helpers.themedSvg(theme.palette, "qrc:///redesign/mini/next.svg")
+                            imageSource: root._veiledSvg("qrc:///redesign/mini/next.svg")
                             description: qsTr("Next")
 
                             enabled: root.ended ? MainPlaylistController.currentIndex + 1 < MainPlaylistController.count
