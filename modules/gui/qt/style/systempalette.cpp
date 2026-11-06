@@ -16,6 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 #include "systempalette.hpp"
+#include "menustyle.hpp"
 #include <QGuiApplication>
 #include <QPalette>
 #include <QSettings>
@@ -418,6 +419,9 @@ void SystemPalette::updatePalette()
             m_palettePriv.get(), &ExternalPaletteImpl::CSDMetricsChanged,
             this, &SystemPalette::CSDMetricsChanged);
     }
+    // componentComplete() runs after the properties are set, so this is right by then
+    if (m_drivesWidgets)
+        MenuStyle::setDark(m_isDark);
     emit paletteChanged();
 
     bool hasCSDImage = m_palettePriv && m_palettePriv->hasCSDImages();

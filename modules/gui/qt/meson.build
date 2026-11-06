@@ -1732,9 +1732,16 @@ if qt6_dep.found()
             'sources': files(
                 'tests/test_menu_style.cpp',
                 'style/menustyle.hpp',
-                'style/menustyle.cpp'
+                'style/menustyle.cpp',
+                'style/figmatokens.cpp',
+                'style/figmatokens.hpp',
+                'util/color_svg_image_provider.cpp',
+                'util/color_svg_image_provider.hpp',
+                'util/imagehelper.cpp',
+                'util/imagehelper.hpp'
             ) + qt6pre_qrc,
             'moc_sources': files('tests/test_menu_style.cpp'),
+            'moc_headers': files('style/figmatokens.hpp'),
             'suite': ['qt'],
             'include_directories' : qt_include_dir,
             'link_args': qt_link_args,
