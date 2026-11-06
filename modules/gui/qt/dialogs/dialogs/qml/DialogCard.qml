@@ -22,6 +22,7 @@ import VLC.MainInterface
 import VLC.Style
 import VLC.Widgets as Widgets
 import VLC.Player
+import VLC.Util
 import VLC.Dialogs
 
 // The Figma dialog window (Settings, Open Network Stream, New Playlist, ...): a frameless card with a title bar, a
@@ -117,6 +118,12 @@ Window {
         height = h
         x = Math.max(scr.virtualX, Math.min(Math.round(cx - w / 2), scr.virtualX + scr.desktopAvailableWidth - w))
         y = Math.max(scr.virtualY, Math.min(Math.round(cy - h / 2), scr.virtualY + scr.desktopAvailableHeight - h))
+    }
+
+    // a redesign SVG with its baked greys swapped for the theme's (a dark run swaps each for itself)
+    function bakedIcon(url) {
+        return SVGColorImage.colorize(url)
+            .any({ "#8F8F8F": theme.palette.tokens.fgA2, "#EAEAEA": theme.palette.tokens.fg1 }).uri()   // fixed colour: baked SVG keys
     }
 
     function open() {

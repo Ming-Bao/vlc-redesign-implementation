@@ -35,9 +35,6 @@ T.ItemDelegate {
         id: theme
         colorSet: ColorContext.Item
     }
-    // the palette is gone while a removed row is torn down
-    readonly property bool _dark: theme.palette?.isDark ?? false
-
     implicitHeight: VLCStyle.dp(32, VLCStyle.scale)
     // the list keeps keyboard focus and moves its cursor; rows only take clicks
     focusPolicy: Qt.NoFocus
@@ -66,14 +63,14 @@ T.ItemDelegate {
             text: row.text
             elide: Text.ElideRight
             font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-            color: row.current ? theme.accent : (row._dark ? "#969696" : theme.fg.primary)
+            color: row.current ? theme.accent : theme.palette?.tokens.fgA1
         }
 
         Widgets.LabelExt {
             visible: text.length > 0
             text: row.trailingText
             font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-            color: row._dark ? "#6B6B6B" : theme.fg.secondary
+            color: theme.palette?.tokens.fgA3
         }
     }
 }

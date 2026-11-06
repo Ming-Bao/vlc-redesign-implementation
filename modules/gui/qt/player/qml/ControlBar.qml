@@ -295,9 +295,11 @@ T.Pane {
                 }
 
                 backgroundColor: !root._compact ? theme.bg.primary
-                                                : root._dark ? "#090909" : Qt.darker(root.backgroundColor, 1.15)
-                progressColor: root._compact ? Qt.tint(backgroundColor, Qt.alpha(theme.accent, root._dark ? 0.26 : 0.4))
-                                             : theme.fg.primary
+                                                : theme.palette.tokens.bgB2
+                // dark keeps its accent tint over the track; light is the frame's BG/Accent Bright
+                progressColor: !root._compact ? theme.fg.primary
+                                              : root._dark ? Qt.tint(backgroundColor, Qt.alpha(theme.accent, 0.26))
+                                                           : theme.palette.tokens.accentBgBright
 
                 Accessible.role: Accessible.Slider
                 Accessible.name: qsTr("Progress")
@@ -395,7 +397,7 @@ T.Pane {
 
                     width: VLCStyle.dp(240, VLCStyle.scale)
                     height: VLCStyle.dp(28, VLCStyle.scale)
-                    color: "#090909"
+                    color: theme.palette.tokens.bgB2
 
                     Drag.source: seekDrag
                     Drag.hotSpot: Qt.point(-VLCStyle.dragDelta, -VLCStyle.dragDelta)

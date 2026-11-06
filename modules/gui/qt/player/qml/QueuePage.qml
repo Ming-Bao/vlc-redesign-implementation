@@ -35,7 +35,6 @@ ColumnLayout {
         id: theme
         colorSet: ColorContext.Window
     }
-    readonly property bool _dark: theme.palette.isDark
 
     // the queue list, and where keyboard navigation leaves it (forwarded by QueuePanel)
     readonly property alias list: list
@@ -66,7 +65,7 @@ ColumnLayout {
             text: qsTr("%1 items - %2").arg(queueModel.count).arg(queueModel.duration.formatLong())
             elide: Text.ElideRight
             font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-            color: root._dark ? "#6B6B6B" : theme.fg.secondary
+            color: theme.palette.tokens.fgA3
         }
 
         Widgets.SortControl {
@@ -200,7 +199,7 @@ ColumnLayout {
                 verticalAlignment: Text.AlignVCenter
                 text: VLCIcons.drag_handle
                 font.pixelSize: VLCStyle.icon_normal
-                color: queueRow._dark ? "#8F8F8F" : queueRow.colorContext.fg.secondary
+                color: queueRow.colorContext.palette?.tokens.fgA2
 
                 // the row lands where the pointer is on release; the cursor tint shows the spot meanwhile
                 DragHandler {

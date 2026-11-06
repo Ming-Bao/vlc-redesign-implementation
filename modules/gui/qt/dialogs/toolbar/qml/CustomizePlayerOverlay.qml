@@ -333,11 +333,11 @@ FocusScope {
                                 Rectangle {
                                     anchors.centerIn: parent
                                     visible: cell.modelData.id === ControlListModel.DIVIDER
-                                    // Figma's cell: an 18 px line, 1.5 wide, round caps, #373737
+                                    // Figma's cell: an 18 px line, 1.5 wide, round caps, Divider/Bright
                                     width: VLCStyle.dp(1.5, VLCStyle.scale)
                                     height: VLCStyle.dp(19.5, VLCStyle.scale)
                                     radius: width / 2
-                                    color: "#373737"
+                                    color: theme.palette.tokens.dividerBright
                                 }
                             }
 

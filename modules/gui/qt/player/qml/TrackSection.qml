@@ -40,8 +40,7 @@ ColumnLayout {
         id: theme
         colorSet: ColorContext.Window
     }
-    readonly property bool _dark: theme.palette.isDark
-    readonly property color _labelColor: _dark ? "#969696" : theme.fg.primary
+    readonly property color _labelColor: theme.palette.tokens.fgA1
 
     // bumped on every model change so _anyChecked re-evaluates (the models have no notifier for it)
     property int _rev: 0
@@ -144,7 +143,7 @@ ColumnLayout {
         Layout.fillWidth: true
         implicitHeight: 1
         visible: root.divider
-        color: root._dark ? "#222222" : theme.border
+        color: theme.palette.tokens.dividerDim
     }
 
     RowLayout {
@@ -157,7 +156,7 @@ ColumnLayout {
             Layout.fillWidth: true
             text: root.title
             font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-            color: root._dark ? "#6B6B6B" : theme.fg.secondary
+            color: theme.palette.tokens.fgA3
         }
 
         Row {

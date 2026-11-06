@@ -504,8 +504,9 @@ T.ProgressBar {
             id: waveUnplayed
             anchors.fill: parent
             visible: control.waveform
-            onPaint: control._paintWave(getContext("2d"), width, height,
-                                        theme.palette.isDark ? "#404040" : theme.fg.secondary)
+            readonly property color barColor: theme.palette.tokens.fgA4
+            onBarColorChanged: requestPaint()
+            onPaint: control._paintWave(getContext("2d"), width, height, barColor)
             onWidthChanged: requestPaint()
         }
 
@@ -520,8 +521,9 @@ T.ProgressBar {
                 id: wavePlayed
                 width: waveUnplayed.width
                 height: waveUnplayed.height
-                onPaint: control._paintWave(getContext("2d"), width, height,
-                                            theme.palette.isDark ? Qt.darker(theme.accent, 1.24) : theme.accent)
+                readonly property color barColor: theme.palette.tokens.accentDim
+                onBarColorChanged: requestPaint()
+                onPaint: control._paintWave(getContext("2d"), width, height, barColor)
                 onWidthChanged: requestPaint()
             }
         }

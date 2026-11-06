@@ -35,9 +35,7 @@ FocusScope {
     readonly property ColorContext colorContext: ColorContext {
         id: theme
 
-        palette: (MainCtx.hasEmbededVideo && MainCtx.pinVideoControls === false)
-                 ? VLCStyle.darkPalette
-                 : VLCStyle.palette
+        palette: VLCStyle.palette
 
         colorSet: ColorContext.Window
     }

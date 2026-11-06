@@ -311,7 +311,7 @@ DialogCard {
             width: VLCStyle.dp(24, VLCStyle.scale)
             height: width
             sourceSize: Qt.size(width, height)
-            source: "qrc:///redesign/dialogs/pencil.svg"
+            source: root.bakedIcon("qrc:///redesign/dialogs/pencil.svg")
 
             HoverHandler { id: pencilHover }
 

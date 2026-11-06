@@ -102,7 +102,7 @@ DialogCard {
         implicitWidth: VLCStyle.dp(30, VLCStyle.scale)
         implicitHeight: VLCStyle.dp(30, VLCStyle.scale)
         radius: VLCStyle.dp(5, VLCStyle.scale)
-        color: "#161616"
+        color: root.colorContext.palette.isDark ? "#161616" : root.colorContext.palette.tokens.bgA5   // fixed colour: off-token dark value (FG/B1 as a surface)
 
         Widgets.IconLabel {
             anchors.centerIn: parent
@@ -247,7 +247,8 @@ DialogCard {
             Canvas {
                 id: dashes
 
-                readonly property color stroke: drop.containsDrag || dropBox.activeFocus ? root._s.accent : "#2D2D2D"
+                readonly property color stroke: drop.containsDrag || dropBox.activeFocus ? root._s.accent
+                                               : root.colorContext.palette.isDark ? "#2D2D2D" : root.colorContext.palette.tokens.dividerBright   // fixed colour: off-token dark value
 
                 anchors.fill: parent
                 onStrokeChanged: requestPaint()

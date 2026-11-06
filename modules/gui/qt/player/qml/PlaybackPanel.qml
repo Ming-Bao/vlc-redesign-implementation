@@ -29,8 +29,8 @@ import VLC.Dialogs
 PlayerPanel {
     id: root
 
-    readonly property color _fieldColor: _dark ? "#090909" : colorContext.bg.secondary
-    readonly property color _valueColor: _dark ? "#8F8F8F" : colorContext.fg.primary
+    readonly property color _fieldColor: colorContext.palette.tokens.bgB2
+    readonly property color _valueColor: colorContext.palette.tokens.fgA2
 
     readonly property real _minRate: 0.25
     readonly property real _maxRate: 2
@@ -242,7 +242,7 @@ PlayerPanel {
                             anchors.verticalCenter: parent.verticalCenter
                             width: 1
                             height: VLCStyle.dp(6, VLCStyle.scale)
-                            color: "#3A3A3A"
+                            color: root._dark ? "#3A3A3A" : root.colorContext.palette.tokens.dividerBright   // fixed colour: off-token dark value
                         }
                     }
                 }

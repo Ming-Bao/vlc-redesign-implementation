@@ -20,7 +20,7 @@ import QtQuick.Shapes
 
 import VLC.Style
 
-// Customize Player's outline around items and zones: 1 px #6B6B6B, dash 4/4 (Figma 2107:5604)
+// Customize Player's outline around items and zones: 1 px FG/A3, dash 4/4 (Figma 2107:5604)
 // An Item, as a Shape's implicit size is its path's: a control's background would size itself in a loop.
 Item {
     id: root
@@ -31,7 +31,7 @@ Item {
         anchors.fill: parent
 
         ShapePath {
-            strokeColor: "#6B6B6B"
+            strokeColor: VLCStyle.palette.tokens.fgA3   // the same in both themes
             strokeWidth: root._w
             strokeStyle: ShapePath.DashLine
             dashPattern: [4, 4]

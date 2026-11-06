@@ -260,3 +260,17 @@ Task 3 (dark keeps the exact literal; light reads the nearest token):
 - HomeListRow.qml: compact thumbnail backing `#303030` (placeholder with meaning) kept in dark; light reads bgA4 (was bg.secondary).
 - AccentRow.qml: selected swatch background now `style.accentBg` (token) instead of swatch x0.26.
 - AccentSwatches.js: swatch list marked `// fixed colour: accent swatch`.
+
+Task 4 (player, mini player, dialogs):
+- Player.qml `_barColor`: in a window dark keeps solid BG/A3 (`#1B1B1B`), light reads BG/A3 Transparent (the frame); fullscreen both read BG/A3 Transparent at 95 %. Kept `isDark` branch.
+- Player.qml control bar: a 1 px Divider/Dim top border in light only (the frame has it, the dark frame doesn't). Kept `isDark` branch that adds an item.
+- Player.qml, MinimalView.qml: the forced `VLCStyle.darkPalette` while a video plays is gone (spec); Dark shots unchanged.
+- Player.qml resume dialog: `Qt.rgba(#191919, 0.95)` -> BG/A3 Transparent (light #D5D5D5 75 % over the video).
+- LibraryPanel.qml rail: dark keeps BG/A4 (`#191919`), light reads BG/A3 Transparent (spec's player table). Kept `isDark` branch.
+- ControlBar.qml compact seek elapsed: dark keeps `Qt.tint(track, accent 26 %)` (not a token: #3D2509-ish, not #371F06), light reads BG/Accent Bright. Kept `isDark` branch.
+- VolumeWidget.qml: the meter shows in both themes; light track `#888888` (fixed colour: Figma volume track (light)), dark BG/B2; a white 20 % wash over the level in light only. Kept `isDark` branches.
+- PlayButton.qml: playing pill light `#9E9E9E` -> FG/A3 (`#6B6B6B`, the dark value's token, same in both).
+- PlaybackPanel.qml: speed ticks `#3A3A3A` -> dividerBright.
+- MiniPlayer.qml: ended video backing `#202020` -> bgA2 (`#303030` video placeholder kept as a fixed colour).
+- NewPlaylistDialog.qml: "+" tile `#161616` (FG/B1 used as a surface; FG/B1 is same-in-both, so it would stay black in light) -> bgA5, like lightPartner() would; dashed box stroke `#2D2D2D` -> dividerBright.
+- SliderBar.qml waveform: played bars light `theme.accent` -> accentDim (dark already drew Qt.darker(accent, 1.24) = accentDim); unplayed fgA4. Both now repaint on a theme switch.

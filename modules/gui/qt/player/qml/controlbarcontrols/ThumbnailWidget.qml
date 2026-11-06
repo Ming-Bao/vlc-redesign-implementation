@@ -29,7 +29,7 @@ Rectangle {
     implicitWidth: VLCStyle.dp(24, VLCStyle.scale)
     implicitHeight: VLCStyle.dp(24, VLCStyle.scale)
     radius: VLCStyle.dp(2, VLCStyle.scale)
-    color: "#303030"
+    color: "#303030"   // fixed colour: thumbnail placeholder
 
     Image {
         anchors.fill: parent

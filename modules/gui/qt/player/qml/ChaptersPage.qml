@@ -32,7 +32,6 @@ Item {
         id: theme
         colorSet: ColorContext.Window
     }
-    readonly property bool _dark: theme.palette.isDark
 
     // the chapters list, and where keyboard navigation leaves it (forwarded by QueuePanel)
     readonly property alias list: list
@@ -46,7 +45,7 @@ Item {
         visible: list.count === 0
         text: qsTr("No chapters")
         font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-        color: root._dark ? "#6B6B6B" : theme.fg.secondary
+        color: theme.palette.tokens.fgA3
     }
 
     ListView {
