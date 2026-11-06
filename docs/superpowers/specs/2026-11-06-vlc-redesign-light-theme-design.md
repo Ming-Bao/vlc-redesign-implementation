@@ -86,9 +86,9 @@ Every colour the redesign takes from a `Dark/*` token takes the same token's lig
 
 ## System
 
-- **System picks between the two Figma palettes** by the desktop's dark/light preference: the theme provider's `isThemeDark()`. It no longer takes the GTK/Qt provider's own colours. *(my call: the redesign has one look per lightness. Adwaita's colours mixed with Figma literals is today's half state.)*
+- **System picks between the two Figma palettes** by the desktop's dark/light preference: the theme provider's `isThemeDark()` (the GTK provider reads the desktop portal's `color-scheme`, which GTK 3's theme colours ignore), else Qt's colour-scheme hint when no provider answers. It no longer takes the GTK/Qt provider's own colours. *(my call: the redesign has one look per lightness. Adwaita's colours mixed with Figma literals is today's half state.)*
 - The provider is kept so a desktop switch still fires `paletteChanged`, and for its CSD metrics and images if the title bar uses them.
-- If no provider loads, System falls back to Light, as today.
+- If no provider loads, System takes Qt's colour-scheme hint, else Light.
 
 ## The player (frame `2425:13624`)
 
