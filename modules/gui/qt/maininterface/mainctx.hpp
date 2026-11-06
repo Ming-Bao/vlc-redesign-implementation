@@ -262,6 +262,7 @@ public:
     void setUseGlobalShortcuts(bool useGlobalShortcuts );
     // off while any hold is on, whatever useGlobalShortcuts is set to; a visible modal DialogCard holds one
     Q_INVOKABLE void holdGlobalShortcuts(bool hold);
+    Q_INVOKABLE void reloadAccentColor() { emit accentColorChanged(); }
     inline int maxVolume() const { return m_maxVolume; }
 
     inline float safeArea() const { return m_safeArea; }
@@ -566,6 +567,7 @@ protected slots:
     void onVOutChanged( bool );
 
 signals:
+    void accentColorChanged();
     void fullscreenInterfaceToggled( bool );
     void setInterfaceVisibible(bool, bool requestActivate = false);
     void setInterfaceFullScreen( bool );

@@ -68,6 +68,7 @@
 #include "dialogs/dialogs_provider.hpp"
 #include "dialogs/dialogs/dialogmodel.hpp"
 #include "dialogs/settings/settings_bridge.hpp"
+#include "dialogs/onboarding/onboarding_controller.hpp"
 #include "dialogs/subtitles/add_subtitles_controller.hpp"
 #ifdef UPDATE_CHECK
 #include "dialogs/help/help.hpp" // UpdateModel
@@ -289,6 +290,7 @@ void MainUI::registerQMLTypes()
         assert(DialogErrorModel::getInstance<false>());
         qmlRegisterSingletonInstance<DialogErrorModel>(uri, versionMajor, versionMinor, "DialogErrorModel", DialogErrorModel::getInstance<false>());
         qmlRegisterSingletonInstance<SettingsBridge>(uri, versionMajor, versionMinor, "SettingsBridge", new SettingsBridge(m_intf, this));
+        qmlRegisterSingletonInstance<OnboardingController>(uri, versionMajor, versionMinor, "Onboarding", new OnboardingController(m_intf, this));
         qmlRegisterSingletonInstance<AddSubtitlesController>(uri, versionMajor, versionMinor, "AddSubtitlesController",
                                                              new AddSubtitlesController(m_intf, this));
         {

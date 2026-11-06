@@ -657,10 +657,13 @@ modules/gui/minimal_macosx/macosx.c
 modules/gui/ncurses.c
 modules/gui/qt/dialogs/bookmarks/bookmarks.cpp
 modules/gui/qt/dialogs/bookmarks/bookmarks.hpp
+modules/gui/qt/dialogs/dialogs/qml/AccentSwatches.js
 modules/gui/qt/dialogs/dialogs/qml/CustomDialog.qml
 modules/gui/qt/dialogs/dialogs/qml/DialogCard.qml
 modules/gui/qt/dialogs/network/qml/NetworkStreamDialog.qml
 modules/gui/qt/dialogs/hotkeys/qml/HotkeysData.js
+modules/gui/qt/dialogs/onboarding/qml/OnboardingKeys.js
+modules/gui/qt/dialogs/onboarding/qml/OnboardingWindow.qml
 modules/gui/qt/dialogs/hotkeys/qml/HotkeysDialog.qml
 modules/gui/qt/dialogs/subtitles/qml/AddSubtitlesDialog.qml
 modules/gui/qt/dialogs/playlists/qml/NewPlaylistDialog.qml
@@ -694,8 +697,6 @@ modules/gui/qt/dialogs/fingerprint/chromaprint.cpp
 modules/gui/qt/dialogs/fingerprint/chromaprint.hpp
 modules/gui/qt/dialogs/fingerprint/fingerprintdialog.cpp
 modules/gui/qt/dialogs/fingerprint/fingerprintdialog.hpp
-modules/gui/qt/dialogs/firstrun/firstrunwizard.cpp
-modules/gui/qt/dialogs/firstrun/firstrunwizard.hpp
 modules/gui/qt/dialogs/gototime/gototime.cpp
 modules/gui/qt/dialogs/gototime/gototime.hpp
 modules/gui/qt/dialogs/help/help.cpp
@@ -752,6 +753,10 @@ modules/gui/qt/dialogs/settings/qml/rows/StartupVolumeRow.qml
 modules/gui/qt/dialogs/settings/qml/rows/ThemeRow.qml
 modules/gui/qt/dialogs/settings/settings_bridge.cpp
 modules/gui/qt/dialogs/settings/settings_bridge.hpp
+modules/gui/qt/dialogs/onboarding/onboarding_controller.cpp
+modules/gui/qt/dialogs/onboarding/onboarding_controller.hpp
+modules/gui/qt/dialogs/onboarding/onboarding_folders.cpp
+modules/gui/qt/dialogs/onboarding/onboarding_folders.hpp
 modules/gui/qt/dialogs/sout/convert.cpp
 modules/gui/qt/dialogs/sout/convert.hpp
 modules/gui/qt/dialogs/sout/profile_selector.cpp

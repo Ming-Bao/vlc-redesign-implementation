@@ -57,7 +57,6 @@ libqt_plugin_la_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS_qt) \
 	-I$(srcdir) -I$(builddir) \
 	-I$(builddir)/dialogs/extended \
 	-I$(builddir)/dialogs/fingerprint \
-	-I$(builddir)/dialogs/firstrun \
 	-I$(builddir)/dialogs/help \
 	-I$(builddir)/dialogs/messages \
 	-I$(builddir)/dialogs/open \
@@ -125,7 +124,6 @@ libqt_plugin_la_SOURCES = \
 	dialogs/fingerprint/chromaprint.hpp \
 	dialogs/fingerprint/fingerprintdialog.cpp \
 	dialogs/fingerprint/fingerprintdialog.hpp \
-	dialogs/firstrun/firstrunwizard.cpp dialogs/firstrun/firstrunwizard.hpp \
 	dialogs/gototime/gototime.cpp dialogs/gototime/gototime.hpp \
 	dialogs/help/aboutmodel.hpp \
 	dialogs/help/help.cpp dialogs/help/help.hpp \
@@ -162,6 +160,10 @@ libqt_plugin_la_SOURCES = \
 	dialogs/systray/systray.hpp \
 	dialogs/network/saved_streams.cpp \
 	dialogs/network/saved_streams.hpp \
+	dialogs/onboarding/onboarding_controller.cpp \
+	dialogs/onboarding/onboarding_controller.hpp \
+	dialogs/onboarding/onboarding_folders.cpp \
+	dialogs/onboarding/onboarding_folders.hpp \
 	dialogs/hotkeys/hotkey_model.cpp \
 	dialogs/hotkeys/hotkey_model.hpp \
 	dialogs/settings/settings_bridge.cpp \
@@ -447,7 +449,6 @@ nodist_libqt_plugin_la_SOURCES = \
 	dialogs/extensions/extensions_manager.moc.cpp \
 	dialogs/fingerprint/chromaprint.moc.cpp \
 	dialogs/fingerprint/fingerprintdialog.moc.cpp \
-	dialogs/firstrun/firstrunwizard.moc.cpp \
 	dialogs/gototime/gototime.moc.cpp \
 	dialogs/help/aboutmodel.moc.cpp \
 	dialogs/help/help.moc.cpp \
@@ -472,6 +473,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	dialogs/sout/sout_widgets.moc.cpp \
 	dialogs/systray/systray.moc.cpp \
 	dialogs/network/saved_streams.moc.cpp \
+	dialogs/onboarding/onboarding_controller.moc.cpp \
 	dialogs/hotkeys/hotkey_model.moc.cpp \
 	dialogs/subtitles/opensubtitles_client.moc.cpp \
 	dialogs/subtitles/add_subtitles_controller.moc.cpp \
@@ -586,7 +588,6 @@ nodist_libqt_plugin_la_SOURCES += \
 	dialogs/extended/ui_equalizer.h \
 	dialogs/extended/ui_video_effects.h \
 	dialogs/fingerprint/ui_fingerprintdialog.h \
-	dialogs/firstrun/ui_firstrunwizard.h \
 	dialogs/help/ui_about.h \
 	dialogs/help/ui_update.h \
 	dialogs/messages/ui_messages_panel.h \
@@ -800,7 +801,6 @@ libqt_plugin_la_UI = \
 	dialogs/extended/equalizer.ui \
 	dialogs/extended/video_effects.ui \
 	dialogs/fingerprint/fingerprintdialog.ui \
-	dialogs/firstrun/firstrunwizard.ui \
 	dialogs/help/about.ui \
 	dialogs/help/update.ui \
 	dialogs/messages/messages_panel.ui \
@@ -1026,6 +1026,7 @@ libqt_plugin_la_RES = \
 	pixmaps/redesign/dialogs/pencil.svg \
 	pixmaps/redesign/dialogs/subtitle-file.svg \
 	pixmaps/redesign/dialogs/swap.svg \
+	pixmaps/redesign/onboarding/cone.svg \
 	pixmaps/redesign/settings/audio.svg \
 	pixmaps/redesign/settings/audio-active.svg \
 	pixmaps/redesign/settings/chevron-down.svg \
@@ -1070,9 +1071,6 @@ libqt_plugin_la_RES = \
 	pixmaps/redesign/mini/replay.svg \
 	pixmaps/misc/cone.svg \
 	pixmaps/misc/new_indicator.svg \
-	pixmaps/misc/theme_dark.svg \
-	pixmaps/misc/theme_daynight.svg \
-	pixmaps/misc/theme_light.svg \
 	pixmaps/misc/wait1.svg \
 	pixmaps/misc/wait2.svg \
 	pixmaps/misc/wait3.svg \
@@ -1168,6 +1166,7 @@ libqml_module_dialogs_a_ModulePath = VLC/Dialogs
 libqml_module_dialogs_a_CXXFLAGS = $(libqt_plugin_la_CXXFLAGS)
 libqml_module_dialogs_a_CPPFLAGS = $(libqt_plugin_la_CPPFLAGS)
 libqml_module_dialogs_a_QML = \
+	dialogs/dialogs/qml/AccentSwatches.js \
 	dialogs/dialogs/qml/CustomDialog.qml \
 	dialogs/dialogs/qml/DialogCard.qml \
 	dialogs/hotkeys/qml/HotkeysDialog.qml \
@@ -1184,6 +1183,8 @@ libqml_module_dialogs_a_QML = \
 	dialogs/toolbar/qml/DashedBox.qml \
 	dialogs/settings/qml/AdvancedBar.qml \
 	dialogs/hotkeys/qml/HotkeysData.js \
+	dialogs/onboarding/qml/OnboardingKeys.js \
+	dialogs/onboarding/qml/OnboardingWindow.qml \
 	dialogs/settings/qml/SettingsData.js \
 	dialogs/settings/qml/SettingsRowDelegate.qml \
 	dialogs/settings/qml/SettingsSidebar.qml \
@@ -2055,6 +2056,21 @@ test_hotkey_model_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
 check_PROGRAMS += test_hotkey_model
 TESTS += test_hotkey_model
 
+# test_onboarding_folders
+test_onboarding_folders_SOURCES = \
+	tests/test_onboarding_folders.cpp \
+	dialogs/onboarding/onboarding_folders.hpp dialogs/onboarding/onboarding_folders.cpp
+nodist_test_onboarding_folders_SOURCES = \
+	tests/test_onboarding_folders.moc
+BUILT_SOURCES += tests/test_onboarding_folders.moc
+CLEANFILES += tests/test_onboarding_folders.moc
+test_onboarding_folders_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)
+test_onboarding_folders_CXXFLAGS = $(QT_QTEST_COMMON_cxxflags)
+test_onboarding_folders_LDADD = $(QT_QTEST_COMMON_ldadd)
+test_onboarding_folders_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
+check_PROGRAMS += test_onboarding_folders
+TESTS += test_onboarding_folders
+
 # test_saved_streams
 test_saved_streams_SOURCES = \
 	tests/test_saved_streams.cpp \
@@ -2296,8 +2312,8 @@ check_PROGRAMS += qml_test
 EXTRA_DIST += tests/tst_FSM.qml
 TESTS += tests/tst_FSM.qml
 EXTRA_DIST += tests/tst_LibraryHelpers.qml
-EXTRA_DIST += tests/tst_SettingsData.qml tests/tst_HotkeysData.qml tests/tst_CustomizePalette.qml
+EXTRA_DIST += tests/tst_SettingsData.qml tests/tst_HotkeysData.qml tests/tst_OnboardingKeys.qml tests/tst_CustomizePalette.qml
 TESTS += tests/tst_LibraryHelpers.qml
-TESTS += tests/tst_SettingsData.qml tests/tst_HotkeysData.qml tests/tst_CustomizePalette.qml
+TESTS += tests/tst_SettingsData.qml tests/tst_HotkeysData.qml tests/tst_OnboardingKeys.qml tests/tst_CustomizePalette.qml
 endif
 endif

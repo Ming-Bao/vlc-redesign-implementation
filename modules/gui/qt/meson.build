@@ -44,7 +44,6 @@ moc_headers = files(
     'dialogs/extensions/extensions_manager.hpp',
     'dialogs/fingerprint/chromaprint.hpp',
     'dialogs/fingerprint/fingerprintdialog.hpp',
-    'dialogs/firstrun/firstrunwizard.hpp',
     'dialogs/gototime/gototime.hpp',
     'dialogs/help/aboutmodel.hpp',
     'dialogs/help/help.hpp',
@@ -70,6 +69,7 @@ moc_headers = files(
     'dialogs/systray/systray.hpp',
     'dialogs/settings/settings_bridge.hpp',
     'dialogs/network/saved_streams.hpp',
+    'dialogs/onboarding/onboarding_controller.hpp',
     'dialogs/hotkeys/hotkey_model.hpp',
     'dialogs/subtitles/add_subtitles_controller.hpp',
     'dialogs/subtitles/opensubtitles_client.hpp',
@@ -243,8 +243,6 @@ qt_plugin_sources = files(
     'dialogs/fingerprint/chromaprint.hpp',
     'dialogs/fingerprint/fingerprintdialog.cpp',
     'dialogs/fingerprint/fingerprintdialog.hpp',
-    'dialogs/firstrun/firstrunwizard.cpp',
-    'dialogs/firstrun/firstrunwizard.hpp',
     'dialogs/gototime/gototime.cpp',
     'dialogs/gototime/gototime.hpp',
     'dialogs/help/aboutmodel.hpp',
@@ -283,6 +281,10 @@ qt_plugin_sources = files(
     'dialogs/settings/settings_bridge.cpp',
     'dialogs/network/saved_streams.cpp',
     'dialogs/network/saved_streams.hpp',
+    'dialogs/onboarding/onboarding_controller.cpp',
+    'dialogs/onboarding/onboarding_controller.hpp',
+    'dialogs/onboarding/onboarding_folders.cpp',
+    'dialogs/onboarding/onboarding_folders.hpp',
     'dialogs/hotkeys/hotkey_model.cpp',
     'dialogs/hotkeys/hotkey_model.hpp',
     'dialogs/settings/settings_bridge.hpp',
@@ -631,7 +633,6 @@ ui_sources = files(
     'dialogs/extended/equalizer.ui',
     'dialogs/extended/video_effects.ui',
     'dialogs/fingerprint/fingerprintdialog.ui',
-    'dialogs/firstrun/firstrunwizard.ui',
     'dialogs/help/about.ui',
     'dialogs/help/update.ui',
     'dialogs/messages/messages_panel.ui',
@@ -659,6 +660,7 @@ qml_modules += {
     'target' : 'dialogs',
     'outdir' : 'VLC/Dialogs',
     'sources': files(
+        'dialogs/dialogs/qml/AccentSwatches.js',
         'dialogs/dialogs/qml/CustomDialog.qml',
         'dialogs/dialogs/qml/DialogCard.qml',
         'dialogs/hotkeys/qml/HotkeysDialog.qml',
@@ -675,6 +677,8 @@ qml_modules += {
         'dialogs/toolbar/qml/DashedBox.qml',
         'dialogs/settings/qml/AdvancedBar.qml',
         'dialogs/hotkeys/qml/HotkeysData.js',
+        'dialogs/onboarding/qml/OnboardingKeys.js',
+        'dialogs/onboarding/qml/OnboardingWindow.qml',
         'dialogs/settings/qml/SettingsData.js',
         'dialogs/settings/qml/SettingsRowDelegate.qml',
         'dialogs/settings/qml/SettingsSidebar.qml',
@@ -1071,6 +1075,7 @@ qml_tests = {
     'tst_LibraryHelpers': files('tests/tst_LibraryHelpers.qml'),
     'tst_SettingsData': files('tests/tst_SettingsData.qml'),
     'tst_HotkeysData': files('tests/tst_HotkeysData.qml'),
+    'tst_OnboardingKeys': files('tests/tst_OnboardingKeys.qml'),
     'tst_CustomizePalette': files('tests/tst_CustomizePalette.qml'),
 }
 
@@ -1586,6 +1591,20 @@ if qt6_dep.found()
             ),
             'moc_sources': files('tests/test_saved_streams.cpp'),
             'moc_headers': files('dialogs/network/saved_streams.hpp'),
+            'suite': ['qt'],
+            'include_directories' : qt_include_dir,
+            'link_args': qt_link_args,
+            'dependencies': [qt6_dep, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
+            'name': 'test_qt_onboarding_folders',
+            'sources': files(
+                'tests/test_onboarding_folders.cpp',
+                'dialogs/onboarding/onboarding_folders.cpp',
+                'dialogs/onboarding/onboarding_folders.hpp'
+            ),
+            'moc_sources': files('tests/test_onboarding_folders.cpp'),
             'suite': ['qt'],
             'include_directories' : qt_include_dir,
             'link_args': qt_link_args,

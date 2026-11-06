@@ -24,17 +24,16 @@ start)
     done
     echo "VLC window never appeared; see $RUN/vlc.log"; exit 1 ;;
 seed)
-    # One-time: run the first-run wizard so the media library indexes build/redesign-{media,music}
+    # One-time: walk the onboarding card so the media library indexes build/redesign-{media,music}
+    # (the card's folder starts at XDG Videos; Finish adds it and XDG Music)
     rm -rf "$PROFILE"; . "$(dirname "$0")/redesign-env.sh"; mkdir -p "$RUN"
     Xvfb :77 -screen 0 1600x900x24 -nolisten tcp > "$RUN/xvfb.log" 2>&1 & echo $! > "$RUN/xvfb.pid"
     sleep 1
-    "$BUILD/bin/vlc-static" -I qt > "$RUN/vlc.log" 2>&1 & echo $! > "$RUN/vlc.pid"
+    "$BUILD/bin/vlc-static" -I qt --aout=dummy -vv > "$RUN/vlc.log" 2>&1 & echo $! > "$RUN/vlc.pid"
     sleep 8
-    xdotool key Return; sleep 2                      # privacy page -> folders page
-    xdotool mousemove 1136 636 click 1; sleep 2      # Next -> colour scheme
-    xdotool mousemove 1050 400 click 1; sleep 1      # Night
-    xdotool mousemove 1136 636 click 1; sleep 2      # Next -> layout
-    xdotool mousemove 1136 636 click 1; sleep 15     # Finish, let the library index
+    xdotool key Return; sleep 2                      # Welcome: Next -> theme
+    xdotool key Return; sleep 2                      # Next -> shortcuts
+    xdotool key Return; sleep 15                     # Finish, let the library index
     "$0" stop; echo seeded ;;
 shot)  import -window root "$2" && echo "saved $2" ;;
 click) xdotool mousemove "$2" "$3" sleep 0.2 click 1 ;;

@@ -40,6 +40,8 @@ Window {
     property bool resizable: false
     property bool modal: false
 
+    // without the title bar the card's empty background moves the window
+    property bool showHeader: true
     property bool showFooter: true
     property bool saveEnabled: false
     property string saveText: qsTr("Save")
@@ -183,13 +185,21 @@ Window {
 
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.top: titleBar.bottom
+            anchors.top: root.showHeader ? titleBar.bottom : parent.top
             anchors.bottom: footer.visible ? footer.top : parent.bottom
+        }
+
+        DragHandler {
+            enabled: !root.showHeader
+            target: null
+            grabPermissions: PointerHandler.TakeOverForbidden
+            onActiveChanged: if (active) root.startSystemMove()
         }
 
         Rectangle {
             id: titleBar
 
+            visible: root.showHeader
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top

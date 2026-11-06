@@ -166,6 +166,7 @@ signals:
     void CSDMetricsChanged();
 
 private:
+    void readAccent();
     void updatePalette();
 
     void makeLightPalette();
