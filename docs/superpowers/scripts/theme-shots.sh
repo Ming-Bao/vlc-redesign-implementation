@@ -99,4 +99,7 @@ finish
 # --- onboarding (the card is always dark; slice 10 makes its preview follow the tile) ---
 launch onboarding --qt-privacy-ask
 c 1233 757 3;              shot 21-onboarding-theme # Welcome: Next
+c 644 414;                 shot 22-onboarding-light # Light tile: the preview is light, the card stays dark
+c 956 414;                 shot 23-onboarding-system # System tile
+c 644 414;  c 1233 757;    c 1233 757 4; shot 24-onboarding-finish # Light, Next, Finish: the main window is light, no restart
 finish

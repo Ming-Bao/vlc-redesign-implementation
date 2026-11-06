@@ -43,6 +43,18 @@ DialogCard {
     // Finish or skip ran: closing does nothing more
     property bool _done: false
 
+    // the card is always dark; only the small player preview follows the picked theme tile
+    readonly property var dk: VLCStyle.darkPalette.tokens
+    readonly property var pv: previewPalette.tokens
+    readonly property bool previewDark: previewPalette.isDark
+
+    SystemPalette {
+        id: previewPalette
+
+        source: root.scheme
+        ctx: MainCtx
+    }
+
     readonly property bool _folderOk: !Onboarding.hasMediaLibrary || Onboarding.folderValid(folderField.text)
 
     title: qsTr("Welcome to VLC!")
@@ -51,7 +63,7 @@ DialogCard {
     modal: true
     figmaWidth: 1090
     figmaHeight: 759
-    cardColor: "#0E0E0E"
+    cardColor: dk.bgB1
 
     onVisibleChanged: if (visible) content.forceActiveFocus()
     onPageChanged: content.forceActiveFocus()
@@ -106,8 +118,8 @@ DialogCard {
     component Btn: T.Button {
         id: btn
 
-        property color fill: "#1B1B1B"
-        property color textColor: "#8F8F8F"
+        property color fill: dk.bgA3
+        property color textColor: dk.fgA2
 
         width: VLCStyle.dp(100, VLCStyle.scale)
         height: VLCStyle.dp(32, VLCStyle.scale)
@@ -139,7 +151,7 @@ DialogCard {
         x: VLCStyle.dp(928, VLCStyle.scale)
         y: VLCStyle.dp(671, VLCStyle.scale)
         fill: root.accent
-        textColor: "#161616"
+        textColor: dk.fgB1
         text: qsTr("Next")
         onClicked: root._next()
     }
@@ -167,7 +179,7 @@ DialogCard {
         height: VLCStyle.dp(42, VLCStyle.scale)
         verticalAlignment: Text.AlignVCenter
         font.pixelSize: VLCStyle.dp(24, VLCStyle.scale)
-        color: "#969696"
+        color: dk.fgA1
     }
 
     // a preview icon: a VLCIcons glyph in a slot of the given width
@@ -175,7 +187,7 @@ DialogCard {
         width: VLCStyle.dp(13.2, VLCStyle.scale)
         height: VLCStyle.dp(13.2, VLCStyle.scale)
         font.pixelSize: VLCStyle.dp(13.2, VLCStyle.scale)
-        color: "#8F8F8F"
+        color: pv.fgA2
     }
 
     // the preview's volume meter: a wedge (Figma 48.4 x 15.4) cut at `right`
@@ -195,7 +207,7 @@ DialogCard {
         Layout.preferredWidth: VLCStyle.dp(41.8, VLCStyle.scale)
         horizontalAlignment: Text.AlignHCenter
         font.pixelSize: VLCStyle.dp(8.25, VLCStyle.scale)
-        color: "#8F8F8F"
+        color: pv.fgA2
     }
 
     // a key cap; letters and words are padded 20, arrows and symbols 12
@@ -215,14 +227,14 @@ DialogCard {
             width: parent.width
             height: parent.height
             radius: VLCStyle.dp(12, VLCStyle.scale)
-            color: "#405C5C5C"
+            color: "#405C5C5C"   // fixed colour: Figma key-cap shadow, not a token
         }
         Rectangle {
             anchors.fill: parent
             radius: VLCStyle.dp(12, VLCStyle.scale)
-            color: "#1B1B1B"
+            color: dk.bgA3
             border.width: VLCStyle.dp(3, VLCStyle.scale)
-            border.color: "#373737"
+            border.color: dk.dividerBright
         }
         Text {
             id: capLabel
@@ -231,7 +243,7 @@ DialogCard {
             text: cap.text
             font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
             font.weight: Font.Light
-            color: "#EAEAEA"
+            color: dk.fg1
         }
     }
 
@@ -268,7 +280,7 @@ DialogCard {
                     text: root.title
                     font.pixelSize: VLCStyle.dp(32, VLCStyle.scale)
                     font.weight: Font.Light
-                    color: "#EAEAEA"
+                    color: dk.fg1
                     Accessible.role: Accessible.Heading
                 }
 
@@ -284,7 +296,7 @@ DialogCard {
                     topPadding: VLCStyle.dp(4, VLCStyle.scale)
                     font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
                     font.weight: Font.Light
-                    color: "#969696"
+                    color: dk.fgA1
                 }
 
                 Column {
@@ -297,7 +309,7 @@ DialogCard {
                     Text {
                         text: qsTr("Choose a Media Folder to get started with")
                         font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-                        color: "#8F8F8F"
+                        color: dk.fgA2
                     }
 
                     Row {
@@ -307,9 +319,9 @@ DialogCard {
                             width: VLCStyle.dp(595 - 10 - 114, VLCStyle.scale)
                             height: VLCStyle.dp(36, VLCStyle.scale)
                             radius: VLCStyle.dp(6, VLCStyle.scale)
-                            color: "#090909"
+                            color: dk.bgB2
                             border.width: VLCStyle.dp(2, VLCStyle.scale)
-                            border.color: folderField.activeFocus ? root.accent : "#191919"
+                            border.color: folderField.activeFocus ? root.accent : dk.bgA4
 
                             T.TextField {
                                 id: folderField
@@ -323,9 +335,9 @@ DialogCard {
                                 verticalAlignment: TextInput.AlignVCenter
                                 text: Onboarding.defaultFolder
                                 font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
-                                color: "#C6C6C6"
+                                color: dk.fg2
                                 selectionColor: root.accent
-                                selectedTextColor: "#161616"
+                                selectedTextColor: dk.fgB1
                                 selectByMouse: true
                                 activeFocusOnTab: true
                                 Accessible.name: qsTr("Choose a Media Folder to get started with")
@@ -339,7 +351,7 @@ DialogCard {
                                 visible: folderField.text.length === 0
                                 text: qsTr("e.g., ~/Videos")
                                 font: folderField.font
-                                color: "#404040"
+                                color: dk.fgA4
                             }
                         }
 
@@ -364,18 +376,18 @@ DialogCard {
 
             // Theme and colour
             Item {
-                // the player drawn small (the Figma Player at 0.55); the theme does not change it
+                // the player drawn small (the Figma Player at 0.55); it takes the picked theme
                 Rectangle {
                     x: VLCStyle.dp(17, VLCStyle.scale)
                     y: VLCStyle.dp(19, VLCStyle.scale)
                     width: VLCStyle.dp(1056, VLCStyle.scale)
                     height: VLCStyle.dp(594, VLCStyle.scale)
-                    color: "#090909"
+                    color: pv.bgB2
 
                     Rectangle {
                         width: parent.width
                         height: VLCStyle.dp(22, VLCStyle.scale)
-                        color: "#191919"
+                        color: pv.bgA4
 
                         Image {
                             x: VLCStyle.dp(3.3 + 3.85, VLCStyle.scale)
@@ -408,12 +420,12 @@ DialogCard {
                         anchors.bottom: parent.bottom
                         width: parent.width
                         height: VLCStyle.dp(29.7, VLCStyle.scale)
-                        color: Qt.rgba(0x19 / 255, 0x19 / 255, 0x19 / 255, 0.95)
+                        color: pv.bgA3Transparent
 
                         Rectangle {
                             width: parent.width
                             height: VLCStyle.dp(0.55, VLCStyle.scale)
-                            color: "#222222"
+                            color: pv.dividerDim
                         }
 
                         RowLayout {
@@ -440,7 +452,7 @@ DialogCard {
                                         anchors.centerIn: parent
                                         anchors.horizontalCenterOffset: VLCStyle.dp(0.55, VLCStyle.scale)
                                         text: VLCIcons.play_filled
-                                        color: "#161616"
+                                        color: pv.fgB1
                                     }
                                 }
                                 PreviewIcon {
@@ -458,7 +470,7 @@ DialogCard {
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: VLCStyle.dp(15.4, VLCStyle.scale)
                                 radius: VLCStyle.dp(3.3, VLCStyle.scale)
-                                color: "#090909"
+                                color: pv.bgB2
 
                                 Rectangle {
                                     x: VLCStyle.dp(1.1, VLCStyle.scale)
@@ -466,8 +478,10 @@ DialogCard {
                                     width: VLCStyle.dp(53.9, VLCStyle.scale)
                                     height: VLCStyle.dp(13.2, VLCStyle.scale)
                                     radius: VLCStyle.dp(2.2, VLCStyle.scale)
-                                    // as SettingsStyle.accentBg
-                                    color: Qt.rgba(root.accent.r * 0.26, root.accent.g * 0.26, root.accent.b * 0.26, 1)
+                                    // BG/Accent Bright for the picked swatch; light mirrors style/figmatokens.cpp (30 % accent over #D1D1D1)
+                                    color: root.previewDark
+                                           ? Qt.rgba(root.accent.r * 0.26, root.accent.g * 0.26, root.accent.b * 0.26, 1)
+                                           : Qt.tint("#D1D1D1", Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.30))   // fixed colour: light BG/Accent Bright formula
                                 }
                                 Rectangle {
                                     x: VLCStyle.dp(50.6, VLCStyle.scale)
@@ -497,13 +511,13 @@ DialogCard {
                                     height: VLCStyle.dp(15.4, VLCStyle.scale)
                                     preferredRendererType: Shape.CurveRenderer
 
-                                    Wedge { fillColor: "#090909" }
+                                    Wedge { fillColor: pv.bgB2 }
                                     Wedge {
                                         right: w * 0.37
                                         fillGradient: LinearGradient {
                                             x1: 0; x2: VLCStyle.dp(48.4, VLCStyle.scale)
-                                            GradientStop { position: 0.0; color: "#77A913" }
-                                            GradientStop { position: 0.58; color: "#8E8713" }
+                                            GradientStop { position: 0.0; color: "#77A913" }   // fixed colour: Figma onboarding
+                                            GradientStop { position: 0.58; color: "#8E8713" }   // fixed colour: Figma onboarding
                                         }
                                     }
                                 }
@@ -539,9 +553,9 @@ DialogCard {
 
                 Repeater {
                     model: [
-                        { label: qsTr("Light"), scheme: ColorSchemeModel.Day, swatch: "#AFAFAF" },
-                        { label: qsTr("Dark"), scheme: ColorSchemeModel.Night, swatch: "#222222" },
-                        { label: qsTr("System"), scheme: ColorSchemeModel.System, swatch: "#222222" }
+                        { label: qsTr("Light"), scheme: ColorSchemeModel.Day, swatch: "#AFAFAF" },   // fixed colour: Figma onboarding
+                        { label: qsTr("Dark"), scheme: ColorSchemeModel.Night, swatch: "#222222" },   // fixed colour: Figma onboarding
+                        { label: qsTr("System"), scheme: ColorSchemeModel.System, swatch: "#222222" }   // fixed colour: Figma onboarding
                     ]
 
                     T.Button {
@@ -602,7 +616,7 @@ DialogCard {
                                     preferredRendererType: Shape.CurveRenderer
 
                                     ShapePath {
-                                        fillColor: "#AFAFAF"
+                                        fillColor: "#AFAFAF"   // fixed colour: Figma onboarding
                                         strokeColor: "transparent"
                                         startX: 16 * systemShape.k; startY: 0
                                         PathLine { x: 100 * systemShape.k - systemShape.r; y: 0 }
@@ -623,7 +637,7 @@ DialogCard {
                                 text: tile.text
                                 font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
                                 font.weight: Font.Light
-                                color: "#8F8F8F"
+                                color: dk.fgA2
                             }
                         }
                     }
@@ -703,7 +717,7 @@ DialogCard {
                             elide: Text.ElideRight
                             font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
                             font.weight: Font.Light
-                            color: "#969696"
+                            color: dk.fgA1
                         }
 
                         Row {
@@ -735,7 +749,7 @@ DialogCard {
                                         text: "/"
                                         font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
                                         font.weight: Font.Light
-                                        color: "#969696"
+                                        color: dk.fgA1
                                     }
 
                                     Cap {
@@ -758,7 +772,7 @@ DialogCard {
                     verticalAlignment: Text.AlignVCenter
                     text: qsTr("Find the full list in the menu.")
                     font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
-                    color: "#6B6B6B"
+                    color: dk.fgA3
                 }
 
                 BackBtn {}
