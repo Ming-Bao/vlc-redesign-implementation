@@ -199,7 +199,7 @@ ColumnLayout {
                 verticalAlignment: Text.AlignVCenter
                 text: VLCIcons.drag_handle
                 font.pixelSize: VLCStyle.icon_normal
-                color: queueRow.colorContext.palette?.tokens.fgA2
+                color: queueRow.colorContext.palette?.tokens.fgA2 ?? "transparent"
 
                 // the row lands where the pointer is on release; the cursor tint shows the spot meanwhile
                 DragHandler {

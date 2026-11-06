@@ -43,11 +43,13 @@ QtObject {
     readonly property color tick:      theme.palette.isDark ? "#2A2A2A" : _t.bgA1   // fixed colour: off-token dark value
 
     // the settings window's own frame (Figma "Settings - *"): card, top bar, search box and sidebar
-    readonly property color windowBg:        _t.bgB1Transparent
+    // light reads the opaque partner: these are separate windows (and the Customize Player card over the player), and
+    // 20-25 % of the desktop or video under them made light text unreadable (slice 10 Ledger); dark keeps the frame's
+    readonly property color windowBg:        theme.palette.isDark ? _t.bgB1Transparent : _t.bgB1
     readonly property color topBar:          _t.bgB2
     readonly property color searchBg:        _t.bgA5
     readonly property color placeholder:     _t.fgA4
-    readonly property color sidebarBg:       _t.bgA3Transparent
+    readonly property color sidebarBg:       theme.palette.isDark ? _t.bgA3Transparent : _t.bgA3
     readonly property color sidebarSelected: _t.bgA1
     readonly property color sidebarHover:    theme.palette.isDark ? "#1E1E1E" : _t.bgA2   // fixed colour: off-token dark value
     readonly property color labelActive:     _t.fg1

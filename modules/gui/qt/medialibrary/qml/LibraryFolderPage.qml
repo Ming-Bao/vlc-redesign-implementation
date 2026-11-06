@@ -252,7 +252,7 @@ Widgets.PageExt {
                         width: gridView.cellWidth
                         artHeight: gridView.artHeight
                         glyph: VLCIcons.add
-                        backing: theme.palette?.isDark ? "#1E1E1E" : theme.palette?.tokens.bgA2   // fixed colour: off-token dark value
+                        backing: theme.palette?.isDark ? "#1E1E1E" : theme.palette?.tokens.bgA2 ?? "transparent"   // fixed colour: off-token dark value
                         title: qsTr("Add")
 
                         Navigation.parentItem: parent
@@ -295,7 +295,7 @@ Widgets.PageExt {
                         width: cell.width
                         artHeight: gridView.artHeight
                         glyph: VLCIcons.folder
-                        backing: theme.palette?.isDark ? "#1E1E1E" : theme.palette?.tokens.bgA2   // fixed colour: off-token dark value
+                        backing: theme.palette?.isDark ? "#1E1E1E" : theme.palette?.tokens.bgA2 ?? "transparent"   // fixed colour: off-token dark value
                         title: cell.model.title ?? ""
 
                         Navigation.parentItem: cell
@@ -476,7 +476,7 @@ Widgets.PageExt {
         T.Label {
             text: qsTr("No results")
             font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
-            color: theme.palette?.tokens.fgA3
+            color: theme.palette?.tokens.fgA3 ?? "transparent"
         }
     }
 }

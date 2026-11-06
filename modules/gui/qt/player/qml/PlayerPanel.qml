@@ -120,7 +120,8 @@ T.Popup {
 
     background: Rectangle {
         radius: VLCStyle.dp(10, VLCStyle.scale)
-        color: theme.palette.tokens.bgB1Transparent
+        // light reads the opaque partner: 20 % of the video under light text left it unreadable (slice 10 Ledger)
+        color: root._dark ? theme.palette.tokens.bgB1Transparent : theme.palette.tokens.bgB1
     }
 
     contentItem: ColumnLayout {

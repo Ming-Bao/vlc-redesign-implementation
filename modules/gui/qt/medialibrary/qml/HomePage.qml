@@ -388,7 +388,7 @@ Widgets.PageExt {
                         required property var modelData
 
                         glyph: VLCIcons.folder
-                        backing: theme.palette?.isDark ? "#1E1E1E" : theme.palette?.tokens.bgA2   // fixed colour: off-token dark value
+                        backing: theme.palette?.isDark ? "#1E1E1E" : theme.palette?.tokens.bgA2 ?? "transparent"   // fixed colour: off-token dark value
                         title: modelData.name
 
                         onActivated: (reason) => folders.open(modelData, reason)

@@ -55,7 +55,7 @@ T.Menu {
     background: Rectangle {
         radius: VLCStyle.dp(10, VLCStyle.scale)
         // ponytail: no 50 px backdrop blur; at 95 % opacity it does not show. Add a FrostedGlassEffect if the card gets lighter.
-        color: theme.palette?.tokens.bgA3Transparent
+        color: theme.palette?.tokens.bgA3Transparent ?? "transparent"
 
         // Figma: 0 8 15 rgba(0,0,0,0.46)
         RoundedRectangleShadow {
@@ -102,7 +102,7 @@ T.Menu {
                     text: item.text
                     elide: Text.ElideRight
                     font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-                    color: theme.palette?.tokens.fgA2
+                    color: theme.palette?.tokens.fgA2 ?? "transparent"
                 }
 
                 IconLabel {
@@ -115,7 +115,7 @@ T.Menu {
 
             background: Rectangle {
                 radius: VLCStyle.dp(6, VLCStyle.scale)
-                color: item.highlighted ? theme.palette?.tokens.bgA2 : "transparent"
+                color: item.highlighted ? theme.palette?.tokens.bgA2 ?? "transparent" : "transparent"
             }
 
             // later: run once the menu has closed, so a modal dialog does not nest inside the menu's event handling

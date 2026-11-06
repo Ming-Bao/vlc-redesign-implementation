@@ -338,7 +338,7 @@ Widgets.PageExt {
                         focus: true
                         width: gridView.cellWidth
                         glyph: VLCIcons.add
-                        backing: theme.palette?.isDark ? "#1E1E1E" : theme.palette?.tokens.bgA2   // fixed colour: off-token dark value
+                        backing: theme.palette?.isDark ? "#1E1E1E" : theme.palette?.tokens.bgA2 ?? "transparent"   // fixed colour: off-token dark value
                         title: qsTr("Create playlist")
 
                         Navigation.parentItem: parent
@@ -522,7 +522,7 @@ Widgets.PageExt {
         T.Label {
             text: qsTr("No results")
             font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
-            color: theme.palette?.tokens.fgA3
+            color: theme.palette?.tokens.fgA3 ?? "transparent"
         }
     }
 }

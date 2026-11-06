@@ -277,7 +277,7 @@ Widgets.PageExt {
         T.Label {
             text: qsTr("No results")
             font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
-            color: theme.palette?.tokens.fgA3
+            color: theme.palette?.tokens.fgA3 ?? "transparent"
         }
     }
 }

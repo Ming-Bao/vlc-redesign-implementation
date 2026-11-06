@@ -240,7 +240,7 @@ Widgets.PageLoader {
                             required property int index
 
                             glyph: VLCIcons.folder
-                            backing: theme.palette?.isDark ? "#1E1E1E" : theme.palette?.tokens.bgA2   // fixed colour: off-token dark value
+                            backing: theme.palette?.isDark ? "#1E1E1E" : theme.palette?.tokens.bgA2 ?? "transparent"   // fixed colour: off-token dark value
                             title: modelData.name
 
                             Navigation.parentItem: foldersFlickable

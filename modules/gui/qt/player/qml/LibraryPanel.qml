@@ -54,7 +54,7 @@ FocusScope {
     // panel to blur, so the Figma's background blur is left out
     Rectangle {
         anchors.fill: parent
-        color: theme.palette?.tokens.bgB1Transparent
+        color: theme.palette?.tokens.bgB1Transparent ?? "transparent"
     }
 
     Loader {
@@ -108,7 +108,7 @@ FocusScope {
 
         background: Rectangle {
             // Figma: dark BG/A4, the light frame BG/A3 Transparent
-            color: theme.palette?.isDark ? theme.palette.tokens.bgA4 : theme.palette?.tokens.bgA3Transparent
+            color: theme.palette?.isDark ? theme.palette.tokens.bgA4 : theme.palette?.tokens.bgA3Transparent ?? "transparent"
         }
 
         Navigation.parentItem: root

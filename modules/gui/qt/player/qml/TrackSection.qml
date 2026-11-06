@@ -113,7 +113,9 @@ ColumnLayout {
 
         background: Rectangle {
             radius: VLCStyle.dp(4, VLCStyle.scale)
-            color: row.hovered ? Qt.rgba(1, 1, 1, 0.05) : "transparent"
+            // a wash of the text colour: white in dark, FG/1 in light (white is invisible on the light card)
+            color: row.hovered ? Qt.alpha(rowTheme.palette?.isDark ? "white" : rowTheme.palette?.tokens.fg1 ?? "transparent", 0.05)
+                               : "transparent"
             border.width: row.visualFocus ? VLCStyle.focus_border : 0
             border.color: rowTheme.visualFocus
         }

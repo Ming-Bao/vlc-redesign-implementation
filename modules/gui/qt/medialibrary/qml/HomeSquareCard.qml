@@ -31,7 +31,7 @@ T.AbstractButton {
     property url image
     // VLCIcons glyph shown when there is no image
     property string glyph
-    property color backing: theme.palette?.isDark ? "#171717" : theme.palette?.tokens.bgA4   // fixed colour: off-token dark value
+    property color backing: theme.palette?.isDark ? "#171717" : theme.palette?.tokens.bgA4 ?? "transparent"   // fixed colour: off-token dark value
     property string title
     property string subtitle
     // the art box is width × artHeight (a 16:9 folder tile on a video level)
@@ -99,7 +99,7 @@ T.AbstractButton {
                 visible: root.image.toString() === ""
                 text: root.glyph
                 font.pixelSize: VLCStyle.dp(48, VLCStyle.scale)
-                color: theme.palette?.tokens.fgA1
+                color: theme.palette?.tokens.fgA1 ?? "transparent"
             }
 
             // selected: the tint shows under the focus ring too
@@ -136,7 +136,7 @@ T.AbstractButton {
                 text: root.title
                 font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
                 color: root.playing ? theme.accent
-                                    : theme.palette?.tokens.fgA1
+                                    : theme.palette?.tokens.fgA1 ?? "transparent"
             }
 
             T.Label {
@@ -145,7 +145,7 @@ T.AbstractButton {
                 elide: Text.ElideRight
                 text: root.subtitle
                 font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
-                color: theme.palette?.tokens.fgA3
+                color: theme.palette?.tokens.fgA3 ?? "transparent"
             }
         }
     }

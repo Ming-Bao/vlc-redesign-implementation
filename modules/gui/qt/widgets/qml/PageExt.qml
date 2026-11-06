@@ -360,7 +360,7 @@ T.Page {
                                         width: VLCStyle.dp(8, VLCStyle.scale)
                                         text: "▶"
                                         font.pixelSize: VLCStyle.dp(8, VLCStyle.scale)
-                                        color: theme.palette?.tokens.fgA4
+                                        color: theme.palette?.tokens.fgA4 ?? "transparent"
                                     }
 
                                     T.Label {
@@ -371,7 +371,7 @@ T.Page {
                                         font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
                                         font.weight: crumb.isLast ? Font.DemiBold : Font.Normal
                                         font.underline: crumb.hovered && !crumb.isLast
-                                        color: crumb.isLast ? theme.palette?.tokens.fgA1 : theme.palette?.tokens.fgA2
+                                        color: crumb.isLast ? theme.palette?.tokens.fgA1 ?? "transparent" : theme.palette?.tokens.fgA2 ?? "transparent"
                                     }
                                 }
 
@@ -401,7 +401,7 @@ T.Page {
                     Layout.column: defaultPageHeader.compact ? 0 : 1
                     Layout.fillWidth: defaultPageHeader.compact
                     text: qsTr("%1 item", "%1 items", defaultPageHeader.itemCount).arg(defaultPageHeader.itemCount)
-                    color: theme.palette?.tokens.fgA3
+                    color: theme.palette?.tokens.fgA3 ?? "transparent"
                     font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
                 }
 

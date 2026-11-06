@@ -170,7 +170,7 @@ Widgets.PageExt {
             required property int index
 
             glyph: modelData.glyph
-            backing: theme.palette?.isDark ? "#1E1E1E" : theme.palette?.tokens.bgA2   // fixed colour: off-token dark value
+            backing: theme.palette?.isDark ? "#1E1E1E" : theme.palette?.tokens.bgA2 ?? "transparent"   // fixed colour: off-token dark value
             title: modelData.text
 
             Navigation.parentItem: body

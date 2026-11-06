@@ -102,7 +102,7 @@ FocusScope {
         id: theme
         colorSet: ColorContext.View
     }
-    readonly property color _titleColor: theme.palette?.tokens.fgA1
+    readonly property color _titleColor: theme.palette?.tokens.fgA1 ?? "transparent"
 
     Column {
         id: column

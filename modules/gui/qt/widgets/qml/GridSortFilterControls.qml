@@ -188,13 +188,13 @@ NavigableRow {
         selectionColor: theme.bg.highlight
         selectedTextColor: theme.fg.highlight
         placeholderText: qsTr("Search")
-        placeholderTextColor: theme.palette?.tokens.fgA4
+        placeholderTextColor: theme.palette?.tokens.fgA4 ?? "transparent"
         selectByMouse: true
 
         Accessible.name: qsTr("Search")
 
         background: Rectangle {
-            color: theme.palette?.tokens.bgA5
+            color: theme.palette?.tokens.bgA5 ?? "transparent"
             radius: VLCStyle.dp(6, VLCStyle.scale)
             border.width: searchField.activeFocus ? VLCStyle.dp(1, VLCStyle.scale) : 0
             border.color: theme.visualFocus
@@ -204,7 +204,7 @@ NavigableRow {
                 anchors.verticalCenter: parent.verticalCenter
                 text: VLCIcons.search
                 font.pixelSize: VLCStyle.icon_normal
-                color: theme.palette?.tokens.fgA2
+                color: theme.palette?.tokens.fgA2 ?? "transparent"
             }
         }
 

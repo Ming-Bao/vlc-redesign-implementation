@@ -74,7 +74,7 @@ T.AbstractButton {
             width: root.width
             height: Math.round(width * 9 / 16)
             radius: root._radius
-            color: theme.palette?.isDark ? "#171717" : theme.palette?.tokens.bgA4   // fixed colour: off-token dark value
+            color: theme.palette?.isDark ? "#171717" : theme.palette?.tokens.bgA4 ?? "transparent"   // fixed colour: off-token dark value
 
             Widgets.ImageExt {
                 anchors.fill: parent
@@ -91,7 +91,7 @@ T.AbstractButton {
                 visible: !root.model.thumbnail
                 text: root.glyph
                 font.pixelSize: VLCStyle.dp(48, VLCStyle.scale)
-                color: theme.palette?.tokens.fgA1
+                color: theme.palette?.tokens.fgA1 ?? "transparent"
             }
 
             // 20 % veil
@@ -150,8 +150,8 @@ T.AbstractButton {
             text: root.text
             font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
             color: root.playing ? theme.accent
-                 : root.dimmed ? theme.palette?.tokens.fgA3
-                 : theme.palette?.tokens.fgA1
+                 : root.dimmed ? theme.palette?.tokens.fgA3 ?? "transparent"
+                 : theme.palette?.tokens.fgA1 ?? "transparent"
         }
     }
 

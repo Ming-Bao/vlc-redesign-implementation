@@ -159,7 +159,7 @@ T.ItemDelegate {
             verticalAlignment: Text.AlignVCenter
 
             // Figma: the active root's label is brighter (FG/2) than the others
-            color: control.entryState === 2 ? theme.palette?.tokens.fg2 : theme.fg.primary
+            color: control.entryState === 2 ? theme.palette?.tokens.fg2 ?? "transparent" : theme.fg.primary
 
             elide: Text.ElideRight
 
