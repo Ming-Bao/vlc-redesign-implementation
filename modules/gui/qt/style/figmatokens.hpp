@@ -53,12 +53,16 @@ struct FigmaTokens
     Q_PROPERTY(QColor logo MEMBER logo)
     Q_PROPERTY(QColor accentBgBright MEMBER accentBgBright)
     Q_PROPERTY(QColor accentBgDark MEMBER accentBgDark)
+    Q_PROPERTY(QColor accentText MEMBER accentText)
 public:
     QColor fg1, fg2, fgA1, fgA2, fgA3, fgA4, fgB1;
     QColor bgA1, bgA2, bgA3, bgA4, bgA5, bgB1, bgB2;
     QColor bgA3Transparent, bgB1Transparent, bgB2Transparent;
     QColor dividerDim, dividerBright;
     QColor accent, accentBright, accentDim, logo, accentBgBright, accentBgDark;
+    // no Figma style: the accent as text or an icon. Dark: the accent; light: Accent/Dim, as the light
+    // accent on light grey reads at ~1.5:1. Accent fills (pills, handles, rings) stay `accent`.
+    QColor accentText;
 };
 
 // The table for one theme. The accent tokens derive from `accent`; with `defaultAccent`

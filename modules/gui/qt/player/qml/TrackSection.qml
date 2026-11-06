@@ -173,7 +173,7 @@ ColumnLayout {
         visible: root.showNone && !!root.model
         text: qsTr("None")
         ticked: !root._anyChecked
-        tickColor: theme.accent
+        tickColor: theme.accentText
         labelColor: root._labelColor
         onClicked: root._uncheckAll(-1)
     }
@@ -189,7 +189,7 @@ ColumnLayout {
 
             text: model.display
             ticked: model.checked
-            tickColor: theme.accent
+            tickColor: theme.accentText
             labelColor: root._labelColor
             onClicked: {
                 if (model.checked)

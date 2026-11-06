@@ -58,7 +58,7 @@ Rectangle {
                     text: seg.text
                     horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                     font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-                    color: seg.index === root.currentIndex ? root._s.accent : root._s.label
+                    color: seg.index === root.currentIndex ? root._s.accentText : root._s.label
                 }
             }
         }

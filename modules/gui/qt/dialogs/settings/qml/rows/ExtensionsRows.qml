@@ -123,7 +123,7 @@ Column {
                         text: item.title
                         elide: Text.ElideRight
                         font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-                        color: item.isSelected ? root.style.accent : root.style.rowLabel
+                        color: item.isSelected ? root.style.accentText : root.style.rowLabel
                     }
                     Widgets.LabelExt {
                         id: ver

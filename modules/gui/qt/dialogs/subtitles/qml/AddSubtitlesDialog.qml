@@ -544,7 +544,7 @@ DialogCard {
                         anchors.verticalCenter: parent.verticalCenter
                         text: VLCIcons.checkmark
                         font.pixelSize: VLCStyle.dp(24, VLCStyle.scale)
-                        color: root._s.accent
+                        color: root._s.accentText
                     }
                 }
             }

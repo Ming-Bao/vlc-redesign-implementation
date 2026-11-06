@@ -59,7 +59,7 @@ T.Switch {
             anchors.verticalCenter: parent.verticalCenter
             text: root.checked ? qsTr("ON") : qsTr("OFF")
             font.pixelSize: VLCStyle.dp(12, VLCStyle.scale)
-            color: root.checked ? root._s.accent : root._s.label
+            color: root.checked ? root._s.accentText : root._s.label
         }
     }
 }

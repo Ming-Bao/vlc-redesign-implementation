@@ -142,7 +142,7 @@ T.ItemDelegate {
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
 
-                color: control.entryState === 2 ? theme.accent : theme.fg.primary
+                color: control.entryState === 2 ? theme.accentText : theme.fg.primary
 
                 font.pixelSize: VLCStyle.icon_normal
             }

@@ -65,6 +65,13 @@ private slots:
             QVERIFY(FigmaTokens::staticMetaObject.property(i).readOnGadget(&t).value<QColor>().isValid()); } }
     void pickedAccent() { auto t = figmaTokens(false, QColor("#19A234"), false);
         QCOMPARE(t.accent, QColor("#19A234")); QCOMPARE(t.logo, QColor("#19A234")); }
+    // accent as text: the accent in dark, Accent/Dim in light (the default and the grey swatch)
+    void accentText() {
+        QCOMPARE(figmaTokens(true, QColor("#D37918"), true).accentText, QColor("#D37918"));
+        QCOMPARE(figmaTokens(true, QColor("#AFAFAF"), false).accentText, QColor("#AFAFAF"));
+        auto l = figmaTokens(false, QColor("#E8851A"), true);
+        QCOMPARE(l.accentText, l.accentDim); QVERIFY(close(l.accentText, QColor("#965916"), 6));
+        QVERIFY(close(figmaTokens(false, QColor("#AFAFAF"), false).accentText, QColor("#717171"), 2)); }
 
     // a colour that is no token takes the light value of the nearest dark token by lightness, keeping its alpha
     void lightPartner_cases() {

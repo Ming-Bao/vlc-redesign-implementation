@@ -299,7 +299,7 @@ DialogCard {
             text: cell.capturing ? qsTr("Press a key…") : root.hk.displayKeys(cell.keys)
             font.family: dmMono.name
             font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-            color: cell.capturing ? root._s.accent : root._s.sectionTitle
+            color: cell.capturing ? root._s.accentText : root._s.sectionTitle
         }
 
         Image {

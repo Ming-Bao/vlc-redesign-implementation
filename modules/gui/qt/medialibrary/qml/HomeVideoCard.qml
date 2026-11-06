@@ -149,7 +149,7 @@ T.AbstractButton {
             elide: Text.ElideRight
             text: root.text
             font.pixelSize: VLCStyle.dp(16, VLCStyle.scale)
-            color: root.playing ? theme.accent
+            color: root.playing ? theme.accentText
                  : root.dimmed ? theme.palette?.tokens.fgA3 ?? "transparent"
                  : theme.palette?.tokens.fgA1 ?? "transparent"
         }

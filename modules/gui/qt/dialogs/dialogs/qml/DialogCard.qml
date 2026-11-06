@@ -359,7 +359,7 @@ Window {
                 enabled: root.saveEnabled
                 opacity: enabled ? 1 : 0.5
                 color: root._s.accentBg
-                textColor: root._s.accent
+                textColor: root._s.accentText
                 text: root.saveText
                 onActivated: root.saved()
             }

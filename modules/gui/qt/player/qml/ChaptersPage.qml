@@ -103,7 +103,7 @@ Item {
                 text: chapterRow.index + 1
                 font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
                 font.weight: Font.Medium
-                color: chapterRow.colorContext.accent
+                color: chapterRow.colorContext.accentText
             }
 
             onClicked: Player.chapters.selectChapter(index)

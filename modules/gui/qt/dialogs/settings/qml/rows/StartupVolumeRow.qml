@@ -61,7 +61,7 @@ Column {
                 anchors.verticalCenter: parent.verticalCenter
                 text: btn.text
                 font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-                color: btn.selected ? root.style.accent : root.style.label
+                color: btn.selected ? root.style.accentText : root.style.label
             }
             Rectangle {
                 visible: field.text.length > 0

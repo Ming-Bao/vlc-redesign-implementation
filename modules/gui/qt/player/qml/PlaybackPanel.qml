@@ -127,7 +127,7 @@ PlayerPanel {
                     verticalAlignment: Text.AlignVCenter
                     text: resetItem.text
                     font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-                    color: resetItem._lit ? presetBtn._s.accent : presetBtn._s.value
+                    color: resetItem._lit ? presetBtn._s.accentText : presetBtn._s.value
                 }
                 background: Rectangle {
                     color: resetItem._lit ? presetBtn._s.face : "transparent"

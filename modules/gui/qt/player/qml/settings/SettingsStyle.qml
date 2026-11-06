@@ -33,6 +33,8 @@ QtObject {
     // the accent is only defined in the View set (any window part may be built on another set)
     readonly property ColorContext _view: ColorContext { palette: style.theme.palette; colorSet: ColorContext.View }
     readonly property color accent:    _view.accent
+    // the accent as text or an icon (light: Accent/Dim, so it reads on light grey); `accent` stays for fills and rings
+    readonly property color accentText: _view.accentText
     readonly property color accentBg:  _t.accentBgBright
     readonly property color accentDim: _t.accentDim
     readonly property color knobOff:   _t.fgA4

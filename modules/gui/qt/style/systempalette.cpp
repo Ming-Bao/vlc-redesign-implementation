@@ -520,7 +520,7 @@ void SystemPalette::makeFigmaPalette(bool dark)
         setColor(CS, C::Fg, C::Negative, C::Normal, Qt::red);
 
         setColor(CS, C::Bg, C::Neutral, C::Normal, QColor(Qt::darkYellow));
-        setColor(CS, C::Fg, C::Neutral, C::Normal, t.accent);
+        setColor(CS, C::Fg, C::Neutral, C::Normal, t.accentText);
 
         setColor(CS, C::Bg, C::Positive, C::Normal, QColor(Qt::darkGreen));
         setColor(CS, C::Fg, C::Positive, C::Normal, Qt::green);
@@ -538,7 +538,7 @@ void SystemPalette::makeFigmaPalette(bool dark)
         setColor(CS, C::Decoration, C::Separator, C::Normal, t.dividerDim);
 
         setColor(CS, C::Decoration, C::Accent, C::Normal, t.accent);
-        setColor(CS, C::Fg, C::Link, C::Normal, t.accent);
+        setColor(CS, C::Fg, C::Link, C::Normal, t.accentText);
     }
 
     //window banner & miniplayer

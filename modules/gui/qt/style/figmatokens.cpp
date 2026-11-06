@@ -94,6 +94,7 @@ FigmaTokens figmaTokens(bool dark, const QColor& accent, bool defaultAccent)
     }
     // always derived: dark QML has drawn Qt.darker(accent, 1.24) since slice 4
     t.accentDim = t.accent.darker(dark ? 124 : 155);
+    t.accentText = dark ? t.accent : t.accentDim;
     return t;
 }
 

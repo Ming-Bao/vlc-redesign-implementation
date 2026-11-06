@@ -275,7 +275,7 @@ ListView {
 
                     font.pixelSize: VLCStyle.fontHeight_xxxlarge
 
-                    color: theme.accent
+                    color: theme.accentText
                 }
             }
 
@@ -708,7 +708,7 @@ ListView {
             Text {
                 text: section
                 font.pixelSize: VLCStyle.fontSize_xlarge
-                color: theme.accent
+                color: theme.accentText
             }
 
             Rectangle {

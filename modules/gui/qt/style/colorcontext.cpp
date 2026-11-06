@@ -431,3 +431,9 @@ QColor ColorContext::accent() const
 {
     return getColor(Decoration, Accent);
 }
+
+QColor ColorContext::accentText() const
+{
+    // dark: tokens().accentText is the accent, as accent() gives
+    return m_palette ? m_palette->tokens().accentText : accent();
+}

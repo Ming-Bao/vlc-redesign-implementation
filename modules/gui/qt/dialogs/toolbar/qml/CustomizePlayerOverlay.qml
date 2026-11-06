@@ -417,7 +417,7 @@ FocusScope {
                 enabled: root._profile?.dirty ?? false
                 opacity: enabled ? 1 : 0.5
                 color: root._s.accentBg
-                textColor: root._s.accent
+                textColor: root._s.accentText
                 text: qsTr("Save")
                 onActivated: root._close(true)
             }

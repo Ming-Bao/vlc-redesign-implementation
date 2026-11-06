@@ -65,7 +65,7 @@ T.ItemDelegate {
             text: row.text
             elide: Text.ElideRight
             font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
-            color: row.current ? theme.accent : theme.palette?.tokens.fgA1 ?? "transparent"
+            color: row.current ? theme.accentText : theme.palette?.tokens.fgA1 ?? "transparent"
         }
 
         Widgets.LabelExt {
