@@ -539,7 +539,12 @@ void MainCtx::onSettingChanged(const QString& name)
         if (wanted && !m_systray && QSystemTrayIcon::isSystemTrayAvailable())
             m_systray = std::make_unique<VLCSystray>(this);
         else if (!wanted)
+        {
+            // a hidden window with no tray left would strand the app
+            if (m_windowVisibility == QWindow::Hidden || m_windowVisibility == QWindow::Minimized)
+                setInterfaceVisibible(true, true);
             m_systray.reset();
+        }
     }
     emit settingChanged(name);
 }
