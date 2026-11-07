@@ -32,7 +32,7 @@ inline Kind kindOf(const QString& option)
     static const QSet<QString> outputVars = {
         "aspect-ratio", "crop", "zoom", "autoscale", "deinterlace", "deinterlace-mode", "video-wallpaper",
         "sub-margin", "stereo-mode", "audio-filter", "video-filter", "equalizer-bands", "equalizer-preamp",
-        "equalizer-2pass", "pitch-shift", "audio-visual", "audio-replay-gain-mode", "hue", "brightness",
+        "equalizer-2pass", "pitch-shift", "audio-replay-gain-mode", "hue", "brightness",
         "contrast", "saturation", "gamma" };
     static const QSet<QString> player = {
         "rate", "audio-desync", "sub-delay", "sub-text-scale", "video", "audio", "spu", "audio-track",

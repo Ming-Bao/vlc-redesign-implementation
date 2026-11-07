@@ -275,7 +275,7 @@ var pages = [
         { title: qsTr("Language and Sync"), rows: [
             { label: qsTr("Preferred audio language"), applies: "next", kind: "dropdown", option: "audio-language", choicesFrom: "languages" },
             { label: qsTr("Audio delay"), kind: "number", option: "audio-desync", scale: 1000, suffix: qsTr(" s") },
-            { label: qsTr("Visualizer"), kind: "dropdown", option: "audio-visual" }
+            { label: qsTr("Visualizer"), applies: "next", kind: "dropdown", option: "audio-visual" }
         ] },
         { title: "", adv: true, rows: [
             { label: qsTr("Pass compressed audio to the receiver"), kind: "toggle", adv: true, option: "spdif" },

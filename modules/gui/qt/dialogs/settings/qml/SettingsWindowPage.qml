@@ -21,6 +21,7 @@ import QtQuick.Templates as T
 import VLC.Style
 import VLC.Widgets as Widgets
 import VLC.Player
+import VLC.Playlist
 import VLC.Dialogs
 
 import "SettingsData.js" as SettingsData
@@ -60,6 +61,13 @@ Flickable {
 
     // re-read every row (values may have changed outside the bridge while the page was hidden)
     function reload() { _tick++ }
+
+    // the player's own repeat/shuffle buttons write the config behind the bridge's back
+    Connections {
+        target: MainPlaylistController
+        function onRepeatModeChanged() { Qt.callLater(root.reload) }
+        function onRandomChanged() { Qt.callLater(root.reload) }
+    }
 
     onPageChanged: {
         advancedOpen = !!_openByPage[page.name]
