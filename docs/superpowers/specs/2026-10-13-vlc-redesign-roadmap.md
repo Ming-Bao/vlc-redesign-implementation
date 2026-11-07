@@ -30,3 +30,11 @@ Slice 1 (done, merged): dark tokens, sidebar card, title bar, page header, flat 
 
 Each slice: writing-plans → user review → executing-plans; verify against Figma frames with
 `docs/superpowers/scripts/vlc-xvfb.sh` (X11) and `wl-drive.py` (Wayland).
+
+## Later (recorded 2026-11-08, not scheduled)
+- **Figma audit.** Page `0:1` of `dSoAm0gN9ZterHSssJU9FN` has 105 top-level frames. List them with `use_figma`
+  (`figma.currentPage.children.map(n => n.name + ' ' + n.id)`), map each to a row above, and report the unmapped and
+  partly built frames to the user before planning anything.
+- **Customize Player: the second top row takes no items** (user report). Reproduce on the harness first.
+  `dialogs/toolbar/qml/CustomizePlayerOverlay.qml`; slice 8 plan `docs/superpowers/plans/2026-11-05-vlc-redesign-dialogs.md`.
+  Likely the row's model or alignment isn't registered as a drop target.
