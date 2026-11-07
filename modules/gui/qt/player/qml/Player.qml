@@ -56,7 +56,9 @@ FocusScope {
     // Figma 247:445 / 3328:11554: in a window the video sits between the bars,
     // in fullscreen the bars overlay it and hide when idle
     property bool _controlsUnderVideo: (MainCtx.intfMainWindow.visibility !== Window.FullScreen)
-                                       || MainCtx.pinVideoControls // the user pins them in fullscreen too
+                                       || (MainCtx.pinVideoControls && MainCtx.fsController) // the user pins them in fullscreen too
+    // "Show controls in fullscreen" off: the bars never appear over fullscreen video
+    readonly property bool _barsAllowed: MainCtx.fsController || (MainCtx.intfMainWindow.visibility !== Window.FullScreen)
 
     // in a window dark is solid BG/A3, light the frame's BG/A3 Transparent; fullscreen overlays both at 95 %
     readonly property color _barColor: !_controlsUnderVideo ? Qt.alpha(windowTheme.palette.tokens.bgA3Transparent, 0.95)
@@ -731,7 +733,7 @@ FocusScope {
         //initial state value is "", using a binding avoid animation on startup
         Binding on state {
             when: playerToolbarVisibilityFSM.started
-            value: (playerToolbarVisibilityFSM.isVisible || rootPlayer._controlsUnderVideo) ? "visible" : "hidden"
+            value: ((playerToolbarVisibilityFSM.isVisible || rootPlayer._controlsUnderVideo) && rootPlayer._barsAllowed) ? "visible" : "hidden"
         }
 
         onRequestLockUnlockAutoHide: (lock) => rootPlayer.lockUnlockAutoHide(lock)
@@ -1026,7 +1028,7 @@ FocusScope {
         //initial state value is "", using a binding avoid animation on startup
         Binding on state {
             when: playerToolbarVisibilityFSM.started
-            value: (playerToolbarVisibilityFSM.isVisible || rootPlayer._controlsUnderVideo) ? "visible" : "hidden"
+            value: ((playerToolbarVisibilityFSM.isVisible || rootPlayer._controlsUnderVideo) && rootPlayer._barsAllowed) ? "visible" : "hidden"
         }
 
         onRequestLockUnlockAutoHide: (lock) => rootPlayer.lockUnlockAutoHide(lock)

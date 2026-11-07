@@ -44,7 +44,7 @@ Item {
     // Events
     //---------------------------------------------------------------------------------------------
 
-    Component.onCompleted: if (DialogErrorModel.repeatedMessageCount){
+    Component.onCompleted: if (MainCtx.errorDialogs && DialogErrorModel.repeatedMessageCount){
                                hideErrorPopupTimer.restart()
                                errorPopup.state = "visible"
                            }
@@ -145,6 +145,8 @@ Item {
         target: DialogErrorModel
 
         function onCountChanged() {
+            if (!MainCtx.errorDialogs) // the model still collects it for the messages log
+                return
             hideErrorPopupTimer.restart()
             errorPopup.state = "visible"
         }
