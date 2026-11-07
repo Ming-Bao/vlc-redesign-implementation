@@ -168,6 +168,9 @@ libqt_plugin_la_SOURCES = \
 	dialogs/hotkeys/hotkey_model.hpp \
 	dialogs/settings/settings_bridge.cpp \
 	dialogs/settings/settings_bridge.hpp \
+	dialogs/settings/settings_apply.cpp \
+	dialogs/settings/settings_apply.hpp \
+	dialogs/settings/settings_apply_kind.hpp \
 	dialogs/settings/settings_extensions.cpp \
 	dialogs/toolbar/controlbar_profile.hpp \
 	dialogs/toolbar/controlbar_profile.cpp \
@@ -480,6 +483,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	dialogs/subtitles/opensubtitles_client.moc.cpp \
 	dialogs/subtitles/add_subtitles_controller.moc.cpp \
 	dialogs/settings/settings_bridge.moc.cpp \
+	dialogs/settings/settings_apply.moc.cpp \
 	dialogs/toolbar/controlbar_profile.moc.cpp \
 	dialogs/toolbar/controlbar_profile_model.moc.cpp \
 	dialogs/playlists/playlists.moc.cpp \
@@ -2168,6 +2172,21 @@ test_subtitle_matching_LDADD = $(QT_QTEST_COMMON_ldadd)
 test_subtitle_matching_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
 check_PROGRAMS += test_subtitle_matching
 TESTS += test_subtitle_matching
+
+# test_settings_apply_kind
+
+test_settings_apply_kind_SOURCES = \
+	tests/test_settings_apply_kind.cpp \
+	dialogs/settings/settings_apply_kind.hpp
+nodist_test_settings_apply_kind_SOURCES = tests/test_settings_apply_kind.moc
+BUILT_SOURCES += tests/test_settings_apply_kind.moc
+CLEANFILES += tests/test_settings_apply_kind.moc
+test_settings_apply_kind_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)
+test_settings_apply_kind_CXXFLAGS = $(QT_QTEST_COMMON_cxxflags)
+test_settings_apply_kind_LDADD = $(QT_QTEST_COMMON_ldadd)
+test_settings_apply_kind_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
+check_PROGRAMS += test_settings_apply_kind
+TESTS += test_settings_apply_kind
 
 # test_effects_util
 

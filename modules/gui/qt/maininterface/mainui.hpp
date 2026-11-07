@@ -21,6 +21,7 @@
 #include <QMessageBox>
 
 class VLCVarChoiceModel;
+class SettingsBridge;
 
 class MainUI : public QObject
 {
@@ -42,6 +43,7 @@ private:
     static QObject* getMainCtxInstance(QQmlEngine *, QJSEngine *);
 
     qt_intf_t* m_intf = nullptr;
+    SettingsBridge* m_settingsBridge = nullptr;
     MainCtx* m_mainCtx = nullptr;
     QWindow*       m_interfaceWindow = nullptr;
 

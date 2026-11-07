@@ -48,6 +48,8 @@ public:
     Q_INVOKABLE bool filterEnabled(const QString& module) const;
     Q_INVOKABLE void setFilterEnabled(const QString& module, bool on);
     Q_INVOKABLE QVariant value(const QString& name) const;
+    // the live half of setValue: the var on the aout and every vout that has it, no config write
+    void pushToOutputs(const QString& name, const QVariant& v);
     Q_INVOKABLE void setValue(const QString& name, const QVariant& v);
     Q_INVOKABLE QVariant configValue(const QString& name) const;
     Q_INVOKABLE void setConfigValue(const QString& name, const QVariant& v);

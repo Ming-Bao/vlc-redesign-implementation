@@ -68,6 +68,7 @@
 #include "dialogs/dialogs_provider.hpp"
 #include "dialogs/dialogs/dialogmodel.hpp"
 #include "dialogs/settings/settings_bridge.hpp"
+#include "dialogs/settings/settings_apply.hpp"
 #include "dialogs/onboarding/onboarding_controller.hpp"
 #include "dialogs/subtitles/add_subtitles_controller.hpp"
 #ifdef UPDATE_CHECK
@@ -289,7 +290,8 @@ void MainUI::registerQMLTypes()
         qmlRegisterSingletonInstance<DialogsProvider>(uri, versionMajor, versionMinor, "DialogsProvider", DialogsProvider::getInstance());
         assert(DialogErrorModel::getInstance<false>());
         qmlRegisterSingletonInstance<DialogErrorModel>(uri, versionMajor, versionMinor, "DialogErrorModel", DialogErrorModel::getInstance<false>());
-        qmlRegisterSingletonInstance<SettingsBridge>(uri, versionMajor, versionMinor, "SettingsBridge", new SettingsBridge(m_intf, this));
+        m_settingsBridge = new SettingsBridge(m_intf, this);
+        qmlRegisterSingletonInstance<SettingsBridge>(uri, versionMajor, versionMinor, "SettingsBridge", m_settingsBridge);
         qmlRegisterSingletonInstance<OnboardingController>(uri, versionMajor, versionMinor, "Onboarding", new OnboardingController(m_intf, this));
         qmlRegisterSingletonInstance<AddSubtitlesController>(uri, versionMajor, versionMinor, "AddSubtitlesController",
                                                              new AddSubtitlesController(m_intf, this));
@@ -331,8 +333,9 @@ void MainUI::registerQMLTypes()
         qmlRegisterUncreatableType<ProgramListModel>(uri, versionMajor, versionMinor, "ProgramListModel", "available programs of a media" );
         assert(m_intf->p_mainPlayerController);
         qmlRegisterSingletonInstance<PlayerController>(uri, versionMajor, versionMinor, "Player", m_intf->p_mainPlayerController);
-        qmlRegisterSingletonInstance<PlayerEffects>(uri, versionMajor, versionMinor, "Effects",
-                                                    new PlayerEffects(m_intf, m_intf->p_mainPlayerController, this));
+        auto* effects = new PlayerEffects(m_intf, m_intf->p_mainPlayerController, this);
+        qmlRegisterSingletonInstance<PlayerEffects>(uri, versionMajor, versionMinor, "Effects", effects);
+        new SettingsApplier(m_intf, m_settingsBridge, effects, this);
         qmlRegisterType<PlayerWaveform>(uri, versionMajor, versionMinor, "Waveform");
         qmlRegisterTypesAndRevisions<TimedText>(uri, versionMajor);
         qmlRegisterType<PlayerHighResolutionTimeUpdater>(uri, versionMajor, versionMinor, "HighResolutionTimeUpdater");

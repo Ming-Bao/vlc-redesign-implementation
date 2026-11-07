@@ -169,7 +169,7 @@ void PlayerEffects::setConfigValue(const QString& name, const QVariant& v)
     touch();
 }
 
-void PlayerEffects::setValue(const QString& name, const QVariant& v)
+void PlayerEffects::pushToOutputs(const QString& name, const QVariant& v)
 {
     const int type = config_GetType(qtu(name));
     QByteArray keep;
@@ -179,6 +179,11 @@ void PlayerEffects::setValue(const QString& name, const QVariant& v)
     for (const auto& vout : m_player->getVouts())
         if (var_Type(vout.get(), qtu(name)))
             var_SetChecked(vout.get(), qtu(name), type, val);
+}
+
+void PlayerEffects::setValue(const QString& name, const QVariant& v)
+{
+    pushToOutputs(name, v);
     setConfigValue(name, v);
 }
 

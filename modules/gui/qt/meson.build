@@ -68,6 +68,7 @@ moc_headers = files(
     'dialogs/sout/sout_widgets.hpp',
     'dialogs/systray/systray.hpp',
     'dialogs/settings/settings_bridge.hpp',
+    'dialogs/settings/settings_apply.hpp',
     'dialogs/network/saved_streams.hpp',
     'dialogs/onboarding/onboarding_controller.hpp',
     'dialogs/hotkeys/hotkey_model.hpp',
@@ -280,6 +281,9 @@ qt_plugin_sources = files(
     'dialogs/preferences/simple_preferences.cpp',
     'dialogs/preferences/simple_preferences.hpp',
     'dialogs/settings/settings_bridge.cpp',
+    'dialogs/settings/settings_apply.cpp',
+    'dialogs/settings/settings_apply.hpp',
+    'dialogs/settings/settings_apply_kind.hpp',
     'dialogs/network/saved_streams.cpp',
     'dialogs/network/saved_streams.hpp',
     'dialogs/onboarding/onboarding_controller.cpp',
@@ -1567,6 +1571,19 @@ if qt6_dep.found()
             'link_with': [libvlccore, libvlc],
             'link_args': qt_link_args,
             'dependencies': [qt6_dep, qt_extra_deps, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
+            'name': 'test_qt_settings_apply_kind',
+            'sources': files(
+                'tests/test_settings_apply_kind.cpp',
+                'dialogs/settings/settings_apply_kind.hpp'
+            ),
+            'moc_sources': files('tests/test_settings_apply_kind.cpp'),
+            'suite': ['qt'],
+            'include_directories' : qt_include_dir,
+            'link_args': qt_link_args,
+            'dependencies': [qt6_dep, qtest_qt6_dep]
         }
 
         vlc_tests += {
