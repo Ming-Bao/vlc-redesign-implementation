@@ -328,6 +328,9 @@ FocusScope {
 
                     cursorShape: playerSpecializationLoader.cursorShape
 
+                    // the video takes its clicks before the popup overlay sees them: close the queue card here
+                    onMouseReleased: if (playlistpopup.opened) playlistpopup.close()
+
                     function onMouseEvent() {
                         //short interval for mouse events
                         if (Player.isInteractive)
@@ -844,8 +847,18 @@ FocusScope {
         Component.onCompleted: if (shown) open()
         // Escape closes the card itself: keep the play queue state in step
         // (only while the docked queue is still shown: undocking closes the card too)
-        onClosed: if (playlistVisibility.isPlaylistVisible && MainCtx.playqueuePanel.docked && !rootPlayer._customizing)
-                      playlistVisibility.togglePlaylistVisibility()
+        // Deferred: a click outside closes the card before the clicked control runs, so a queue toggle
+        // (button) has already hidden the state, and a Bookmarks/Chapters button has switched the tab to show
+        property int _closedTab: 0
+        onClosed: { _closedTab = currentTab; Qt.callLater(_syncClosed) }
+        function _syncClosed() {
+            if (!playlistVisibility.isPlaylistVisible || !MainCtx.playqueuePanel.docked || rootPlayer._customizing)
+                return
+            if (currentTab !== _closedTab)
+                open()
+            else
+                playlistVisibility.togglePlaylistVisibility()
+        }
 
         navigationParent: rootPlayer
         navigationUp: topBar

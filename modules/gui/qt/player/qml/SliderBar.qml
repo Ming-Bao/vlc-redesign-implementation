@@ -587,7 +587,8 @@ T.ProgressBar {
                 },
                 State {
                     name: "buffering not started"
-                    when: control.visible && Player.isStarted && Player.buffering === 0
+                    // only before the first frame: a seek drops buffering to 0 too, and the bounce would flash
+                    when: control.visible && Player.isStarted && Player.buffering === 0 && control.value === 0
                     PropertyChanges {
                         target: bufferRect
                         width: bufferAnimWidth

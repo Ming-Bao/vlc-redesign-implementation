@@ -16,6 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 import QtQuick
+import QtQuick.Templates as T
 
 import VLC.MainInterface
 import VLC.Style
@@ -41,6 +42,8 @@ PlayerPanel {
 
     fillHeight: true
     modal: false
+    // a release anywhere else closes the card and still reaches what was clicked (e.g. Subtitles)
+    closePolicy: T.Popup.CloseOnEscape | T.Popup.CloseOnReleaseOutside
     dim: false
     // opening does not take the focus: the player keeps its hotkeys while the card is up
     focus: false
