@@ -688,6 +688,7 @@ qml_modules += {
         'dialogs/settings/qml/SettingsWindow.qml',
         'dialogs/settings/qml/SettingsWindowPage.qml',
         'dialogs/settings/qml/rows/AccentRow.qml',
+        'dialogs/settings/qml/rows/AppliesChip.qml',
         'dialogs/settings/qml/rows/BufferingRows.qml',
         'dialogs/settings/qml/rows/EqualizerRows.qml',
         'dialogs/settings/qml/rows/ExtensionsRows.qml',

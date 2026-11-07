@@ -58,5 +58,6 @@ QtObject {
     // the settings window's pages: section headers, row labels, the Advanced Options bar
     readonly property color sectionTitle:    _t.fg2
     readonly property color rowLabel:        _t.fgA2
+    readonly property color chipBg:          _t.bgA2   // the "applies" chip after a row label
     readonly property color advancedBg:      _t.bgA3Transparent
 }

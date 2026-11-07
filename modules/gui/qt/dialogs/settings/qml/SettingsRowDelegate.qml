@@ -237,6 +237,12 @@ FocusScope {
                 width: Math.min(implicitWidth, VLCStyle.dp(360, VLCStyle.scale))
             }
         }
+
+        AppliesChip {
+            anchors.verticalCenter: parent.verticalCenter
+            style: root.style
+            text: SettingsData.appliesText(root.row)
+        }
     }
 
     Item {

@@ -41,4 +41,42 @@ TestCase {
         const p = Data.search(Data.pages, "proxy")
         compare(p[0].title, "Network Connections & Security")
     }
+
+    function rowsByOption() {               // first option of each row -> row
+        const m = {}
+        for (const p of Data.pages) for (const s of p.sections) for (const r of s.rows) {
+            const k = r.option ?? r.list ?? r.component ?? r.action
+            m[k] = m[k] ?? r
+        }
+        return m
+    }
+    function test_appliesValues() {
+        for (const p of Data.pages) for (const s of p.sections) for (const r of s.rows)
+            verify(r.applies === undefined || r.applies === "next" || r.applies === "restart", r.label)
+    }
+    function test_appliesSpot() {
+        const m = rowsByOption()
+        compare(m["dec-dev"].applies, "next")
+        compare(m["sub-autodetect-file"].applies, "next")
+        compare(m["aout"].applies, "next")
+        compare(m["media-library"].applies, "restart")
+        compare(m["file-logging"].applies, "restart")
+        compare(m["qt-icon-change"].applies, "restart")
+        compare(m["file-caching"].applies, "next")        // Buffering (custom row)
+        compare(m["volume-save"].applies, "restart")      // Startup volume (custom row)
+        compare(m["rate"].applies, undefined)
+        compare(m["audio-track"].applies, undefined)
+        compare(m["qt-max-volume"].applies, undefined)
+        compare(m["freetype-color"].applies, undefined)
+        compare(Data.appliesText(m["dec-dev"]), "Next video")
+        compare(Data.appliesText(m["media-library"]), "After restart")
+        compare(Data.appliesText(m["rate"]), "")
+    }
+    function test_deadRowsRemoved() {
+        const m = rowsByOption()
+        compare(m["qt-fs-sensitivity"], undefined)
+        compare(m["playlist-tree"], undefined)
+        verify(m["qt-fs-controller"] !== undefined)
+        verify(m["qt-error-dialogs"] !== undefined)
+    }
 }

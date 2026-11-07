@@ -68,10 +68,20 @@ Column {
         height: root._lineHeight
 
         Widgets.LabelExt {
+            id: bufLabel
+
             anchors.verticalCenter: parent.verticalCenter
             text: root.row.label
             font.pixelSize: VLCStyle.dp(14, VLCStyle.scale)
             color: root.style ? root.style.rowLabel : "transparent"
+        }
+
+        AppliesChip {
+            anchors.left: bufLabel.right
+            anchors.leftMargin: VLCStyle.dp(10, VLCStyle.scale)
+            anchors.verticalCenter: parent.verticalCenter
+            style: root.style
+            text: SettingsData.appliesText(root.row)
         }
 
         SettingCombo {
