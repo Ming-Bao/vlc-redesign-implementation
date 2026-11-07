@@ -70,7 +70,7 @@ function test_appliesSpot() {
     compare(m["media-library"].applies, "restart")
     compare(m["file-logging"].applies, "restart")
     compare(m["qt-icon-change"].applies, "restart")
-    compare(m["BufferingRows.qml"].applies, "next")
+    compare(m["file-caching"].applies, "next")        // Buffering (custom row)
     compare(m["volume-save"].applies, "restart")      // Startup volume (custom row)
     compare(m["rate"].applies, undefined)
     compare(m["qt-max-volume"].applies, undefined)
