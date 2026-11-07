@@ -66,3 +66,4 @@ static-lib/
 
 # Claude Code tooling state
 **/.claude/handoff-nudge-state.json
+.superpowers/
