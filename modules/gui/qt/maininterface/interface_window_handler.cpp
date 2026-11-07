@@ -84,10 +84,28 @@ InterfaceWindowHandler::InterfaceWindowHandler(qt_intf_t *_p_intf, MainCtx* main
 
     m_window->setTitle("");
 
-    if( var_InheritBool( p_intf, "qt-name-in-title" ) )
+    const auto applyNameInTitle = [this]()
     {
-        connect( THEMIM, &PlayerController::nameChanged, m_window, &QWindow::setTitle );
-    }
+        disconnect( THEMIM, &PlayerController::nameChanged, m_window, &QWindow::setTitle );
+        if( var_InheritBool( p_intf, "qt-name-in-title" ) )
+        {
+            connect( THEMIM, &PlayerController::nameChanged, m_window, &QWindow::setTitle );
+            m_window->setTitle( THEMIM->getName() );
+        }
+        else
+            m_window->setTitle( "" );
+    };
+    applyNameInTitle();
+
+    connect( m_mainCtx, &MainCtx::settingChanged, this, [this, applyNameInTitle](const QString& name)
+    {
+        if( name == QLatin1String("qt-name-in-title") )
+            applyNameInTitle();
+        else if( name == QLatin1String("qt-pause-minimized") )
+            m_pauseOnMinimize = var_InheritBool( p_intf, "qt-pause-minimized" );
+        else if( name == QLatin1String("qt-opacity") )
+            m_window->setOpacity( var_InheritFloat( p_intf, "qt-opacity" ) );
+    });
 
     connect( m_window, &QWindow::screenChanged, m_mainCtx, &MainCtx::updateIntfScaleFactor );
 

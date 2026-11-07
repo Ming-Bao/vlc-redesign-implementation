@@ -438,10 +438,13 @@ void MainCtx::loadPrefs(const bool callSignals)
             signal(this);
     };
 
-    bool minimalMode = false;
-    /* Are we in the enhanced always-video mode or not ? */
-    loadFromVLCOption(minimalMode, "qt-minimal-view", nullptr);
-    setMinimalView(minimalMode);
+    /* Are we in the enhanced always-video mode or not ? Start-up only: a reload must not flip compact mode */
+    if (!callSignals)
+    {
+        bool minimalMode = false;
+        loadFromVLCOption(minimalMode, "qt-minimal-view", nullptr);
+        setMinimalView(minimalMode);
+    }
 
     loadFromVLCOption(m_bgCone, "qt-bgcone", &MainCtx::bgConeToggled);
 
@@ -458,6 +461,10 @@ void MainCtx::loadPrefs(const bool callSignals)
     loadFromVLCOption(m_smoothScroll, "qt-smooth-scrolling", &MainCtx::smoothScrollChanged);
 
     loadFromVLCOption(m_maxVolume, "qt-max-volume", &MainCtx::maxVolumeChanged);
+
+    loadFromVLCOption(m_errorDialogs, "qt-error-dialogs", &MainCtx::errorDialogsChanged);
+
+    loadFromVLCOption(m_fsController, "qt-fs-controller", &MainCtx::fsControllerChanged);
 
     loadFromVLCOption(m_pinVideoControls, "qt-pin-controls", &MainCtx::pinVideoControlsChanged);
 
@@ -521,6 +528,20 @@ void MainCtx::loadFromSettingsImpl(const bool callSignals)
 void MainCtx::reloadPrefs()
 {
     loadPrefs(true);
+}
+
+void MainCtx::onSettingChanged(const QString& name)
+{
+    reloadPrefs();
+    if (name == QLatin1String("qt-system-tray"))
+    {
+        const bool wanted = var_InheritBool(p_intf, "qt-system-tray");
+        if (wanted && !m_systray && QSystemTrayIcon::isSystemTrayAvailable())
+            m_systray = std::make_unique<VLCSystray>(this);
+        else if (!wanted)
+            m_systray.reset();
+    }
+    emit settingChanged(name);
 }
 
 void MainCtx::onInputChanged( bool hasInput )

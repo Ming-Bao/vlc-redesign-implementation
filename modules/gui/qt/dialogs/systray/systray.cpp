@@ -39,6 +39,12 @@ VLCSystray::VLCSystray(MainCtx* ctx, QObject* parent)
 
     m_notificationSetting = var_InheritInteger(m_intf, "qt-notification");
 
+    connect(m_ctx, &MainCtx::settingChanged, this, [this](const QString& name)
+    {
+        if (name == QLatin1String("qt-notification"))
+            m_notificationSetting = var_InheritInteger(m_intf, "qt-notification");
+    });
+
     QIcon iconVLC;
     if( m_ctx->useXmasCone() )
         iconVLC = QIcon::fromTheme( "vlc-xmas", QIcon( ":/logo/vlc128-xmas.png" ) );

@@ -31,6 +31,13 @@ VideoWindowHandler::VideoWindowHandler(qt_intf_t* intf, QObject *parent)
     /* Does the interface resize to video size or the opposite */
     m_autoresize = var_InheritBool( m_intf, "qt-video-autoresize" );
 
+    if (m_intf->p_mi)
+        connect(m_intf->p_mi, &MainCtx::settingChanged, this, [this](const QString& name)
+        {
+            if (name == QLatin1String("qt-video-autoresize"))
+                m_autoresize = var_InheritBool(m_intf, "qt-video-autoresize");
+        });
+
     assert(qGuiApp);
     m_hasWayland = qGuiApp->platformName().startsWith(QLatin1String("wayland"));
 

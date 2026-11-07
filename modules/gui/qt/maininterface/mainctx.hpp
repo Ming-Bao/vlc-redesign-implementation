@@ -127,6 +127,8 @@ class MainCtx : public QObject
     Q_PROPERTY(QWindow* intfMainWindow READ intfMainWindow CONSTANT FINAL)
     Q_PROPERTY(bool useGlobalShortcuts READ getUseGlobalShortcuts WRITE setUseGlobalShortcuts NOTIFY useGlobalShortcutsChanged FINAL)
     Q_PROPERTY(int maxVolume READ maxVolume NOTIFY maxVolumeChanged FINAL)
+    Q_PROPERTY(bool errorDialogs READ errorDialogs NOTIFY errorDialogsChanged FINAL)
+    Q_PROPERTY(bool fsController READ fsController NOTIFY fsControllerChanged FINAL)
     Q_PROPERTY(float safeArea READ safeArea NOTIFY safeAreaChanged FINAL)
     Q_PROPERTY(VideoSurfaceProvider* videoSurfaceProvider READ getVideoSurfaceProvider WRITE setVideoSurfaceProvider NOTIFY hasEmbededVideoChanged FINAL)
     Q_PROPERTY(int mouseHideTimeout READ mouseHideTimeout NOTIFY mouseHideTimeoutChanged FINAL)
@@ -264,6 +266,8 @@ public:
     Q_INVOKABLE void holdGlobalShortcuts(bool hold);
     Q_INVOKABLE void reloadAccentColor() { emit accentColorChanged(); }
     inline int maxVolume() const { return m_maxVolume; }
+    inline bool errorDialogs() const { return m_errorDialogs; }
+    inline bool fsController() const { return m_fsController; }
 
     inline float safeArea() const { return m_safeArea; }
 
@@ -495,6 +499,8 @@ protected:
     bool m_customizingPlayer = false;
 
     int m_maxVolume = 125;
+    bool m_errorDialogs = true;
+    bool m_fsController = true;
 
     float m_safeArea = 0.0;
 
@@ -558,6 +564,8 @@ public slots:
     void emitShow();
 
     virtual void reloadPrefs();
+    // Settings window: re-read the prefs, then tell the owners of once-read options which one changed
+    void onSettingChanged(const QString& name);
     VLCVarChoiceModel* getExtraInterfaces();
 
     bool pasteFromClipboard();
@@ -617,6 +625,9 @@ signals:
     void useGlobalShortcutsChanged( bool );
 
     void maxVolumeChanged();
+    void errorDialogsChanged();
+    void fsControllerChanged();
+    void settingChanged(const QString& name);
 
     void safeAreaChanged();
 

@@ -18,6 +18,7 @@
 #include "settings_apply.hpp"
 #include "settings_apply_kind.hpp"
 #include "settings_bridge.hpp"
+#include "maininterface/mainctx.hpp"
 #include "player/player_controller.hpp"
 #include "player/player_effects.hpp"
 #include "playlist/playlist_controller.hpp"
@@ -108,4 +109,8 @@ void SettingsApplier::applyPlayer(const QString& option, const QVariant& value)
                                 : PlaylistController::MEDIA_STOPPED_CONTINUE);
 }
 
-void SettingsApplier::applyInterface(const QString&) {}
+void SettingsApplier::applyInterface(const QString& option)
+{
+    if (m_intf->p_mi)
+        m_intf->p_mi->onSettingChanged(option);
+}
