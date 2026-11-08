@@ -57,7 +57,13 @@ void SettingsApplier::applyPlayer(const QString& option, const QVariant& value)
         return;
 
     if (option == "rate")
-        player->setRate(value.toFloat());
+    {
+        // not PlayerController::setRate, a no-op with no input: this also sets the player var the next input inherits
+        vlc_player_t* p = player->getPlayer();
+        vlc_player_Lock(p);
+        vlc_player_ChangeRate(p, value.toFloat());
+        vlc_player_Unlock(p);
+    }
     else if (option == "audio-desync")
         player->setAudioDelayMS(value.toInt());
     else if (option == "sub-delay")
