@@ -131,6 +131,8 @@ T.ToolBar {
         property Controls.ControlListModel source: null
         property alias repeater: repeater
         property int index: 0
+        // not row.width: a row's width drops hidden items, so one narrow frame would hide them for good
+        property real availableWidth: Number.MAX_VALUE
 
         signal requestLockUnlockAutoHide(bool lock)
         signal menuOpened(var menu)
@@ -148,7 +150,7 @@ T.ToolBar {
                 ctx: MainCtx
             }
 
-            availableWidth: row.width
+            availableWidth: row.availableWidth
             availableHeight: row.height
 
             Navigation.parentItem: row.bar
@@ -239,6 +241,7 @@ T.ToolBar {
 
             // whole pixels: a layout rounds down, which would elide text that fits
             width: Math.max(0, Math.min(Math.ceil(implicitWidth), room))
+            availableWidth: Math.max(0, room)
 
             anchors {
                 horizontalCenter: parent.horizontalCenter
