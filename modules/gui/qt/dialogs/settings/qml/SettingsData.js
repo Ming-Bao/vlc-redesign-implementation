@@ -91,11 +91,11 @@ var pages = [
             { label: qsTr("Skin file"), applies: "restart", kind: "browseFile", option: "skins2-last" }
         ] },
         { title: qsTr("Window"), rows: [
-            { label: qsTr("Play video inside main window"), applies: "next", kind: "toggle", option: "embedded-video" },
+            { label: qsTr("Play video inside main window"), applies: "restart", kind: "toggle", option: "embedded-video" },
             { label: qsTr("Resize window to fit video"), kind: "dropdown", option: "qt-video-autoresize",
               choices: [ { value: false, label: qsTr("Never") }, { value: true, label: qsTr("Always") } ] },
             { label: qsTr("Keep window above other windows"), kind: "toggle", option: "video-on-top" },
-            { label: qsTr("Show window decorations"), applies: "next", kind: "toggle", option: "video-deco" },
+            { label: qsTr("Show window decorations"), applies: "restart", kind: "toggle", option: "video-deco" },
             { label: qsTr("Show the file name in the title bar"), kind: "toggle", option: "qt-name-in-title" },
             { label: qsTr("Open fullscreen on"), kind: "dropdown", option: "qt-fullscreen-screennumber", choicesFrom: "screens" }
         ] },
@@ -197,8 +197,8 @@ var pages = [
     { name: "video", label: qsTr("Video"), title: qsTr("Video Defaults"), icon: "video", group: "Media", sections: [
         { title: qsTr("Output"), rows: [
             { label: qsTr("Enable video"), kind: "toggle", option: "video" },
-            { label: qsTr("Start videos in fullscreen"), applies: "next", kind: "toggle", option: "fullscreen" },
-            { label: qsTr("Stop the screensaver during playback"), applies: "next", kind: "toggle", option: "disable-screensaver" },
+            { label: qsTr("Start videos in fullscreen"), applies: "restart", kind: "toggle", option: "fullscreen" },
+            { label: qsTr("Stop the screensaver during playback"), applies: "restart", kind: "toggle", option: "disable-screensaver" },
             { label: qsTr("Play video as desktop wallpaper"), kind: "toggle", option: "video-wallpaper" }
         ] },
         { title: qsTr("Picture"), rows: [
@@ -235,15 +235,15 @@ var pages = [
             { label: qsTr("Show a preview after capture"), kind: "toggle", option: "snapshot-preview" }
         ] },
         { title: "", adv: true, rows: [
-            { label: qsTr("Custom aspect ratios"), applies: "next", kind: "field", adv: true, option: "custom-aspect-ratios" },
-            { label: qsTr("Custom crop ratios"), applies: "next", kind: "field", adv: true, option: "custom-crop-ratios" },
+            { label: qsTr("Custom aspect ratios"), applies: "restart", kind: "field", adv: true, option: "custom-aspect-ratios" },
+            { label: qsTr("Custom crop ratios"), applies: "restart", kind: "field", adv: true, option: "custom-crop-ratios" },
             { label: qsTr("Monitor pixel aspect ratio"), applies: "next", kind: "field", adv: true, option: "monitor-par" }
         ] }
     ] },
     { name: "audio", label: qsTr("Audio"), title: qsTr("Audio Defaults"), icon: "audio", group: "Media", sections: [
         { title: qsTr("Output"), rows: [
             { label: qsTr("Enable audio"), kind: "toggle", option: "audio" },
-            { label: qsTr("Output device"), applies: "next", kind: "dropdown", option: "aout" },
+            { label: qsTr("Output device"), applies: "restart", kind: "dropdown", option: "aout" },
             { label: qsTr("Speaker setup"), kind: "dropdown", option: "stereo-mode" }
         ] },
         { title: qsTr("Volume"), rows: [
@@ -254,7 +254,7 @@ var pages = [
         ] },
         { title: qsTr("Loudness"), rows: [
             { label: qsTr("Normalize loudness"), kind: "toggle", list: "audio-filter", module: "normvol" },
-            { label: qsTr("Target level"), applies: "next", kind: "number", option: "norm-max-level" },
+            { label: qsTr("Target level"), kind: "number", option: "norm-max-level" },
             // "Night mode" is not built: no separate VLC filter (the Compressor below covers it)
             { label: qsTr("Replay gain"), kind: "dropdown", option: "audio-replay-gain-mode" },
             { label: qsTr("Replay gain preamp"), applies: "next", kind: "number", option: "audio-replay-gain-preamp" }
@@ -332,8 +332,8 @@ var pages = [
         { title: qsTr("On-screen Feedback"), rows: [
             { label: qsTr("Show feedback for shortcuts"), kind: "toggle", option: "osd" },
             // "Show feedback for" is not built: no VLC option
-            { label: qsTr("Show filename when a video starts"), applies: "next", kind: "toggle", option: "video-title-show" },
-            { label: qsTr("Show filename for"), applies: "next", kind: "slider", option: "video-title-timeout", min: 1, max: 10, step: 1, scale: 1000,
+            { label: qsTr("Show filename when a video starts"), applies: "restart", kind: "toggle", option: "video-title-show" },
+            { label: qsTr("Show filename for"), applies: "restart", kind: "slider", option: "video-title-timeout", min: 1, max: 10, step: 1, scale: 1000,
               ticks: [ qsTr("1 s"), qsTr("5 s"), qsTr("10 s") ], enabledBy: "video-title-show" }
         ] },
         // "Ignore styling in ASS and SSA subtitles" and the second "Visualization size" are not built: no VLC option / a Figma copy-paste
@@ -379,14 +379,14 @@ var pages = [
     ] },
     { name: "performance", label: qsTr("Performance"), title: qsTr("Performance Settings"), icon: "performance", group: "System", sections: [
         { title: qsTr("Decoding"), rows: [
-            { label: qsTr("Hardware-accelerated decoding"), applies: "next", kind: "dropdown", option: "dec-dev" },
+            { label: qsTr("Hardware-accelerated decoding"), applies: "restart", kind: "dropdown", option: "dec-dev" },
             { label: qsTr("Video post-processing"), kind: "dropdown", option: "postproc-q",
               choices: [ { value: 0, label: qsTr("Off") }, 1, 2, 3, 4, 5, 6 ].map((c) => typeof c === "number" ? { value: c, label: String(c) } : c) },
             { label: qsTr("Skip the H.264 loop filter"), applies: "next", kind: "dropdown", option: "avcodec-skiploopfilter" },
             { label: qsTr("Decoding threads"), applies: "next", kind: "number", option: "avcodec-threads" }
         ] },
         { title: qsTr("Smooth Playback"), rows: [
-            { label: qsTr("Drop frames when the system can't keep up"), applies: "next", kind: "toggle", option: "drop-late-frames" },
+            { label: qsTr("Drop frames when the system can't keep up"), applies: "restart", kind: "toggle", option: "drop-late-frames" },
             { label: qsTr("Give VLC real-time priority"), kind: "toggle", option: "high-priority" }
         ] },
         { title: qsTr("Developer"), adv: true, rows: [
@@ -405,9 +405,9 @@ var pages = [
         ] },
         { title: qsTr("Streaming"), rows: [
             { label: qsTr("Play locally while streaming"), applies: "next", kind: "toggle", option: "sout-display" },
-            { label: qsTr("Include audio"), applies: "next", kind: "toggle", option: "sout-audio" },
-            { label: qsTr("Include video"), applies: "next", kind: "toggle", option: "sout-video" },
-            { label: qsTr("Include subtitles"), applies: "next", kind: "toggle", option: "sout-spu" },
+            { label: qsTr("Include audio"), applies: "restart", kind: "toggle", option: "sout-audio" },
+            { label: qsTr("Include video"), applies: "restart", kind: "toggle", option: "sout-video" },
+            { label: qsTr("Include subtitles"), applies: "restart", kind: "toggle", option: "sout-spu" },
             { label: qsTr("Encoding preset"), kind: "dropdown", option: "sout-x264-preset" },
             { label: qsTr("Tuning"), kind: "dropdown", option: "sout-x264-tune" }
         ] }

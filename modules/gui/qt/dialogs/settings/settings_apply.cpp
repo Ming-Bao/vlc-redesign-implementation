@@ -101,6 +101,14 @@ void SettingsApplier::applyPlayer(const QString& option, const QVariant& value)
                            : m_bridge->value("loop").toBool() ? PlaylistController::PLAYBACK_REPEAT_ALL
                            : PlaylistController::PLAYBACK_REPEAT_NONE);
     }
+    else if (option == "audio-language" || option == "sub-language")
+    {
+        // the player var shadows the option for every later input; the rules pick a track when tracks appear
+        vlc_player_t* p = player->getPlayer();
+        vlc_player_Lock(p);
+        vlc_player_SelectCategoryLanguage(p, option == "audio-language" ? AUDIO_ES : SPU_ES, qtu(value.toString()));
+        vlc_player_Unlock(p);
+    }
     else if (option == "random")
         queue->setRandom(value.toBool());
     else if (option == "play-and-stop" || option == "play-and-exit")

@@ -28,15 +28,18 @@ enum class Kind { None, OutputVar, Player, Interface };
 
 inline Kind kindOf(const QString& option)
 {
-    // OutputVar: variable on the aout/vouts. Player: through PlayerController. Interface: the GUI itself
+    // OutputVar: variable on the aout/vouts. Player: through PlayerController. Interface: the GUI itself.
+    // The player, its aout and its vout live for the whole session and copy some options once: those are pushed
+    // to them too (align, monitor-par, audio-visual, the languages), or the next video would not see them
     static const QSet<QString> outputVars = {
         "aspect-ratio", "crop", "zoom", "autoscale", "deinterlace", "deinterlace-mode", "video-wallpaper",
         "sub-margin", "stereo-mode", "audio-filter", "video-filter", "equalizer-bands", "equalizer-preamp",
         "equalizer-2pass", "pitch-shift", "audio-replay-gain-mode", "hue", "brightness",
-        "contrast", "saturation", "gamma" };
+        "contrast", "saturation", "gamma", "align", "monitor-par", "audio-visual", "norm-max-level" };
     static const QSet<QString> player = {
         "rate", "audio-desync", "sub-delay", "sub-text-scale", "video", "audio", "spu", "audio-track",
-        "sub-track", "repeat", "loop", "random", "play-and-stop", "play-and-exit" };
+        "sub-track", "repeat", "loop", "random", "play-and-stop", "play-and-exit", "audio-language",
+        "sub-language" };
     static const QSet<QString> interface = {
         "qt-video-autoresize", "video-on-top", "qt-name-in-title", "mouse-hide-timeout", "qt-system-tray",
         "qt-notification", "qt-opacity", "qt-pause-minimized", "qt-bgcone", "qt-fs-opacity", "qt-max-volume",

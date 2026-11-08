@@ -32,11 +32,17 @@ private slots:
         QCOMPARE(kindOf("loop"), Kind::Player);
         QCOMPARE(kindOf("qt-max-volume"), Kind::Interface);
         QCOMPARE(kindOf("qt-fs-controller"), Kind::Interface);
+        // shadowed by a long-lived object (player, aout, free vout): pushed to it so the next video reads them
+        QCOMPARE(kindOf("audio-language"), Kind::Player);
+        QCOMPARE(kindOf("sub-language"), Kind::Player);
+        QCOMPARE(kindOf("audio-visual"), Kind::OutputVar);
+        QCOMPARE(kindOf("align"), Kind::OutputVar);
+        QCOMPARE(kindOf("monitor-par"), Kind::OutputVar);
+        QCOMPARE(kindOf("norm-max-level"), Kind::OutputVar);
     }
     void emptyNameIgnored() { QCOMPARE(settingsapply::kindOf(""), settingsapply::Kind::None); }
-    void tagsAreNeverLive() { // rows tagged "next"/"restart" must not also be pushed live
-        for (const char* o : {"fullscreen", "dec-dev", "aout", "video-title-show", "qt-minimal-view",
-                              "volume-save", "qt-icon-change", "custom-aspect-ratios", "align"})
+    void neverPushed() { // no safe live push: it would act at once, reset what plays, or has no public setter
+        for (const char* o : {"fullscreen", "qt-minimal-view", "volume-save", "aout", "dec-dev", "sout-audio"})
             QCOMPARE(settingsapply::kindOf(o), settingsapply::Kind::None);
     }
 };

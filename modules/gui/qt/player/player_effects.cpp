@@ -176,9 +176,17 @@ void PlayerEffects::pushToOutputs(const QString& name, const QVariant& v)
     const vlc_value_t val = toVlcValue(v, type, keep);
     if (auto aout = m_player->getAout(); aout && var_Type(aout.get(), qtu(name)))
         var_SetChecked(aout.get(), qtu(name), type, val);
-    for (const auto& vout : m_player->getVouts())
-        if (var_Type(vout.get(), qtu(name)))
-            var_SetChecked(vout.get(), qtu(name), type, val);
+    // every vout the player keeps, playing or not: the stopped "free" vout is reused by the next video, and with
+    // none yet this is the dummy vout the first one inherits from (getVouts() is empty when nothing plays)
+    size_t count = 0;
+    vout_thread_t** vouts = vlc_player_vout_HoldAll(m_player->getPlayer(), &count);
+    for (size_t i = 0; i < count; ++i)
+    {
+        if (var_Type(vouts[i], qtu(name)))
+            var_SetChecked(vouts[i], qtu(name), type, val);
+        vout_Release(vouts[i]);
+    }
+    free(vouts);
 }
 
 void PlayerEffects::setValue(const QString& name, const QVariant& v)

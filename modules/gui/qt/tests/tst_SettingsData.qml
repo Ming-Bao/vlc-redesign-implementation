@@ -56,9 +56,16 @@ TestCase {
     }
     function test_appliesSpot() {
         const m = rowsByOption()
-        compare(m["dec-dev"].applies, "next")
+        compare(m["dec-dev"].applies, "restart")          // the decoder device lives as long as the vout
         compare(m["sub-autodetect-file"].applies, "next")
-        compare(m["aout"].applies, "next")
+        compare(m["aout"].applies, "restart")             // the aout is created once and reused
+        compare(m["audio-language"].applies, "next")      // pushed to the player var, used when tracks appear
+        compare(m["align"].applies, "next")               // pushed to the vout, read when its display starts
+        compare(m["norm-max-level"].applies, undefined)   // normvol reads the aout var on every buffer
+        for (const o of ["embedded-video", "video-deco", "fullscreen", "disable-screensaver", "video-title-show",
+                         "video-title-timeout", "drop-late-frames", "custom-aspect-ratios", "custom-crop-ratios",
+                         "sout-audio", "sout-video", "sout-spu"])
+            compare(m[o].applies, "restart", o)          // read once when the session's player, vout or window is made
         compare(m["media-library"].applies, "restart")
         compare(m["file-logging"].applies, "restart")
         compare(m["qt-icon-change"].applies, "restart")
@@ -70,7 +77,7 @@ TestCase {
         compare(m["freetype-color"].applies, undefined)   // UpdateDefaultLiveStyles re-reads it on every render
         compare(m["freetype-bold"].applies, "next")       // read when the renderer opens
         compare(m["recursive"].applies, "restart")        // read once by the preparser at launch
-        compare(Data.appliesText(m["dec-dev"]), "Next video")
+        compare(Data.appliesText(m["sub-autodetect-file"]), "Next video")
         compare(Data.appliesText(m["media-library"]), "After restart")
         compare(Data.appliesText(m["rate"]), "")
     }
