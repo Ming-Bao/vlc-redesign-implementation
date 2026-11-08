@@ -360,6 +360,8 @@ T.Pane {
                 }
 
                 MouseArea {
+                    id: seekDragArea
+
                     anchors.fill: parent
 
                     acceptedButtons: Qt.LeftButton
@@ -480,10 +482,19 @@ T.Pane {
             Layout.leftMargin: VLCStyle.dp(24, VLCStyle.scale)
             Layout.rightMargin: VLCStyle.dp(24, VLCStyle.scale)
 
+            // only the seekbar can go here: no drop box for other controls, and the row says so
             DashedBox {
                 anchors.fill: parent
                 anchors.margins: -VLCStyle.dp(4, VLCStyle.scale)
-                visible: PlayerControlbarControls.customizeDragging
+                visible: seekDragArea.drag.active
+            }
+
+            Widgets.CaptionLabel {
+                anchors.centerIn: parent
+                width: Math.min(implicitWidth, parent.width)
+                text: qsTr("Only the seek bar can go here")
+                font.pixelSize: VLCStyle.fontSize_small
+                color: theme.fg.secondary
             }
 
             DropArea {
