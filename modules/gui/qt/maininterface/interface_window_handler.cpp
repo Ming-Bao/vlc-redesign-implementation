@@ -71,6 +71,12 @@ InterfaceWindowHandler::InterfaceWindowHandler(qt_intf_t *_p_intf, MainCtx* main
 
     QVLCTools::restoreWindowPosition( getSettings(), m_window, QSize(600, 420) );
 
+    // Start minimized shows the window for a moment, then hides it. On Wayland, showing asks the
+    // compositor for an activation token; hidden before it comes back, the token is never used
+    // and GNOME shows a busy cursor until it times out. Show this first time without activating.
+    if (m_mainCtx->isHideAfterCreation())
+        m_window->setProperty("_q_showWithoutActivating", true);
+
     // this needs to be called asynchronously
     // otherwise QQuickWidget won't initialize properly
     QMetaObject::invokeMethod(this, [this]()
@@ -79,7 +85,13 @@ InterfaceWindowHandler::InterfaceWindowHandler(qt_intf_t *_p_intf, MainCtx* main
         WindowStateHolder::holdFullscreen( m_window,  WindowStateHolder::INTERFACE, m_window->visibility() == QWindow::FullScreen );
 
         if (m_mainCtx->isHideAfterCreation())
+        {
             m_window->hide();
+            // first shown from the tray: from here on behave as a normal start (auto-raise)
+            connect(m_window, &QWindow::visibleChanged, m_mainCtx, &MainCtx::clearHideAfterCreation,
+                    Qt::SingleShotConnection);
+        }
+        m_window->setProperty("_q_showWithoutActivating", QVariant());
     }, Qt::QueuedConnection);
 
     m_window->setTitle("");

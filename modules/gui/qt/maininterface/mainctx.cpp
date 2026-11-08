@@ -231,6 +231,8 @@ MainCtx::MainCtx(qt_intf_t *_p_intf)
     /*********************************
      * Create the Systray Management *
      *********************************/
+    // known now, before the window is first shown; initSystray drops it if there is no tray
+    b_hideAfterCreation = var_InheritBool( p_intf, "qt-start-minimized" );
     //postpone systray initialisation to speedup starting time
     QMetaObject::invokeMethod(this, &MainCtx::initSystray, Qt::QueuedConnection);
 
@@ -554,7 +556,7 @@ void MainCtx::onSettingChanged(const QString& name)
 
 void MainCtx::onInputChanged( bool hasInput )
 {
-    if( hasInput == false )
+    if( hasInput == false || b_hideAfterCreation )
         return;
     int autoRaise = var_InheritInteger( p_intf, "qt-auto-raise" );
     if ( autoRaise == MainCtx::RAISE_NEVER )
@@ -571,6 +573,8 @@ void MainCtx::onInputChanged( bool hasInput )
 
 void MainCtx::onVOutChanged( bool video )
 {
+    if ( b_hideAfterCreation ) // started in the tray: a resumed video must not pop the window up
+        return;
     int autoRaise = var_InheritInteger( p_intf, "qt-auto-raise" );
     if ( video && ( autoRaise & MainCtx::RAISE_VIDEO ) )
         emit askRaise();
@@ -684,12 +688,12 @@ inline void MainCtx::initSystray()
     if( var_InheritBool( p_intf, "qt-start-minimized") )
     {
         if( b_systrayAvailable )
-        {
             b_systrayWanted = true;
-            b_hideAfterCreation = true;
-        }
         else
+        {
+            b_hideAfterCreation = false;
             msg_Err( p_intf, "cannot start minimized without system tray bar" );
+        }
     }
 
     if( b_systrayAvailable && b_systrayWanted )
