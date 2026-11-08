@@ -34,6 +34,7 @@
 #include "player/delay_estimator.hpp"
 #include "player/player_effects.hpp"
 #include "player/player_waveform.hpp"
+#include "player/seek_preview.hpp"
 
 #include "dialogs/network/saved_streams.hpp"
 #include "dialogs/toolbar/controlbar_profile_model.hpp"
@@ -337,6 +338,7 @@ void MainUI::registerQMLTypes()
         qmlRegisterSingletonInstance<PlayerEffects>(uri, versionMajor, versionMinor, "Effects", effects);
         new SettingsApplier(m_intf, m_settingsBridge, effects, this);
         qmlRegisterType<PlayerWaveform>(uri, versionMajor, versionMinor, "Waveform");
+        qmlRegisterType<SeekPreview>(uri, versionMajor, versionMinor, "SeekPreview");
         qmlRegisterTypesAndRevisions<TimedText>(uri, versionMajor);
         qmlRegisterType<PlayerHighResolutionTimeUpdater>(uri, versionMajor, versionMinor, "HighResolutionTimeUpdater");
         qmlRegisterUncreatableMetaObject(VLCTickForeign::staticMetaObject, uri, versionMajor, versionMinor, "VLCTick", "Not Instantiable" );

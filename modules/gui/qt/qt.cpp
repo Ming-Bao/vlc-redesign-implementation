@@ -162,6 +162,9 @@ static void ShowDialog   ( intf_thread_t *, int, int, intf_dialog_args_t * );
 #define MINIMIZED_LONGTEXT N_( "VLC will start with just an icon in " \
                                "your taskbar." )
 
+#define SEEK_THUMBNAIL_TEXT N_( "Show thumbnail while scrubbing" )
+#define SEEK_THUMBNAIL_LONGTEXT N_( "Show the video frame under the pointer when hovering the seek bar." )
+
 #define KEEPSIZE_TEXT N_( "Resize interface to the native video size" )
 #define KEEPSIZE_LONGTEXT N_( "You have two choices:\n" \
             " - The interface will resize to the native video size\n" \
@@ -390,6 +393,8 @@ vlc_module_begin ()
 
     add_bool( "qt-video-autoresize", true, KEEPSIZE_TEXT,
               KEEPSIZE_LONGTEXT )
+    add_bool( "qt-seek-thumbnail", true, SEEK_THUMBNAIL_TEXT,
+              SEEK_THUMBNAIL_LONGTEXT )
     add_bool( "qt-name-in-title", true, TITLE_TEXT,
               TITLE_LONGTEXT )
     add_bool( "qt-fs-controller", true, QT_FULLSCREEN_TEXT,
