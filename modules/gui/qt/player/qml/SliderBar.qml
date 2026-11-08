@@ -115,10 +115,15 @@ T.ProgressBar {
 
     // the main player's bar shows the frame under the pointer (Figma thumbnail 2151:9673)
     property bool previewEnabled: false
-    property bool _previewAllowed: false   // re-read on each hover, so the setting applies live
+    property bool _previewAllowed: false   // re-read on each hover and media, so the setting applies live
     readonly property real _hoverX: Helpers.clamp(hoverHandler.point.position.x, 0, control.width)
     readonly property bool _previewing: previewEnabled && hoverHandler.hovered && !dragHandler.active
                                         && Player.seekable && Player.videoTracks.count > 0 && _previewAllowed
+
+    function _recheckPreview() {
+        if (hoverHandler.hovered)
+            _previewAllowed = previewLoader.item?.allowed() ?? false
+    }
 
     // the time (and chapter) at `x`, or the playing time when not hovered
     function _hoverText(x, hovered) {
@@ -162,9 +167,14 @@ T.ProgressBar {
             return control.mapToItem(null, 0, 0).y - height - VLCStyle.margin_xsmall
         }
 
+        // the bar drops the card while a new item has no video yet (music mode): recheck once it is back
+        onLoaded: control._recheckPreview()
+
         sourceComponent: SeekPreviewCard {
             uri: Player.url
             position: control._hoverX / control.width
+            // a new item under a still pointer may be a disc
+            onUriChanged: control._recheckPreview()
             text: control._previewing ? control._hoverText(control._hoverX, true) : ""
         }
     }
@@ -290,7 +300,7 @@ T.ProgressBar {
 
         onHoveredChanged: () => {
             if (hovered) {
-                control._previewAllowed = previewLoader.item?.allowed() ?? false
+                control._recheckPreview()
                 if(Player.hasChapters)
                     control._isSeekPointsShown = true
             } else {

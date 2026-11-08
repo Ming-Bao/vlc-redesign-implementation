@@ -66,10 +66,7 @@ void SeekPreview::setUri(const QUrl& uri)
     if (uri == m_uri)
         return;
     m_uri = uri;
-    if (m_current)
-        vlc_preparser_Cancel(m_preparser, m_current);
-    m_current = nullptr;
-    m_latest.reset();
+    cancel();
     setFrame(QImage());
     emit uriChanged();
     requestShown(); // a new file under a still pointer
@@ -82,6 +79,15 @@ void SeekPreview::setPosition(double position)
     m_position = position;
     emit positionChanged();
     requestShown();
+}
+
+// drops the wanted request and anything pending; a late result is ignored by finish()
+void SeekPreview::cancel()
+{
+    if (m_current)
+        vlc_preparser_Cancel(m_preparser, m_current);
+    m_current = nullptr;
+    m_latest.reset();
 }
 
 // only while shown: a hidden card (audio, dragging, setting off) decodes nothing
@@ -97,9 +103,14 @@ void SeekPreview::requestShown()
 void SeekPreview::itemChange(ItemChange change, const ItemChangeData& value)
 {
     QQuickPaintedItem::itemChange(change, value);
-    // positions set while hidden were not asked for: ask on show
-    if (change == ItemVisibleHasChanged && value.boolValue)
+    if (change != ItemVisibleHasChanged)
+        return;
+    // positions set while hidden were not asked for: ask on show; on hide stop
+    // decoding but keep the frame, so the next show is never blank
+    if (value.boolValue)
         requestShown();
+    else
+        cancel();
 }
 
 void SeekPreview::setRadius(qreal radius)
@@ -211,12 +222,17 @@ void SeekPreview::finish(vlc_preparser_req* req, const QImage& image)
     m_inflight.removeOne(req);
     vlc_preparser_req_Release(req);
     if (req != m_current)
-        return; // cancelled by a uri change
+        return; // cancelled (uri change or hide)
     m_current = nullptr;
     if (!image.isNull())
         setFrame(image);
     if (auto next = m_latest.finished())
-        submit(*next);
+    {
+        if (isVisible())
+            submit(*next);
+        else
+            m_latest.reset();
+    }
 }
 
 void SeekPreview::setFrame(const QImage& frame)
