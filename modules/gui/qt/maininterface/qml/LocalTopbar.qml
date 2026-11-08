@@ -281,7 +281,8 @@ T.ToolBar {
 
                     x: logo.x + logo.width + VLCStyle.margin_xsmall
                     anchors.verticalCenter: parent.verticalCenter
-                    width: Math.min(implicitWidth, editCenter.x - x)
+                    // the zones fill the bar, so a drop in the free space lands (as the bottom row's)
+                    width: editCenter.x - x
 
                     model: root.controlModel?.left ?? null
                     dashFreeSpace: false
@@ -293,7 +294,7 @@ T.ToolBar {
 
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
-                    width: Math.min(implicitWidth, parent.width - 2 * editRight.width - VLCStyle.margin_large * 2)
+                    width: Math.min(implicitWidth, parent.width - 2 * editRight.implicitWidth - VLCStyle.margin_large * 2)
 
                     model: root.controlModel?.center ?? null
                     alignment: Qt.AlignHCenter
@@ -307,7 +308,7 @@ T.ToolBar {
                     anchors.right: parent.right
                     anchors.rightMargin: VLCStyle.margin_xsmall
                     anchors.verticalCenter: parent.verticalCenter
-                    width: implicitWidth
+                    width: parent.width - anchors.rightMargin - (editCenter.x + editCenter.width)
 
                     model: root.controlModel?.right ?? null
                     alignment: Qt.AlignRight
