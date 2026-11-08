@@ -480,6 +480,16 @@ T.ProgressBar {
                     }
                 }
 
+                // the gap after a chapter, filled so the breaks read on the dark track (no Figma frame: my call)
+                Rectangle {
+                    visible: index < seekpointsRptr.count - 1
+                    x: seekpointsRect.x + seekpointsRect.width
+                    y: seekpointsRect.y
+                    width: control._seekPointsDistance
+                    height: seekpointsRect.height
+                    color: Qt.alpha(theme.palette.tokens.fgA1, 0.5)
+                }
+
                 transitions: [
                     Transition {
                         to: "*"
