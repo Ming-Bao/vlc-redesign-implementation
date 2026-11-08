@@ -87,11 +87,14 @@ vlc_player_AoutCallback(vlc_object_t *this, const char *var,
 
     if (strcmp(var, "volume") == 0)
     {
-        if (oldval.f_float >= 0.f && oldval.f_float != newval.f_float)
+        if (oldval.f_float != newval.f_float)
         {
+            /* the first report (from unknown) reaches the interfaces, but
+             * shows no OSD: it is not a change the user made */
             vlc_player_aout_SendEvent(player, on_volume_changed,
                                       (audio_output_t *)this, newval.f_float);
-            vlc_player_osd_Volume(player, false);
+            if (oldval.f_float >= 0.f)
+                vlc_player_osd_Volume(player, false);
         }
     }
     else if (strcmp(var, "mute") == 0)
