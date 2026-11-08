@@ -263,16 +263,16 @@ module a toggle adds to its list option.
 | subtitles | Text encoding | `subsdec-encoding` | NEXT |
 | subtitles | Load subtitle files automatically | `sub-autodetect-file` | NEXT |
 | subtitles | File name matching | `sub-autodetect-fuzzy` | NEXT |
-| subtitles | Font | `freetype-font` | LIVE |
+| subtitles | Font | `freetype-font` | NEXT |
 | subtitles | Font size | `sub-text-scale` | PLAYER |
-| subtitles | Bold | `freetype-bold` | LIVE |
+| subtitles | Bold | `freetype-bold` | NEXT |
 | subtitles | Text color | `freetype-color` | LIVE |
-| subtitles | Text opacity | `freetype-opacity` | LIVE |
+| subtitles | Text opacity | `freetype-opacity` | NEXT |
 | subtitles | Outline thickness | `freetype-outline-thickness` | LIVE |
-| subtitles | Outline color | `freetype-outline-color` | LIVE |
-| subtitles | Shadow | `freetype-shadow-opacity` | LIVE |
-| subtitles | Shadow color | `freetype-shadow-color` | LIVE |
-| subtitles | Shadow distance | `freetype-shadow-distance` | LIVE |
+| subtitles | Outline color | `freetype-outline-color` | NEXT |
+| subtitles | Shadow | `freetype-shadow-opacity` | NEXT |
+| subtitles | Shadow color | `freetype-shadow-color` | NEXT |
+| subtitles | Shadow distance | `freetype-shadow-distance` | NEXT |
 | subtitles | Background | `freetype-background-opacity` | LIVE |
 | subtitles | Background color | `freetype-background-color` | LIVE |
 | subtitles | Background opacity | `freetype-background-opacity` | LIVE |
@@ -282,9 +282,9 @@ module a toggle adds to its list option.
 | subtitles | Show filename when a video starts | `video-title-show` | NEXT |
 | subtitles | Show filename for | `video-title-timeout video-title-show` | NEXT |
 | subtitles | Load subtitles from these folders | `sub-autodetect-path` | NEXT |
-| subtitles | Shadow angle | `freetype-shadow-angle` | LIVE |
+| subtitles | Shadow angle | `freetype-shadow-angle` | NEXT |
 | subtitles | Text direction | `freetype-text-direction` | LIVE |
-| subtitles | Monospace font | `freetype-monofont` | LIVE |
+| subtitles | Monospace font | `freetype-monofont` | NEXT |
 | library | Only allow one VLC window | `one-instance` | HIDDEN |
 | library | Apply to files opened from the file manager | `one-instance-when-started-from-file one-instance` | HIDDEN |
 | library | Add to the playlist instead of replacing it | `playlist-enqueue one-instance` | HIDDEN |
