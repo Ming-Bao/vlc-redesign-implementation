@@ -658,7 +658,9 @@ aout_filters_t *aout_FiltersNewWithClock(vlc_object_t *obj, vlc_clock_t *clock,
         free (str);
     }
 
-    char *visual = var_InheritString(obj, "audio-visual");
+    /* a visualization needs a clock for its video output: a chain without
+     * one (transcode) inherits the player's setting but cannot show it */
+    char *visual = clock != NULL ? var_InheritString(obj, "audio-visual") : NULL;
     if (visual != NULL && strcasecmp(visual, "none"))
         AppendFilter(obj, "visualization", visual, filters,
                      &input_format, &output_format, NULL);
