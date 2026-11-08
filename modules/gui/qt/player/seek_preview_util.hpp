@@ -18,6 +18,7 @@
 #ifndef VLC_QT_SEEK_PREVIEW_UTIL_HPP
 #define VLC_QT_SEEK_PREVIEW_UTIL_HPP
 
+#include <QImage>
 #include <QSize>
 #include <QString>
 #include <optional>
@@ -31,6 +32,8 @@ bool previewableScheme(const QString& scheme);
 double clampPosition(double p);
 // largest size with the aspect of `src` that fits `box`, at least 1 px per axis; `box` if `src` is invalid
 QSize fitInto(QSize src, QSize box);
+// `img` as displayed for a VLC orientation (ORIENT_* in vlc_es.h, 0..7); 4..7 swap width and height
+QImage oriented(const QImage& img, int orientation);
 
 // coalesces requests while one is in flight: only the newest pending one is kept
 class LatestOnly

@@ -18,6 +18,7 @@
 #include "seek_preview_util.hpp"
 
 #include <QStringList>
+#include <QTransform>
 #include <algorithm>
 #include <cmath>
 
@@ -40,6 +41,25 @@ QSize fitInto(QSize src, QSize box)
         return box;
     const double s = std::min(double(box.width()) / src.width(), double(box.height()) / src.height());
     return { std::max(1, qRound(src.width() * s)), std::max(1, qRound(src.height() * s)) };
+}
+
+QImage oriented(const QImage& img, int orientation)
+{
+    // QTransform only (QImage::mirrored is deprecated in 6.9, flipped is 6.9+)
+    const QTransform hflip = QTransform::fromScale(-1, 1);
+    const QTransform vflip = QTransform::fromScale(1, -1);
+    const QTransform r90 = QTransform().rotate(90);
+    switch (orientation)
+    {
+    case 1: return img.transformed(hflip);
+    case 2: return img.transformed(vflip);
+    case 3: return img.transformed(QTransform().rotate(180));
+    case 4: return img.transformed(r90).transformed(hflip);   // transposed
+    case 5: return img.transformed(QTransform().rotate(270));
+    case 6: return img.transformed(r90);
+    case 7: return img.transformed(r90).transformed(vflip);   // anti-transposed
+    default: return img;
+    }
 }
 
 bool LatestOnly::request(double p)

@@ -60,6 +60,7 @@ public:
     void paint(QPainter* painter) override;
 
 protected:
+    void componentComplete() override;
     void itemChange(ItemChange change, const ItemChangeData& value) override;
 
 signals:
@@ -73,6 +74,7 @@ private:
     static void onEnded(vlc_preparser_req* req, int status, picture_t* thumbnail, void* data);
     void requestShown();
     void cancel();
+    int playingOrientation() const;
     void submit(double position);
     void finish(vlc_preparser_req* req, const QImage& image);
     void setFrame(const QImage& frame);
@@ -86,6 +88,7 @@ private:
     vlc_preparser_t* m_preparser = nullptr;
     vlc_object_t* m_obj = nullptr;            // set with m_preparser, read by onEnded
     vlc_preparser_req* m_current = nullptr;   // the request whose result is wanted
+    int m_orientation = 0;                    // ORIENT_* of m_current's media
     QList<vlc_preparser_req*> m_inflight;     // submitted, result not yet back on the Qt thread
     image_handler_t* m_image = nullptr;       // thumbnailer thread only (1 thread)
 };

@@ -20,16 +20,22 @@
 #endif
 
 #include "seek_preview.hpp"
+#include "player/player_controller.hpp"
 
 #include <vlc_common.h>
 #include <vlc_fourcc.h>
 #include <vlc_image.h>
 #include <vlc_input_item.h>
 #include <vlc_picture.h>
+#include <vlc_player.h>
 #include <vlc_preparser.h>
 
 #include <QPainter>
 #include <QPainterPath>
+
+static_assert(ORIENT_TOP_RIGHT == 1 && ORIENT_BOTTOM_RIGHT == 3 && ORIENT_LEFT_TOP == 4
+              && ORIENT_LEFT_BOTTOM == 5 && ORIENT_RIGHT_TOP == 6 && ORIENT_RIGHT_BOTTOM == 7,
+              "seekpreview::oriented() uses the vlc_es.h numbering");
 
 namespace
 {
@@ -81,6 +87,21 @@ void SeekPreview::setPosition(double position)
     requestShown();
 }
 
+// the decoded picture's format never carries the orientation (picture_Setup resets it), so take
+// it from the player's video track when `m_uri` is what plays (it is: QML binds Player.url)
+int SeekPreview::playingOrientation() const
+{
+    int orientation = ORIENT_NORMAL;
+    vlc_player_t* player = m_ctx->getIntf()->p_mainPlayerController->getPlayer();
+    vlc_player_Lock(player);
+    input_item_t* media = vlc_player_GetCurrentMedia(player);
+    if (media && media->psz_uri && QUrl(QString::fromUtf8(media->psz_uri)) == m_uri  /* as PlayerController::url */)
+        if (const vlc_player_track* track = vlc_player_GetSelectedTrack(player, VIDEO_ES))
+            orientation = track->fmt.video.orientation;
+    vlc_player_Unlock(player);
+    return orientation;
+}
+
 // drops the wanted request and anything pending; a late result is ignored by finish()
 void SeekPreview::cancel()
 {
@@ -98,6 +119,13 @@ void SeekPreview::requestShown()
     const double p = seekpreview::clampPosition(m_position);
     if (m_latest.request(p))
         submit(p);
+}
+
+// an item created already visible gets no ItemVisibleHasChanged, and setUri/setPosition ran too early
+void SeekPreview::componentComplete()
+{
+    QQuickPaintedItem::componentComplete();
+    requestShown();
 }
 
 void SeekPreview::itemChange(ItemChange change, const ItemChangeData& value)
@@ -182,6 +210,7 @@ void SeekPreview::submit(double position)
     }
     m_inflight.append(req);
     m_current = req;
+    m_orientation = playingOrientation();
 }
 
 // thumbnailer thread
@@ -225,7 +254,7 @@ void SeekPreview::finish(vlc_preparser_req* req, const QImage& image)
         return; // cancelled (uri change or hide)
     m_current = nullptr;
     if (!image.isNull())
-        setFrame(image);
+        setFrame(seekpreview::oriented(image, m_orientation));
     if (auto next = m_latest.finished())
     {
         if (isVisible())
