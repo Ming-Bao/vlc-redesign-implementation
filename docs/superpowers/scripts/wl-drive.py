@@ -20,6 +20,8 @@ Steps (executed in order):
                       Adwaita-dark, ...) in the private session. Needs XDG_CONFIG_HOME=build/redesign-profile/config
                       on dbus-run-session, so the bus's dconf service writes the profile's dconf, not the user's.
     isolated:         only check that (gset's guard, which runs before anything else); writes nothing
+Env: WL_CURSOR=1 draws the pointer into shots; WL_VLC_WAIT=SECONDS after vlc: (default 12);
+     WL_PROFILE=DIR uses DIR/{config,data,cache} instead of build/redesign-profile.
 Writes OUTDIR/vlc.log and OUTDIR/shell.log.
 """
 import os
@@ -71,7 +73,7 @@ def main():
     os.makedirs(out, exist_ok=True)
     env = dict(os.environ)
     env.pop("DISPLAY", None)
-    prof = os.path.join(BUILD, "redesign-profile")
+    prof = os.environ.get("WL_PROFILE") or os.path.join(BUILD, "redesign-profile")
     env.update(XDG_CONFIG_HOME=f"{prof}/config", XDG_DATA_HOME=f"{prof}/data",
                XDG_CACHE_HOME=f"{prof}/cache", VLC_LIB_PATH=f"{BUILD}/modules",
                VLC_PLUGIN_PATH=f"{BUILD}/modules")
@@ -103,7 +105,7 @@ def main():
                        "(o)")[0]
     stream_path = bus_call(bus, "org.gnome.Mutter.ScreenCast", sc_path,
                            "org.gnome.Mutter.ScreenCast.Session", "RecordMonitor",
-                           GLib.Variant("(sa{sv})", ("", {"cursor-mode": GLib.Variant("u", 0)})), "(o)")[0]
+                           GLib.Variant("(sa{sv})", ("", {"cursor-mode": GLib.Variant("u", int(os.environ.get("WL_CURSOR", "0")))})), "(o)")[0]
     node = {}
 
     def on_signal(_conn, _sender, _path, _iface, signal, params):
@@ -147,7 +149,7 @@ def main():
             vlc = subprocess.Popen([f"{BUILD}/bin/vlc-static", "-vv", "-I", "qt", "--aout=dummy", "--no-qt-privacy-ask",
                                     "--restore-playback-pos=0", *args], env=venv,
                                    stdout=open(f"{out}/vlc.log", "w"), stderr=subprocess.STDOUT)
-            pump(12)
+            pump(float(os.environ.get("WL_VLC_WAIT", "12")))
         elif verb == "max":
             key(KEYSYMS["Super_L"], True); key(KEYSYMS["Up"], True)
             key(KEYSYMS["Up"], False); key(KEYSYMS["Super_L"], False)
