@@ -462,6 +462,8 @@ qt_plugin_sources = files(
     'player/effects_util.hpp',
     'player/waveform_util.cpp',
     'player/waveform_util.hpp',
+    'player/seek_preview_util.cpp',
+    'player/seek_preview_util.hpp',
     'player/input_models.hpp',
     'player/player_controller.cpp',
     'player/player_controller.hpp',
@@ -1739,6 +1741,20 @@ if qt6_dep.found()
                 'player/waveform_util.cpp'
             ),
             'moc_sources': files('tests/test_waveform_util.cpp'),
+            'suite': ['qt'],
+            'include_directories' : qt_include_dir,
+            'link_args': qt_link_args,
+            'dependencies': [qt6_dep, qtest_qt6_dep]
+        }
+
+        vlc_tests += {
+            'name': 'test_qt_seek_preview_util',
+            'sources': files(
+                'tests/test_seek_preview_util.cpp',
+                'player/seek_preview_util.hpp',
+                'player/seek_preview_util.cpp'
+            ),
+            'moc_sources': files('tests/test_seek_preview_util.cpp'),
             'suite': ['qt'],
             'include_directories' : qt_include_dir,
             'link_args': qt_link_args,

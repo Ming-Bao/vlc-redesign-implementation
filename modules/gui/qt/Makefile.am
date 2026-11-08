@@ -321,6 +321,7 @@ libqt_plugin_la_SOURCES = \
 	player/delay_estimator.hpp \
 	player/effects_util.cpp player/effects_util.hpp \
 	player/waveform_util.cpp player/waveform_util.hpp \
+	player/seek_preview_util.cpp player/seek_preview_util.hpp \
 	player/player_controller.cpp player/player_controller.hpp player/player_controller_p.hpp \
 	player/player_effects.cpp player/player_effects.hpp \
 	player/player_waveform.cpp player/player_waveform.hpp \
@@ -2259,6 +2260,21 @@ test_waveform_util_LDADD = $(QT_QTEST_COMMON_ldadd)
 test_waveform_util_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
 check_PROGRAMS += test_waveform_util
 TESTS += test_waveform_util
+
+# test_seek_preview_util
+
+test_seek_preview_util_SOURCES = \
+	tests/test_seek_preview_util.cpp \
+	player/seek_preview_util.hpp player/seek_preview_util.cpp
+nodist_test_seek_preview_util_SOURCES = tests/test_seek_preview_util.moc
+BUILT_SOURCES += tests/test_seek_preview_util.moc
+CLEANFILES += tests/test_seek_preview_util.moc
+test_seek_preview_util_CPPFLAGS = $(QT_QTEST_COMMON_cppflags)
+test_seek_preview_util_CXXFLAGS = $(QT_QTEST_COMMON_cxxflags)
+test_seek_preview_util_LDADD = $(QT_QTEST_COMMON_ldadd)
+test_seek_preview_util_LDFLAGS = $(QT_QTEST_COMMON_ldflags)
+check_PROGRAMS += test_seek_preview_util
+TESTS += test_seek_preview_util
 
 # test_menu_style
 test_menu_style_SOURCES = \
