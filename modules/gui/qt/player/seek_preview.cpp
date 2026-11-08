@@ -101,8 +101,14 @@ bool SeekPreview::allowed() const
 
 void SeekPreview::submit(double position)
 {
+    // no disc spin-up, and nothing when the setting is off, whatever QML does
+    if (!allowed())
+    {
+        m_latest.reset();
+        return;
+    }
     vlc_preparser_req* req = nullptr;
-    if (m_ctx && !m_uri.isEmpty())
+    if (!m_uri.isEmpty())
     {
         vlc_object_t* obj = VLC_OBJECT(m_ctx->getIntf());
         if (!m_preparser)
