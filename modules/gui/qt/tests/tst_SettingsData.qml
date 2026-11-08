@@ -67,7 +67,8 @@ TestCase {
         compare(m["rate"].applies, undefined)
         compare(m["audio-track"].applies, undefined)
         compare(m["qt-max-volume"].applies, undefined)
-        compare(m["freetype-color"].applies, undefined)
+        compare(m["freetype-color"].applies, "next")      // the text renderer reads its style when the input starts
+        compare(m["recursive"].applies, "restart")        // read once by the preparser at launch
         compare(Data.appliesText(m["dec-dev"]), "Next video")
         compare(Data.appliesText(m["media-library"]), "After restart")
         compare(Data.appliesText(m["rate"]), "")
