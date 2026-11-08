@@ -31,13 +31,13 @@ Rectangle {
     implicitWidth: label.implicitWidth + 2 * VLCStyle.dp(7, VLCStyle.scale)
     implicitHeight: label.implicitHeight + 2 * VLCStyle.dp(2, VLCStyle.scale)
     radius: VLCStyle.dp(4, VLCStyle.scale)
-    color: root.style.chipBg
+    color: root.style ? root.style.chipBg : "transparent"   // style can arrive after the first binding pass
 
     Widgets.LabelExt {
         id: label
 
         anchors.centerIn: parent
         font.pixelSize: VLCStyle.dp(11, VLCStyle.scale)
-        color: root.style.label
+        color: root.style ? root.style.label : "transparent"
     }
 }

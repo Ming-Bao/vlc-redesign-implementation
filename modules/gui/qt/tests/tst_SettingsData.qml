@@ -62,6 +62,7 @@ TestCase {
         compare(m["audio-language"].applies, "next")      // pushed to the player var, used when tracks appear
         compare(m["align"].applies, "next")               // pushed to the vout, read when its display starts
         compare(m["norm-max-level"].applies, undefined)   // normvol reads the aout var on every buffer
+        compare(m["input-record-native"].applies, "next") // copied into each input, read when a recording starts
         for (const o of ["embedded-video", "video-deco", "fullscreen", "disable-screensaver", "video-title-show",
                          "video-title-timeout", "drop-late-frames", "custom-aspect-ratios", "custom-crop-ratios",
                          "sout-audio", "sout-video", "sout-spu"])

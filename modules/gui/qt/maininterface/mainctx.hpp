@@ -459,6 +459,7 @@ protected:
     SidePanelCtx*   m_navigationPanel = nullptr;
     QWindow::Visibility  m_windowVisibility = QWindow::Windowed;
     bool                 b_interfaceOnTop = false;      ///keep UI on top
+    bool                 m_onTopOption = false;         ///the video-on-top option as last read
     bool                 b_hasWayland = false;
     bool                 b_hasMedialibrary = false;
     MediaLib*            m_medialib = nullptr;

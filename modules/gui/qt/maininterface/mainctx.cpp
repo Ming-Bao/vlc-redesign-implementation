@@ -448,11 +448,14 @@ void MainCtx::loadPrefs(const bool callSignals)
 
     loadFromVLCOption(m_bgCone, "qt-bgcone", &MainCtx::bgConeToggled);
 
-    /* Should the UI stays on top of other windows */
-    loadFromVLCOption(b_interfaceOnTop, "video-on-top", [this](MainCtx *)
+    /* Should the UI stays on top of other windows. Follow the option only when it changed: the menu's "Always on
+       top" sets the flag without writing the option, and a reload for another option must not undo that */
+    loadFromVLCOption(m_onTopOption, "video-on-top", [this](MainCtx *)
     {
-        emit interfaceAlwaysOnTopChanged(b_interfaceOnTop);
+        setInterfaceAlwaysOnTop(m_onTopOption);
     });
+    if (!callSignals)
+        b_interfaceOnTop = m_onTopOption;
 
     loadFromVLCOption(m_hasToolbarMenu, "qt-menubar", &MainCtx::hasToolbarMenuChanged);
 

@@ -398,7 +398,7 @@ var pages = [
     { name: "recording", label: qsTr("Recording"), title: qsTr("Recording, Casting & Streaming Out"), icon: "recording", group: "System", sections: [
         { title: qsTr("Recording"), rows: [
             { label: qsTr("Save recordings to"), kind: "browseFolder", option: "input-record-path" },
-            { label: qsTr("Record without re-encoding when possible"), kind: "toggle", option: "input-record-native" }
+            { label: qsTr("Record without re-encoding when possible"), applies: "next", kind: "toggle", option: "input-record-native" }
         ] },
         { title: qsTr("Casting"), rows: [
             { label: qsTr("Cast quality"), applies: "next", kind: "dropdown", option: "sout-chromecast-conversion-quality" }

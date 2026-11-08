@@ -57,8 +57,10 @@ FocusScope {
     // in fullscreen the bars overlay it and hide when idle
     property bool _controlsUnderVideo: (MainCtx.intfMainWindow.visibility !== Window.FullScreen)
                                        || (MainCtx.pinVideoControls && MainCtx.fsController) // the user pins them in fullscreen too
-    // "Show controls in fullscreen" off: the bars never appear over fullscreen video
+    // "Show controls in fullscreen" off: the bars never appear over fullscreen video (Customize Player edits them in
+    // place, and audio-only fullscreen has no video to uncover)
     readonly property bool _barsAllowed: MainCtx.fsController || (MainCtx.intfMainWindow.visibility !== Window.FullScreen)
+                                         || _customizing || !Player.hasVideoOutput
 
     // in a window dark is solid BG/A3, light the frame's BG/A3 Transparent; fullscreen overlays both at 95 %
     readonly property color _barColor: !_controlsUnderVideo ? Qt.alpha(windowTheme.palette.tokens.bgA3Transparent, 0.95)
