@@ -75,6 +75,8 @@ TestCase {
         compare(m["rate"].applies, undefined)
         compare(m["audio-track"].applies, undefined)
         compare(m["qt-max-volume"].applies, undefined)
+        verify(m["qt-seek-thumbnail"] !== undefined)
+        compare(m["qt-seek-thumbnail"].applies, undefined) // SeekPreview reads it each hover
         compare(m["freetype-color"].applies, undefined)   // UpdateDefaultLiveStyles re-reads it on every render
         compare(m["freetype-bold"].applies, "next")       // read when the renderer opens
         compare(m["recursive"].applies, "restart")        // read once by the preparser at launch

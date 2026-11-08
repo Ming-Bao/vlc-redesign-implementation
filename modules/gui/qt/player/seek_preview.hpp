@@ -59,6 +59,9 @@ public:
 
     void paint(QPainter* painter) override;
 
+protected:
+    void itemChange(ItemChange change, const ItemChangeData& value) override;
+
 signals:
     void ctxChanged();
     void uriChanged();
@@ -68,6 +71,7 @@ signals:
 
 private:
     static void onEnded(vlc_preparser_req* req, int status, picture_t* thumbnail, void* data);
+    void requestShown();
     void submit(double position);
     void finish(vlc_preparser_req* req, const QImage& image);
     void setFrame(const QImage& frame);

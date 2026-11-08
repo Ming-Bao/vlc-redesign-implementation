@@ -180,7 +180,8 @@ var pages = [
               choices: [ { value: false, label: qsTr("Stop") }, { value: true, label: qsTr("Quit") } ] }
         ] },
         { title: qsTr("Seeking"), rows: [
-            { label: qsTr("Seek precisely"), applies: "next", kind: "toggle", option: "input-fast-seek", invert: true }
+            { label: qsTr("Seek precisely"), applies: "next", kind: "toggle", option: "input-fast-seek", invert: true },
+            { label: qsTr("Show thumbnail while scrubbing"), kind: "toggle", option: "qt-seek-thumbnail" }
         ] },
         { title: qsTr("Discs and Files"), rows: [
             { label: qsTr("Default optical drive"), kind: "dropdown", option: "dvd", choicesFrom: "opticalDrives", editable: true },

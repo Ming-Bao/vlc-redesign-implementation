@@ -72,6 +72,7 @@ void SeekPreview::setUri(const QUrl& uri)
     m_latest.reset();
     setFrame(QImage());
     emit uriChanged();
+    requestShown(); // a new file under a still pointer
 }
 
 void SeekPreview::setPosition(double position)
@@ -80,8 +81,25 @@ void SeekPreview::setPosition(double position)
         return;
     m_position = position;
     emit positionChanged();
-    if (m_latest.request(seekpreview::clampPosition(position)))
-        submit(seekpreview::clampPosition(position));
+    requestShown();
+}
+
+// only while shown: a hidden card (audio, dragging, setting off) decodes nothing
+void SeekPreview::requestShown()
+{
+    if (!isComponentComplete() || !isVisible())
+        return;
+    const double p = seekpreview::clampPosition(m_position);
+    if (m_latest.request(p))
+        submit(p);
+}
+
+void SeekPreview::itemChange(ItemChange change, const ItemChangeData& value)
+{
+    QQuickPaintedItem::itemChange(change, value);
+    // positions set while hidden were not asked for: ask on show
+    if (change == ItemVisibleHasChanged && value.boolValue)
+        requestShown();
 }
 
 void SeekPreview::setRadius(qreal radius)

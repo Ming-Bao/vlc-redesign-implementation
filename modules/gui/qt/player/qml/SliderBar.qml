@@ -45,7 +45,6 @@ T.ProgressBar {
     readonly property real _scaledSeekPointsRadius: _seekPointsRadius * _hoveredScalingFactor
 
     property bool _currentChapterHovered: false
-    property real _tooltipPosition: (Widgets.PointingToolTipAttached.instance?.pos.x ?? 0.0) / width
 
     property color backgroundColor: theme.bg.primary
     property color progressColor: theme.fg.primary
@@ -114,26 +113,60 @@ T.ProgressBar {
         onTriggered: control._isSeekPointsShown = false
     }
 
-    Widgets.PointingToolTipAttached.visible: (hoverHandler.hovered || control.visualFocus || dragHandler.active)
+    // the main player's bar shows the frame under the pointer (Figma thumbnail 2151:9673)
+    property bool previewEnabled: false
+    property bool _previewAllowed: false   // re-read on each hover, so the setting applies live
+    readonly property real _hoverX: Helpers.clamp(hoverHandler.point.position.x, 0, control.width)
+    readonly property bool _previewing: previewEnabled && hoverHandler.hovered && !dragHandler.active
+                                        && Player.seekable && Player.videoTracks.count > 0 && _previewAllowed
 
-    Widgets.PointingToolTipAttached.text: {
-        if (!Widgets.PointingToolTipAttached.instance?.visible)
-            return ""
-
-        let _text
-
+    // the time (and chapter) at `x`, or the playing time when not hovered
+    function _hoverText(x, hovered) {
         const length = Player.length
-        if (hoverHandler.hovered)
-            _text = length.scale(Widgets.PointingToolTipAttached.instance.pos.x / control.width)
-        else
-            _text = Player.time
+        let _text = hovered ? length.scale(x / control.width) : Player.time
 
         _text = _text.formatHMS(length.isSubSecond() ? VLCTick.SubSecondFormattedAsMS : 0)
 
         if (Player.hasChapters)
-            _text += " - " + Player.chapters.getNameAtPosition(control._tooltipPosition)
+            _text += " - " + Player.chapters.getNameAtPosition(x / control.width)
 
         return _text
+    }
+
+    Widgets.PointingToolTipAttached.visible: (hoverHandler.hovered || control.visualFocus || dragHandler.active)
+                                             && !control._previewing
+
+    Widgets.PointingToolTipAttached.text: {
+        if (!Widgets.PointingToolTipAttached.instance?.visible)
+            return ""
+        return control._hoverText(Widgets.PointingToolTipAttached.instance.pos.x, hoverHandler.hovered)
+    }
+
+    Loader {
+        id: previewLoader
+        active: control.previewEnabled
+        parent: control.Window.contentItem
+        z: 1000
+        visible: control._previewing
+
+        // above the pointer, kept inside the window
+        x: {
+            void control._previewing   // re-place on show
+            const margin = VLCStyle.margin_xsmall
+            const px = control.mapToItem(null, control._hoverX, 0).x - width / 2
+            return Helpers.clamp(px, margin, (parent?.width ?? 0) - width - margin)
+        }
+        y: {
+            void control._previewing
+            void control.height
+            return control.mapToItem(null, 0, 0).y - height - VLCStyle.margin_xsmall
+        }
+
+        sourceComponent: SeekPreviewCard {
+            uri: Player.url
+            position: control._hoverX / control.width
+            text: control._previewing ? control._hoverText(control._hoverX, true) : ""
+        }
     }
 
     Widgets.PointingToolTipAttached.pos: Qt.point(hoverHandler.hovered ? Helpers.clamp(hoverHandler.point.position.x, 0, control.availableWidth)
@@ -257,6 +290,7 @@ T.ProgressBar {
 
         onHoveredChanged: () => {
             if (hovered) {
+                control._previewAllowed = previewLoader.item?.allowed() ?? false
                 if(Player.hasChapters)
                     control._isSeekPointsShown = true
             } else {

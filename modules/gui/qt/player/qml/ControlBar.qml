@@ -275,6 +275,7 @@ T.Pane {
 
                 barHeight: root.sliderHeight
                 paintOnly: root.editing
+                previewEnabled: !root.musicMode && !root.editing
 
                 blockStyle: root._compact
                 waveform: root.musicMode && root._compact

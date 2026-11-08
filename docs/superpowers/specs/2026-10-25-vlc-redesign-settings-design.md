@@ -202,7 +202,7 @@ Rows are listed in Figma order. **Adv** = under Advanced Options. "—" = not bu
 | Stop after each item | toggle | `play-and-stop` | |
 | When playback finishes | dropdown Stop/Quit | `play-and-exit` | Own list |
 | Seek precisely | toggle | `input-fast-seek` (inverted) | |
-| Show thumbnail while scrubbing | — | — | No VLC option. Not built |
+| Show thumbnail while scrubbing | toggle | `qt-seek-thumbnail` | Slice 12 |
 | Default optical drive | editable dropdown | `dvd` | Lists the optical drives found (`/dev/sr*`, or drive letters) |
 | Repair damaged AVI files | dropdown | `avi-index` | |
 | Load matching .mkv files from the same folder | toggle | `mkv-preload-local-dir` | |
