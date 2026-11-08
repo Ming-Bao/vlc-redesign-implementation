@@ -308,19 +308,19 @@ var pages = [
               choices: [ { value: 100, label: qsTr("Automatic") }, { value: 75, label: qsTr("Small") }, { value: 125, label: qsTr("Large") },
                          { value: 150, label: qsTr("Larger") }, { value: 200, label: qsTr("Largest") } ] },
             { label: qsTr("Bold"), applies: "next", kind: "toggle", option: "freetype-bold" },
-            { label: qsTr("Text color"), applies: "next", kind: "color", option: "freetype-color" },
+            { label: qsTr("Text color"), kind: "color", option: "freetype-color" },
             { label: qsTr("Text opacity"), applies: "next", kind: "slider", option: "freetype-opacity", min: 0, max: 100, step: 10, scale: 2.55,
               ticks: [ qsTr("0%"), qsTr("50%"), qsTr("100%") ] },
-            { label: qsTr("Outline thickness"), applies: "next", kind: "dropdown", option: "freetype-outline-thickness" },
+            { label: qsTr("Outline thickness"), kind: "dropdown", option: "freetype-outline-thickness" },
             { label: qsTr("Outline color"), applies: "next", kind: "color", option: "freetype-outline-color" },
             { label: qsTr("Shadow"), applies: "next", kind: "toggle", option: "freetype-shadow-opacity", on: 128, off: 0 },
             { label: qsTr("Shadow color"), applies: "next", kind: "color", option: "freetype-shadow-color" },
             { label: qsTr("Shadow distance"), applies: "next", kind: "dropdown", option: "freetype-shadow-distance",
               choices: [ { value: 0.03, label: qsTr("Small") }, { value: 0.06, label: qsTr("Medium") }, { value: 0.1, label: qsTr("Large") } ] },
-            { label: qsTr("Background"), applies: "next", kind: "dropdown", option: "freetype-background-opacity",
+            { label: qsTr("Background"), kind: "dropdown", option: "freetype-background-opacity",
               choices: [ { value: 0, label: qsTr("None") }, { value: 128, label: qsTr("Box") } ] },
-            { label: qsTr("Background color"), applies: "next", kind: "color", option: "freetype-background-color" },
-            { label: qsTr("Background opacity"), applies: "next", kind: "slider", option: "freetype-background-opacity", min: 0, max: 100, step: 10, scale: 2.55,
+            { label: qsTr("Background color"), kind: "color", option: "freetype-background-color" },
+            { label: qsTr("Background opacity"), kind: "slider", option: "freetype-background-opacity", min: 0, max: 100, step: 10, scale: 2.55,
               ticks: [ qsTr("0%"), qsTr("50%"), qsTr("100%") ] }
         ] },
         { title: qsTr("Position & Timing"), rows: [
@@ -340,7 +340,7 @@ var pages = [
         { title: "", adv: true, rows: [
             { label: qsTr("Load subtitles from these folders"), applies: "next", kind: "field", adv: true, option: "sub-autodetect-path" },
             { label: qsTr("Shadow angle"), applies: "next", kind: "number", adv: true, option: "freetype-shadow-angle" },
-            { label: qsTr("Text direction"), applies: "next", kind: "dropdown", adv: true, option: "freetype-text-direction" },
+            { label: qsTr("Text direction"), kind: "dropdown", adv: true, option: "freetype-text-direction" },
             { label: qsTr("Monospace font"), applies: "next", kind: "dropdown", adv: true, option: "freetype-monofont", choicesFrom: "fonts" }
         ] }
     ] },
