@@ -1,0 +1,16 @@
+From: VLC Redesign
+Subject: [PATCH] mkspecs: do not link AGL on macOS
+
+The macOS 26 SDK no longer has AGL.framework, and nothing needs it.
+---
+--- a/mkspecs/common/mac.conf	2026-11-10 00:30:32.774539808 +1300
++++ b/mkspecs/common/mac.conf	2026-11-10 00:30:32.776241466 +1300
+@@ -30,7 +30,7 @@
+ QMAKE_REL_RPATH_BASE    = @loader_path
+ 
+ QMAKE_LIBS_DYNLOAD      =
+-QMAKE_LIBS_OPENGL       = -framework OpenGL -framework AGL
++QMAKE_LIBS_OPENGL       = -framework OpenGL
+ QMAKE_LIBS_THREAD       =
+ 
+ QMAKE_INCDIR_WAYLAND    =
