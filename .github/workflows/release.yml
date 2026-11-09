@@ -37,6 +37,10 @@ jobs:
           enc() { python3 -c "import sys;print(sys.stdin.read()[-3500:].replace('%','%25').replace('\r','').replace('\n','%0A'))"; }
           echo "::error title=build errors::$(grep -a -E 'error:|Error [0-9]|\*\*\*|FAILED|No such|not found|failed' build.log | tail -30 | enc)"
           echo "::error title=build log tail::$(tail -c 3500 build.log | enc)"
+          # Full log on a temporary branch (fetchable with plain git).
+          d=$(mktemp -d) && cp build.log "$d/" && cd "$d" && git init -q && git add build.log &&
+            git -c user.name=ci -c user.email=ci@localhost commit -qm "${{ github.job }} log" &&
+            git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" HEAD:refs/heads/ci-logs/${{ github.job }}-${{ github.run_id }}
       - uses: actions/upload-artifact@v4
         with: { name: windows, path: dist/* }
 
@@ -58,6 +62,10 @@ jobs:
           enc() { python3 -c "import sys;print(sys.stdin.read()[-3500:].replace('%','%25').replace('\r','').replace('\n','%0A'))"; }
           echo "::error title=build errors::$(grep -a -E 'error:|Error [0-9]|\*\*\*|FAILED|No such|not found|failed' build.log | tail -30 | enc)"
           echo "::error title=build log tail::$(tail -c 3500 build.log | enc)"
+          # Full log on a temporary branch (fetchable with plain git).
+          d=$(mktemp -d) && cp build.log "$d/" && cd "$d" && git init -q && git add build.log &&
+            git -c user.name=ci -c user.email=ci@localhost commit -qm "${{ github.job }} log" &&
+            git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" HEAD:refs/heads/ci-logs/${{ github.job }}-${{ github.run_id }}
       - uses: actions/upload-artifact@v4
         with: { name: linux, path: dist/* }
 
@@ -80,6 +88,10 @@ jobs:
           enc() { python3 -c "import sys;print(sys.stdin.read()[-3500:].replace('%','%25').replace('\r','').replace('\n','%0A'))"; }
           echo "::error title=build errors::$(grep -a -E 'error:|Error [0-9]|\*\*\*|FAILED|No such|not found|failed' build.log | tail -30 | enc)"
           echo "::error title=build log tail::$(tail -c 3500 build.log | enc)"
+          # Full log on a temporary branch (fetchable with plain git).
+          d=$(mktemp -d) && cp build.log "$d/" && cd "$d" && git init -q && git add build.log &&
+            git -c user.name=ci -c user.email=ci@localhost commit -qm "${{ github.job }} log" &&
+            git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" HEAD:refs/heads/ci-logs/${{ github.job }}-${{ github.run_id }}
       - uses: actions/upload-artifact@v4
         with: { name: macos, path: dist/* }
 
