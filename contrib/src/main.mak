@@ -637,9 +637,14 @@ MESONCLEAN = rm -rf $(BUILD_DIR)/meson-private
 MESONBUILD = meson compile -C $(BUILD_DIR) $(MESON_BUILD) $(MESONCOMPILEFLAGS) && meson install -C $(BUILD_DIR)
 
 # shared Qt config
+# Qt's CMake cross-compiles whenever the contrib toolchain names the system,
+# as on macOS, and then needs host tools.
+ifneq ($(HAVE_CROSS_COMPILE)$(HAVE_MACOSX),)
+QT_CROSS_COMPILE := 1
+endif
 ifeq ($(call system_tool_majmin, qmake6 -query QT_VERSION 2>/dev/null),$(QTBASE_VERSION_MAJOR))
 
-ifdef HAVE_CROSS_COMPILE
+ifdef QT_CROSS_COMPILE
 QT_LIBEXECS := $(shell qmake6 -query QT_HOST_LIBEXECS)
 QT_BINS := $(shell qmake6 -query QT_HOST_BINS)
 else
@@ -656,7 +661,7 @@ endif
 endif
 endif
 
-ifdef HAVE_CROSS_COMPILE
+ifdef QT_CROSS_COMPILE
 ifdef QT_USES_SYSTEM_TOOLS
  # using system Qt native tools
  QT_HOST_PREFIX := $(shell PATH="${SYSTEM_PATH}" qmake6 -query QT_HOST_PREFIX)

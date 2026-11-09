@@ -13,7 +13,7 @@ ID=io.github.ming-bao.vlc-redesign
 # top, and the Qt interface replaces the macosx one.
 export VLC_FORCE_KERNELVERSION=19
 export VLC_PREBUILT_CONTRIBS_URL=https://artifacts.videolan.org/vlc/macos-arm64/vlc-contrib-aarch64-apple-darwin19-a302ba5409be61e07f8d4b34ed57d88258d7cc59.tar.zst
-export VLC_CONTRIB_REBUILD="qt qtsvg qtshadertools-tools qtdeclarative-tools qtdeclarative"
+export VLC_CONTRIB_REBUILD="qt-tools qt qtsvg qtshadertools-tools qtdeclarative-tools qtdeclarative"
 export VLC_CONFIGURE_ARGS="--enable-qt"
 export MINIMAL_OSX_VERSION=12.0   # Qt 6.8's minimum
 

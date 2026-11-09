@@ -1,12 +1,12 @@
 #!/bin/sh
-# curl, retried with backoff: GitHub release downloads sometimes answer 504
-# for minutes at a time. The release scripts put this first in PATH.
-i=0
-while :; do
-    /usr/bin/curl "$@" && exit 0
-    s=$?
-    i=$((i + 1))
-    [ $i -ge 8 ] && exit $s
-    echo "curl failed ($s), retry $i in $((i * 20))s" >&2
-    sleep $((i * 20))
+# curl with patient retries: GitHub release downloads sometimes answer 504 for
+# minutes at a time. curl's --retry only retries transient errors (5xx,
+# timeouts), so expected misses like a mirror's 404 still fail at once.
+# The release scripts put this first in PATH; callers' own --retry N is dropped.
+n=$#
+while [ $n -gt 0 ]; do
+    a=$1; shift; n=$((n - 1))
+    if [ "$a" = --retry ]; then shift; n=$((n - 1)); continue; fi
+    set -- "$@" "$a"
 done
+exec /usr/bin/curl --retry 10 --retry-delay 20 --retry-max-time 900 "$@"
