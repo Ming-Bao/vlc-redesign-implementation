@@ -76,8 +76,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build tools from Homebrew
         run: |
-          brew install autoconf automake libtool pkgconf cmake gnu-sed gnu-tar xz bison flex \
+          brew install autoconf automake libtool cmake gnu-sed gnu-tar xz bison flex \
             nasm gettext help2man meson ninja gperf zstd m4
+          # No pkgconf: VLC builds its own pkg-config, which cannot see /opt/homebrew.
           for p in libtool gnu-sed gnu-tar; do echo "$(brew --prefix $p)/libexec/gnubin" >> "$GITHUB_PATH"; done
           for p in bison flex m4 gettext; do echo "$(brew --prefix $p)/bin" >> "$GITHUB_PATH"; done
       - name: Build
