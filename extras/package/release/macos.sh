@@ -18,7 +18,8 @@ export VLC_CONFIGURE_ARGS="--enable-qt"
 export MINIMAL_OSX_VERSION=12.0   # Qt 6.8's minimum
 
 mkdir -p "$ROOT/build-macos" && cd "$ROOT/build-macos"
-"$ROOT/extras/package/macosx/build.sh" -a aarch64 -j "$(sysctl -n hw.ncpu)"
+# -d: release build (debug makes qmake link the _debug static Qt plugins)
+"$ROOT/extras/package/macosx/build.sh" -d -a aarch64 -j "$(sysctl -n hw.ncpu)"
 
 rm -rf dmg && mkdir dmg
 cp -R VLC.app "dmg/$APP"
