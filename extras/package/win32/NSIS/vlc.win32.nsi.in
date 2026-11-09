@@ -844,7 +844,7 @@ Section "un.$(Name_Section91)" SEC91
   Delete /REBOOTOK "$INSTDIR\npvlc.dll"
 
   RMDir "$SMPROGRAMS\${PRODUCT_PUBLISHER}"
-  RMDir /r $SMPROGRAMS\${PRODUCT_PUBLISHER}
+  RMDir /r "$SMPROGRAMS\${PRODUCT_PUBLISHER}"
 
   FileOpen $UninstallLog "$INSTDIR\uninstall.log" r
   UninstallLoop:
