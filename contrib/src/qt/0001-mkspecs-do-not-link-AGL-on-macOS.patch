@@ -1,10 +1,28 @@
 From: VLC Redesign
-Subject: [PATCH] mkspecs: do not link AGL on macOS
+Subject: [PATCH] Do not link AGL on macOS when the SDK lacks it
 
 The macOS 26 SDK no longer has AGL.framework, and nothing needs it.
 ---
---- a/mkspecs/common/mac.conf	2026-11-10 00:30:32.774539808 +1300
-+++ b/mkspecs/common/mac.conf	2026-11-10 00:30:32.776241466 +1300
+--- a/cmake/FindWrapOpenGL.cmake	2026-11-10 01:41:58.302984735 +1300
++++ b/cmake/FindWrapOpenGL.cmake	2026-11-10 01:41:58.311687402 +1300
+@@ -41,12 +41,11 @@
+         if(WrapOpenGL_AGL)
+             set(__opengl_agl_fw_path "${WrapOpenGL_AGL}")
+         endif()
+-        if(NOT __opengl_agl_fw_path)
+-            set(__opengl_agl_fw_path "-framework AGL")
+-        endif()
+ 
+         target_link_libraries(WrapOpenGL::WrapOpenGL INTERFACE ${__opengl_fw_path})
+-        target_link_libraries(WrapOpenGL::WrapOpenGL INTERFACE ${__opengl_agl_fw_path})
++        if(__opengl_agl_fw_path)
++            target_link_libraries(WrapOpenGL::WrapOpenGL INTERFACE ${__opengl_agl_fw_path})
++        endif()
+     else()
+         target_link_libraries(WrapOpenGL::WrapOpenGL INTERFACE OpenGL::GL)
+     endif()
+--- a/mkspecs/common/mac.conf	2026-11-10 01:41:58.288467435 +1300
++++ b/mkspecs/common/mac.conf	2026-11-10 01:41:58.305273740 +1300
 @@ -30,7 +30,7 @@
  QMAKE_REL_RPATH_BASE    = @loader_path
  
