@@ -499,6 +499,9 @@ if [ -n "$PREBUILT_FAILED" ]; then
     fi
 else
     make -j$JOBS tools
+    if [ -n "$VLC_CONTRIB_REBUILD" ]; then
+        make -j$JOBS rebuild-prebuilt REBUILD_PKGS="$VLC_CONTRIB_REBUILD"
+    fi
 fi
 cd ../..
 

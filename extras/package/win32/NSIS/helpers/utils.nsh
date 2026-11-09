@@ -20,6 +20,9 @@
     ReadRegStr $2 HKU "$1\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" AppData
     StrCmp $2 "" "${Index}-Loop"
     RMDir /r "$2\vlc"
+    ReadRegStr $2 HKU "$1\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Local AppData"
+    StrCmp $2 "" +2
+    RMDir /r "$2\vlc"
     Goto "${Index}-Loop"
   "${Index}-End:"
   !undef Index

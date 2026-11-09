@@ -7,7 +7,7 @@ DEPS_qtdeclarative-tools = qt-tools $(DEPS_qt-tools) qtshadertools-tools $(DEPS_
 
 DEPS_qtdeclarative = qt $(DEPS_qt) qtdeclarative-tools $(DEPS_qtdeclarative-tools)
 
-ifdef HAVE_WIN32
+ifneq ($(HAVE_WIN32)$(HAVE_MACOSX),)
 PKGS += qtdeclarative
 endif
 ifneq ($(findstring qt,$(PKGS)),)

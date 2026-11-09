@@ -5,7 +5,7 @@ QTSVG_URL := $(QT)/$(QTSVG_VERSION)/submodules/qtsvg-everywhere-src-$(QTSVG_VERS
 
 DEPS_qtsvg += qt $(DEPS_qt)
 
-ifdef HAVE_WIN32
+ifneq ($(HAVE_WIN32)$(HAVE_MACOSX),)
 PKGS += qtsvg
 endif
 

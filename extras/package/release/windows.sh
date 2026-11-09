@@ -1,0 +1,24 @@
+#!/bin/sh
+# Build the Windows installer and portable zip into $1 (default: dist/).
+# Runs inside registry.videolan.org/vlc-debian-win64-posix (see release.yml).
+set -e
+ROOT=$(cd "$(dirname "$0")/../../.." && pwd)
+OUT=$(mkdir -p "${1:-$ROOT/dist}" && cd "${1:-$ROOT/dist}" && pwd)
+VERSION=${VERSION:-beta}
+
+# Upstream's prebuilt contribs for this tree's contrib revision; only Qt is
+# rebuilt, with the network module the redesign needs.
+export VLC_PREBUILT_CONTRIBS_URL=https://artifacts.videolan.org/vlc/win64/vlc-contrib-x86_64-w64-mingw32-a5538c557d276378d5ba0f8f8010a8b87eaa6f78.tar.zst
+export VLC_CONTRIB_REBUILD=qt
+
+mkdir -p "$ROOT/build-win64" && cd "$ROOT/build-win64"
+"$ROOT/extras/package/win32/build.sh" -a x86_64 -p -r -i r
+
+exe=$(ls vlc-*-win64.exe) zip=$(ls vlc-*-win64.zip)
+top=$(unzip -Z1 "$zip" | head -1 | cut -d/ -f1)
+rm -rf stage && mkdir -p "stage/$top"
+cp "$ROOT/extras/package/release/uninstall.cmd" "stage/$top/"
+cp "$zip" "$OUT/vlc-redesign-$VERSION-win64-portable.zip"
+(cd stage && zip -q "$OUT/vlc-redesign-$VERSION-win64-portable.zip" "$top/uninstall.cmd")
+cp "$exe" "$OUT/vlc-redesign-$VERSION-win64.exe"
+ls -l "$OUT"

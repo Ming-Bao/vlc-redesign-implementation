@@ -3,16 +3,16 @@
 ; (http://nsis.sourceforge.net) ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-!define PRODUCT_NAME "VLC media player"
+!define PRODUCT_NAME "VLC Redesign"
 !define VERSION @VERSION@
 !define PRODUCT_VERSION @VERSION@
-!define PRODUCT_GROUP "VideoLAN"
-!define PRODUCT_PUBLISHER "VideoLAN"
-!define PRODUCT_WEB_SITE "https://www.videolan.org/"
-!define PRODUCT_DIR_REGKEY "Software\VideoLAN\VLC"
+!define PRODUCT_GROUP "VLC Redesign"
+!define PRODUCT_PUBLISHER "VLC Redesign"
+!define PRODUCT_WEB_SITE "https://github.com/Ming-Bao/vlc-redesign-implementation"
+!define PRODUCT_DIR_REGKEY "Software\VLC Redesign"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
-!define PRODUCT_ID "{ea92ef52-afe4-4212-bacb-dfe9fca94cd6}"
+!define PRODUCT_ID "{2b96413a-f7af-4827-9e84-7397a8a04b23}"
 
 !define MUI_LANGDLL_REGISTRY_ROOT "HKLM"
 !define MUI_LANGDLL_REGISTRY_KEY "${PRODUCT_DIR_REGKEY}"
@@ -909,7 +909,7 @@ Section "un.$(Name_Section91)" SEC91
   SetAutoClose true
 SectionEnd
 
-Section /o "un.$(Name_Section92)" SEC92
+Section "un.$(Name_Section92)" SEC92
   !insertmacro delprefs
 SectionEnd
 

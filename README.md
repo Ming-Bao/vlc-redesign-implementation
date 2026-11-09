@@ -1,140 +1,82 @@
-# VLC media player
+# VLC Redesign
 
-**VLC** is a libre and open source **media player** and **multimedia engine**,
-focused on **playing everything**, and **running everywhere**.
+A full redesign of the **VLC media player** interface, built on VLC 4's engine.
+It implements the community Figma design *"VLC Redesign"* as a new Qt/QML
+interface: a new player, library, menus, mini player, settings, dialogs,
+onboarding and a light theme.
 
-**VLC** can play most multimedia files, discs, streams, devices and is also able to
-convert, encode, **stream** and manipulate streams into numerous formats.
+> **Beta.** This is an unofficial fork, not a VideoLAN release. Expect rough edges.
+> Report problems on the [issue tracker](https://github.com/Ming-Bao/vlc-redesign-implementation/issues).
 
-VLC is used by many over the world, on numerous platforms, for very different use cases.
+## What's new
 
-The **engine of VLC** can be embedded into 3rd party applications, and is called *libVLC*.
+- **Player**: a pinned video with a solid control bar, a new icon set and the Inter font;
+  tracks, playback, queue, bookmarks and chapters panels; per-type video, audio and
+  subtitle settings that replace the old effects dialog; a seek bar thumbnail preview.
+- **Music player**: a waveform seek bar and a cover-art layout.
+- **Library**: Home (Continue Watching, Listen Again, frequently visited folders, playlists
+  and artists), folder-based Videos and Music, Network (streams, podcasts, radio),
+  Playlists and Recent, with a side panel you can open beside the player.
+- **Mini player**: a floating card over the library.
+- **Menus, Settings and dialogs**: every menu, the Settings window, Open Network Stream,
+  New Playlist, Add Subtitles (including OpenSubtitles with your own API key),
+  Keyboard Shortcuts and Customize Player are redrawn. Most settings apply at once.
+- **Onboarding**: a three-page first-run card (welcome, theme and colour, shortcuts).
+- **Themes**: dark, light, or follow the system, with a choice of accent colour.
 
-**VLC** is part of the [VideoLAN project](https://videolan.org) and
-is developed and supported by a community of volunteers.
+## Download
 
-The VideoLAN project was started at the university [École Centrale Paris](https://www.centralesupelec.fr/) who
-relicensed VLC under the GPLv2 license in February 2001. Since then, VLC has
-been downloaded **billions** of times.
+Get the latest build from [Releases](https://github.com/Ming-Bao/vlc-redesign-implementation/releases).
+
+| Platform | File | Notes |
+|---|---|---|
+| Windows 10/11 (64-bit) | `vlc-redesign-*-win64.exe` | Installer. Installs next to regular VLC, as "VLC Redesign". A portable `.zip` is also provided. |
+| macOS 12+ (Apple Silicon) | `vlc-redesign-*-macos-arm64.dmg` | Not signed: right-click the app and choose **Open** the first time. |
+| Linux (x86-64) | `vlc-redesign-*-x86_64.AppImage` | `chmod +x` it and run. Needs a recent distribution (2025 or later). |
+
+The builds are not code-signed, so Windows SmartScreen and macOS Gatekeeper will warn on first launch.
+
+## Uninstall
+
+Each package removes the app **and** its settings, media library and caches.
+
+- **Windows**: *Settings ▸ Apps ▸ VLC Redesign ▸ Uninstall* (or `uninstall.exe` in the
+  install folder). "Delete preferences and cache" is ticked by default. For the portable zip, run
+  `uninstall.cmd` from the extracted folder.
+- **macOS**: run `Uninstall VLC Redesign.command` from the disk image.
+- **Linux**: run `uninstall.sh` (from the release) and give it the AppImage's path:
+  `sh uninstall.sh ~/Applications/vlc-redesign-x86_64.AppImage`.
+
+**Note:** this fork keeps VLC's settings folders (`%APPDATA%\vlc`, `~/Library/Preferences/org.videolan.vlc`,
+`~/.config/vlc` and friends). If you also use regular VLC, uninstalling
+resets its settings too.
+
+## Building from source
+
+The fork builds like VLC 4. It needs Qt 6 (with the Network module) and Meson 1.10 or later:
+
+```sh
+meson setup build
+ninja -C build
+build/bin/vlc-static
+```
+
+See [INSTALL](INSTALL) and the [VLC hacking guide](https://wiki.videolan.org/Hacker_Guide) for
+dependencies. Release packaging lives in `.github/workflows/release.yml`.
+
+Design notes, per-slice specs and plans are in [`docs/superpowers/`](docs/superpowers/);
+[the roadmap](docs/superpowers/specs/2026-10-13-vlc-redesign-roadmap.md) lists what each
+slice changed and where it departs from the Figma.
+
+## Credits
+
+- Redesign implementation: Ming Bao and Galen Green (see [AUTHORS](AUTHORS)).
+- Design: the community Figma file *"VLC Redesign"*.
+- Engine and everything else: [VLC](https://www.videolan.org/vlc/) by VideoLAN and its
+  contributors. This project is not affiliated with or endorsed by VideoLAN; VLC is a
+  VideoLAN trademark.
 
 ## License
 
-**VLC** is released under the GPLv2 *(or later)* license.
-*On some platforms, it is de facto GPLv3, because of the licenses of dependencies*.
-
-**libVLC**, the engine is released under the LGPLv2 *(or later)* license. \
-This allows embedding the engine in 3rd party applications, while letting them to be licensed under other licenses.
-
-# Platforms
-
-VLC is available for the following platforms:
-- [Windows] *(from 7 and later, including UWP platforms and all versions of Windows 10)*
-- [macOS] *(10.10 and later)*
-- [GNU/Linux] and affiliated
-- [BSD] and affiliated
-- [Android] *(4.2 and later)*, including Android TV and Android Auto
-- [iOS] *(9 and later)*, including AppleTV and iPadOS
-- Haiku, OS/2 and a few others.
-
-[Windows]: https://www.videolan.org/vlc/download-windows.html
-[macOS]: https://www.videolan.org/vlc/download-macosx.html
-[GNU/Linux]: https://www.videolan.org/vlc/#download
-[BSD]: https://www.videolan.org/vlc/download-freebsd.html
-[Android]: https://www.videolan.org/vlc/download-android.html
-[iOS]: https://www.videolan.org/vlc/download-ios.html
-
-Not all platforms receive the same amount of care, due to our limited resources.
-
-**Nota Bene**: The [Android app](https://code.videolan.org/videolan/vlc-android/) and
-the [iOS app](https://code.videolan.org/videolan/vlc-ios/) are located in different repositories
-than the main one.
-
-# Contributing & Community
-
-**VLC** is maintained by a community of people, and VideoLAN is not paying any of them.\
-The community is composed of developers, helpers, maintainers, designers and writers that want
-this open source project to thrive.
-
-The main development of VLC is done in the C language, but this repository also contains
-plenty of C++, Obj-C, asm and Rust.
-
-Other repositories linked to vlc are done in languages including Kotlin/Java [(Android)](https://code.videolan.org/videolan/vlc-android/),
-Swift [(iOS)](https://code.videolan.org/videolan/vlc-ios/), and C# [(libVLCSharp)](https://code.videolan.org/videolan/libvlcsharp/).
-
-We need help with the following tasks:
-- Coding
-- Packaging for Windows, macOS and Linux distributions
-- Technical writing for the documentation
-- Design
-- Support
-- Community management and communication.
-
-Please contribute :)
-
-We are on IRC. You can find us on the **#videolan** channel on *[Libera.chat]*.
-
-[Libera.chat]: https://libera.chat
-
-## Contributions
-
-Contributions are now done through Merge Requests on our [GitLab repository](https://code.videolan.org/videolan/vlc/).
-
-CI and discussions should be resolved before a Merge Request can be merged.
-
-# libVLC
-
-**libVLC** is an embeddable engine for 3rd party applications and frameworks.
-
-It runs on the same platforms as VLC *(and sometimes on more)* and can provide playback,
-streaming and conversion of multimedia files and streams.
-
-
-**libVLC** has numerous bindings for other languages, such as C++, Python and C#.
-
-# Support
-
-## Links
-
-Some useful links that might help you:
-
-- [VLC web site](https://www.videolan.org/vlc/)
-- [Support](https://www.videolan.org/support/)
-- [Forums](https://forum.videolan.org/)
-- [Wiki](https://wiki.videolan.org/)
-- [Developer's Corner](https://wiki.videolan.org/Developers_Corner)
-- [VLC hacking guide](https://wiki.videolan.org/Hacker_Guide)
-- [Bugtracker](https://code.videolan.org/videolan/vlc/-/issues)
-- [VideoLAN web site](https://www.videolan.org/)
-
-## Source Code sitemap
-```
-ABOUT-NLS          - Notes on the Free Translation Project.
-AUTHORS            - VLC authors.
-COPYING            - The GPL license.
-COPYING.LIB        - The LGPL license.
-INSTALL            - Installation and building instructions.
-NEWS               - Important modifications between the releases.
-README             - Project summary.
-THANKS             - VLC contributors.
-
-bin/               - VLC binaries.
-bindings/          - libVLC bindings to other languages.
-compat/            - compatibility library for operating systems missing
-                     essential functionalities.
-contrib/           - Facilities for retrieving external libraries and building
-                     them for systems that don't have the right versions.
-doc/               - Miscellaneous documentation.
-extras/analyser    - Code analyser and editor specific files.
-extras/buildsystem - Different build system specific files.
-extras/misc        - Files that don't fit in the other extras/ categories.
-extras/package     - VLC packaging specific files such as spec files.
-extras/tools/      - Facilities for retrieving external building tools needed
-                     for systems that don't have the right versions.
-include/           - Header files.
-lib/               - libVLC source code.
-modules/           - VLC plugins and modules. Most of the code is here.
-po/                - VLC translations.
-share/             - Common resource files.
-src/               - libvlccore source code.
-test/              - Testing system.
-```
+Like VLC, this is released under the GPLv2 *(or later)*; libVLC is LGPLv2 *(or later)*.
+See [COPYING](COPYING) and [COPYING.LIB](COPYING.LIB).

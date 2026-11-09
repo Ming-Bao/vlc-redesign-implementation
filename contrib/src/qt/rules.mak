@@ -4,10 +4,7 @@
 QTBASE_VERSION_FULL := $(QTBASE_VERSION)
 QTBASE_URL := $(QT)/$(QTBASE_VERSION_FULL)/submodules/qtbase-everywhere-src-$(QTBASE_VERSION_FULL).tar.xz
 
-ifdef HAVE_MACOSX
-#PKGS += qt
-endif
-ifdef HAVE_WIN32
+ifneq ($(HAVE_WIN32)$(HAVE_MACOSX),)
 PKGS += qt
 endif
 ifneq ($(findstring qt,$(PKGS)),)
@@ -82,7 +79,7 @@ endif
 QTBASE_COMMON_CONFIG := -DFEATURE_pkg_config=OFF -DINPUT_openssl=no \
 	-DFEATURE_dbus=OFF -DFEATURE_zstd=OFF -DFEATURE_concurrent=OFF -DFEATURE_androiddeployqt=OFF \
 	-DFEATURE_sql=OFF \
-	-DFEATURE_xml=OFF -DFEATURE_printsupport=OFF -DFEATURE_network=OFF \
+	-DFEATURE_xml=OFF -DFEATURE_printsupport=OFF -DFEATURE_network=ON \
 	-DFEATURE_pdf=OFF \
 	-DQT_BUILD_EXAMPLES=OFF -DQT_GENERATE_SBOM=OFF \
 	--log-level=STATUS

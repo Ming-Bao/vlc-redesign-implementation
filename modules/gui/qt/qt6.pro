@@ -8,7 +8,7 @@ CONFIG -= debug_and_release
 CONFIG += no_include_pwd
 
 win32 {
-QTPLUGIN += qwindows qmodernwindowsstyle
+QTPLUGIN += qwindows qmodernwindowsstyle qschannelbackend
 }
 
 linux {
@@ -16,7 +16,7 @@ QTPLUGIN += qxcb-glx-integration qxcb-egl-integration qxcb qwayland-generic qway
 }
 
 macx {
-QTPLUGIN += qcocoa qmacstyle
+QTPLUGIN += qcocoa qmacstyle qsecuretransportbackend
 }
 
 ios {
