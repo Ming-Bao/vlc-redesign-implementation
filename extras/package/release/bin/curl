@@ -1,0 +1,12 @@
+#!/bin/sh
+# curl, retried with backoff: GitHub release downloads sometimes answer 504
+# for minutes at a time. The release scripts put this first in PATH.
+i=0
+while :; do
+    /usr/bin/curl "$@" && exit 0
+    s=$?
+    i=$((i + 1))
+    [ $i -ge 8 ] && exit $s
+    echo "curl failed ($s), retry $i in $((i * 20))s" >&2
+    sleep $((i * 20))
+done

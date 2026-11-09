@@ -1,8 +1,9 @@
 #!/bin/bash
 # Build the macOS (Apple Silicon) disk image into $1 (default: dist/).
-# Runs on a GitHub macos-14 runner (see release.yml).
+# Runs on a GitHub macos-latest runner (see release.yml).
 set -e
 ROOT=$(cd "$(dirname "$0")/../../.." && pwd)
+export PATH="$ROOT/extras/package/release/bin:$PATH"  # retrying curl
 OUT=$(mkdir -p "${1:-$ROOT/dist}" && cd "${1:-$ROOT/dist}" && pwd)
 VERSION=${VERSION:-beta}
 APP="VLC Redesign.app"

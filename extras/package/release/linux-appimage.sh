@@ -3,6 +3,7 @@
 # Runs inside registry.videolan.org/vlc-debian-unstable (see release.yml).
 set -e
 ROOT=$(cd "$(dirname "$0")/../../.." && pwd)
+export PATH="$ROOT/extras/package/release/bin:$PATH"  # retrying curl
 OUT=$(mkdir -p "${1:-$ROOT/dist}" && cd "${1:-$ROOT/dist}" && pwd)
 VERSION=${VERSION:-beta}
 J=$(nproc)
