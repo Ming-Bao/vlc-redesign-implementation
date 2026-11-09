@@ -1,0 +1,17 @@
+From: VLC Redesign
+Subject: [PATCH] Do not use __yield on Apple
+
+Xcode 26 clang errors on the implicit declaration of __yield; on Apple
+qYieldCpu() falls through to __builtin_arm_yield.
+---
+--- a/src/corelib/thread/qyieldcpu.h	2026-11-09 21:16:51.503239827 +1300
++++ b/src/corelib/thread/qyieldcpu.h	2026-11-09 21:16:51.504997903 +1300
+@@ -31,7 +31,7 @@
+     noexcept
+ #endif
+ {
+-#if __has_builtin(__yield)
++#if __has_builtin(__yield) && !defined(__APPLE__) // Apple clang: __yield needs <arm_acle.h>
+     __yield();              // Generic
+ #elif defined(_YIELD_PROCESSOR) && defined(Q_CC_MSVC)
+     _YIELD_PROCESSOR();     // Generic; MSVC's <atomic>
