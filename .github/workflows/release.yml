@@ -8,10 +8,6 @@ on:
     branches: ['release/**']
   workflow_dispatch:
 
-concurrency:
-  group: release-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: write
 
@@ -37,7 +33,10 @@ jobs:
           sh -c 'git config --global --add safe.directory /src && extras/package/release/windows.sh /src/dist' 2>&1 | tee build.log
       - name: Log tail as annotation
         if: failure()
-        run: python3 -c "import sys;t=open('build.log',errors='replace').read()[-60000:];print('::error title=build log tail::'+t.replace('%','%25').replace('\r','').replace('\n','%0A'))"
+        run: |
+          enc() { python3 -c "import sys;print(sys.stdin.read()[-3500:].replace('%','%25').replace('\r','').replace('\n','%0A'))"; }
+          echo "::error title=build errors::$(grep -a -E 'error|Error|FAILED|No such|not found' build.log | tail -30 | enc)"
+          echo "::error title=build log tail::$(tail -c 3500 build.log | enc)"
       - uses: actions/upload-artifact@v4
         with: { name: windows, path: dist/* }
 
@@ -55,7 +54,10 @@ jobs:
           sh -c 'git config --global --add safe.directory /src && extras/package/release/linux-appimage.sh /src/dist' 2>&1 | tee build.log
       - name: Log tail as annotation
         if: failure()
-        run: python3 -c "import sys;t=open('build.log',errors='replace').read()[-60000:];print('::error title=build log tail::'+t.replace('%','%25').replace('\r','').replace('\n','%0A'))"
+        run: |
+          enc() { python3 -c "import sys;print(sys.stdin.read()[-3500:].replace('%','%25').replace('\r','').replace('\n','%0A'))"; }
+          echo "::error title=build errors::$(grep -a -E 'error|Error|FAILED|No such|not found' build.log | tail -30 | enc)"
+          echo "::error title=build log tail::$(tail -c 3500 build.log | enc)"
       - uses: actions/upload-artifact@v4
         with: { name: linux, path: dist/* }
 
@@ -68,7 +70,10 @@ jobs:
         run: extras/package/release/macos.sh "$PWD/dist" 2>&1 | tee build.log
       - name: Log tail as annotation
         if: failure()
-        run: python3 -c "import sys;t=open('build.log',errors='replace').read()[-60000:];print('::error title=build log tail::'+t.replace('%','%25').replace('\r','').replace('\n','%0A'))"
+        run: |
+          enc() { python3 -c "import sys;print(sys.stdin.read()[-3500:].replace('%','%25').replace('\r','').replace('\n','%0A'))"; }
+          echo "::error title=build errors::$(grep -a -E 'error|Error|FAILED|No such|not found' build.log | tail -30 | enc)"
+          echo "::error title=build log tail::$(tail -c 3500 build.log | enc)"
       - uses: actions/upload-artifact@v4
         with: { name: macos, path: dist/* }
 
