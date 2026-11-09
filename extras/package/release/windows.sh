@@ -17,10 +17,9 @@ mkdir -p "$ROOT/build-win64" && cd "$ROOT/build-win64"
 cd win64  # build.sh builds in $PWD/win64
 
 exe=$(ls vlc-*-win64.exe) zip=$(ls vlc-*-win64.zip)
-top=$(unzip -Z1 "$zip" | head -1 | cut -d/ -f1)
-rm -rf stage && mkdir -p "stage/$top"
-cp "$ROOT/extras/package/release/uninstall.cmd" "stage/$top/"
+top=${zip%-win64.zip}   # the zip holds this folder, e.g. vlc-4.0.0-dev/
+cp "$ROOT/extras/package/release/uninstall.cmd" "$top/"
 cp "$zip" "$OUT/vlc-redesign-$VERSION-win64-portable.zip"
-(cd stage && zip -q "$OUT/vlc-redesign-$VERSION-win64-portable.zip" "$top/uninstall.cmd")
+zip -q "$OUT/vlc-redesign-$VERSION-win64-portable.zip" "$top/uninstall.cmd"
 cp "$exe" "$OUT/vlc-redesign-$VERSION-win64.exe"
 ls -l "$OUT"
