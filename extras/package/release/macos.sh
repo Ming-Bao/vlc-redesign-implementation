@@ -27,6 +27,13 @@ mkdir -p "$ROOT/build-macos" && cd "$ROOT/build-macos"
     exit 1
 }
 
+# The app must not depend on anything outside the bundle and the system.
+if find VLC.app -type f \( -name '*.dylib' -o -perm -u+x \) -exec otool -L {} + 2>/dev/null |
+        grep -E '/opt/homebrew|/usr/local/'; then
+    echo "VLC.app links libraries from outside the bundle" >&2
+    exit 1
+fi
+
 rm -rf dmg && mkdir dmg
 cp -R VLC.app "dmg/$APP"
 PL="dmg/$APP/Contents/Info.plist"
