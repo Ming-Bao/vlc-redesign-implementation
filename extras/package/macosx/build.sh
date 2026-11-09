@@ -221,10 +221,11 @@ if [ -n "$PREBUILT_FAILED" ]; then
         make package
     fi
 else
-    make -j$JOBS tools
+    # Before the tools: natively, Qt's host tools are the rebuilt Qt itself.
     if [ -n "$VLC_CONTRIB_REBUILD" ]; then
         make -j$JOBS rebuild-prebuilt REBUILD_PKGS="$VLC_CONTRIB_REBUILD"
     fi
+    make -j$JOBS tools
 fi
 spopd
 

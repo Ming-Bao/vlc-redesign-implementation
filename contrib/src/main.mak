@@ -793,12 +793,12 @@ ifneq ($(notdir $(PREFIX)),$(HOST))
 endif
 	tar -c -C tmp $(HOST)/ | zstd --quiet --force --threads=0 -12 -c > ../vlc-contrib-$(HOST)-$(DATE).tar.zst
 
-# Rebuild REBUILD_PKGS over a prebuilt tree (e.g. a Qt with other features);
-# their other dependencies are taken as already built.
+# Rebuild REBUILD_PKGS, in order, over a prebuilt tree (e.g. a Qt with other
+# features); their other dependencies are taken as already built.
 REBUILD_DEPS = $(filter-out $(REBUILD_PKGS),$(sort $(foreach p,$(REBUILD_PKGS),$(DEPS_$(p)))))
 rebuild-prebuilt:
 	touch $(REBUILD_DEPS:%=.dep-%)
-	$(MAKE) $(REBUILD_PKGS:%=.%) $(REBUILD_DEPS:%=-o .dep-%)
+	set -e; for p in $(REBUILD_PKGS); do $(MAKE) .$$p $(REBUILD_DEPS:%=-o .dep-%); done
 
 list:
 	@echo All packages:
