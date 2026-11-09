@@ -1791,6 +1791,7 @@ $(QML_RULES_DEPS): Makefile
 	  echo '$(@D)/qmlassets.cpp: $$(builddir)/$(@D)/qmldir.qrc $$(builddir)/$(@D)/res.qrc'; \
 	  echo '$(@D)/qmlassets.cpp: $$(libqml_module_$(@D)_a_QML) $$(libqml_module_$(@D)_a_Singleton_QML)'; \
 	  echo '$$(libqml_module_$(@D)_a_QML:.qml=.cpp) $$(libqml_module_$(@D)_a_Singleton_QML:.qml=.cpp): $$(builddir)/$(@D)/res.qrc'; \
+	  echo '$$(patsubst %.js,%.cpp,$$(filter %.js,$$(libqml_module_$(@D)_a_QML))): $$(builddir)/$(@D)/res.qrc'; \
 	} > $@.tmp && \
 	if cmp -s $@.tmp $@; then rm -f $@.tmp; else mv $@.tmp $@; fi
 
