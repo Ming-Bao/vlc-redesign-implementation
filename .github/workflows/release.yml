@@ -35,7 +35,7 @@ jobs:
         if: failure()
         run: |
           enc() { python3 -c "import sys;print(sys.stdin.read()[-3500:].replace('%','%25').replace('\r','').replace('\n','%0A'))"; }
-          echo "::error title=build errors::$(grep -a -E 'error|Error|FAILED|No such|not found' build.log | tail -30 | enc)"
+          echo "::error title=build errors::$(grep -a -E 'error:|Error [0-9]|\*\*\*|FAILED|No such|not found|failed' build.log | tail -30 | enc)"
           echo "::error title=build log tail::$(tail -c 3500 build.log | enc)"
       - uses: actions/upload-artifact@v4
         with: { name: windows, path: dist/* }
@@ -56,7 +56,7 @@ jobs:
         if: failure()
         run: |
           enc() { python3 -c "import sys;print(sys.stdin.read()[-3500:].replace('%','%25').replace('\r','').replace('\n','%0A'))"; }
-          echo "::error title=build errors::$(grep -a -E 'error|Error|FAILED|No such|not found' build.log | tail -30 | enc)"
+          echo "::error title=build errors::$(grep -a -E 'error:|Error [0-9]|\*\*\*|FAILED|No such|not found|failed' build.log | tail -30 | enc)"
           echo "::error title=build log tail::$(tail -c 3500 build.log | enc)"
       - uses: actions/upload-artifact@v4
         with: { name: linux, path: dist/* }
@@ -66,13 +66,19 @@ jobs:
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
+      - name: Build tools from Homebrew
+        run: |
+          brew install autoconf automake libtool pkgconf cmake gnu-sed gnu-tar xz bison flex \
+            nasm gettext help2man meson ninja gperf zstd m4
+          for p in libtool gnu-sed gnu-tar; do echo "$(brew --prefix $p)/libexec/gnubin" >> "$GITHUB_PATH"; done
+          for p in bison flex m4 gettext; do echo "$(brew --prefix $p)/bin" >> "$GITHUB_PATH"; done
       - name: Build
         run: extras/package/release/macos.sh "$PWD/dist" 2>&1 | tee build.log
       - name: Log tail as annotation
         if: failure()
         run: |
           enc() { python3 -c "import sys;print(sys.stdin.read()[-3500:].replace('%','%25').replace('\r','').replace('\n','%0A'))"; }
-          echo "::error title=build errors::$(grep -a -E 'error|Error|FAILED|No such|not found' build.log | tail -30 | enc)"
+          echo "::error title=build errors::$(grep -a -E 'error:|Error [0-9]|\*\*\*|FAILED|No such|not found|failed' build.log | tail -30 | enc)"
           echo "::error title=build log tail::$(tail -c 3500 build.log | enc)"
       - uses: actions/upload-artifact@v4
         with: { name: macos, path: dist/* }
