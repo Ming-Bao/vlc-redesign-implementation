@@ -14,6 +14,7 @@ export VLC_CONTRIB_REBUILD=qt
 
 mkdir -p "$ROOT/build-win64" && cd "$ROOT/build-win64"
 "$ROOT/extras/package/win32/build.sh" -a x86_64 -p -r -i r
+cd win64  # build.sh builds in $PWD/win64
 
 exe=$(ls vlc-*-win64.exe) zip=$(ls vlc-*-win64.zip)
 top=$(unzip -Z1 "$zip" | head -1 | cut -d/ -f1)
