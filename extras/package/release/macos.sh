@@ -19,7 +19,12 @@ export MINIMAL_OSX_VERSION=12.0   # Qt 6.8's minimum
 
 mkdir -p "$ROOT/build-macos" && cd "$ROOT/build-macos"
 # -d: release build (debug makes qmake link the _debug static Qt plugins)
-"$ROOT/extras/package/macosx/build.sh" -d -a aarch64 -j "$(sysctl -n hw.ncpu)"
+"$ROOT/extras/package/macosx/build.sh" -d -a aarch64 -j "$(sysctl -n hw.ncpu)" || {
+    # Which build files still ask for frameworks the SDK lacks.
+    grep -rlw AGL contrib --include='*.prl' --include='*.pc' --include='*.cmake' \
+        --include='*.conf' --include='*.la' --include='*.pri' 2>/dev/null | head -30
+    exit 1
+}
 
 rm -rf dmg && mkdir dmg
 cp -R VLC.app "dmg/$APP"
