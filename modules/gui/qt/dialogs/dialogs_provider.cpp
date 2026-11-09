@@ -1096,7 +1096,7 @@ void  DialogsProvider::loadMediaFile( const es_format_category_e category, const
     }
 }
 
-QUrl DialogsProvider::pickFile( const QString& title, bool subtitle, const QUrl& near )
+QUrl DialogsProvider::pickFile( const QString& title, bool subtitle, const QUrl& nearUrl )
 {
     QString filter;
     if( subtitle ) {
@@ -1109,7 +1109,7 @@ QUrl DialogsProvider::pickFile( const QString& title, bool subtitle, const QUrl&
     filter.chop(2); //remove trailing ";;"
 
     return QFileDialog::getOpenFileUrl( nullptr, title,
-                                        near.isValid() ? near.adjusted( QUrl::RemoveFilename )
+                                        nearUrl.isValid() ? nearUrl.adjusted( QUrl::RemoveFilename )
                                                        : p_intf->p_mi->getDialogFilePath(),
                                         filter );
 }

@@ -271,7 +271,7 @@ public slots:
     void streamMedia( const QUrl& url, bool stream ) { streamingDialog( { url }, !stream ); }
     // a file picker for the library file menu's Add Subtitle/Audio Tracks, opened in
     // the folder of `near`; an empty url when cancelled
-    Q_INVOKABLE QUrl pickFile( const QString& title, bool subtitle, const QUrl& near );
+    Q_INVOKABLE QUrl pickFile( const QString& title, bool subtitle, const QUrl& nearUrl );
     // the library folder menu's Add File and Add Folder, opened in `folder`;
     // nothing picked: [] and an empty url
     Q_INVOKABLE QStringList pickMedia( const QString& title, const QUrl& folder )
