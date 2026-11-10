@@ -77,8 +77,11 @@ QT_MDIAREA := OFF
 endif
 
 ifdef HAVE_CROSS_COMPILE
-# This is necessary to make use of qmake
+ifndef HAVE_MACOSX
+# This is necessary to make use of qmake (macOS has no $(HOST)-clang++:
+# qmake passes -arch from QT_ARCHS instead)
 QTBASE_CONFIG += -DQT_QMAKE_DEVICE_OPTIONS:STRING=CROSS_COMPILE=$(HOST)-
+endif
 endif
 
 ifdef HAVE_WIN32
