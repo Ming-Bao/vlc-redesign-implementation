@@ -921,6 +921,10 @@ ifdef HAVE_ANDROID
 endif
 ifdef MSYS_BUILD
 	CMAKE_TOOLCHAIN_ENV += FIND_ROOT_PATH="$(shell cygpath -m $(PREFIX))"
+else ifeq ($(HAVE_CROSS_COMPILE)$(HAVE_MACOSX),11)
+	# macOS cross builds (x86_64 on arm64) only search the roots: add the
+	# SDK, or its frameworks (OpenGL for Qt) are not found.
+	CMAKE_TOOLCHAIN_ENV += FIND_ROOT_PATH="$(PREFIX);$(MACOSX_SDK)"
 else
 	CMAKE_TOOLCHAIN_ENV += FIND_ROOT_PATH="$(PREFIX)"
 endif
