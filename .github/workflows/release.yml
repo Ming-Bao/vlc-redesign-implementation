@@ -70,7 +70,11 @@ jobs:
         with: { name: linux, path: dist/* }
 
   macos:
-    runs-on: macos-latest
+    runs-on: macos-latest  # Apple Silicon; x86_64 is cross-compiled
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [aarch64, x86_64]
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
@@ -82,7 +86,7 @@ jobs:
           for p in libtool gnu-sed gnu-tar; do echo "$(brew --prefix $p)/libexec/gnubin" >> "$GITHUB_PATH"; done
           for p in bison flex m4 gettext; do echo "$(brew --prefix $p)/bin" >> "$GITHUB_PATH"; done
       - name: Build
-        run: extras/package/release/macos.sh "$PWD/dist" 2>&1 | tee build.log
+        run: ARCH=${{ matrix.arch }} extras/package/release/macos.sh "$PWD/dist" 2>&1 | tee build.log
       - name: Log tail as annotation
         if: failure()
         run: |
@@ -92,9 +96,11 @@ jobs:
           # Full log on a temporary branch (fetchable with plain git).
           d=$(mktemp -d) && cp build.log "$d/" && cd "$d" && git init -q && git add build.log &&
             git -c user.name=ci -c user.email=ci@localhost commit -qm "${{ github.job }} log" &&
-            git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" HEAD:refs/heads/ci-logs/${{ github.job }}-${{ github.run_id }}
+            git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" HEAD:refs/heads/ci-logs/${{ github.job }}-${{ matrix.arch }}-${{ github.run_id }}
       - uses: actions/upload-artifact@v4
-        with: { name: macos, path: dist/* }
+        with:
+          name: macos-${{ matrix.arch }}
+          path: dist/*
 
   release:
     if: github.ref_type == 'tag'
@@ -116,6 +122,7 @@ jobs:
 
             - **Windows 10/11 x64**: `*-win64.exe` installer (or the portable zip)
             - **macOS 12+ Apple Silicon**: `*-macos-arm64.dmg`
+            - **macOS 12+ Intel**: `*-macos-x86_64.dmg`
             - **Linux x86-64**: `*-x86_64.AppImage` (`chmod +x`, then run; needs a 2025+ distribution)
 
             To uninstall completely (app, settings, media library, caches): Windows

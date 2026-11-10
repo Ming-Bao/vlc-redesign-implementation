@@ -32,6 +32,7 @@ Get the latest build from [Releases](https://github.com/Ming-Bao/vlc-redesign-im
 |---|---|---|
 | Windows 10/11 (64-bit) | `vlc-redesign-*-win64.exe` | Installer. Installs next to regular VLC, as "VLC Redesign". A portable `.zip` is also provided. |
 | macOS 12+ (Apple Silicon) | `vlc-redesign-*-macos-arm64.dmg` | Not signed: right-click the app and choose **Open** the first time. |
+| macOS 12+ (Intel) | `vlc-redesign-*-macos-x86_64.dmg` | Same as above. |
 | Linux (x86-64) | `vlc-redesign-*-x86_64.AppImage` | `chmod +x` it and run. Needs a recent distribution (2025 or later). |
 
 The builds are not code-signed, so Windows SmartScreen and macOS Gatekeeper will warn on first launch.
