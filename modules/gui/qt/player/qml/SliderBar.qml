@@ -68,22 +68,29 @@ T.ProgressBar {
                    : Array(_waveBars).fill(minH)
     }
 
-    function _paintWave(ctx, w, h, color) {
-        ctx.reset()
-        ctx.fillStyle = color
-        const hs = _waveHeights
-        const n = hs.length
-        const x0 = (w - ((n - 1) * _wavePitch + _waveBarWidth)) / 2
-        for (let i = 0; i < n; ++i) {
-            ctx.beginPath()
-            ctx.roundedRect(x0 + i * _wavePitch, (h - hs[i]) / 2, _waveBarWidth, hs[i], _waveBarWidth / 2, _waveBarWidth / 2)
-            ctx.fill()
-        }
-    }
+    // the waveform's bars, as Rectangles: the static Qt of the Windows and macOS packages
+    // is built without Canvas (contrib/src/qtdeclarative/rules.mak)
+    component WaveBars: Item {
+        id: bars
 
-    on_WaveHeightsChanged: {
-        waveUnplayed.requestPaint()
-        wavePlayed.requestPaint()
+        property color barColor
+        readonly property real _x0: (width - ((control._waveHeights.length - 1) * control._wavePitch + control._waveBarWidth)) / 2
+
+        Repeater {
+            model: control._waveHeights
+
+            Rectangle {
+                required property int index
+                required property real modelData
+
+                x: bars._x0 + index * control._wavePitch
+                y: (bars.height - modelData) / 2
+                width: control._waveBarWidth
+                height: modelData
+                radius: control._waveBarWidth / 2
+                color: bars.barColor
+            }
+        }
     }
 
     Keys.onRightPressed: Player.jumpFwd()
@@ -554,14 +561,11 @@ T.ProgressBar {
             }
         }
 
-        Canvas {
+        WaveBars {
             id: waveUnplayed
             anchors.fill: parent
             visible: control.waveform
-            readonly property color barColor: theme.palette.tokens.fgA4
-            onBarColorChanged: requestPaint()
-            onPaint: control._paintWave(getContext("2d"), width, height, barColor)
-            onWidthChanged: requestPaint()
+            barColor: theme.palette.tokens.fgA4
         }
 
         Item {
@@ -571,14 +575,10 @@ T.ProgressBar {
             clip: true
             visible: control.waveform
 
-            Canvas {
-                id: wavePlayed
+            WaveBars {
                 width: waveUnplayed.width
                 height: waveUnplayed.height
-                readonly property color barColor: theme.palette.tokens.accentDim
-                onBarColorChanged: requestPaint()
-                onPaint: control._paintWave(getContext("2d"), width, height, barColor)
-                onWidthChanged: requestPaint()
+                barColor: theme.palette.tokens.accentDim
             }
         }
 

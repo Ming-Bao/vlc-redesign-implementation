@@ -687,6 +687,7 @@ qml_modules += {
         'dialogs/toolbar/qml/CustomizePlayerOverlay.qml',
         'dialogs/toolbar/qml/CustomizePalette.js',
         'dialogs/toolbar/qml/DashedBox.qml',
+        'dialogs/toolbar/qml/DashedLine.qml',
         'dialogs/settings/qml/AdvancedBar.qml',
         'dialogs/hotkeys/qml/HotkeysData.js',
         'dialogs/onboarding/qml/OnboardingKeys.js',

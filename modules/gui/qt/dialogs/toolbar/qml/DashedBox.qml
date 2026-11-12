@@ -20,20 +20,14 @@ import QtQuick
 import VLC.Style
 
 // Customize Player's outline around items and zones: 1 px FG/A3, dash 4/4 (Figma 2107:5604)
-// A Canvas, not QtQuick.Shapes: static Qt (Windows, macOS) does not link Shapes.
-Canvas {
+// An Item, so a control's background does not size itself from it; the edges are DashedLines.
+Item {
     id: root
 
-    readonly property real _w: VLCStyle.dp(1, VLCStyle.scale)
     readonly property color _color: VLCStyle.palette.tokens.fgA3   // the same in both themes
 
-    on_ColorChanged: requestPaint()
-    onPaint: {
-        const ctx = getContext("2d")
-        ctx.reset()
-        ctx.strokeStyle = _color
-        ctx.lineWidth = _w
-        ctx.setLineDash([4, 4])   // in units of the line width
-        ctx.strokeRect(_w / 2, _w / 2, width - _w, height - _w)
-    }
+    DashedLine { anchors { left: parent.left; right: parent.right; top: parent.top } color: root._color }
+    DashedLine { anchors { left: parent.left; right: parent.right; bottom: parent.bottom } color: root._color }
+    DashedLine { vertical: true; anchors { top: parent.top; bottom: parent.bottom; left: parent.left } color: root._color }
+    DashedLine { vertical: true; anchors { top: parent.top; bottom: parent.bottom; right: parent.right } color: root._color }
 }

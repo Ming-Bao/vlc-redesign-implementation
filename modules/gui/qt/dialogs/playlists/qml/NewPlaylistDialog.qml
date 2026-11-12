@@ -244,28 +244,55 @@ DialogCard {
                 color: root._s.field
             }
 
-            // the 2 px dashed border
-            Canvas {
+            // the 2 px dashed border: dashed edges, solid rounded corners
+            Item {
                 id: dashes
 
                 readonly property color stroke: drop.containsDrag || dropBox.activeFocus ? root._s.accent
                                                : root.colorContext.palette.isDark ? "#2D2D2D" : root.colorContext.palette.tokens.dividerBright   // fixed colour: off-token dark value
+                readonly property real _lw: VLCStyle.dp(2, VLCStyle.scale)
+                readonly property real _r: VLCStyle.dp(6, VLCStyle.scale)
+
+                component Edge: DashedLine {
+                    color: dashes.stroke
+                    lineWidth: dashes._lw
+                    dash: 6   // 12 px dashes, 8 px gaps
+                    gap: 4
+                }
 
                 anchors.fill: parent
-                onStrokeChanged: requestPaint()
-                onWidthChanged: requestPaint()
-                onHeightChanged: requestPaint()
-                onPaint: {
-                    const ctx = getContext("2d")
-                    const lw = VLCStyle.dp(2, VLCStyle.scale)
-                    const r = VLCStyle.dp(6, VLCStyle.scale)
-                    ctx.reset()
-                    ctx.strokeStyle = stroke
-                    ctx.lineWidth = lw
-                    ctx.setLineDash([lw * 3, lw * 2])
-                    ctx.beginPath()
-                    ctx.roundedRect(lw / 2, lw / 2, width - lw, height - lw, r, r)
-                    ctx.stroke()
+
+                Edge { x: dashes._r; width: dashes.width - 2 * dashes._r; anchors.top: parent.top }
+                Edge { x: dashes._r; width: dashes.width - 2 * dashes._r; anchors.bottom: parent.bottom }
+                Edge { vertical: true; y: dashes._r; height: dashes.height - 2 * dashes._r; anchors.left: parent.left }
+                Edge { vertical: true; y: dashes._r; height: dashes.height - 2 * dashes._r; anchors.right: parent.right }
+
+                Repeater {
+                    model: 4
+
+                    // a corner: the quarter of a ring
+                    Item {
+                        required property int index
+                        readonly property bool _right: index % 2 === 1
+                        readonly property bool _bottom: index > 1
+
+                        x: _right ? dashes.width - dashes._r : 0
+                        y: _bottom ? dashes.height - dashes._r : 0
+                        width: dashes._r
+                        height: dashes._r
+                        clip: true
+
+                        Rectangle {
+                            x: parent._right ? -dashes._r : 0
+                            y: parent._bottom ? -dashes._r : 0
+                            width: 2 * dashes._r
+                            height: 2 * dashes._r
+                            radius: dashes._r
+                            color: "transparent"
+                            border.width: dashes._lw
+                            border.color: dashes.stroke
+                        }
+                    }
                 }
             }
 

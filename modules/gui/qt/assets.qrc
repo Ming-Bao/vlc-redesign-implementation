@@ -111,6 +111,8 @@
     </qresource>
     <qresource prefix="/redesign/onboarding">
         <file alias="cone.svg">pixmaps/redesign/onboarding/cone.svg</file>
+        <file alias="system-swatch.svg">pixmaps/redesign/onboarding/system-swatch.svg</file>
+        <file alias="volume-wedge.svg">pixmaps/redesign/onboarding/volume-wedge.svg</file>
     </qresource>
     <qresource prefix="/redesign/settings">
         <file alias="audio.svg">pixmaps/redesign/settings/audio.svg</file>

@@ -7,6 +7,13 @@ export PATH="$ROOT/extras/package/release/bin:$PATH"  # retrying curl
 OUT=$(mkdir -p "${1:-$ROOT/dist}" && cd "${1:-$ROOT/dist}" && pwd)
 VERSION=${VERSION:-beta}
 
+# The contrib (static) Qt is built without these (contrib/src/qtdeclarative/rules.mak): a QML file
+# using one fails to load, and the main window never opens. Fail in seconds, not after the build.
+if grep -rnE --include='*.qml' 'import QtQuick\.(Shapes|Particles)|\b(Canvas|Shape|ShapePath|PathView|PathLine|PathArc|PathAnimation|PathInterpolator|AnimatedImage|AnimatedSprite|SpriteSequence|Flipable)\s*\{' "$ROOT/modules/gui/qt"; then
+    echo "error: QML above uses a type the static Qt does not have" >&2
+    exit 1
+fi
+
 # Upstream's prebuilt contribs for this tree's contrib revision; only Qt is
 # rebuilt, with the network module the redesign needs.
 export VLC_PREBUILT_CONTRIBS_URL=https://artifacts.videolan.org/vlc/win64/vlc-contrib-x86_64-w64-mingw32-a5538c557d276378d5ba0f8f8010a8b87eaa6f78.tar.zst

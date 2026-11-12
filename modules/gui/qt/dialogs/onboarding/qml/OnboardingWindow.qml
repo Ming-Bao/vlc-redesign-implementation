@@ -500,37 +500,13 @@ DialogCard {
                                 }
 
                                 // the volume meter: a wedge, its first 37 % lit with the meter's gradient (dimmed 20 %)
-                                // (Canvas, not QtQuick.Shapes: static Qt does not link Shapes)
-                                Canvas {
-                                    readonly property color _track: pv.bgB2
-
+                                // (an SVG: static Qt has no Canvas or QtQuick.Shapes)
+                                Image {
                                     width: VLCStyle.dp(48.4, VLCStyle.scale)
                                     height: VLCStyle.dp(15.4, VLCStyle.scale)
-                                    antialiasing: true
-
-                                    on_TrackChanged: requestPaint()
-                                    onPaint: {
-                                        const ctx = getContext("2d")
-                                        const w = width, h = height
-                                        // the wedge from the left edge to `right`
-                                        const wedge = (right) => {
-                                            ctx.beginPath()
-                                            ctx.moveTo(0, h * 0.33)
-                                            ctx.lineTo(right, h * (0.33 - 0.30 * right / w))
-                                            ctx.lineTo(right, h * (0.67 + 0.30 * right / w))
-                                            ctx.lineTo(0, h * 0.67)
-                                            ctx.closePath()
-                                            ctx.fill()
-                                        }
-                                        ctx.reset()
-                                        ctx.fillStyle = _track
-                                        wedge(w)
-                                        const g = ctx.createLinearGradient(0, 0, w, 0)
-                                        g.addColorStop(0.0, "#77A913")   // fixed colour: Figma onboarding
-                                        g.addColorStop(0.58, "#8E8713")   // fixed colour: Figma onboarding
-                                        ctx.fillStyle = g
-                                        wedge(w * 0.37)
-                                    }
+                                    sourceSize: Qt.size(width, height)
+                                    source: SVGColorImage.colorize("qrc:///redesign/onboarding/volume-wedge.svg")
+                                                .color1(pv.bgB2).uri()
                                 }
                             }
 
@@ -615,25 +591,11 @@ DialogCard {
                                 FocusRing { visible: tile.visualFocus && !tile.selected }
 
                                 // System: the light part over the right of the swatch (the frame's gradient)
-                                Canvas {
+                                Image {
                                     anchors.fill: parent
                                     visible: tile.modelData.scheme === ColorSchemeModel.System
-                                    antialiasing: true
-
-                                    onPaint: {
-                                        const ctx = getContext("2d")
-                                        // the path is drawn on a 100 grid
-                                        const k = width / 100, r = 12 * k, e = 100 * k
-                                        ctx.reset()
-                                        ctx.fillStyle = "#AFAFAF"   // fixed colour: Figma onboarding
-                                        ctx.beginPath()
-                                        ctx.moveTo(16 * k, 0)
-                                        ctx.arcTo(e, 0, e, r, r)
-                                        ctx.arcTo(e, e, e - r, e, r)
-                                        ctx.lineTo(75 * k, e)
-                                        ctx.closePath()
-                                        ctx.fill()
-                                    }
+                                    sourceSize: Qt.size(width, height)
+                                    source: "qrc:///redesign/onboarding/system-swatch.svg"
                                 }
                             }
                         }

@@ -601,27 +601,13 @@ DialogCard {
                         color: root._s.title
                     }
 
-                    // Figma "Vector 77": 1 px Divider/Bright, dash 8 8 (a Canvas: static Qt has no QtQuick.Shapes)
-                    Canvas {
-                        readonly property color _color: root.colorContext.palette.tokens.dividerBright
-                        readonly property real _w: VLCStyle.dp(1, VLCStyle.scale)
-
+                    // Figma "Vector 77": 1 px Divider/Bright, dash 8 8
+                    DashedLine {
                         x: mediaName.x + mediaName.width + VLCStyle.dp(14, VLCStyle.scale)
                         width: pair.split - x
-                        height: parent.height
-
-                        on_ColorChanged: requestPaint()
-                        onPaint: {
-                            const ctx = getContext("2d")
-                            ctx.reset()
-                            ctx.strokeStyle = _color
-                            ctx.lineWidth = _w
-                            ctx.setLineDash([8, 8])   // in units of the line width
-                            ctx.beginPath()
-                            ctx.moveTo(0, height / 2)
-                            ctx.lineTo(width, height / 2)
-                            ctx.stroke()
-                        }
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: root.colorContext.palette.tokens.dividerBright
+                        dash: 8
                     }
 
                     Rectangle {

@@ -1037,6 +1037,8 @@ libqt_plugin_la_RES = \
 	pixmaps/redesign/dialogs/subtitle-file.svg \
 	pixmaps/redesign/dialogs/swap.svg \
 	pixmaps/redesign/onboarding/cone.svg \
+	pixmaps/redesign/onboarding/system-swatch.svg \
+	pixmaps/redesign/onboarding/volume-wedge.svg \
 	pixmaps/redesign/settings/audio.svg \
 	pixmaps/redesign/settings/audio-active.svg \
 	pixmaps/redesign/settings/chevron-down.svg \
@@ -1191,6 +1193,7 @@ libqml_module_dialogs_a_QML = \
 	dialogs/toolbar/qml/CustomizePlayerOverlay.qml \
 	dialogs/toolbar/qml/CustomizePalette.js \
 	dialogs/toolbar/qml/DashedBox.qml \
+	dialogs/toolbar/qml/DashedLine.qml \
 	dialogs/settings/qml/AdvancedBar.qml \
 	dialogs/hotkeys/qml/HotkeysData.js \
 	dialogs/onboarding/qml/OnboardingKeys.js \
