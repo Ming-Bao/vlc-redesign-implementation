@@ -17,7 +17,6 @@
  *****************************************************************************/
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Shapes
 import QtQuick.Templates as T
 
 import VLC.MainInterface
@@ -196,18 +195,6 @@ DialogCard {
     }
 
     // the preview's volume meter: a wedge (Figma 48.4 x 15.4) cut at `right`
-    component Wedge: ShapePath {
-        readonly property real w: VLCStyle.dp(48.4, VLCStyle.scale)
-        readonly property real h: VLCStyle.dp(15.4, VLCStyle.scale)
-        property real right: w
-        strokeColor: "transparent"
-        startX: 0; startY: h * 0.33
-        PathLine { x: right; y: h * (0.33 - 0.30 * right / w) }
-        PathLine { x: right; y: h * (0.67 + 0.30 * right / w) }
-        PathLine { x: 0; y: h * 0.67 }
-        PathLine { x: 0; y: h * 0.33 }
-    }
-
     component PreviewTime: Text {
         Layout.preferredWidth: VLCStyle.dp(41.8, VLCStyle.scale)
         horizontalAlignment: Text.AlignHCenter
@@ -513,19 +500,36 @@ DialogCard {
                                 }
 
                                 // the volume meter: a wedge, its first 37 % lit with the meter's gradient (dimmed 20 %)
-                                Shape {
+                                // (Canvas, not QtQuick.Shapes: static Qt does not link Shapes)
+                                Canvas {
+                                    readonly property color _track: pv.bgB2
+
                                     width: VLCStyle.dp(48.4, VLCStyle.scale)
                                     height: VLCStyle.dp(15.4, VLCStyle.scale)
-                                    preferredRendererType: Shape.CurveRenderer
+                                    antialiasing: true
 
-                                    Wedge { fillColor: pv.bgB2 }
-                                    Wedge {
-                                        right: w * 0.37
-                                        fillGradient: LinearGradient {
-                                            x1: 0; x2: VLCStyle.dp(48.4, VLCStyle.scale)
-                                            GradientStop { position: 0.0; color: "#77A913" }   // fixed colour: Figma onboarding
-                                            GradientStop { position: 0.58; color: "#8E8713" }   // fixed colour: Figma onboarding
+                                    on_TrackChanged: requestPaint()
+                                    onPaint: {
+                                        const ctx = getContext("2d")
+                                        const w = width, h = height
+                                        // the wedge from the left edge to `right`
+                                        const wedge = (right) => {
+                                            ctx.beginPath()
+                                            ctx.moveTo(0, h * 0.33)
+                                            ctx.lineTo(right, h * (0.33 - 0.30 * right / w))
+                                            ctx.lineTo(right, h * (0.67 + 0.30 * right / w))
+                                            ctx.lineTo(0, h * 0.67)
+                                            ctx.closePath()
+                                            ctx.fill()
                                         }
+                                        ctx.reset()
+                                        ctx.fillStyle = _track
+                                        wedge(w)
+                                        const g = ctx.createLinearGradient(0, 0, w, 0)
+                                        g.addColorStop(0.0, "#77A913")   // fixed colour: Figma onboarding
+                                        g.addColorStop(0.58, "#8E8713")   // fixed colour: Figma onboarding
+                                        ctx.fillStyle = g
+                                        wedge(w * 0.37)
                                     }
                                 }
                             }
@@ -611,27 +615,24 @@ DialogCard {
                                 FocusRing { visible: tile.visualFocus && !tile.selected }
 
                                 // System: the light part over the right of the swatch (the frame's gradient)
-                                Shape {
-                                    id: systemShape
-
-                                    // the path is drawn on a 100 grid
-                                    readonly property real k: width / 100
-                                    readonly property real r: 12 * k
-
+                                Canvas {
                                     anchors.fill: parent
                                     visible: tile.modelData.scheme === ColorSchemeModel.System
-                                    preferredRendererType: Shape.CurveRenderer
+                                    antialiasing: true
 
-                                    ShapePath {
-                                        fillColor: "#AFAFAF"   // fixed colour: Figma onboarding
-                                        strokeColor: "transparent"
-                                        startX: 16 * systemShape.k; startY: 0
-                                        PathLine { x: 100 * systemShape.k - systemShape.r; y: 0 }
-                                        PathArc { x: 100 * systemShape.k; y: systemShape.r; radiusX: systemShape.r; radiusY: systemShape.r }
-                                        PathLine { x: 100 * systemShape.k; y: 100 * systemShape.k - systemShape.r }
-                                        PathArc { x: 100 * systemShape.k - systemShape.r; y: 100 * systemShape.k; radiusX: systemShape.r; radiusY: systemShape.r }
-                                        PathLine { x: 75 * systemShape.k; y: 100 * systemShape.k }
-                                        PathLine { x: 16 * systemShape.k; y: 0 }
+                                    onPaint: {
+                                        const ctx = getContext("2d")
+                                        // the path is drawn on a 100 grid
+                                        const k = width / 100, r = 12 * k, e = 100 * k
+                                        ctx.reset()
+                                        ctx.fillStyle = "#AFAFAF"   // fixed colour: Figma onboarding
+                                        ctx.beginPath()
+                                        ctx.moveTo(16 * k, 0)
+                                        ctx.arcTo(e, 0, e, r, r)
+                                        ctx.arcTo(e, e, e - r, e, r)
+                                        ctx.lineTo(75 * k, e)
+                                        ctx.closePath()
+                                        ctx.fill()
                                     }
                                 }
                             }

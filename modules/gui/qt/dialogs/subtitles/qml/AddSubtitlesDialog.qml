@@ -16,7 +16,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 import QtQuick
-import QtQuick.Shapes
 import QtQuick.Templates as T
 
 import VLC.MainInterface
@@ -602,20 +601,26 @@ DialogCard {
                         color: root._s.title
                     }
 
-                    Shape {
+                    // Figma "Vector 77": 1 px Divider/Bright, dash 8 8 (a Canvas: static Qt has no QtQuick.Shapes)
+                    Canvas {
+                        readonly property color _color: root.colorContext.palette.tokens.dividerBright
+                        readonly property real _w: VLCStyle.dp(1, VLCStyle.scale)
+
                         x: mediaName.x + mediaName.width + VLCStyle.dp(14, VLCStyle.scale)
                         width: pair.split - x
                         height: parent.height
-                        ShapePath {
-                            // Figma "Vector 77": 1 px Divider/Bright, dash 8 8
-                            strokeColor: root.colorContext.palette.tokens.dividerBright
-                            strokeWidth: VLCStyle.dp(1, VLCStyle.scale)
-                            strokeStyle: ShapePath.DashLine
-                            // in units of the stroke width
-                            dashPattern: [8, 8]
-                            fillColor: "transparent"
-                            startX: 0; startY: height / 2
-                            PathLine { x: width; y: height / 2 }
+
+                        on_ColorChanged: requestPaint()
+                        onPaint: {
+                            const ctx = getContext("2d")
+                            ctx.reset()
+                            ctx.strokeStyle = _color
+                            ctx.lineWidth = _w
+                            ctx.setLineDash([8, 8])   // in units of the line width
+                            ctx.beginPath()
+                            ctx.moveTo(0, height / 2)
+                            ctx.lineTo(width, height / 2)
+                            ctx.stroke()
                         }
                     }
 

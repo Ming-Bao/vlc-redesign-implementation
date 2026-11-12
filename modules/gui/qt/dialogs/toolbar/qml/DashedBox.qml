@@ -16,33 +16,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 import QtQuick
-import QtQuick.Shapes
 
 import VLC.Style
 
 // Customize Player's outline around items and zones: 1 px FG/A3, dash 4/4 (Figma 2107:5604)
-// An Item, as a Shape's implicit size is its path's: a control's background would size itself in a loop.
-Item {
+// A Canvas, not QtQuick.Shapes: static Qt (Windows, macOS) does not link Shapes.
+Canvas {
     id: root
 
     readonly property real _w: VLCStyle.dp(1, VLCStyle.scale)
+    readonly property color _color: VLCStyle.palette.tokens.fgA3   // the same in both themes
 
-    Shape {
-        anchors.fill: parent
-
-        ShapePath {
-            strokeColor: VLCStyle.palette.tokens.fgA3   // the same in both themes
-            strokeWidth: root._w
-            strokeStyle: ShapePath.DashLine
-            dashPattern: [4, 4]
-            fillColor: "transparent"
-
-            startX: root._w / 2
-            startY: root._w / 2
-            PathLine { x: root.width - root._w / 2; y: root._w / 2 }
-            PathLine { x: root.width - root._w / 2; y: root.height - root._w / 2 }
-            PathLine { x: root._w / 2; y: root.height - root._w / 2 }
-            PathLine { x: root._w / 2; y: root._w / 2 }
-        }
+    on_ColorChanged: requestPaint()
+    onPaint: {
+        const ctx = getContext("2d")
+        ctx.reset()
+        ctx.strokeStyle = _color
+        ctx.lineWidth = _w
+        ctx.setLineDash([4, 4])   // in units of the line width
+        ctx.strokeRect(_w / 2, _w / 2, width - _w, height - _w)
     }
 }
